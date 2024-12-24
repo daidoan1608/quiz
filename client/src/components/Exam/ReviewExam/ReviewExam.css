@@ -1,0 +1,149 @@
+.header {
+    /* background-color: #e0f7fa; */
+    height: 190px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #178FA5;
+    border-top: 5px solid #00bcd4;
+    justify-content: space-between;
+}
+.text-header h2 {
+    color: #178FA5; /* Màu xanh */
+    font-size: 48px; /* Kích thước chữ lớn */
+    text-transform: uppercase; /* Chữ in hoa */
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Hiệu ứng bóng cho chữ */
+    font-weight: 700;
+    position: relative;
+    left: 4rem;
+
+}
+.header .nav-links {
+    display: flex;
+    align-items: center;
+}
+.header .nav-links a {
+    margin: 0 60px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 700;
+    position: relative;
+    top: 2rem;
+    left: 4rem;
+}
+.header .nav-links a:hover {
+    border-bottom: 2px solid #00bcd4;
+    color: #178FA5;
+}
+
+/* Style cho container chính */
+.category-review {
+    display: flex; /* Sử dụng Flexbox để căn giữa các phần tử con */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    /* height: 100vh; Đảm bảo container chiếm toàn bộ chiều cao của viewport */
+    padding: 10px;
+}
+
+/* Style cho card */
+.review-card {
+    display: flex; /* Sử dụng Flexbox để căn chỉnh hình ảnh và văn bản theo hàng ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+    height: 300px;
+    padding: 20px;
+}
+
+
+/* Style cho text */
+.review-text {
+    display: flex;
+    flex-direction: column;
+   
+}
+
+/* Style cho tiêu đề */
+.review-text h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Style cho đoạn văn bản */
+.review-text p {
+    font-size: 16px;
+    color: #666;
+    margin: 5px 0;
+}
+
+/* Style cho liên kết */
+.review-text a {
+    text-decoration: none;
+    color: #008080;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Hiệu ứng hover cho liên kết */
+.review-text a:hover {
+    text-decoration: underline;
+    color: #006666;
+}
+
+
+/* Category-review-qa */
+.category-review-qa {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    margin-left: 70px;
+}
+.question {
+    margin-bottom: 20px;
+}
+.question-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.options {
+    list-style-type: none;
+    padding: 0;
+}
+.options li {
+    margin-bottom: 10px;
+}
+.options li label {
+    margin-left: 10px;
+}
+.correct {
+    color: green;
+}
+.incorrect {
+    color: red;
+}
+.option-circle.selected {
+    background-color: #007bff;
+    color: white;
+}
+/* .option-circle {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 2px solid #000;
+    text-align: center;
+    line-height: 20px;
+    margin-right: 10px;
+}
+.option-circle.correct {
+    background-color: green;
+    color: white;
+}
+.option-circle.incorrect {
+    background-color: red;
+    color: white;
+} */

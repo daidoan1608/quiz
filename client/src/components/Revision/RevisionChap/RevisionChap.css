@@ -1,0 +1,127 @@
+.revision-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 1400px;
+  align-items: center;
+}
+
+.question-selector {
+  
+  position: sticky; /* Keeps the question selector at the top */
+  top: 0; /* Fixed at the top of the viewport */
+  background-color: #fff; /* White background for visibility */
+  z-index: 1000; /* Ensure it sits above other elements */
+  padding: 10px;
+  border-bottom: 1px solid #ddd; /* Bottom border for separation */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+}
+
+.question-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.question-button.answered {
+  background-color: lightblue; /* Highlight answered questions */
+}
+
+.question-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Space between buttons */
+}
+
+.question-button:hover {
+  background-color: #e6f7ff; /* Light blue on hover */
+}
+
+.revision-right {
+  padding: 20px; /* Padding for the main content area */
+}
+
+.container-end {
+  margin-bottom: 20px; /* Space below each question block */
+}
+
+.question {
+  font-weight: bold; /* Bold font for questions */
+}
+
+.options {
+  display: flex;
+  flex-direction: column; /* Stack options vertically */
+  gap: 10px; /* Space between options */
+}
+
+.answer-label {
+  display: block; /* Block display for labels */
+}
+
+.answer-input {
+  margin-right: 10px; /* Space between radio button and label text */
+}
+
+.answer-span {
+  padding: 5px 10px;
+  border: 1px solid grey; /* Border for answer options */
+  border-radius: 5px; /* Rounded corners for answer options */
+}
+
+.answer-span.selected {
+  background-color: lightblue; /* Highlight selected answer */
+}
+
+.feedback {
+  margin-top: 10px; /* Space above feedback messages */
+}
+
+.correct {
+  color: green; /* Color for correct answers */
+}
+
+.incorrect {
+  color: red; /* Color for incorrect answers */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center; /* Center pagination buttons */
+}
+
+.pagination button {
+  padding: 10px 15px;
+  border: 1px solid #ddd; /* Border for pagination buttons */
+  border-radius: 5px; /* Rounded corners for pagination buttons */
+}
+
+.pagination button.active {
+    background-color: #007bff; /* Active page button color */
+    color: white; /* Text color for active button */
+}
+
+.pagination button:disabled {
+    background-color: #f1f1f1; /* Background for disabled buttons */
+    cursor: not-allowed; /* Change cursor to indicate disabled state */
+}
+.no-questions-message {
+  display: flex; /* Use flexbox for alignment */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  height: 100%; /* Full height of the parent container */
+  font-size: 18px; /* Optional: adjust font size */
+  color: #666; /* Optional: adjust text color */
+  text-align: center; /* Center text alignment */
+}
+.error-message {
+  color: red; /* Red c
+  olor for error messages */
+}

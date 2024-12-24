@@ -1,0 +1,33 @@
+/* DetailExam.css */
+
+/* Màu nền của đáp án đúng */
+.correct-answer {
+    background-color: #81c784; /* Màu xanh lá */
+    color: black;
+  }
+  
+  /* Màu nền của đáp án người dùng chọn đúng */
+  .correct-user-answer {
+    background-color: #64b5f6; /* Màu xanh da trời */
+  }
+  
+  /* Màu nền của đáp án người dùng chọn sai */
+  .incorrect-user-answer {
+    background-color: #ef9a9a; /* Màu đỏ nhạt */
+  }
+  
+  /* Màu nền của các đáp án không chọn */
+  .default-answer {
+    background-color: white;
+  }
+  
+  /* Dấu tích xanh cho đáp án đúng người dùng chọn */
+  .correct-icon {
+    color: #388e3c; /* Màu xanh đậm */
+  }
+  
+  /* Dấu X đỏ cho đáp án sai người dùng chọn */
+  .incorrect-icon {
+    color: #d32f2f; /* Màu đỏ */
+  }
+  

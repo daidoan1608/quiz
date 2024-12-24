@@ -1,0 +1,70 @@
+/* Style cho container chính */
+.category-result {
+    display: flex; /* Sử dụng Flexbox để căn giữa các phần tử con */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    /* height: 100vh; Đảm bảo container chiếm toàn bộ chiều cao của viewport */
+    padding: 20px;
+}
+
+/* Style cho card */
+.result-card {
+    display: flex; /* Sử dụng Flexbox để căn chỉnh hình ảnh và văn bản theo hàng ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 700px;
+    height: 400px;
+    padding: 20px;
+}
+
+/* Style cho hình ảnh */
+.result-img {
+    margin-right: 20px; /* Khoảng cách giữa ảnh và văn bản */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* width: 100px; */
+}
+.result-img img{
+    width: 100px;
+}
+
+/* Style cho text */
+.result-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Căn giữa văn bản theo chiều dọc */
+    align-items: center; /* Căn giữa văn bản theo chiều ngang */
+}
+
+/* Style cho tiêu đề */
+.result-text h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Style cho đoạn văn bản */
+.result-text p {
+    font-size: 16px;
+    color: #666;
+    margin: 5px 0;
+}
+
+/* Style cho liên kết */
+.result-text a {
+    text-decoration: none;
+    color: #008080;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Hiệu ứng hover cho liên kết */
+.result-text a:hover {
+    text-decoration: underline;
+    color: #006666;
+}

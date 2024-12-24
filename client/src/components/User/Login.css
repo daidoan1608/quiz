@@ -1,0 +1,72 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f5f5f5;
+}
+
+.form-login {
+  width: 100%;
+  max-width: 540px;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.input-icon {
+  color: #bfbfbf;
+}
+
+.checkbox-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-password {
+  color: #1890ff;
+}
+
+.submit-button {
+  height: 45px;
+  font-size: 16px;
+}
+
+.register-link {
+  margin-top: 15px; 
+  text-align: center; 
+  font-size: 14px; 
+}
+
+.register {
+   color: #1890ff; 
+}
+
+.register:hover {
+   text-decoration: underline; 
+}
+
+/* Custom margin for form items */
+.ant-form-item {
+   margin-bottom: 16px; 
+}

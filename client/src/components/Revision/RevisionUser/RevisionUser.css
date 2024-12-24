@@ -1,0 +1,45 @@
+.revision {
+  display: flex; /* Use flexbox for layout */
+  height: 100vh; /* Full viewport height */
+}
+.content {
+  height: 80vh; /* 80% of viewport height */
+}
+.content {
+  height: 100%; /* Full height */
+  flex-grow: 1; /* Allow content to grow and fill remaining space */
+  padding: 0px 20px; /* Add padding for content area */
+  background-color: #f9f9f9; /* Optional background color for contrast */
+  overflow-y: auto; /* Enable vertical scrolling if content overflows */
+
+}
+
+.category-re {
+  height: 100%; /* Full height */
+  width: 100%;
+}
+
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.card-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.card-content h2,
+.card-content h3 {
+  margin: 0;
+}
+
+.card-button {
+  background-color: #007bff; /* Button color */
+  color: white;
+  border: none;
+  padding: 10px;
+}

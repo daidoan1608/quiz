@@ -1,0 +1,116 @@
+/* To ensure the entire layout uses flex */
+.revision {
+    display: flex;
+    margin: 20px;
+    height: 100vh; /* Tạo chiều cao toàn màn hình cho layout */
+    max-height: 1400px;
+  }
+  
+  /* Sidebar styles */
+  .sidebar {
+    width: 300px; /* Chiều rộng cố định cho sidebar */
+    background-color: #f1f1f1;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    height: 100vh; /* Sidebar chiếm hết chiều cao màn hình */
+    z-index: 10;
+  }
+  
+  .sidebar h3 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  
+  .sidebar li:hover {
+    color: #008080;
+  }
+  
+  /* Content styles */
+  .content {
+    flex-grow: 1;
+    padding: 20px;
+  }
+  
+  /* Layout for content section */
+  .category-re {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .container-re {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px;
+    text-align: center;
+  }
+  
+  .category-header {
+    font-size: 24px;
+    margin: 20px 0;
+  }
+  
+  .card {
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 20px 0;
+    padding: 40px;
+    display: block;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  
+  .card-content {
+    position: absolute;
+    top: 2rem;
+    text-align: left;
+  }
+  
+  .card-content h3 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .card-time {
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    position: relative;
+    left: 13rem;
+  }
+  
+  .card-button {
+    background-color: #008080;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    position: relative;
+    left: 13rem;
+  }
+  
+  .card-button:hover {
+    background-color: #006666;
+  }
+  
