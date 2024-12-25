@@ -17,9 +17,10 @@ function Login() {
         password: values.password,
       });
 
-      const { accessToken, refreshToken } = response.data;
+      const { accessToken, refreshToken , userId} = response.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('userId', userId);
 
       message.success('Đăng nhập thành công!');
       console.log(response.data);

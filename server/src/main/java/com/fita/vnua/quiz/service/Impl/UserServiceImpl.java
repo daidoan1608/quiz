@@ -1,4 +1,4 @@
-package com.fita.vnua.quiz.service.Impl;
+package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.model.dto.UserDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
@@ -61,8 +61,7 @@ public class UserServiceImpl implements UserService {
             return modelMapper.map(savedUser, UserDto.class);
         } catch (DataIntegrityViolationException ex) {
             // Kiểm tra lỗi có phải do trùng username
-            if (ex.getCause() instanceof ConstraintViolationException) {
-                ConstraintViolationException constraintEx = (ConstraintViolationException) ex.getCause();
+            if (ex.getCause() instanceof ConstraintViolationException constraintEx) {
                 if (constraintEx.getSQLException().getErrorCode() == 1062) { // Mã lỗi MySQL cho Duplicate Key
                     throw new CustomApiException("Username đã tồn tại", HttpStatus.CONFLICT);
                 }
@@ -89,5 +88,20 @@ public class UserServiceImpl implements UserService {
         return Response.builder()
                 .responseMessage("User deleted successfully")
                 .responseCode("200 OK").build();
+    }
+
+    @Override
+    public boolean isUsernameExisted(String username) {
+        return userRepository.existsUserByUsername(username);
+    }
+
+    @Override
+    public boolean isEmailExisted(String email) {
+        return userRepository.existsUserByEmail(email);
+    }
+
+    @Override
+    public UserDto getUserByUsername(String username) {
+        return userRepository.findByUsername(username).map(user -> modelMapper.map(user, UserDto.class)).orElse(null);
     }
 }

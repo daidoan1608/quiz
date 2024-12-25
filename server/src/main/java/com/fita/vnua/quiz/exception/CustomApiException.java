@@ -1,8 +1,10 @@
 package com.fita.vnua.quiz.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+@Getter
 @ResponseStatus(HttpStatus.CONFLICT)
 public class CustomApiException extends RuntimeException {
     private HttpStatus status;
@@ -19,7 +21,4 @@ public class CustomApiException extends RuntimeException {
         this.status = status;
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./index.css";
+import axiosLocalApi from "../../api/local-api";
 
 export default function Headers() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,6 +16,10 @@ export default function Headers() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    axiosLocalApi.post("/auth/logout" , {
+      refreshToken: localStorage.getItem("refreshToken"),
+    });
+    localStorage.removeItem("userId");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     navigate("/"); // Chuyển hướng về trang chủ khi đăng xuất

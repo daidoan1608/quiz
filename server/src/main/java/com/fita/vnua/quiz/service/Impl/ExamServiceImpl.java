@@ -1,4 +1,4 @@
-package com.fita.vnua.quiz.service.Impl;
+package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.model.dto.ExamDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
@@ -25,9 +25,7 @@ public class ExamServiceImpl implements ExamService {
     private final ExamQuestionRepository examQuestionRepository;
     private final UserRepository userRepository;
 
-    @Override
-    public List<ExamDto> getAllExams() {
-        List<Exam> exams = examRepository.findAll();
+    private List<ExamDto> mapExamsToExamDtos(List<Exam> exams) {
         List<ExamDto> examDtos = new ArrayList<>();
         for (Exam exam : exams) {
             ExamDto examDto = new ExamDto();
@@ -45,22 +43,15 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    public List<ExamDto> getAllExams() {
+        List<Exam> exams = examRepository.findAll();
+        return mapExamsToExamDtos(exams);
+    }
+
+    @Override
     public List<ExamDto> getExamsBySubjectId(Long subjectId) {
         List<Exam> exams = examRepository.findExamsBySubjectId(subjectId);
-        List<ExamDto> examDtos = new ArrayList<>();
-        for (Exam exam : exams) {
-            ExamDto examDto = new ExamDto();
-            examDto.setExamId(exam.getExamId());
-            examDto.setTitle(exam.getTitle());
-            examDto.setDescription(exam.getDescription());
-            examDto.setDuration(exam.getDuration());
-            examDto.setSubjectId(exam.getSubject().getSubjectId());
-            examDto.setCreatedBy(exam.getCreatedBy().getUserId());
-            examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
-            examDto.setQuestions(questionService.getQuestionsByExamId(exam.getExamId()));
-            examDtos.add(examDto);
-        }
-        return examDtos;
+        return mapExamsToExamDtos(exams);
     }
 
     @Override

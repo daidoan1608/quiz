@@ -13,4 +13,7 @@ public interface UserService {
     UserDto create(UserDto userDto);
     UserDto update(UUID userId, UserDto userDto);
     Response delete(UUID userId);
+    boolean isUsernameExisted(String username);
+    boolean isEmailExisted(String email);
+    UserDto getUserByUsername(String username);
 }

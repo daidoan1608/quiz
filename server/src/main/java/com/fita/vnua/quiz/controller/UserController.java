@@ -2,12 +2,11 @@ package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.UserDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
-import com.fita.vnua.quiz.service.Impl.UserServiceImpl;
+import com.fita.vnua.quiz.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserController {
     private final UserServiceImpl userService;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("admin/users")
     public ResponseEntity<?> getAllUsers() {

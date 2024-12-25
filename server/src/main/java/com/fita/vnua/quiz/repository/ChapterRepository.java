@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ChapterRepository extends JpaRepository<Chapter, Long> {
-    @Query("SELECT c FROM Chapter c WHERE c.subject.id = :subjectId")
+    @Query("SELECT c FROM Chapter c WHERE c.subject.subjectId = :subjectId")
     List<Chapter> findBySubject(Long subjectId);
 }

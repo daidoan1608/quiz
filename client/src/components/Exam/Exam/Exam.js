@@ -81,17 +81,7 @@ export default function Exam() {
   };
 
   const handleSubmit = async () => {
-    let userId = '';
-    try {
-    const resp = await axiosLocalApi.post('/auth/introspect', {
-        token: localStorage.getItem('accessToken'),
-        tokenType: 'access_token',
-      });
-      
-        userId = resp.data.userId;
-      }catch (error) {
-        console.error('Lỗi khi lấy dữ liệu:', error);
-      }
+    const userId = localStorage.getItem('userId');
     const endTime = new Date().toISOString(); // Thời gian kết thúc (hiện tại)
     const correctAnswers = questions.reduce((count, question, index) => {
       const userAnswerIndex = selectedAnswers[index];

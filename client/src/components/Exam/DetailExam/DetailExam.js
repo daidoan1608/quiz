@@ -46,7 +46,6 @@ export default function DetailExam() {
                 answer => answer.questionId === question.questionId
             );
             const correctAnswer = question.answers.find(answer => answer.isCorrect);
-ádfÁDFSAFASFAS
             return (
                 <div key={question.questionId} className="mb-4">
                     <h3 className="font-bold">Câu {questionIndex + 1}: {question.content}</h3>

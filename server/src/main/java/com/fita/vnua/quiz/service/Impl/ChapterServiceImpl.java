@@ -1,10 +1,9 @@
-package com.fita.vnua.quiz.service.Impl;
+package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.model.dto.ChapterDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.repository.ChapterRepository;
-import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.ChapterService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +42,7 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterDto update(Long chapterId, ChapterDto chapterDto) {
         var existingChapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new EntityNotFoundException("Chapter not found"));
-        String oldName = chapterDto.getName();
-        String newName = existingChapter.getName();
+
         existingChapter.setName(chapterDto.getName());
         existingChapter.setChapterNumber(chapterDto.getChapterNumber());
         chapterRepository.save(existingChapter);
