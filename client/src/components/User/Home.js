@@ -1,42 +1,19 @@
 import React, { useEffect, useState } from "react";
-import axiosLocalApi from "../../api/local-api";
-import { useNavigate } from "react-router-dom"; // Thêm hook useNavigate để chuyển hướng
+import { publicAxios } from "../../api/axiosConfig";
 import "./Home.css";
 import Footer from "../Footer";
 import Headers from "../Header";
 
 export default function Home() {
   const [subjects, setSubjects] = useState([]);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigate = useNavigate(); // Khởi tạo hook useNavigate
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-    }
     getAllSubjects();
   }, []);
 
   const getAllSubjects = async () => {
-    const resp = await axiosLocalApi.get("public/subjects");
+    const resp = await publicAxios.get("public/subjects");
     setSubjects(resp.data);
-  };
-
-  const handleLoginClick = () => {
-    setIsLoginModalOpen(true);
-  };
-
-  const handleRegisterClick = () => {
-    setIsRegisterModalOpen(true);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem("user");
-    navigate("/"); // Chuyển hướng về trang chủ khi đăng xuất
   };
 
   const elementSubjects = subjects.map((item, index) => {

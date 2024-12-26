@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import axiosLocalApi from "../../../api/local-api";
+import { publicAxios } from "../../../api/axiosConfig";
 import { useLocation } from "react-router-dom";
 import "./RevisionChap.css";
 import Headers from "../../Header";
@@ -22,10 +22,9 @@ export default function RevisionChap1() {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await axiosLocalApi.get(
+        const response = await publicAxios.get(
           `/public/chapter/questions/${chapterId}`
         );
-
         if (response.data.responseCode === "404") {
           setError(response.data.responseMessage);
           setQuestionAnswers([]);
@@ -117,9 +116,7 @@ export default function RevisionChap1() {
             {item.answers[selectedAnswerIndex].isCorrect ? (
               <span className="correct">Đáp án đúng!</span>
             ) : (
-              <span className="incorrect">
-                Đáp án sai! Vui lòng thử lại.
-              </span>
+              <span className="incorrect">Đáp án sai! Vui lòng thử lại.</span>
             )}
           </div>
         )}
@@ -136,7 +133,9 @@ export default function RevisionChap1() {
         {error ? (
           <div className="error-message">{error}</div>
         ) : totalQuestions === 0 ? (
-          <div className="no-questions-message">Không có câu hỏi nào trong chương này.</div>
+          <div className="no-questions-message">
+            Không có câu hỏi nào trong chương này.
+          </div>
         ) : (
           <>
             {/* Question Selector */}

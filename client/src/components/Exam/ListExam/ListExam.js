@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import axiosLocalApi from '../../../api/local-api';
-import './ListExam.css';
-import Headers from '../../Header';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Footer from '../../Footer';
-import LoginPrompt from '../../User/LoginPrompt';
+import React, { useEffect, useState } from "react";
+import { publicAxios } from "../../../api/axiosConfig";
+import "./ListExam.css";
+import Headers from "../../Header";
+import { useLocation, useNavigate } from "react-router-dom";
+import Footer from "../../Footer";
+import LoginPrompt from "../../User/LoginPrompt";
 
 export default function ExamUsers() {
   const [examDto, setExamUsers] = useState([]);
@@ -14,18 +14,19 @@ export default function ExamUsers() {
   const navigate = useNavigate();
   const location = useLocation();
   const { subjectId } = location.state || {};
-  const accessToken = localStorage.getItem('accessToken');
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     getAllExam();
-    const savedCompletedExams = JSON.parse(localStorage.getItem('completedExams')) || [];
-    setCompletedExams(new Set(savedCompletedExams));
+    const savedCompletedExams =
+      JSON.parse(localStorage.getItem("completedExams")) || [];
+      setCompletedExams(new Set(savedCompletedExams));
   }, []);
 
   const getAllExam = async () => {
     try {
-      const resp = await axiosLocalApi.get(`/public/exams/${subjectId}`);
-      if (resp.data.responseCode === '404') {
+      const resp = await publicAxios.get(`/public/exams/${subjectId}`);
+      if (resp.data.responseCode === "404") {
         setError(resp.data.responseMessage);
         setExamUsers([]);
       } else {
@@ -33,7 +34,7 @@ export default function ExamUsers() {
         setError(null);
       }
     } catch (err) {
-      setError('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.');
+      setError("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.");
       setExamUsers([]);
     }
   };
@@ -44,11 +45,11 @@ export default function ExamUsers() {
       return;
     }
     const startTime = new Date().toISOString();
-    navigate('/taketheexam', { state: { examId , startTime} });
+    navigate("/taketheexam", { state: { examId, startTime } });
   };
 
   const handleLoginRedirect = () => {
-    navigate('/login');
+    navigate("/login");
   };
 
   const handleClosePrompt = () => {
@@ -60,7 +61,7 @@ export default function ExamUsers() {
     return (
       <div
         key={index}
-        className={`card ${isCompleted ? 'completed' : ''}`}
+        className={`card ${isCompleted ? "completed" : ""}`}
         onClick={() => handleExamClick(item.examId)}
       >
         <div className="card-time">
@@ -102,7 +103,9 @@ export default function ExamUsers() {
       {error ? (
         <div className="error-message">{error}</div>
       ) : examDto.length === 0 ? (
-        <div className="no-questions-message">Không có bài thi nào trong chương này.</div>
+        <div className="no-questions-message">
+          Không có bài thi nào trong chương này.
+        </div>
       ) : (
         <>
           <section className="container-section">

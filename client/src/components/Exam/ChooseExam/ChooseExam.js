@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axiosLocalApi from "../../../api/local-api";
+import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom"; // Dùng useNavigate để điều hướng
 import "./ChooseExam.css";
 import Headers from "../../Header";
@@ -17,7 +17,7 @@ export default function ChooseExam() {
 
   const getAllSubjects = async () => {
     try {
-      const resp = await axiosLocalApi.get("/public/subjects");
+      const resp = await publicAxios.get("/public/subjects");
       console.log("Dữ liệu nhận được:", resp.data);
       setSubjects(resp.data); // Lưu danh sách môn học
     } catch (error) {
@@ -27,26 +27,24 @@ export default function ChooseExam() {
 
   // Hàm chọn môn học
   const handleSelectSubject = (subjectId) => {
-    const selected = subjects.find((subject) => subject.subjectId === subjectId
-);
+    const selected = subjects.find(
+      (subject) => subject.subjectId === subjectId
+    );
     setSelectedSubject(selected); // Cập nhật môn học đã chọn
-
-    // Điều hướng đến trang ExamUsers và truyền subjectId trong URL
-    // navigate(`/exams`);
   };
   const handleSelectExamBySubjectId = (subjectId) => {
     navigate(`/exams`, { state: { subjectId } });
-  }
+  };
 
   return (
     <div>
       <Headers />
       <div className="revision">
         {/* Sidebar */}
-        <Sidebar 
-          subjects={subjects} 
-          selectedSubject={selectedSubject} 
-          onSelectSubject={handleSelectSubject} 
+        <Sidebar
+          subjects={subjects}
+          selectedSubject={selectedSubject}
+          onSelectSubject={handleSelectSubject}
         />
 
         {/* Main Content */}
@@ -62,14 +60,14 @@ export default function ChooseExam() {
                   <div className="card-content">
                     <h2>{selectedSubject.name}</h2>
                   </div>
-                    <button
-                      className="card-button"
-                      onClick={() => 
-                        handleSelectExamBySubjectId(selectedSubject.subjectId)
-                      }
-                    >
-                      Chọn đề 
-                    </button>
+                  <button
+                    className="card-button"
+                    onClick={() =>
+                      handleSelectExamBySubjectId(selectedSubject.subjectId)
+                    }
+                  >
+                    Chọn đề
+                  </button>
                 </div>
               ) : (
                 <div className="subject-list">
@@ -83,7 +81,9 @@ export default function ChooseExam() {
                       </div>
                       <button
                         className="card-button"
-                        onClick={() => handleSelectExamBySubjectId(item.subjectId)} // Chọn môn học
+                        onClick={() =>
+                          handleSelectExamBySubjectId(item.subjectId)
+                        } // Chọn môn học
                       >
                         Chọn đề
                       </button>

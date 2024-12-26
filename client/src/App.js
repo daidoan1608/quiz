@@ -9,7 +9,7 @@ import RegisterForm from "./components/User/Register";
 import ListExam from "./components/Exam/ListExam/ListExam";
 import Exam from "./components/Exam/Exam/Exam";
 import Result from "./components/Exam/Result/Result";
-import ReviewExam from "./components/Exam/ReviewExam/ReviewExam";
+// import ReviewExam from "./components/Exam/ReviewExam/ReviewExam";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
 import ChooseExam from "./components/Exam/ChooseExam/ChooseExam";
 
@@ -43,7 +43,7 @@ function App() {
         {/* Làm bài thi */}
         <Route exact path="/result" element={<Result />} /> 
         {/* Kết quả thi */}
-        <Route exact path="/reviewExam" element={<ReviewExam />} />
+        {/* <Route exact path="/reviewExam" element={<ReviewExam />} /> */}
         {/* Xem lại bài thi gần nhất ấn bài thi */}
       </Routes>
     </Router>
