@@ -5,6 +5,7 @@ import "./ChooseExam.css";
 import Headers from "../../Header";
 import Footer from "../../Footer";
 import Sidebar from "../../User/SideBar"; // Import the Sidebar component
+import Headers2 from "../../Headers2";
 
 export default function ChooseExam() {
   const [subjects, setSubjects] = useState([]);
@@ -40,7 +41,8 @@ export default function ChooseExam() {
 
   return (
     <div>
-      <Headers />
+      {/* <Headers /> */}
+      <Headers2 />
       <div className="revision">
         {/* Sidebar */}
         <Sidebar 
@@ -55,38 +57,50 @@ export default function ChooseExam() {
             <div className="container-re">
               {/* Hiển thị thông tin môn học đã chọn */}
               {selectedSubject ? (
-                <div className="card">
-                  <div className="card-time">
-                    <p>8/12/2024</p>
+                <div className="card-exam">
+                  <div className='card-img-exam'>
+                      <div className='card-img-ex'>
+                      <img src='/exam.png'></img>
+                      </div>
                   </div>
-                  <div className="card-content">
-                    <h2>{selectedSubject.name}</h2>
+                  <div className='card-two-exam'>
+                    <div className="card-content-exam">
+                      <h3>{selectedSubject.name}</h3>
+                    </div>
+                    <div className='card-button-ex'>
+                      <button
+                        className="card-button-exam"
+                        onClick={() => 
+                          handleSelectExamBySubjectId(selectedSubject.subjectId)
+                        }
+                      >
+                        Chọn đề 
+                        </button>
+                      </div>
                   </div>
-                    <button
-                      className="card-button"
-                      onClick={() => 
-                        handleSelectExamBySubjectId(selectedSubject.subjectId)
-                      }
-                    >
-                      Chọn đề 
-                    </button>
                 </div>
               ) : (
                 <div className="subject-list">
                   {subjects.map((item) => (
-                    <div className="card" key={item.subjectId}>
-                      <div className="card-time">
-                        <p>8/12/2024</p>
+                    <div className="card-exam" key={item.subjectId}>
+                      <div className='card-img-exam'>
+                        <div className='card-img'>
+                        <img src='/exam.png'></img>
+                        </div>
                       </div>
-                      <div className="card-content">
-                        <h3>{item.name}</h3> {/* Display subject name */}
+                      <div className='card-two-exam'>
+                        <div className="card-content-exam">
+                          <h3>{item.name}</h3> {/* Display subject name */}
+                        </div>
+                        <div className='card-button-ex'>
+                          <button
+                            className="card-button-exam"
+                            onClick={() => handleSelectExamBySubjectId(item.subjectId)} // Chọn môn học
+                          >
+                            Chọn đề
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        className="card-button"
-                        onClick={() => handleSelectExamBySubjectId(item.subjectId)} // Chọn môn học
-                      >
-                        Chọn đề
-                      </button>
                     </div>
                   ))}
                 </div>

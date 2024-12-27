@@ -18,11 +18,13 @@
     left: 4rem;
 
 }
-.header .nav-links {
+.header .nav-links-headers2 {
     display: flex;
     align-items: center;
+    position: relative;
+    bottom: 2rem;
 }
-.header .nav-links a {
+.header .nav-links-headers2 a {
     margin: 0 60px;
     text-decoration: none;
     color: #333;
@@ -31,11 +33,14 @@
     top: 2rem;
     left: 4rem;
 }
-.header .nav-links a:hover {
+.header .nav-links-headers2 a:hover {
     /* border-bottom: 2px solid #00bcd4; */
     /* color: #178FA5; */
 }
-
+/* Header img */
+/* .header-between h2{
+    font-size: 4rem;
+} */
 /*Section*/
 .container-section-search {
     font-family: Arial, sans-serif;

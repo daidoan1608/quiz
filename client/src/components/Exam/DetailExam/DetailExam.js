@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import Headers from '../../Header';
+// import Headers from '../../Header';
 import axiosLocalApi from "../../../api/local-api";
 import './DetailExam.css'; // Import file CSS
 import Footer from '../../Footer';
+import Headers2 from '../../Headers2';
 
 export default function DetailExam() {
     const [examData, setExamData] = useState(null);
@@ -49,7 +50,8 @@ export default function DetailExam() {
 
             return (
                 <div key={question.questionId} className="mb-4">
-                    <h3 className="font-bold">Câu {questionIndex + 1}: {question.content}</h3>
+                    <h3 className="font-bold"> {question.content}</h3> 
+                    {/* Câu {questionIndex + 1}: */}
                     <div className="flex flex-col">
                         {question.answers.map((answer) => {
                             const isCorrect = answer.isCorrect;
@@ -86,9 +88,9 @@ export default function DetailExam() {
 
     return (
         <>
-            <Headers />
+            <Headers2 />
             <div className="p-4">
-                <h2 className="text-xl font-bold mb-4">{examData.title}</h2>
+                <h2 className="text-xl font-bold mb-4">{examData.title}: {examData.subjectName}</h2>
                 {renderQuestions()}
             </div>
             <Footer />

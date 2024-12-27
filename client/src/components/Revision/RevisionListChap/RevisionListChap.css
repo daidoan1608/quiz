@@ -87,7 +87,7 @@
   font-size: 24px;
   margin: 20px 0;
 }
-.card {
+/* .card-listchap {
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -97,16 +97,16 @@
   justify-content: space-between;
   align-items: center;
   position: relative;
-}
-.card-content {
+} */
+/* .card-content {
   position: absolute;
   top: 2rem;
   text-align: left;
-}
-.card-content h3 {
+} */
+/* .card-content h3 {
   margin: 0;
   font-size: 18px;
-}
+} */
 .card-content .icon {
   color: #000;
   margin-left: 5px;
@@ -139,7 +139,7 @@
 
   /* align-items: end; */
 }
-.card-button {
+/* .card-button {
   background-color: #008080;
   color: #fff;
   border: none;
@@ -148,10 +148,10 @@
   cursor: pointer;
   font-size: 16px;
   position: relative;
-  left: 13rem;
+  left: 13rem; */
 
   /* align-items: end; */
-}
+/* } */
 .card-button:hover {
   background-color: #006666;
 }

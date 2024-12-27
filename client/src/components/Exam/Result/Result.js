@@ -3,6 +3,7 @@ import { useNavigate , useLocation } from 'react-router-dom';
 import './Result.css';
 import Headers from '../../Header';
 import Footer from '../../Footer';
+import Headers2 from '../../Headers2';
 
 export default function Result() {
   const location = useLocation();
@@ -17,8 +18,8 @@ export default function Result() {
 
   return (
     <>
-      <Headers />
-
+      {/* <Headers /> */}
+      <Headers2 />
       <div className="category-result">
         <div className="result-card">
           <div className="result-img">
@@ -32,12 +33,12 @@ export default function Result() {
             <p>CÂU ĐÚNG: {correctAnswers}/{totalQuestions}</p>
             <p>THỜI GIAN: {timeTaken}</p>
             <p>ĐIỂM: {score}</p>
-            <button className="submit-btn" onClick={handleDetail}>Xem bài thi</button>
-            <div className="btn-result">
-              <a href="/">
-                <button className="submit-btn">THOÁT</button>
+            <button className="submit-btn-result" onClick={handleDetail}>Xem bài thi</button>
+            {/* <div className="submit-btn-result"> */}
+              <a href="/exams">
+                <button className="submit-btn-result">THOÁT</button>
               </a>
-            </div>
+            {/* </div> */}
           </div>
         </div>
       </div>

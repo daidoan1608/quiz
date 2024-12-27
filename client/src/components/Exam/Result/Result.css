@@ -68,3 +68,28 @@
     text-decoration: underline;
     color: #006666;
 }
+.submit-btn-result{
+    width: auto;
+    padding: 10px 20px;
+    background-color: #008080;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    margin-top: 20px;
+    display: inline-block;
+    position: relative;
+    
+}
+.submit-btn-result:hover {
+    background-color: #006666;
+  }
+  
+  .submit-btn-result:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.3);
+  }

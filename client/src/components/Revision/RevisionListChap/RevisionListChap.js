@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axiosLocalApi from '../../../api/local-api';
 import LoginPrompt from '../../User/LoginPrompt'; // Import the new component
 import Footer from '../../Footer';
+import Headers2 from '../../Headers2';
 
 export default function RevisionListChap() {
     const [chapters, setChapters] = useState([]);
@@ -105,7 +106,8 @@ export default function RevisionListChap() {
 
     return (
         <div>
-            <Headers />
+            {/* <Headers /> */}
+            <Headers2 />
             {showLoginPrompt && (
               <LoginPrompt 
                   onLoginRedirect={handleLoginRedirect} 

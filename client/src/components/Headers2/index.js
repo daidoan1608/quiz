@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./index.css";
 
-export default function Headers() {
+export default function Headers2() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate(); // Khởi tạo hook navigate
 
@@ -24,13 +24,10 @@ export default function Headers() {
     <div>
       <header className="header">
         <img alt="FITA logo" src="logoschool.png" />
-        <div>
-          <div className="search-bar">
-            <input placeholder="Tìm kiếm..." type="text" />
-            <i className="fas fa-search"></i>
-          </div>
+        <div className="header-between">
+          
 
-          <div className="nav-links">
+          <div className="nav-links-headers2">
             <a href="/">TRANG CHỦ</a>
             <a href="/revision">ÔN TẬP</a>
             <a href="/chooseExams">BÀI THI</a>

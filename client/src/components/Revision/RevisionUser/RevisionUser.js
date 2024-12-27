@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import './RevisionUser.css';
 import Footer from '../../Footer';
 import Sidebar from '../../User/SideBar'; // Import the new Sidebar component
+import Headers2 from '../../Headers2';
 
 export default function RevisionUser() {
     const [subjects, setSubjects] = useState([]); // Store subject data
@@ -46,7 +47,8 @@ export default function RevisionUser() {
 
     return (
         <div>
-            <Headers />
+            {/* <Headers /> */}
+            <Headers2 />
             <div className="revision">
                 {/* Sidebar */}
                 <Sidebar 
@@ -62,38 +64,51 @@ export default function RevisionUser() {
                             {/* Display details of selected subject */}
                             {selectedSubject ? (
                                 <div className="card">
-                                    <div className='card-time'>
-                                        <p>8/12/2024</p>
+                                <div className='card-img-com'>
+                                            <div className='card-img'>
+                                            <img src='/computer.png'></img>
+                                            </div>
+                                            </div>
+                                    <div className='card-two'>
+                                        <div className="card-content">
+                                            <h3>{selectedSubject.name}</h3>
+                                        </div>
+                                        <div className='card-button-re'>
+                                        <button
+                                            className="card-button"
+                                            onClick={() => 
+                                                // navigate(`/subject/${selectedSubject.subjectId}`)
+                                                handleSelectChapters(selectedSubject.subjectId)
+                                            } // Navigate to chapters page
+                                        >
+                                            Chọn chương
+                                        </button>
+                                        </div>
                                     </div>
-                                    <div className="card-content">
-                                        <h2>{selectedSubject.name}</h2>
-                                    </div>
-                                    <button
-                                        className="card-button"
-                                        onClick={() => 
-                                            // navigate(`/subject/${selectedSubject.subjectId}`)
-                                            handleSelectChapters(selectedSubject.subjectId)
-                                        } // Navigate to chapters page
-                                    >
-                                        Chọn chương
-                                    </button>
                                 </div>
+
                             ) : (
                                 <div className="subject-list">
                                     {subjects.map((item) => (
                                         <div className="card" key={item.subjectId}>
-                                            <div className='card-time'>
-                                                <p>8/12/2024</p>
+                                        <div className='card-img-com'>
+                                            <div className='card-img'>
+                                            <img src='/computer.png'></img>
                                             </div>
-                                            <div className="card-content">
-                                                <h3>{item.name}</h3> {/* Display subject name */}
                                             </div>
-                                            <button
-                                                className="card-button"
-                                                onClick={() => handleSelectChapters(item.subjectId)} // Navigate to chapters of the subject
-                                            >
-                                                Chọn chương
-                                            </button>
+                                            <div className='card-two'>
+                                                <div className="card-content">
+                                                    <h3>{item.name}</h3> {/* Display subject name */}
+                                                </div>
+                                                <div className='card-button-re'>
+                                                <button
+                                                    className="card-button"
+                                                    onClick={() => handleSelectChapters(item.subjectId)} // Navigate to chapters of the subject
+                                                >
+                                                    Chọn chương
+                                                </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

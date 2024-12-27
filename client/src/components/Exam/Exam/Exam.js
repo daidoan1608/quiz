@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './Exam.css';
 import Headers from '../../Header';
 import Footer from '../../Footer';
+import Headers2 from '../../Headers2';
 // import { Footer } from 'antd/es/layout/layout';
 
 export default function Exam() {
@@ -18,6 +19,9 @@ export default function Exam() {
   const { examId , startTime } = location.state || {};
   const questionRefs = useRef([]); // Tạo refs cho từng câu hỏi  
   const accessToken = localStorage.getItem('accessToken');
+  const questionsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(1); //tăng số câu
+  const [questionAnswers, setQuestionAnswers] = useState([]);
 
   useEffect(() => {
     const getAllQuestionsByExamId = async () => {
@@ -160,9 +164,9 @@ export default function Exam() {
       <div 
         key={item.questionId} 
         className="container-end"
-        ref={questionRefs.current[questionIndex]} // Thêm ref cho mỗi câu hỏi
+        ref={questionRefs.current[questionIndex]} // Thêm ref cho mỗi câu hỏi: Câu {questionIndex + 1}:
       >
-        <div className="question">Câu {questionIndex + 1}: {item.content}</div>
+        <div className="question"> {item.content}</div>
         <div className="options">
           {item.answers?.map((answer, answerIndex) => {
             const isSelected = selectedAnswers[questionIndex] === answerIndex;
@@ -200,12 +204,26 @@ export default function Exam() {
     );
   });
 
+
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
-
+  const handleArrowChange = (direction) => {
+    const newPage = currentPage + direction;
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+  
+  const totalQuestions = questions.length; // Số lượng câu hỏi
+  const totalPages = Math.ceil(totalQuestions / questionsPerPage); // Tổng số trang (số câu hỏi chia cho 8 câu mỗi trang)
+  
+  const startIndex = (currentPage - 1) * questionsPerPage; // Vị trí bắt đầu câu hỏi
+  const currentQuestions = questions.slice(startIndex, startIndex + questionsPerPage); // Câu hỏi cần hiển thị trong trang hiện tại
+  
   return (
     <>
-      <Headers />
+      {/* <Headers /> */}
+      <Headers2 />
       <div className="category-center">
         <div className="table-left">
           <div className="info">
@@ -214,24 +232,41 @@ export default function Exam() {
             <p><span>SỐ CÂU:</span> {questions.length}</p>
             <p><span>THỜI GIAN:</span> {duration} Phút </p>
           </div>
-          <div className="timer">
+        </div>
+        <div className="timer">
             <h2>Thời gian còn lại</h2>
             <span>{`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}</span>
           </div>
-        </div>
         <div className="table-right">
           <div className="answer-sheet">
             <p><span>BẢNG TRẢ LỜI</span></p>
-            {[...Array(questions.length)].map((_, idx) => (
-              <div
-                key={idx}
-                className={`number ${selectedAnswers[idx] !== undefined ? 'selected' : ''}`}
-                onClick={() => scrollToQuestion(idx)} // Thêm sự kiện onClick
-                style={{ cursor: 'pointer' }} // Thêm con trỏ để chỉ ra có thể click
-              >
-                {idx + 1}
-              </div>
-            ))}
+            {/* Mũi tên trái */}
+          <button
+            onClick={() => handleArrowChange(-1)}
+            disabled={currentPage === 1}
+          >
+            <i className="fa-solid fa-arrow-left"></i>
+          </button>
+
+          {/* Hiển thị số câu hỏi từ 1 đến 8 trên bảng trả lời */}
+          {currentQuestions.map((_, idx) => (
+            <div
+              key={startIndex + idx}
+              className={`number ${selectedAnswers[startIndex + idx] !== undefined ? 'selected' : ''}`}
+              onClick={() => scrollToQuestion(startIndex + idx)}
+              style={{ cursor: 'pointer' }}
+            >
+              {startIndex + idx + 1} {/* Câu hỏi từ 1 đến 8 */}
+            </div>
+          ))}
+
+          {/* Mũi tên phải */}
+          <button
+            onClick={() => handleArrowChange(1)}
+            disabled={currentPage === totalPages}
+          >
+            <i className="fa-solid fa-arrow-right"></i>
+          </button>
           </div>
         </div>
       </div>

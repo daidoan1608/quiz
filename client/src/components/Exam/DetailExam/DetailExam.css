@@ -1,5 +1,18 @@
 /* DetailExam.css */
-
+.p-4 h2{
+  border: 2px solid #2e86de;
+  padding: 10px ;
+  border-radius: 10px;
+  background-color: #2e86de;
+  width: 600px;
+  text-align: center;
+  position: relative;
+  left: 25rem;
+  color: #fff;
+}
+.mb-4{
+  padding: 40px;
+}
 /* Màu nền của đáp án đúng */
 .correct-answer {
     background-color: #81c784; /* Màu xanh lá */
