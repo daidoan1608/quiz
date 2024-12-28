@@ -2,7 +2,7 @@ package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.ChapterDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
-import com.fita.vnua.quiz.service.Impl.ChapterServiceImpl;
+import com.fita.vnua.quiz.service.impl.ChapterServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

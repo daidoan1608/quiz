@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { publicAxios } from "../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./index.css";
 
@@ -15,9 +16,13 @@ export default function Headers() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    publicAxios.post("/auth/logout", {
+      refreshToken: localStorage.getItem("refreshToken"),
+    });
+    localStorage.removeItem("userId");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
-    navigate("/"); // Chuyển hướng về trang chủ khi đăng xuất
+    navigate("/");
   };
 
   return (

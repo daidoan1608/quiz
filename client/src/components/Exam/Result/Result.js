@@ -13,7 +13,6 @@ export default function Result() {
 
   const handleDetail = () => {
     navigate('/detail', {state: {examId, userExamId}});
-  
   }
 
   return (

@@ -1,15 +1,14 @@
 package com.fita.vnua.quiz.model.dto.request;
 
-import lombok.AllArgsConstructor;
+
+import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
+@Data
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class AuthenticationRequest {
+public class LoginRequest {
     private String username;
     private String password;
 }

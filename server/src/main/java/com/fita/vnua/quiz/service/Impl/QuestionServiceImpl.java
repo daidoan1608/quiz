@@ -1,4 +1,4 @@
-package com.fita.vnua.quiz.service.Impl;
+package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
@@ -120,7 +120,6 @@ public class QuestionServiceImpl implements QuestionService {
                 .orElseThrow(() -> new EntityNotFoundException("Question not found"));
 
         // Cập nhật thông tin của câu hỏi
-        String oldContent = existingQuestion.getContent();
         String newContent = questionDto.getContent();
         existingQuestion.setContent(newContent);
 

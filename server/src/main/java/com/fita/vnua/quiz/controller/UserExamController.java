@@ -4,7 +4,7 @@ import com.fita.vnua.quiz.model.dto.UserExamDto;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
-import com.fita.vnua.quiz.service.Impl.UserExamServiceImpl;
+import com.fita.vnua.quiz.service.impl.UserExamServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

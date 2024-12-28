@@ -1,4 +1,4 @@
-package com.fita.vnua.quiz.service.Impl;
+package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.model.dto.UserAnswerDto;
 import com.fita.vnua.quiz.model.dto.UserExamDto;

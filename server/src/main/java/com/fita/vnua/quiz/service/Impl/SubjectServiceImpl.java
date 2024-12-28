@@ -1,9 +1,8 @@
-package com.fita.vnua.quiz.service.Impl;
+package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.model.dto.ChapterDto;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
-import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
@@ -50,8 +49,7 @@ public class SubjectServiceImpl implements SubjectService {
     public SubjectDto update(Long subjectId, SubjectDto subjectDto) {
         var existingSubject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new EntityNotFoundException("Subject not found"));
-        String oldName = subjectDto.getName();
-        String newName = existingSubject.getName();
+
         existingSubject.setName(subjectDto.getName());
         existingSubject.setDescription(subjectDto.getDescription());
         return modelMapper.map(subjectRepository.save(existingSubject), SubjectDto.class);

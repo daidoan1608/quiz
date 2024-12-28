@@ -1,7 +1,6 @@
 package com.fita.vnua.quiz.genaretor;
 
 import jakarta.persistence.Embeddable;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
