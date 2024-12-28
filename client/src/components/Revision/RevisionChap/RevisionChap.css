@@ -3,20 +3,26 @@
   flex-direction: column;
   gap: 20px;
   min-height: 1400px;
-  align-items: center;
+  /* align-items: center; */
 }
 
 .question-selector {
-  
   position: sticky; /* Keeps the question selector at the top */
   top: 0; /* Fixed at the top of the viewport */
+  left: 2rem; /* Keep it fixed to the left of the screen */
   background-color: #fff; /* White background for visibility */
   z-index: 1000; /* Ensure it sits above other elements */
   padding: 10px;
   border-bottom: 1px solid #ddd; /* Bottom border for separation */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1); /* Subtle shadow on the right */
+  width: 400px; /* You can adjust the width as needed */
+  height: 100px; /* Full height to make it stretch */
 }
+.question-selector h3{
+  position: relative;
+  left: 2rem;
 
+}
 .question-button {
   width: 40px;
   height: 40px;
@@ -38,6 +44,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px; /* Space between buttons */
+  align-items: center;
+  position: relative;
+  left: 2rem;
 }
 
 .question-button:hover {
@@ -46,6 +55,9 @@
 
 .revision-right {
   padding: 20px; /* Padding for the main content area */
+  position: relative;
+  left: 27rem;
+  bottom: 8rem;
 }
 
 .container-end {
@@ -95,6 +107,8 @@
 .pagination {
   display: flex;
   justify-content: center; /* Center pagination buttons */
+  position: relative;
+  right: 20rem;
 }
 
 .pagination button {

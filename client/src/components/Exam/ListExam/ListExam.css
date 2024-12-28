@@ -91,7 +91,8 @@
     font-size: 24px;
     margin: 20px 0;
 }
-.card {
+.card-listexam {
+    height: 180px;
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -107,12 +108,12 @@
     background-color: #d4edda; /* Màu nền khi đã làm bài (ví dụ màu xanh nhạt) */
     border-color: #c3e6cb; /* Đổi màu viền */
 }
-.card-content {
+.card-content-listexam {
     position: absolute;
     top: 2rem;
     text-align: left;
 }
-.card-content h3 {
+.card-content-listexam h3 {
     margin: 0;
     font-size: 18px;
 }
@@ -137,7 +138,7 @@
 .card-content .details span:last-child {
     margin-right: 0;
 }
-.card-time {
+/* .card-time {
     border: none;
     border-radius: 20px;
     padding: 10px 20px;
@@ -146,9 +147,9 @@
     position: relative;
     left: 13rem;
 
-    /* align-items: end; */
-}
-.card-button {
+    align-items: end;
+} */
+.card-button-listexam {
     background-color: #008080;
     color: #fff;
     border: none;
@@ -158,10 +159,11 @@
     font-size: 16px;
     position: relative;
     left: 13rem;
+    top: 2rem;
 
     /* align-items: end; */
 }
-.card-button:hover {
+.card-button-listexam:hover {
     background-color: #006666;
 }
 .no-questions-message {

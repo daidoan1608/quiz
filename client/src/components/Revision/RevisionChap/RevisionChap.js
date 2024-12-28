@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import "./RevisionChap.css";
 import Headers from "../../Header";
 import Footer from "../../Footer";
+import Headers2 from "../../Headers2";
 
 export default function RevisionChap1() {
   const [questionAnswers, setQuestionAnswers] = useState([]);
@@ -53,6 +54,12 @@ export default function RevisionChap1() {
     setCurrentPage(newPage);
   };
 
+  const handleArrowChange = (direction) => {
+    const newPage = currentPage + direction;
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
   const goToQuestion = (questionIndex) => {
     const newPage = Math.floor(questionIndex / questionsPerPage) + 1;
     setCurrentPage(newPage);
@@ -87,7 +94,8 @@ export default function RevisionChap1() {
         ref={(el) => (questionRefs.current[globalQuestionIndex] = el)}
       >
         <div className="question">
-          Câu {globalQuestionIndex + 1}: {item.content}
+          {item.content}
+          {/* câu{globalQuestionIndex+1}: */}
         </div>
         <div className="options">
           {item.answers?.map((answer, answerIndex) => {
@@ -126,7 +134,8 @@ export default function RevisionChap1() {
 
   return (
     <div>
-      <Headers />
+      {/* <Headers /> */}
+      <Headers2 />
 
       <div className="revision-container">
         {/* Check for error or no questions */}
@@ -139,20 +148,40 @@ export default function RevisionChap1() {
         ) : (
           <>
             {/* Question Selector */}
+            {/* Chọn câu trả lời */}
             <div className="question-selector">
-              <h3>Chọn câu hỏi</h3>
+              <h3>Chọn câu trả lời</h3>
               <div className="question-list">
-                {questionAnswers.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToQuestion(index)}
-                    className={`question-button ${
-                      selectedAnswers[index] !== undefined ? "answered" : ""
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
+                {/* Mũi tên trái */}
+                <button
+                  onClick={() => handleArrowChange(-1)}
+                  disabled={currentPage === 1}
+                >
+                  <i className="fa-solid fa-arrow-left"></i>
+                </button>
+
+                {/* Các nút câu hỏi (cập nhật lại chỉ hiển thị số câu hỏi cho trang hiện tại) */}
+                {questionAnswers
+                  .slice((currentPage - 1) * questionsPerPage, currentPage * questionsPerPage)
+                  .map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToQuestion((currentPage - 1) * questionsPerPage + index)}
+                      className={`question-button ${
+                        selectedAnswers[(currentPage - 1) * questionsPerPage + index] !== undefined ? "answered" : ""
+                      }`}
+                    >
+                      {(currentPage - 1) * questionsPerPage + index + 1}
+                    </button>
+                  ))}
+
+                {/* Mũi tên phải */}
+                <button
+                  onClick={() => handleArrowChange(1)}
+                  disabled={currentPage === totalPages}
+                >
+                  <i className="fa-solid fa-arrow-right"></i>
+                </button>
               </div>
             </div>
 

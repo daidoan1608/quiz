@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { publicAxios } from "../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./index.css";
 
-export default function Headers() {
+export default function Headers2() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate(); // Khởi tạo hook navigate
 
@@ -16,26 +15,19 @@ export default function Headers() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    publicAxios.post("/auth/logout", {
-      refreshToken: sessionStorage.getItem("refreshToken"),
-    });
-    localStorage.removeItem("userId");
     localStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
-    navigate("/");
+    localStorage.removeItem("refreshToken");
+    navigate("/"); // Chuyển hướng về trang chủ khi đăng xuất
   };
 
   return (
     <div>
       <header className="header">
         <img alt="FITA logo" src="logoschool.png" />
-        <div>
-          {/* <div className="search-bar">
-            <input placeholder="Tìm kiếm..." type="text" />
-            <i className="fas fa-search"></i>
-          </div> */}
+        <div className="header-between">
+          
 
-          <div className="nav-links">
+          <div className="nav-links-headers2">
             <a href="/">TRANG CHỦ</a>
             <a href="/revision">ÔN TẬP</a>
             <a href="/chooseExams">BÀI THI</a>
@@ -68,7 +60,7 @@ export default function Headers() {
                   </label>
                   <ul className="submenu-user">
                     <li>
-                      <a href="/account" className="account">Tài khoản</a>
+                      <a href="#" className="account">Tài khoản</a>
                     </li>
                     <li>
                       <a onClick={handleLogout} className="log-out">Đăng xuất</a>

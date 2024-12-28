@@ -17,6 +17,16 @@ const RegisterForm = () => {
         password: values.password,
         fullName: values.fullName,
       });
+<<<<<<< HEAD
+  
+      const { accessToken, refreshToken, user } = response.data;  // Giả sử 'user' chứa thông tin người dùng
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify(user));  // Lưu thông tin người dùng vào localStorage
+  
+      message.success('Đăng ký thành công! Chuyển đến trang chủ');
+      navigate('/account');
+=======
 
       const { accessToken, refreshToken } = response.data;
       localStorage.setItem("accessToken", accessToken);
@@ -24,6 +34,7 @@ const RegisterForm = () => {
 
       message.success("Đăng ký thành công! Chuyển đến trang chủ");
       navigate("/");
+>>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại!";
@@ -49,10 +60,16 @@ const RegisterForm = () => {
           <Form.Item
             label="Tên người dùng"
             name="username"
+<<<<<<< HEAD
+            rules={[{ required: true, message: 'Vui lòng nhập Username!' }]}>
+            <Input 
+              placeholder="Nhập username" 
+=======
             rules={[{ required: true, message: "Vui lòng nhập Username!" }]}
           >
             <Input
               placeholder="Nhập username"
+>>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
               prefix={<UserOutlined className="input-icon" />}
               size="large"
             />
@@ -61,10 +78,16 @@ const RegisterForm = () => {
           <Form.Item
             label="Họ và tên"
             name="fullName"
+<<<<<<< HEAD
+            rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}>
+            <Input 
+              placeholder="Nhập họ và tên" 
+=======
             rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
           >
             <Input
               placeholder="Nhập họ và tên"
+>>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
               prefix={<UserOutlined className="input-icon" />}
               size="large"
             />
@@ -74,12 +97,20 @@ const RegisterForm = () => {
             label="Email"
             name="email"
             rules={[
+<<<<<<< HEAD
+              { required: true, message: 'Vui lòng nhập email!' },
+              { type: 'email', message: 'Email không hợp lệ!' },
+            ]}>
+            <Input 
+              placeholder="Nhập email" 
+=======
               { required: true, message: "Vui lòng nhập email!" },
               { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
             <Input
               placeholder="Nhập email"
+>>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
               prefix={<MailOutlined className="input-icon" />}
               size="large"
             />
@@ -89,12 +120,20 @@ const RegisterForm = () => {
             label="Mật khẩu"
             name="password"
             rules={[
+<<<<<<< HEAD
+              { required: true, message: 'Vui lòng nhập mật khẩu!' },
+              { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+            ]}>
+            <Input.Password 
+              placeholder="Nhập mật khẩu" 
+=======
               { required: true, message: "Vui lòng nhập mật khẩu!" },
               { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
             ]}
           >
             <Input.Password
               placeholder="Nhập mật khẩu"
+>>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
               prefix={<LockOutlined className="input-icon" />}
               size="large"
             />
@@ -116,10 +155,16 @@ const RegisterForm = () => {
                   );
                 },
               }),
+<<<<<<< HEAD
+            ]}>
+            <Input.Password 
+              placeholder="Xác nhận mật khẩu" 
+=======
             ]}
           >
             <Input.Password
               placeholder="Xác nhận mật khẩu"
+>>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
               prefix={<LockOutlined className="input-icon" />}
               size="large"
             />
@@ -138,7 +183,7 @@ const RegisterForm = () => {
           </Form.Item>
 
           <div className="login-link">
-            Đã có tài khoản? <a href="/login">Đăng nhập ngay!</a>
+            Đã có tài khoản? <a href="/login" className="login">Đăng nhập ngay!</a>
           </div>
         </Form>
       </div>

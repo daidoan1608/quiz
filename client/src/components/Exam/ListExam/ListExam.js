@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+import React, { useEffect, useState } from 'react';
+import axiosLocalApi from '../../../api/local-api';
+import './ListExam.css';
+import Headers from '../../Header';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Footer from '../../Footer';
+import LoginPrompt from '../../User/LoginPrompt';
+import Headers2 from '../../Headers2';
+=======
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import "./ListExam.css";
@@ -5,6 +15,7 @@ import Headers from "../../Header";
 import { useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../Footer";
 import LoginPrompt from "../../User/LoginPrompt";
+>>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
 
 export default function ExamUsers() {
   const [examDto, setExamUsers] = useState([]);
@@ -61,24 +72,28 @@ export default function ExamUsers() {
     return (
       <div
         key={index}
+<<<<<<< HEAD
+        className={`card-listexam ${isCompleted ? 'completed' : ''}`}
+=======
         className={`card ${isCompleted ? "completed" : ""}`}
+>>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
         onClick={() => handleExamClick(item.examId)}
       >
-        <div className="card-time">
+        {/* <div className="card-time">
           <p>{new Date(item.date || Date.now()).toLocaleDateString()}</p>
-        </div>
-        <div className="card-content">
+        </div> */}
+        <div className="card-content-listexam">
           <h2>{item.title}</h2>
           <h3>{item.description}</h3>
           <div className="details">
             <span>Lần thi:</span>
-            <a href="/reviewExam">
+            {/* <a href="/reviewExam">
               <span>Xem lại</span>
-            </a>
+            </a> */}
           </div>
         </div>
         <button
-          className="card-button"
+          className="card-button-listexam"
           onClick={(e) => {
             e.stopPropagation();
             handleExamClick(item.examId);
@@ -92,7 +107,8 @@ export default function ExamUsers() {
 
   return (
     <div>
-      <Headers />
+      {/* <Headers /> */}
+      <Headers2 />
       {showLoginPrompt && (
         <LoginPrompt
           onLoginRedirect={handleLoginRedirect}
@@ -108,12 +124,12 @@ export default function ExamUsers() {
         </div>
       ) : (
         <>
-          <section className="container-section">
+          {/* <section className="container-section">
             <div className="search-container">
               <input type="text" placeholder="Tìm kiếm bài thi..." />
               <i className="fas fa-search" />
             </div>
-          </section>
+          </section> */}
 
           <div className="category-exam">
             <div className="container-exam">

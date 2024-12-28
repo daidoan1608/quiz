@@ -23,13 +23,13 @@
   }
   
   .table-right {
-    width: 48%; /* Giữ kích thước để các bảng con chiếm 48% chiều rộng */
+    width: 34%; /* Giữ kích thước để các bảng con chiếm 48% chiều rộng */
     padding: 10px;
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    height: 220px;
+    height: 180px;
     overflow: hidden; /* Đảm bảo không có cuộn ngang trong các bảng con */
   }
 /* Chia .table-left thành 2 phần */
@@ -37,13 +37,13 @@
     display: flex; /* Sử dụng flexbox */
     justify-content: space-between; /* Chia đều không gian */
     align-items: center; /* Căn giữa theo chiều dọc */
-    width: 48%; /* Chiếm 48% chiều rộng */
-    padding: 10px;
+    width: 38%; /* Chiếm 48% chiều rộng */
+    padding: 5px;
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    height: 220px; /* Đảm bảo chiều cao cố định */
+    height: 180px; /* Đảm bảo chiều cao cố định */
   }
   
   /* Phần thông tin bài thi */
@@ -51,6 +51,9 @@
     flex: 1; /* Chiếm toàn bộ chiều rộng còn lại */
     text-align: left;
     margin-left: 15%;
+  }
+  .table-left .info p{
+    font-size: 15px;
   }
   
   /* Phần đồng hồ đếm ngược */
@@ -61,7 +64,7 @@
     justify-content: center; /* Căn giữa nội dung trong .timer */
     align-items: center;
     text-align: center;
-    margin: 0 15%;
+    margin: 0 5%;
   }
   
   .timer h2 {
@@ -74,6 +77,8 @@
     color: red;
     font-size: 28px;
     font-weight: bold; /* Làm đậm thời gian */
+    position: relative;
+    left: 4rem;
   }
   
   
@@ -106,6 +111,7 @@
     align-items: center;
     padding: 20px 0;
     position: relative;
+    left: 15rem;
   }
   
   /* Sửa các container-end để tránh cuộn ngang */
@@ -173,6 +179,8 @@
     text-align: center;
     margin-top: 20px;
     display: inline-block;
+    position: relative;
+    right: 12rem;
   }
   
   .submit-btn:hover {
@@ -188,6 +196,8 @@
   .answer-sheet {
     width: 100%; /* Đảm bảo bảng trả lời không vượt quá chiều rộng */
     padding: 10px;
+    position: relative;
+    left: 3rem;
   }
   
   .number {
@@ -207,4 +217,5 @@
     border: 2px solid blue;
   }
   
+
   

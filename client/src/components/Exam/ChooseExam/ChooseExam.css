@@ -65,40 +65,61 @@
     margin: 20px 0;
   }
   
-  .card {
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin: 20px 0;
-    padding: 40px;
-    display: block;
-    justify-content: space-between;
-    align-items: center;
+  .card-exam {
+    display: block; /* Sử dụng Flexbox để căn chỉnh card-img-com và card-two theo chiều ngang */
+    align-items: center; /* Căn giữa các phần tử dọc theo trục */
+    justify-content: flex-start; /* Đặt các phần tử ở đầu (trái) của card */
+    background-color: white; /* Màu nền trắng cho card */
+    border-radius: 8px; /* Bo góc cho card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng nhẹ */
+    padding: 15px; /* Khoảng cách nội dung bên trong card */
+    margin-bottom: 20px; /* Khoảng cách dưới các thẻ card */
+    transition: box-shadow 0.3s ease, transform 0.3s ease; /* Hiệu ứng chuyển động khi hover */
+    width: 100%; /* Đảm bảo card chiếm hết chiều rộng của container */
+  }
+  .card-exam:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Bóng đổ đậm hơn khi hover */
+    transform: translateY(-5px); /* Nâng card lên một chút khi hover */
+  }
+
+  .card-content-exam {
+    font-weight: bold; /* Đậm tên môn học */
+    margin-bottom: 10px; /* Khoảng cách giữa tên môn học và nút */
     position: relative;
+    bottom: 5rem;
   }
   
-  .card-content {
-    position: absolute;
-    top: 2rem;
-    text-align: left;
-  }
-  
-  .card-content h3 {
+  .card-content-exam h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 25px;
   }
   
-  .card-time {
-    border: none;
-    border-radius: 20px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 16px;
+  .card-img-exam {
+    /* display: flex;  */
+    justify-content: center; /* Căn giữa hình ảnh */
+    align-items: center; /* Căn giữa hình ảnh theo chiều dọc */
+    flex-shrink: 0; /* Không co lại khi thiếu không gian */
+    margin-right: 20px; /* Khoảng cách giữa ảnh và phần nội dung */
+  }
+  
+  .card-img-exam img {
+    width: 100px; /* Đặt kích thước ảnh */
+    height: auto; /* Giữ tỷ lệ ảnh */
     position: relative;
-    left: 13rem;
+    right: 15rem;
+    top: 2rem;
   }
   
-  .card-button {
+  
+  .card-two-exam {
+    /* display: flex; Đảm bảo các phần tử trong card-two nằm theo chiều dọc */
+    flex-direction: column; /* Các phần tử trong card-two sắp xếp theo chiều dọc */
+    justify-content: space-between; /* Tạo khoảng cách giữa tên môn học và nút */
+    width: 100%; /* Chiếm hết không gian còn lại */
+    position: relative;
+    top: 0.5rem;
+  }
+  .card-button-exam {
     background-color: #008080;
     color: #fff;
     border: none;
@@ -107,10 +128,11 @@
     cursor: pointer;
     font-size: 16px;
     position: relative;
-    left: 13rem;
+    right: 5rem;
+    bottom: 4rem;
   }
   
-  .card-button:hover {
+  .card-button-exam:hover {
     background-color: #006666;
   }
   
