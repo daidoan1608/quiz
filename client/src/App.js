@@ -12,6 +12,7 @@ import Result from "./components/Exam/Result/Result";
 import ReviewExam from "./components/Exam/ReviewExam/ReviewExam";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
 import ChooseExam from "./components/Exam/ChooseExam/ChooseExam";
+import Account from "./components/account/account";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         {/* Trang Đăng nhập */}
         <Route path="/register" element={<RegisterForm />} />
         {/* Trang Đăng ký */}
+        <Route path="/account" element={<Account />} />
       </Routes>
       <Routes>
         <Route exact path="/chooseExams" element={<ChooseExam />} />

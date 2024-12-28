@@ -63,7 +63,7 @@ export default function Headers() {
                   </label>
                   <ul className="submenu-user">
                     <li>
-                      <a href="#" className="account">Tài khoản</a>
+                      <a href="/account" className="account">Tài khoản</a>
                     </li>
                     <li>
                       <a onClick={handleLogout} className="log-out">Đăng xuất</a>

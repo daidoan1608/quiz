@@ -17,13 +17,14 @@ const RegisterForm = () => {
         password: values.password,
         fullName: values.fullName,
       });
-
-      const { accessToken, refreshToken } = response.data;
+  
+      const { accessToken, refreshToken, user } = response.data;  // Giả sử 'user' chứa thông tin người dùng
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-
+      localStorage.setItem('user', JSON.stringify(user));  // Lưu thông tin người dùng vào localStorage
+  
       message.success('Đăng ký thành công! Chuyển đến trang chủ');
-      navigate('/');
+      navigate('/account');
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại!';
       message.error(errorMessage);
@@ -52,8 +53,7 @@ const RegisterForm = () => {
           <Form.Item
             label="Tên người dùng"
             name="username"
-            rules={[{ required: true, message: 'Vui lòng nhập Username!' }]}
-          >
+            rules={[{ required: true, message: 'Vui lòng nhập Username!' }]}>
             <Input 
               placeholder="Nhập username" 
               prefix={<UserOutlined className="input-icon" />}
@@ -64,8 +64,7 @@ const RegisterForm = () => {
           <Form.Item
             label="Họ và tên"
             name="fullName"
-            rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
-          >
+            rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}>
             <Input 
               placeholder="Nhập họ và tên" 
               prefix={<UserOutlined className="input-icon" />}
@@ -79,8 +78,7 @@ const RegisterForm = () => {
             rules={[
               { required: true, message: 'Vui lòng nhập email!' },
               { type: 'email', message: 'Email không hợp lệ!' },
-            ]}
-          >
+            ]}>
             <Input 
               placeholder="Nhập email" 
               prefix={<MailOutlined className="input-icon" />}
@@ -94,8 +92,7 @@ const RegisterForm = () => {
             rules={[
               { required: true, message: 'Vui lòng nhập mật khẩu!' },
               { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
-            ]}
-          >
+            ]}>
             <Input.Password 
               placeholder="Nhập mật khẩu" 
               prefix={<LockOutlined className="input-icon" />}
@@ -117,8 +114,7 @@ const RegisterForm = () => {
                   return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
                 },
               }),
-            ]}
-          >
+            ]}>
             <Input.Password 
               placeholder="Xác nhận mật khẩu" 
               prefix={<LockOutlined className="input-icon" />}
@@ -139,7 +135,7 @@ const RegisterForm = () => {
           </Form.Item>
           
           <div className="login-link">
-            Đã có tài khoản? <a href="/login">Đăng nhập ngay!</a>
+            Đã có tài khoản? <a href="/login" className="login">Đăng nhập ngay!</a>
           </div>
         </Form>
       </div>
