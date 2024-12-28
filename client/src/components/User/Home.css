@@ -125,6 +125,13 @@ body {
   .category {
     padding: 20px; 
 }
+.category h2 {
+    color: #178FA5; 
+    font-size: 30px; 
+    font-weight: 700; 
+    text-align: center; 
+    margin-bottom: 20px; 
+}
 
 .container {
     display: flex; 
@@ -153,15 +160,6 @@ body {
 
 }
 
-.course:hover {
-    background-color: #f0f0f0; /* Màu nền khi di chuột qua môn học */
-
-}
-
-.course a:hover {
-    color: #178FA5; /* Màu chữ khi di chuột qua liên kết */
-}
-
 .modal {
     display: block;  /* Đảm bảo modal được hiển thị khi trạng thái mở */
     position: fixed;
@@ -173,6 +171,7 @@ body {
     z-index: 1000; /* Đảm bảo modal ở trên cùng */
   }
   .school-introduction {
+    text-align: center;
     font-size: 30px;
     border: 1px solid #ccc;
     padding: 20px;
@@ -180,5 +179,3 @@ body {
     border-radius: 5px;
     background-color: #f9f9f9;
   }
-  
-  

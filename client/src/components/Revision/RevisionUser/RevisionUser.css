@@ -1,74 +1,60 @@
 .revision {
-  display: flex; /* Use flexbox for layout */
-  height: 100vh; /* Full viewport height */
+  display: flex; /* Sử dụng flexbox để bố trí hai phần sidebar và content */
+  height: 100vh; /* Full chiều cao của viewport */
+  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
 }
-.content {
-  height: 80vh; /* 80% of viewport height */
-}
-.content {
-  height: 100%; /* Full height */
-  flex-grow: 1; /* Allow content to grow and fill remaining space */
-  padding: 0px 20px; /* Add padding for content area */
-  background-color: #f9f9f9; /* Optional background color for contrast */
-  overflow-y: auto; /* Enable vertical scrolling if content overflows */
 
+.content {
+  flex-grow: 1; /* Cho phép phần nội dung chiếm không gian còn lại */
+  padding: 20px; /* Khoảng cách giữa các phần tử trong content */
+  background-color: #f9f9f9; /* Màu nền của phần nội dung */
+  overflow-y: auto; /* Cho phép cuộn khi nội dung vượt quá chiều cao */
+  display: flex;
+  flex-direction: column; /* Sắp xếp nội dung theo chiều dọc */
 }
 
 .category-re {
-  height: 100%; /* Full height */
-  width: 100%;
+  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
+  display: flex;
+  justify-content: center; /* Căn giữa nội dung */
 }
+
+.container-re {
+  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
+  max-width: 1200px; /* Giới hạn chiều rộng của container */
+  margin: 0 auto; /* Căn giữa */
+  display: flex;
+  flex-wrap: wrap; /* Cho phép các phần tử bên trong xuống dòng khi không đủ không gian */
+  gap: 20px; /* Khoảng cách giữa các thẻ card */
+}
+
 .card {
-  display: block; /* Sử dụng Flexbox để căn chỉnh card-img-com và card-two theo chiều ngang */
-  align-items: center; /* Căn giữa các phần tử dọc theo trục */
-  justify-content: flex-start; /* Đặt các phần tử ở đầu (trái) của card */
-  background-color: white; /* Màu nền trắng cho card */
+  display: flex; /* Sử dụng flex để sắp xếp các phần tử bên trong card */
+  flex-direction: column; /* Sắp xếp theo chiều dọc */
+  justify-content: space-between; /* Căn đều nội dung trong card */
+  background-color: white; /* Màu nền trắng */
   border-radius: 8px; /* Bo góc cho card */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng nhẹ */
-  padding: 15px; /* Khoảng cách nội dung bên trong card */
-  margin-bottom: 20px; /* Khoảng cách dưới các thẻ card */
-  transition: box-shadow 0.3s ease, transform 0.3s ease; /* Hiệu ứng chuyển động khi hover */
-  width: 100%; /* Đảm bảo card chiếm hết chiều rộng của container */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Bóng đổ nhẹ */
+  padding: 2rem; /* Khoảng cách bên trong card */
+  width: 100%; /* Đảm bảo card chiếm toàn bộ chiều rộng container */
+  max-width: 100%; /* Đặt giới hạn chiều rộng cho mỗi card */
+  transition: box-shadow 0.3s ease, transform 0.3s ease; /* Hiệu ứng hover */
+  margin-bottom: 2rem;
 }
 
 .card:hover {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Bóng đổ đậm hơn khi hover */
-  transform: translateY(-5px); /* Nâng card lên một chút khi hover */
-}
-
-.card-img-com {
-  /* display: flex;  */
-  justify-content: center; /* Căn giữa hình ảnh */
-  align-items: center; /* Căn giữa hình ảnh theo chiều dọc */
-  flex-shrink: 0; /* Không co lại khi thiếu không gian */
-  margin-right: 20px; /* Khoảng cách giữa ảnh và phần nội dung */
-}
-
-.card-img img {
-  width: 180px; /* Đặt kích thước ảnh */
-  height: auto; /* Giữ tỷ lệ ảnh */
-  position: relative;
-  right: 15rem;
-  top: 2rem;
-}
-
-
-.card-two {
-  /* display: flex; Đảm bảo các phần tử trong card-two nằm theo chiều dọc */
-  flex-direction: column; /* Các phần tử trong card-two sắp xếp theo chiều dọc */
-  justify-content: space-between; /* Tạo khoảng cách giữa tên môn học và nút */
-  width: 100%; /* Chiếm hết không gian còn lại */
-  position: relative;
-  bottom: 5rem;
+  transform: translateY(-5px); /* Nâng card lên khi hover */
 }
 
 .card-content {
   font-size: 18px; /* Cỡ chữ cho tên môn học */
-  font-weight: bold; /* Đậm tên môn học */
+  font-weight: bold; /* Chữ đậm */
   margin-bottom: 10px; /* Khoảng cách giữa tên môn học và nút */
+  text-align: center; /* Căn giữa tên môn học */
 }
 
-.card-button{
+.card-button {
   background-color: #008080;
   color: #fff;
   border: none;
@@ -76,13 +62,26 @@
   padding: 10px 20px;
   cursor: pointer;
   font-size: 16px;
-  position: relative;
-  right: 4rem;
-  top: 1rem;
+  text-align: center;
+  align-self: center; /* Căn giữa nút */
+  transition: background-color 0.3s ease;
 }
 
 .card-button:hover {
-  /* background-color: #0056b3; Màu nền thay đổi khi hover */
+  background-color: #0056b3; /* Màu nền khi hover */
 }
 
+.card-img {
+  display: flex;
+  justify-content: center; /* Căn giữa hình ảnh */
+  align-items: center; /* Căn giữa hình ảnh theo chiều dọc */
+  flex-shrink: 0; /* Không co lại khi thiếu không gian */
+  margin-bottom: 15px; /* Khoảng cách giữa ảnh và phần nội dung */
+}
 
+.card-img img {
+  width: 100%; /* Đảm bảo ảnh không vượt quá chiều rộng của card */
+  height: auto; /* Giữ tỷ lệ ảnh */
+  max-width: 180px; /* Giới hạn kích thước ảnh */
+  border-radius: 8px; /* Bo góc cho ảnh */
+}

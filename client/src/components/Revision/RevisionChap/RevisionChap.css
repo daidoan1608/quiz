@@ -3,7 +3,11 @@
   flex-direction: column;
   gap: 20px;
   min-height: 1400px;
-  /* align-items: center; */
+}
+
+.center-text {
+  align-items: center;
+
 }
 
 .question-selector {
@@ -134,8 +138,8 @@
   font-size: 18px; /* Optional: adjust font size */
   color: #666; /* Optional: adjust text color */
   text-align: center; /* Center text alignment */
+  min-height: 100vh;
 }
 .error-message {
-  color: red; /* Red c
-  olor for error messages */
+  color: red;
 }

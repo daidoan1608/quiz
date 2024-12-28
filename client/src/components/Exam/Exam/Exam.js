@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { authAxios } from "../../../api/axiosConfig";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Exam.css";
-import Headers from "../../Header";
+import Headers from "../../Headers";
 import Footer from "../../Footer";
 
 export default function Exam() {
   const [questions, setExamQuestionAnswers] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [duration, setDuration] = useState(0);
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
@@ -115,12 +115,18 @@ export default function Exam() {
   }, [examId, navigate]);
 
   useEffect(() => {
+    // Chỉ bắt đầu đếm ngược khi timeLeft đã được khởi tạo
+    if (timeLeft === null) return;
+    
     if (timeLeft === 0) {
       handleSubmit();
+      return;
     }
+  
     const timerId = setInterval(() => {
       setTimeLeft((prevTime) => prevTime - 1);
     }, 1000);
+  
     return () => clearInterval(timerId);
   }, [timeLeft, handleSubmit]);
 

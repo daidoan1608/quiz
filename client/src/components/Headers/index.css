@@ -18,13 +18,13 @@
     left: 4rem;
 
 }
-.header .nav-links {
+.header .nav-links-headers2 {
     display: flex;
     align-items: center;
     position: relative;
     bottom: 2rem;
 }
-.header .nav-links a {
+.header .nav-links-headers2 a {
     margin: 0 60px;
     text-decoration: none;
     color: #333;
@@ -33,12 +33,7 @@
     top: 2rem;
     left: 4rem;
 }
-.header .nav-links a:hover {
-    /* border-bottom: 2px solid #00bcd4; */
-    /* color: #178FA5; */
-}
 
-/*Section*/
 .container-section-search {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -209,16 +204,6 @@ ul.submenu-user:hover {
     box-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 30px rgba(255, 255, 255, 0.7); /* Tăng độ sáng khi hover */
 }
 
-
-
-ul.submenu-user li {
-    /* border-bottom: 1px solid #e67e22; */
-}
-
-ul.submenu-user li:last-child {
-    /* border-bottom: none; */
-}
-
 ul.submenu-user li a,
 ul.submenu-user li button {
     padding: 10px;
@@ -229,11 +214,6 @@ ul.submenu-user li button {
     width: 100%;
     text-align: left;
     
-}
-
-ul.submenu-user li a:hover,
-ul.submenu-user li button:hover {
-    /* background-color: #e67e22; */
 }
 
 /* Khi checkbox được tick, hiển thị submenu */
@@ -247,4 +227,10 @@ ul.submenu-user li button:hover {
 .log-out{
     position: relative;
     top: 1rem;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column; /* Đảm bảo nội dung xếp theo cột */
+    text-align: center;
 }

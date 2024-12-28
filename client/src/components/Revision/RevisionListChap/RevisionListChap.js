@@ -1,21 +1,10 @@
-<<<<<<< HEAD
-import React, { useEffect, useState } from 'react';
-import Headers from '../../Header';
-import './RevisionListChap.css';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axiosLocalApi from '../../../api/local-api';
-import LoginPrompt from '../../User/LoginPrompt'; // Import the new component
-import Footer from '../../Footer';
-import Headers2 from '../../Headers2';
-=======
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
-import Headers from "../../Header";
+import Headers from "../../Headers";
 import "./RevisionListChap.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoginPrompt from "../../User/LoginPrompt";
 import Footer from "../../Footer";
->>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
 
 export default function RevisionListChap() {
   const [chapters, setChapters] = useState([]);
@@ -108,32 +97,10 @@ export default function RevisionListChap() {
 
   if (isLoading) {
     return (
-<<<<<<< HEAD
-        <div>
-            {/* <Headers /> */}
-            <Headers2 />
-            {showLoginPrompt && (
-              <LoginPrompt 
-                  onLoginRedirect={handleLoginRedirect} 
-                  onClose={handleCloseLoginPrompt} 
-              />
-            )}
-            <div className="subject-detail">
-                {error ? (
-                    <div className="error-message">{error}</div>
-                ) : (
-                    <div className="chapters">
-                        {renderChaps(chapters)}
-                    </div>
-                )}
-            </div>
-            <Footer />
-=======
       <div>
         <Headers />
         <div className="subject-detail">
           <div className="loading">Đang tải dữ liệu...</div>
->>>>>>> bbe4d1c3caf38a04cfb7e4fec2fffa884079c8cb
         </div>
         <Footer />
       </div>

@@ -23,7 +23,7 @@
   }
   
   .table-right {
-    width: 34%; /* Giữ kích thước để các bảng con chiếm 48% chiều rộng */
+    width: 49%; /* Giữ kích thước để các bảng con chiếm 48% chiều rộng */
     padding: 10px;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -37,7 +37,7 @@
     display: flex; /* Sử dụng flexbox */
     justify-content: space-between; /* Chia đều không gian */
     align-items: center; /* Căn giữa theo chiều dọc */
-    width: 38%; /* Chiếm 48% chiều rộng */
+    width: 49%; /* Chiếm 48% chiều rộng */
     padding: 5px;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -50,7 +50,7 @@
   .table-left .info {
     flex: 1; /* Chiếm toàn bộ chiều rộng còn lại */
     text-align: left;
-    margin-left: 15%;
+    margin-left: 5rem;
   }
   .table-left .info p{
     font-size: 15px;
@@ -64,7 +64,9 @@
     justify-content: center; /* Căn giữa nội dung trong .timer */
     align-items: center;
     text-align: center;
-    margin: 0 5%;
+    margin-right: 5rem;
+    align-items: center;
+
   }
   
   .timer h2 {
@@ -78,9 +80,7 @@
     font-size: 28px;
     font-weight: bold; /* Làm đậm thời gian */
     position: relative;
-    left: 4rem;
   }
-  
   
   .number {
     display: inline-block;
@@ -197,7 +197,7 @@
     width: 100%; /* Đảm bảo bảng trả lời không vượt quá chiều rộng */
     padding: 10px;
     position: relative;
-    left: 3rem;
+    /* left: 3rem; */
   }
   
   .number {

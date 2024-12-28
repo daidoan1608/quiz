@@ -2,9 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useLocation } from "react-router-dom";
 import "./RevisionChap.css";
-import Headers from "../../Header";
 import Footer from "../../Footer";
-import Headers2 from "../../Headers2";
+import Headers from "../../Headers";
 
 export default function RevisionChap1() {
   const [questionAnswers, setQuestionAnswers] = useState([]);
@@ -135,9 +134,9 @@ export default function RevisionChap1() {
   return (
     <div>
       {/* <Headers /> */}
-      <Headers2 />
+      <Headers />
 
-      <div className="revision-container">
+      <div className={`revision-container ${error ? 'center-text' : ''}`}>
         {/* Check for error or no questions */}
         {error ? (
           <div className="error-message">{error}</div>

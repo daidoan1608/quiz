@@ -1,138 +1,70 @@
-/* To ensure the entire layout uses flex */
-.revision {
-    display: flex;
-    margin: 20px;
-    height: 100vh; /* Tạo chiều cao toàn màn hình cho layout */
-    max-height: 1400px;
-  }
-  
-  /* Sidebar styles */
-  .sidebar {
-    width: 300px; /* Chiều rộng cố định cho sidebar */
-    background-color: #f1f1f1;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    position: relative;
-    height: 100vh; /* Sidebar chiếm hết chiều cao màn hình */
-    z-index: 10;
-  }
-  
-  .sidebar h3 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .sidebar ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .sidebar li {
-    margin-bottom: 10px;
-    cursor: pointer;
-  }
-  
-  .sidebar li:hover {
-    color: #008080;
-  }
-  
-  /* Content styles */
-  .content {
-    flex-grow: 1;
-    padding: 20px;
-  }
-  
-  /* Layout for content section */
-  .category-re {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .container-re {
-    width: 100%;
-    max-width: 800px;
-    margin: 20px;
-    text-align: center;
-  }
-  
-  .category-header {
-    font-size: 24px;
-    margin: 20px 0;
-  }
-  
-  .card-exam {
-    display: block; /* Sử dụng Flexbox để căn chỉnh card-img-com và card-two theo chiều ngang */
-    align-items: center; /* Căn giữa các phần tử dọc theo trục */
-    justify-content: flex-start; /* Đặt các phần tử ở đầu (trái) của card */
-    background-color: white; /* Màu nền trắng cho card */
-    border-radius: 8px; /* Bo góc cho card */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng nhẹ */
-    padding: 15px; /* Khoảng cách nội dung bên trong card */
-    margin-bottom: 20px; /* Khoảng cách dưới các thẻ card */
-    transition: box-shadow 0.3s ease, transform 0.3s ease; /* Hiệu ứng chuyển động khi hover */
-    width: 100%; /* Đảm bảo card chiếm hết chiều rộng của container */
-  }
-  .card-exam:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Bóng đổ đậm hơn khi hover */
-    transform: translateY(-5px); /* Nâng card lên một chút khi hover */
-  }
+.card-exam {
+  display: flex; /* Sắp xếp các phần tử theo chiều ngang */
+  flex-direction: row; /* Các phần tử nằm theo chiều ngang */
+  justify-content: flex-start; /* Đặt các phần tử từ trái sang phải */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  width: 100%;
+  max-width: 500px; /* Giới hạn chiều rộng tối đa của card */
+  height: auto; /* Chiều cao tự động dựa trên nội dung */
+}
 
-  .card-content-exam {
-    font-weight: bold; /* Đậm tên môn học */
-    margin-bottom: 10px; /* Khoảng cách giữa tên môn học và nút */
-    position: relative;
-    bottom: 5rem;
-  }
-  
-  .card-content-exam h3 {
-    margin: 0;
-    font-size: 25px;
-  }
-  
-  .card-img-exam {
-    /* display: flex;  */
-    justify-content: center; /* Căn giữa hình ảnh */
-    align-items: center; /* Căn giữa hình ảnh theo chiều dọc */
-    flex-shrink: 0; /* Không co lại khi thiếu không gian */
-    margin-right: 20px; /* Khoảng cách giữa ảnh và phần nội dung */
-  }
-  
-  .card-img-exam img {
-    width: 100px; /* Đặt kích thước ảnh */
-    height: auto; /* Giữ tỷ lệ ảnh */
-    position: relative;
-    right: 15rem;
-    top: 2rem;
-  }
-  
-  
-  .card-two-exam {
-    /* display: flex; Đảm bảo các phần tử trong card-two nằm theo chiều dọc */
-    flex-direction: column; /* Các phần tử trong card-two sắp xếp theo chiều dọc */
-    justify-content: space-between; /* Tạo khoảng cách giữa tên môn học và nút */
-    width: 100%; /* Chiếm hết không gian còn lại */
-    position: relative;
-    top: 0.5rem;
-  }
-  .card-button-exam {
-    background-color: #008080;
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 16px;
-    position: relative;
-    right: 5rem;
-    bottom: 4rem;
-  }
-  
-  .card-button-exam:hover {
-    background-color: #006666;
-  }
-  
+.card-exam:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);
+}
+
+/* Card Image (chiếm 10% chiều ngang) */
+.card-img-exam {
+  flex: 0 0 10%; /* Chiếm 10% chiều ngang */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 20px; /* Khoảng cách giữa ảnh và nội dung */
+}
+
+.card-img-exam img {
+  width: 110%; /* Đẩy ảnh ra ngoài một chút */
+  height: auto;
+  max-width: 100px; /* Giới hạn kích thước ảnh */
+  margin-left: -10%; /* Đẩy ảnh ra ngoài từ bên trái */
+}
+
+/* Card Content (phần nội dung) */
+.card-content {
+  display: flex;
+  flex-direction: column; /* Các phần tử trong content xếp theo chiều dọc */
+  justify-content: center; /* Căn giữa phần nội dung */
+  flex-grow: 1; /* Làm cho phần nội dung này chiếm không gian còn lại */
+  text-align: center; /* Căn giữa text trong phần nội dung */
+}
+
+/* Card Content Title */
+.card-content h3 {
+  margin: 0;
+  font-size: 25px;
+  font-weight: bold;
+  margin-bottom: 10px; /* Khoảng cách giữa tiêu đề và nút */
+}
+
+/* Card Button (phần nút) */
+.card-button-exam {
+  background-color: #008080;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  margin-top: 15px; /* Khoảng cách giữa phần nội dung và nút */
+  text-align: center;
+}
+
+.card-button-exam:hover {
+  background-color: #006666;
+}

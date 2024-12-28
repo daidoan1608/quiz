@@ -11,7 +11,7 @@ import Exam from "./components/Exam/Exam/Exam";
 import Result from "./components/Exam/Result/Result";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
 import ChooseExam from "./components/Exam/ChooseExam/ChooseExam";
-import Account from "./components/account/account";
+import Account from "./components/Account/Account";
 
 function App() {
   return (
@@ -44,8 +44,6 @@ function App() {
         {/* Làm bài thi */}
         <Route exact path="/result" element={<Result />} /> 
         {/* Kết quả thi */}
-        {/* <Route exact path="/reviewExam" element={<ReviewExam />} /> */}
-        {/* Xem lại bài thi gần nhất ấn bài thi */}
       </Routes>
     </Router>
   );

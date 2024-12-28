@@ -1,6 +1,7 @@
 .account-container {
     padding: 20px;
     text-align: center;
+    min-height: 100vh;
   }
   
   .account-info {

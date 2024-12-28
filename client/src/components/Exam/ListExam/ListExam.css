@@ -1,77 +1,3 @@
-.header {
-    /* background-color: #e0f7fa; */
-    height: 190px;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    border: 1px solid #178FA5;
-    border-top: 5px solid #00bcd4;
-    justify-content: space-between;
-}
-.text-header h2 {
-    color: #178FA5; /* Màu xanh */
-    font-size: 48px; /* Kích thước chữ lớn */
-    text-transform: uppercase; /* Chữ in hoa */
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Hiệu ứng bóng cho chữ */
-    font-weight: 700;
-    position: relative;
-    left: 4rem;
-
-}
-.header .nav-links {
-    display: flex;
-    align-items: center;
-}
-.header .nav-links a {
-    margin: 0 60px;
-    text-decoration: none;
-    color: #333;
-    font-weight: 700;
-    position: relative;
-    top: 2rem;
-    left: 4rem;
-}
-.header .nav-links a:hover {
-    border-bottom: 2px solid #00bcd4;
-    color: #178FA5;
-}
-
-/*Section*/
-.container-section-search {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    /* align-items: center;
-    background-color: #f5f5f5; */
-}
-.category-exam {
-    max-height: 1400px;
-    min-height: 1400px;
-}
-.search-container {
-    margin: 20px;
-    display: flex;
-    align-items: center;
-    border: 1px solid #00bcd4;
-    border-radius: 25px;
-    padding: 5px 10px;
-    width: 90%;
-    max-width: 400px;
-}
-.search-container input {
-    border: none;
-    outline: none;
-    flex-grow: 1;
-    padding: 5px;
-    font-size: 16px;
-}
-.search-container i {
-    color: #00bcd4;
-    font-size: 20px;
-}
-
 .category-exam {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -80,75 +6,78 @@
     flex-direction: column;
     align-items: center;
     background-color: #f5f5f5;
+    min-height: 100vh; /* Đảm bảo chiều cao đầy đủ cho toàn bộ trang */
 }
+
 .container-exam {
     width: 100%;
-    max-width: 600px;
+    max-width: 800px; /* Tăng width tối đa của container để card rộng hơn */
     margin: 20px;
     text-align: center;
 }
+
 .category-header {
     font-size: 24px;
     margin: 20px 0;
+    font-weight: bold;
+    color: #333;
 }
+
 .card-listexam {
-    height: 180px;
+    height: 200px; /* Tăng chiều cao card một chút để các phần tử trong đó không bị chật */
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     margin: 20px 0;
-    padding: 40px;
-    display: block;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     position: relative;
-    transition: background-color 0.3s ease; /* Thêm hiệu ứng chuyển màu */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Thêm hiệu ứng cho shadow */
 }
+
 .card.completed {
     background-color: #d4edda; /* Màu nền khi đã làm bài (ví dụ màu xanh nhạt) */
     border-color: #c3e6cb; /* Đổi màu viền */
 }
+
 .card-content-listexam {
-    position: absolute;
-    top: 2rem;
+    position: relative;
     text-align: left;
+    margin-bottom: 20px; /* Thêm margin dưới để không bị dính vào nút */
 }
+
+.card-content-listexam h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
 .card-content-listexam h3 {
+    font-size: 16px;
     margin: 0;
-    font-size: 18px;
+    color: #555;
 }
-.card-content .icon {
-    color: #000;
-    margin-left: 5px;
-}
-.card-content .details {
+
+.details {
     margin-top: 10px;
 }
-.card-content .details a{
-    /* margin-top: 10px; */
-    text-decoration: none;
-    color: #000;
-}
-.card-content .details span {
+
+.details span {
     display: inline-block;
     padding: 5px 10px;
-    border: 1px solid #000;
+    border: 1px solid #ddd;
     margin-right: 10px;
+    font-size: 14px;
+    border-radius: 5px;
 }
-.card-content .details span:last-child {
+
+.details span:last-child {
     margin-right: 0;
 }
-/* .card-time {
-    border: none;
-    border-radius: 20px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 16px;
-    position: relative;
-    left: 13rem;
 
-    align-items: end;
-} */
 .card-button-listexam {
     background-color: #008080;
     color: #fff;
@@ -157,17 +86,27 @@
     padding: 10px 20px;
     cursor: pointer;
     font-size: 16px;
-    position: relative;
-    left: 13rem;
-    top: 2rem;
-
-    /* align-items: end; */
+    position: absolute;
+    bottom: 20px; /* Đặt nút ở cuối card */
+    right: 20px; /* Đặt nút về phía bên phải */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Thêm hiệu ứng */
 }
+
 .card-button-listexam:hover {
     background-color: #006666;
+    transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
 }
+
 .no-questions-message {
     font-size: 24px;
     margin: 20px 0;
-    min-height: 1400px;
+    color: #666;
+    text-align: center;
+}
+
+.error-message {
+    font-size: 18px;
+    color: red;
+    text-align: center;
+    margin-top: 20px;
 }

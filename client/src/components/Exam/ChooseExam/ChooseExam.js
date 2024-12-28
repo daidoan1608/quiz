@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom"; // Dùng useNavigate để điều hướng
 import "./ChooseExam.css";
-import Headers from "../../Header";
 import Footer from "../../Footer";
 import Sidebar from "../../User/SideBar"; // Import the Sidebar component
-import Headers2 from "../../Headers2";
+import Headers from "../../Headers";
 
 export default function ChooseExam() {
   const [subjects, setSubjects] = useState([]);
@@ -39,10 +38,8 @@ export default function ChooseExam() {
 
   return (
     <div>
-      {/* <Headers /> */}
-      <Headers2 />
+      <Headers />
       <div className="revision">
-        {/* Sidebar */}
         <Sidebar
           subjects={subjects}
           selectedSubject={selectedSubject}
@@ -62,8 +59,7 @@ export default function ChooseExam() {
                       </div>
                   </div>
                   <div className="card-content">
-                    <h2>{selectedSubject.name}</h2>
-                  </div>
+                    <h3>{selectedSubject.name}</h3>
                     <button
                       className="card-button"
                       onClick={() => 
@@ -72,6 +68,7 @@ export default function ChooseExam() {
                     >
                       Chọn đề 
                     </button>
+                  </div>
                 </div>
               ) : (
                 <div className="subject-list">
@@ -84,13 +81,13 @@ export default function ChooseExam() {
                       </div>
                       <div className="card-content">
                         <h3>{item.name}</h3> {/* Display subject name */}
-                      </div>
-                      <button
+                        <button
                         className="card-button"
                         onClick={() => handleSelectExamBySubjectId(item.subjectId)} // Chọn môn học
                       >
                         Chọn đề
                       </button>
+                      </div>
                     </div>
                   ))}
                 </div>

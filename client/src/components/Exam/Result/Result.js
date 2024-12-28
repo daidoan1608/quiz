@@ -1,9 +1,8 @@
 import React from 'react';
 import { useNavigate , useLocation } from 'react-router-dom';
 import './Result.css';
-import Headers from '../../Header';
 import Footer from '../../Footer';
-import Headers2 from '../../Headers2';
+import Headers from '../../Headers';
 
 export default function Result() {
   const location = useLocation();
@@ -18,7 +17,7 @@ export default function Result() {
   return (
     <>
       {/* <Headers /> */}
-      <Headers2 />
+      <Headers />
       <div className="category-result">
         <div className="result-card">
           <div className="result-img">
@@ -33,11 +32,9 @@ export default function Result() {
             <p>THỜI GIAN: {timeTaken}</p>
             <p>ĐIỂM: {score}</p>
             <button className="submit-btn-result" onClick={handleDetail}>Xem bài thi</button>
-            {/* <div className="submit-btn-result"> */}
               <a href="/exams">
                 <button className="submit-btn-result">THOÁT</button>
               </a>
-            {/* </div> */}
           </div>
         </div>
       </div>

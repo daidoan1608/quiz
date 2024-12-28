@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../api/axiosConfig";
 import "./Home.css";
 import Footer from "../Footer";
-import Headers from "../Header";
+import Headers from "../Headers";
 
 export default function Home() {
   const [subjects, setSubjects] = useState([]);
