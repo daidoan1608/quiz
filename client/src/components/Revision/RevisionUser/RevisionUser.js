@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
-import Headers from "../../Headers";
+import Headers2 from "../../Headers";
 import { useNavigate } from "react-router-dom";
 import "./RevisionUser.css";
 import Footer from "../../Footer";
@@ -48,7 +48,7 @@ export default function RevisionUser() {
 
   return (
     <div>
-      <Headers />
+      <Headers2 />
       <div className="revision">
         {/* Sidebar */}
         <Sidebar
@@ -64,8 +64,8 @@ export default function RevisionUser() {
               {/* Display details of selected subject */}
               {selectedSubject ? (
                 <div className="card">
-                  <div className="card-content">
-                    <h2>{selectedSubject.name}</h2>
+                  <div className="card-content" key={selectedSubject.subjectId}>
+                    <h3>{selectedSubject.name}</h3>
                   </div>
                   <button
                     className="card-button"
@@ -78,7 +78,7 @@ export default function RevisionUser() {
                   </button>
                 </div>
               ) : (
-                <div className="subject-list">
+                <>
                   {subjects.map((item) => (
                     <div className="card" key={item.subjectId}>
                       <div className="card-content">
@@ -92,7 +92,7 @@ export default function RevisionUser() {
                       </button>
                     </div>
                   ))}
-                </div>
+                </>
               )}
             </div>
           </section>

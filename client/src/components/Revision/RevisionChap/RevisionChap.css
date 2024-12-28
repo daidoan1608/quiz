@@ -1,145 +1,113 @@
 .revision-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  min-height: 1400px;
-}
-
-.center-text {
-  align-items: center;
-
+  align-items: center; /* Centers all content horizontally */
+  padding: 20px;
 }
 
 .question-selector {
-  position: sticky; /* Keeps the question selector at the top */
-  top: 0; /* Fixed at the top of the viewport */
-  left: 2rem; /* Keep it fixed to the left of the screen */
-  background-color: #fff; /* White background for visibility */
-  z-index: 1000; /* Ensure it sits above other elements */
+  width: 80%;
   padding: 10px;
-  border-bottom: 1px solid #ddd; /* Bottom border for separation */
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1); /* Subtle shadow on the right */
-  width: 400px; /* You can adjust the width as needed */
-  height: 100px; /* Full height to make it stretch */
-}
-.question-selector h3{
-  position: relative;
-  left: 2rem;
-
-}
-.question-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid #ccc;
   background-color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 180px;
+  z-index: 10;
+  overflow: hidden; 
+  position: sticky; /* Giữ vị trí cố định trong viewport */
+  top: 10px; /* Khoảng cách từ đỉnh viewport */
 }
 
-.question-button.answered {
-  background-color: lightblue; /* Highlight answered questions */
+.number {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  background-color: #f0f0f0;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 50%;
+  font-size: 14px;
 }
 
-.question-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px; /* Space between buttons */
-  align-items: center;
-  position: relative;
-  left: 2rem;
-}
-
-.question-button:hover {
-  background-color: #e6f7ff; /* Light blue on hover */
+.number.answered{
+  background-color: lightblue;
+  border: 2px solid blue;
 }
 
 .revision-right {
-  padding: 20px; /* Padding for the main content area */
-  position: relative;
-  left: 27rem;
-  bottom: 8rem;
-}
-
-.container-end {
-  margin-bottom: 20px; /* Space below each question block */
-}
-
-.question {
-  font-weight: bold; /* Bold font for questions */
+  width: 80%;
+  margin-left: 10rem;
+  margin: 0 auto; /* Centers the content horizontally */
 }
 
 .options {
   display: flex;
-  flex-direction: column; /* Stack options vertically */
-  gap: 10px; /* Space between options */
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
+  gap: 10px; /* Khoảng cách giữa các đáp án */
 }
 
 .answer-label {
-  display: block; /* Block display for labels */
+  display: flex;
+  align-items: center;
+  width: 100%; /* Đáp án chiếm 100% chiều rộng container */
+  padding: 10px; /* Khoảng cách bên trong đáp án */
+  background-color: #f9f9f9; /* Màu nền cho khung */
+  border: 1px solid #ddd; /* Đường viền khung */
+  border-radius: 8px; /* Bo góc khung */
+  cursor: pointer; /* Thêm con trỏ chỉ tay khi hover */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng hover */
+}
+
+.answer-label:hover {
+  background-color: #f1f1f1; /* Màu nền khi hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Tạo hiệu ứng nổi khi hover */
 }
 
 .answer-input {
-  margin-right: 10px; /* Space between radio button and label text */
+  margin-right: 10px; /* Khoảng cách giữa ô chọn và nội dung */
 }
 
 .answer-span {
-  padding: 5px 10px;
-  border: 1px solid grey; /* Border for answer options */
-  border-radius: 5px; /* Rounded corners for answer options */
-}
-
-.answer-span.selected {
-  background-color: lightblue; /* Highlight selected answer */
+  flex-grow: 1; /* Nội dung đáp án chiếm toàn bộ chiều rộng còn lại */
 }
 
 .feedback {
-  margin-top: 10px; /* Space above feedback messages */
+  margin-top: 10px;
 }
 
 .correct {
-  color: green; /* Color for correct answers */
+  color: green;
 }
 
 .incorrect {
-  color: red; /* Color for incorrect answers */
+  color: red;
 }
 
 .pagination {
   display: flex;
-  justify-content: center; /* Center pagination buttons */
-  position: relative;
-  right: 20rem;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .pagination button {
-  padding: 10px 15px;
-  border: 1px solid #ddd; /* Border for pagination buttons */
-  border-radius: 5px; /* Rounded corners for pagination buttons */
-}
-
-.pagination button.active {
-    background-color: #007bff; /* Active page button color */
-    color: white; /* Text color for active button */
+  padding: 5px 10px;
+  background-color: lightblue;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .pagination button:disabled {
-    background-color: #f1f1f1; /* Background for disabled buttons */
-    cursor: not-allowed; /* Change cursor to indicate disabled state */
+  background-color: #ddd;
+  cursor: not-allowed;
 }
-.no-questions-message {
-  display: flex; /* Use flexbox for alignment */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  height: 100%; /* Full height of the parent container */
-  font-size: 18px; /* Optional: adjust font size */
-  color: #666; /* Optional: adjust text color */
-  text-align: center; /* Center text alignment */
-  min-height: 100vh;
-}
-.error-message {
-  color: red;
+
+.pagination button.active {
+  background-color: green;
 }

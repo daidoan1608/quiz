@@ -1,221 +1,147 @@
-/* Đảm bảo box-sizing cho tất cả các phần tử */
-* {
-    box-sizing: border-box;
-  }
-  
-  body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden; /* Ngừng cuộn ngang */
-  }
-  
-  .category-center {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
-    padding: 20px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: #fff;
-    overflow-x: hidden; /* Đảm bảo không có cuộn ngang */
-  }
-  
-  .table-right {
-    width: 49%; /* Giữ kích thước để các bảng con chiếm 48% chiều rộng */
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    height: 180px;
-    overflow: hidden; /* Đảm bảo không có cuộn ngang trong các bảng con */
-  }
-/* Chia .table-left thành 2 phần */
-.table-left {
-    display: flex; /* Sử dụng flexbox */
-    justify-content: space-between; /* Chia đều không gian */
-    align-items: center; /* Căn giữa theo chiều dọc */
-    width: 49%; /* Chiếm 48% chiều rộng */
-    padding: 5px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    height: 180px; /* Đảm bảo chiều cao cố định */
-  }
-  
-  /* Phần thông tin bài thi */
-  .table-left .info {
-    flex: 1; /* Chiếm toàn bộ chiều rộng còn lại */
-    text-align: left;
-    margin-left: 5rem;
-  }
-  .table-left .info p{
-    font-size: 15px;
-  }
-  
-  /* Phần đồng hồ đếm ngược */
-  .table-left .timer {
-    flex: 0 0 auto; /* Không co giãn */
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Căn giữa nội dung trong .timer */
-    align-items: center;
-    text-align: center;
-    margin-right: 5rem;
-    align-items: center;
+.category-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  padding: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+}
 
-  }
-  
-  .timer h2 {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 5px; /* Khoảng cách giữa tiêu đề và thời gian */
-  }
-  
-  .timer span {
-    color: red;
-    font-size: 28px;
-    font-weight: bold; /* Làm đậm thời gian */
-    position: relative;
-  }
-  
-  .number {
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    margin: 5px;
-    background-color: #f0f0f0;
-    text-align: center;
-    line-height: 30px;
-    border-radius: 50%;
-    font-size: 14px;
-  }
-  
-  .arrow {
-    font-size: 20px;
-    margin-left: 10px;
-    cursor: pointer;
-  }
-  
-  /* Các phần tử trong .category-end */
-  .category-end {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-    position: relative;
-    left: 15rem;
-  }
-  
-  /* Sửa các container-end để tránh cuộn ngang */
-  .container-end {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 0px;
-    width: 100%;
-    position: relative;
-    left: 0; /* Đảm bảo không bị lệch sang trái */
-    overflow-x: hidden; /* Tránh cuộn ngang */
-  }
-  
-  .question {
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 20px;
-  }
-  
-  .options {
-    margin-top: 10px;
-  }
-  
-  .option {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .option input {
-    margin-right: 10px;
-  }
-  
-  .option label {
-    font-size: 16px;
-  }
-  
-  .option.correct label {
-    color: #00aaff;
-  }
-  
-  /* Style cho liên kết */
-  .submit-link {
-    text-decoration: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin-top: 30px;
-  }
-  
-  /* Style cho nút "Nộp bài" */
-  .submit-btn {
-    width: auto;
-    padding: 10px 20px;
-    background-color: #008080;
-    color: white;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s ease;
-    text-align: center;
-    margin-top: 20px;
-    display: inline-block;
-    position: relative;
-    right: 12rem;
-  }
-  
-  .submit-btn:hover {
-    background-color: #006666;
-  }
-  
-  .submit-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.3);
-  }
-  
-  /* Điều chỉnh bảng trả lời (Answer sheet) */
-  .answer-sheet {
-    width: 100%; /* Đảm bảo bảng trả lời không vượt quá chiều rộng */
-    padding: 10px;
-    position: relative;
-    /* left: 3rem; */
-  }
-  
-  .number {
-    width: 30px; /* Giữ kích thước cố định cho số câu hỏi */
-    height: 30px;
-    margin: 5px;
-    background-color: #f0f0f0;
-    text-align: center;
-    line-height: 30px;
-    border-radius: 50%;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  
-  .number.selected {
-    background-color: lightblue;
-    border: 2px solid blue;
-  }
-  
+.table-left,.table-right{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 49%;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 180px;
+}
 
-  
+.table-left .info {
+  flex: 1;
+  text-align: left;
+  margin-left: 2rem;
+}
+
+.table-left .info p {
+  font-size: 15px;
+}
+
+.table-left .timer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-right: 2rem;
+}
+
+.timer h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.timer span {
+  color: red;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.category-end {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 10rem;
+}
+
+.question {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.options {
+  margin-top: 10px;
+}
+
+.option {
+  display: flex; /* Đảm bảo radio và label nằm trên cùng một dòng */
+  align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+  flex-wrap: nowrap; /* Không cho phép phần tử xuống dòng */
+  margin-bottom: 10px;
+}
+
+.radio-input {
+  margin-right: 10px; /* Khoảng cách giữa nút radio và label */
+  cursor: pointer;
+}
+
+.radio-label {
+  font-size: 16px;
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid grey;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border 0.3s ease;
+  word-wrap: break-word; /* Đảm bảo rằng văn bản dài không tràn ra ngoài */
+  white-space: normal; /* Cho phép văn bản xuống dòng nếu cần */
+  max-width: 100%; /* Đảm bảo label không vượt quá kích thước container */
+  overflow-wrap: break-word; /* Đảm bảo văn bản dài được ngắt dòng */
+}
+
+.radio-label.selected {
+  background-color: lightblue;
+  border: 2px solid blue;
+}
+
+.submit-btn {
+  padding: 10px 20px;
+  background-color: #008080;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+  align-self: center; /* Canh giữa nút submit */
+}
+
+.submit-btn:hover {
+  background-color: #006666;
+}
+
+.answer-sheet {
+  width: 100%;
+  padding: 10px;
+}
+
+.number {
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  background-color: #f0f0f0;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border 0.3s ease;
+}
+
+.number.selected {
+  background-color: lightblue;
+  border: 2px solid blue;
+}
+
+.submit-btn:hover {
+  background-color: #006666;
+}

@@ -11,7 +11,7 @@ export default function RevisionChap1() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const questionsPerPage = 5;
+  const questionsPerPage = 8;
   const location = useLocation();
   const { chapterId } = location.state || {};
 
@@ -59,16 +59,27 @@ export default function RevisionChap1() {
       setCurrentPage(newPage);
     }
   };
+
   const goToQuestion = (questionIndex) => {
     const newPage = Math.floor(questionIndex / questionsPerPage) + 1;
-    setCurrentPage(newPage);
-
-    // Scroll to the question
-    questionRefs.current[questionIndex]?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+  
+    // Chuyển trang trước, sau đó cuộn đến câu hỏi
+    if (currentPage !== newPage) {
+      setCurrentPage(newPage);
+      setTimeout(() => {
+        questionRefs.current[questionIndex]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 300); // Thời gian chờ để đảm bảo trang mới được render
+    } else {
+      questionRefs.current[questionIndex]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
   };
+  
 
   const totalQuestions = questionAnswers.length;
   const totalPages = Math.ceil(totalQuestions / questionsPerPage);
@@ -81,10 +92,9 @@ export default function RevisionChap1() {
 
   if (isLoading) return <div>Đang tải dữ liệu...</div>;
 
-  // Render questions or a message if there are none
+  // Render questions
   const renderQuestions = currentQuestions.map((item, questionIndex) => {
     const globalQuestionIndex = startIndex + questionIndex;
-    const selectedAnswerIndex = selectedAnswers[globalQuestionIndex];
 
     return (
       <div
@@ -93,34 +103,29 @@ export default function RevisionChap1() {
         ref={(el) => (questionRefs.current[globalQuestionIndex] = el)}
       >
         <div className="question">
-          {item.content}
-          {/* câu{globalQuestionIndex+1}: */}
+          <strong>Câu {globalQuestionIndex + 1}:</strong> {item.content}
         </div>
         <div className="options">
           {item.answers?.map((answer, answerIndex) => {
-            const isSelected = selectedAnswerIndex === answerIndex;
             return (
               <label key={answer.optionId} className="answer-label">
                 <input
                   type="radio"
                   name={`question-${globalQuestionIndex}`}
                   value={answerIndex}
-                  checked={isSelected}
                   onChange={() =>
                     handleAnswerChange(globalQuestionIndex, answerIndex)
                   }
                   className="answer-input"
                 />
-                <span className={`answer-span ${isSelected ? "selected" : ""}`}>
-                  {answer.content}
-                </span>
+                <span className="answer-span">{answer.content}</span>
               </label>
             );
           })}
         </div>
-        {selectedAnswerIndex !== undefined && (
+        {selectedAnswers[globalQuestionIndex] !== undefined && (
           <div className="feedback">
-            {item.answers[selectedAnswerIndex].isCorrect ? (
+            {item.answers[selectedAnswers[globalQuestionIndex]].isCorrect ? (
               <span className="correct">Đáp án đúng!</span>
             ) : (
               <span className="incorrect">Đáp án sai! Vui lòng thử lại.</span>
@@ -133,11 +138,8 @@ export default function RevisionChap1() {
 
   return (
     <div>
-      {/* <Headers /> */}
       <Headers />
-
-      <div className={`revision-container ${error ? 'center-text' : ''}`}>
-        {/* Check for error or no questions */}
+      <div className={`revision-container ${error ? "center-text" : ""}`}>
         {error ? (
           <div className="error-message">{error}</div>
         ) : totalQuestions === 0 ? (
@@ -146,49 +148,27 @@ export default function RevisionChap1() {
           </div>
         ) : (
           <>
-            {/* Question Selector */}
-            {/* Chọn câu trả lời */}
             <div className="question-selector">
-              <h3>Chọn câu trả lời</h3>
+              <p>
+              <span>Bảng trả lời</span>
+              </p>
               <div className="question-list">
-                {/* Mũi tên trái */}
-                <button
-                  onClick={() => handleArrowChange(-1)}
-                  disabled={currentPage === 1}
-                >
-                  <i className="fa-solid fa-arrow-left"></i>
-                </button>
-
-                {/* Các nút câu hỏi (cập nhật lại chỉ hiển thị số câu hỏi cho trang hiện tại) */}
-                {questionAnswers
-                  .slice((currentPage - 1) * questionsPerPage, currentPage * questionsPerPage)
-                  .map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => goToQuestion((currentPage - 1) * questionsPerPage + index)}
-                      className={`question-button ${
-                        selectedAnswers[(currentPage - 1) * questionsPerPage + index] !== undefined ? "answered" : ""
-                      }`}
-                    >
-                      {(currentPage - 1) * questionsPerPage + index + 1}
-                    </button>
-                  ))}
-
-                {/* Mũi tên phải */}
-                <button
-                  onClick={() => handleArrowChange(1)}
-                  disabled={currentPage === totalPages}
-                >
-                  <i className="fa-solid fa-arrow-right"></i>
-                </button>
+                {questionAnswers.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`number ${
+                      selectedAnswers[index] !== undefined ? "answered" : ""
+                    }`}
+                    onClick={() => goToQuestion(index)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {index + 1}
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Display Questions */}
             <div className="revision-right">
               {renderQuestions}
-
-              {/* Pagination */}
               <div className="pagination">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
@@ -196,7 +176,6 @@ export default function RevisionChap1() {
                 >
                   Trang trước
                 </button>
-
                 {[...Array(totalPages)].map((_, idx) => (
                   <button
                     key={idx}
@@ -206,7 +185,6 @@ export default function RevisionChap1() {
                     {idx + 1}
                   </button>
                 ))}
-
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}

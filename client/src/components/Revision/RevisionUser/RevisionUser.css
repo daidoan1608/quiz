@@ -21,7 +21,7 @@
 
 .container-re {
   width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
-  max-width: 1200px; /* Giới hạn chiều rộng của container */
+  max-width: 600px; /* Giới hạn chiều rộng của container */
   margin: 0 auto; /* Căn giữa */
   display: flex;
   flex-wrap: wrap; /* Cho phép các phần tử bên trong xuống dòng khi không đủ không gian */
@@ -69,19 +69,4 @@
 
 .card-button:hover {
   background-color: #0056b3; /* Màu nền khi hover */
-}
-
-.card-img {
-  display: flex;
-  justify-content: center; /* Căn giữa hình ảnh */
-  align-items: center; /* Căn giữa hình ảnh theo chiều dọc */
-  flex-shrink: 0; /* Không co lại khi thiếu không gian */
-  margin-bottom: 15px; /* Khoảng cách giữa ảnh và phần nội dung */
-}
-
-.card-img img {
-  width: 100%; /* Đảm bảo ảnh không vượt quá chiều rộng của card */
-  height: auto; /* Giữ tỷ lệ ảnh */
-  max-width: 180px; /* Giới hạn kích thước ảnh */
-  border-radius: 8px; /* Bo góc cho ảnh */
 }

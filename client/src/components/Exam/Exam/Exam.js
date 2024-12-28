@@ -196,59 +196,46 @@ export default function Exam() {
         </div>
       </div>
       <div className="category-end">
-        {questions.map((item, questionIndex) => (
-          <div
-            key={item.questionId}
-            className="container-end"
-            ref={questionRefs.current[questionIndex]}
-          >
-            <div className="question">
-              Câu {questionIndex + 1}: {item.content}
-            </div>
-            <div className="options">
-              {item.answers?.map((answer, answerIndex) => {
-                const isSelected = selectedAnswers[questionIndex] === answerIndex;
-                return (
-                  <label
-                    key={answer.optionId}
-                    style={{ display: "block", margin: "5px 0" }}
-                  >
-                    <input
-                      type="radio"
-                      name={`question-${questionIndex}`}
-                      value={answerIndex}
-                      checked={isSelected}
-                      onChange={() =>
-                        handleAnswerSelect(questionIndex, answerIndex)
-                      }
-                      style={{
-                        marginRight: "5px",
-                        cursor: "pointer",
-                      }}
-                    />
-                    <span
-                      style={{
-                        backgroundColor: isSelected ? "lightblue" : "transparent",
-                        padding: "5px 10px",
-                        border: isSelected ? "2px solid blue" : "1px solid grey",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                        display: "inline-block",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {answer.content}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-        <button className="submit-btn" onClick={handleSubmit}>
-          Nộp bài
-        </button>
+  {questions.map((item, questionIndex) => (
+    <div
+      key={item.questionId}
+      className="container-end"
+      ref={questionRefs.current[questionIndex]}
+    >
+      <div className="question">
+        Câu {questionIndex + 1}: {item.content}
       </div>
+      <div className="options">
+        {item.answers?.map((answer, answerIndex) => {
+          const isSelected = selectedAnswers[questionIndex] === answerIndex;
+          return (
+            <div key={answer.optionId} className="option">
+              <input
+                type="radio"
+                name={`question-${questionIndex}`}
+                value={answerIndex}
+                checked={isSelected}
+                onChange={() =>
+                  handleAnswerSelect(questionIndex, answerIndex)
+                }
+                className="radio-input"
+              />
+              <label
+                className={`radio-label ${isSelected ? 'selected' : ''}`}
+              >
+                {answer.content}
+              </label>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  ))}
+  <button className="submit-btn" onClick={handleSubmit}>
+    Nộp bài
+  </button>
+</div>
+
       <Footer />
     </>
   );

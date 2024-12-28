@@ -52,7 +52,7 @@ export default function ChooseExam() {
             <div className="container-re">
               {/* Hiển thị thông tin môn học đã chọn */}
               {selectedSubject ? (
-                <div className="card-exam">
+                <div className="card-exam" key={selectedSubject.subjectId}>
                   <div className='card-img-exam'>
                       <div className='card-img-ex'>
                       <img src='/exam.png'></img>
