@@ -9,7 +9,6 @@ import RegisterForm from "./components/User/Register";
 import ListExam from "./components/Exam/ListExam/ListExam";
 import Exam from "./components/Exam/Exam/Exam";
 import Result from "./components/Exam/Result/Result";
-// import ReviewExam from "./components/Exam/ReviewExam/ReviewExam";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
 import ChooseExam from "./components/Exam/ChooseExam/ChooseExam";
 

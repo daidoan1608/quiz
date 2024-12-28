@@ -17,11 +17,11 @@ export default function Headers() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     publicAxios.post("/auth/logout", {
-      refreshToken: localStorage.getItem("refreshToken"),
+      refreshToken: sessionStorage.getItem("refreshToken"),
     });
     localStorage.removeItem("userId");
     localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("refreshToken");
     navigate("/");
   };
 

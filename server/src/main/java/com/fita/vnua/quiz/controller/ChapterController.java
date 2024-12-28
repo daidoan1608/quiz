@@ -32,6 +32,11 @@ public class ChapterController {
         return ResponseEntity.ok(chapterService.getAllChapter());
     }
 
+    @GetMapping("public/chapters/{chapterId}")
+    public ResponseEntity<?> getChapterById(@PathVariable("chapterId") Long chapterId) {
+        return ResponseEntity.ok(chapterService.getChapterById(chapterId));
+    }
+
     @PostMapping("admin/chapters")
     public ResponseEntity<?> createChapter(@RequestBody ChapterDto chapterDto) {
         return ResponseEntity.ok(chapterService.create(chapterDto));

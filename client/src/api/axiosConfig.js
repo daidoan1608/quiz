@@ -20,14 +20,14 @@ const getAccessToken = () => localStorage.getItem("accessToken");
 
 // Hàm làm mới token
 const refreshToken = async () => {
-  const refreshToken = localStorage.getItem("refreshToken");
+  const refreshToken = sessionStorage.getItem("refreshToken");
   try {
     const response = await publicAxios.post("/auth/refresh", { refreshToken });
     localStorage.setItem("accessToken", response.data.accessToken);
     return response.data.accessToken;
   } catch (error) {
     console.error("Refresh token failed", error);
-    // Xử lý logout nếu cần
+    alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!");
     throw error;
   }
 };

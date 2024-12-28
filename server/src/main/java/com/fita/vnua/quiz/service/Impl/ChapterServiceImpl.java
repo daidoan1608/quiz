@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,11 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public List<ChapterDto> getAllChapter() {
         return chapterRepository.findAll().stream().map(chapter -> modelMapper.map(chapter, ChapterDto.class)).toList();
+    }
+
+    @Override
+    public Optional<ChapterDto> getChapterById(Long chapterId) {
+        return chapterRepository.findById(chapterId).map(chapter -> modelMapper.map(chapter, ChapterDto.class));
     }
 
     @Override

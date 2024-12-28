@@ -19,11 +19,10 @@ function Login() {
 
       const { accessToken, refreshToken, userId } = response.data;
       localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      sessionStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("userId", userId);
 
       message.success("Đăng nhập thành công!");
-      console.log(response.data);
       navigate("/");
     } catch (error) {
       const errorMessage =
