@@ -25,10 +25,10 @@ export default function Headers() {
       <header className="header">
         <img alt="FITA logo" src="logoschool.png" />
         <div>
-          <div className="search-bar">
+          {/* <div className="search-bar">
             <input placeholder="Tìm kiếm..." type="text" />
             <i className="fas fa-search"></i>
-          </div>
+          </div> */}
 
           <div className="nav-links">
             <a href="/">TRANG CHỦ</a>

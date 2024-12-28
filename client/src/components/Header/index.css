@@ -21,6 +21,8 @@
 .header .nav-links {
     display: flex;
     align-items: center;
+    position: relative;
+    bottom: 2rem;
 }
 .header .nav-links a {
     margin: 0 60px;
