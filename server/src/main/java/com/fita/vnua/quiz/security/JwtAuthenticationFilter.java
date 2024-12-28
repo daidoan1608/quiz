@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.security;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
+import com.fita.vnua.quiz.model.dto.response.Response;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +33,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         // Lấy token từ header Authorization
         final String authorizationHeader = request.getHeader("Authorization");
+        String path = request.getServletPath();
+        if (path.startsWith("/auth/") || path.startsWith("/public/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String username = null;
         String jwtToken = null;
@@ -40,9 +47,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwtToken = authorizationHeader.substring(7);
             try {
                 username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-            } catch (Exception e) {
-                // Xử lý lỗi khi token không hợp lệ
-                logger.error("Không thể xác thực token", e);
+            } catch (CustomApiException ex) {
+                // Trả về lỗi chi tiết khi token không hợp lệ
+                response.setStatus(ex.getStatus().value());
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"" + ex.getMessage() + "\"}");
+                return;
             }
         }
 

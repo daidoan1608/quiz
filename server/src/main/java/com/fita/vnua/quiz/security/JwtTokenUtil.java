@@ -1,10 +1,10 @@
 package com.fita.vnua.quiz.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.fita.vnua.quiz.exception.CustomApiException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -36,12 +36,26 @@ public class JwtTokenUtil {
     }
 
     public Boolean validateToken(String token,  UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            final String username = getUsernameFromToken(token);
+            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (ExpiredJwtException ex) {
+            throw new CustomApiException("Token has expired", HttpStatus.UNAUTHORIZED);
+        } catch (JwtException ex) {
+            throw new CustomApiException("Invalid JWT token", HttpStatus.UNAUTHORIZED);
+        } catch (IllegalArgumentException ex) {
+            throw new CustomApiException("Token is null, empty or only whitespace", HttpStatus.BAD_REQUEST);
+        }
     }
 
     public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+        try {
+            return getClaimFromToken(token, Claims::getSubject);
+        } catch (ExpiredJwtException ex) {
+            throw new CustomApiException("Token has expired", HttpStatus.UNAUTHORIZED);
+        } catch (JwtException ex) {
+            throw new CustomApiException("Invalid JWT token", HttpStatus.UNAUTHORIZED);
+        }
     }
 
     public Date getExpirationDateFromToken(String token) {

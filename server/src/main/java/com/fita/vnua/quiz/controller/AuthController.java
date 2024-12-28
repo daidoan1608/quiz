@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +32,6 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final AuthService authService;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -89,28 +88,37 @@ public class AuthController {
 
             UserDto user = new UserDto();
             user.setUsername(registerRequest.getUsername());
-            user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            String rawPassword = registerRequest.getPassword(); // Lưu password gốc
+            user.setPassword(registerRequest.getPassword());
             user.setEmail(registerRequest.getEmail());
             user.setFullName(registerRequest.getFullName());
             user.setRole(User.Role.USER);
             userService.create(user);
             // Tự động đăng nhập
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            registerRequest.getUsername(),
-                            registerRequest.getPassword()
-                    )
-            );
 
-            // Lấy UserDetails từ authentication để tạo token
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            // Tự động đăng nhập
+            try {
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                registerRequest.getUsername(),
+                                rawPassword  // Dùng password gốc
+                        )
+                );
 
-            AuthResponse response = authService.createAuthResponse(userDetails);
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                AuthResponse response = authService.createAuthResponse(userDetails);
+                return ResponseEntity.ok(response);
 
+            } catch (AuthenticationException e) {
+                // Log lỗi authentication
+                return ResponseEntity.status(401)
+                        .body(Map.of("error", "Authentication failed after registration: " + e.getMessage()));
+            }
 
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            // Log lỗi
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Registration failed: " + e.getMessage()));
         }
     }
 }
