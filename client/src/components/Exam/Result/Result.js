@@ -29,10 +29,10 @@ export default function Result() {
           <div className="result-text">
             <h1>KẾT QUẢ BÀI THI!</h1>
             <p>CÂU ĐÚNG: {correctAnswers}/{totalQuestions}</p>
-            <p>THỜI GIAN: {timeTaken}</p>
+            <p>THỜI GIAN: {Math.floor(timeTaken/60)}:{(timeTaken%60).toString().padStart(2, '0')} </p>
             <p>ĐIỂM: {score}</p>
             <button className="submit-btn-result" onClick={handleDetail}>Xem bài thi</button>
-              <a href="/exams">
+              <a href="/chooseExams">
                 <button className="submit-btn-result">THOÁT</button>
               </a>
           </div>

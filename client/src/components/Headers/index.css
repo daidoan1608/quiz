@@ -1,237 +1,261 @@
 .header {
-    /* background-color: #e0f7fa; */
-    height: 190px;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    border: 1px solid #178FA5;
-    border-top: 5px solid #00bcd4;
-    justify-content: space-between;
-}
-.text-header h2 {
-    color: #178FA5; /* Màu xanh */
-    font-size: 48px; /* Kích thước chữ lớn */
-    text-transform: uppercase; /* Chữ in hoa */
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Hiệu ứng bóng cho chữ */
-    font-weight: 700;
-    position: relative;
-    left: 4rem;
-
-}
-.header .nav-links-headers2 {
-    display: flex;
-    align-items: center;
-    position: relative;
-    bottom: 2rem;
-}
-.header .nav-links-headers2 a {
-    margin: 0 60px;
-    text-decoration: none;
-    color: #333;
-    font-weight: 700;
-    position: relative;
-    top: 2rem;
-    left: 4rem;
-    font-size: 25px;
-}
-
-.container-section-search {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
     display: flex;
     flex-direction: column;
-    /* align-items: center;
-    background-color: #f5f5f5; */
-}
-.search-container {
-    margin: 20px;
-    display: flex;
-    align-items: center;
-    border: 1px solid #00bcd4;
-    border-radius: 25px;
-    padding: 5px 10px;
-    width: 90%;
-    max-width: 400px;
-}
-.search-container input {
-    border: none;
-    outline: none;
-    flex-grow: 1;
-    padding: 5px;
-    font-size: 16px;
-}
-.search-container i {
-    color: #00bcd4;
-    font-size: 20px;
-}
-
-.item {
-    background-color: #f0f0f0; /* Màu nền của các ô vuông */
-    border: 2px solid #007bff; /* Viền của các ô vuông */
-    padding: 20px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 8px; /* Bo tròn các góc của ô vuông */
-    color: #333;
-    transition: background-color 0.3s, transform 0.3s;
-}
-
-.item:hover {
-    background-color: #007bff;  /* Màu nền khi hover */
-    color: white;  /* Màu chữ khi hover */
-    transform: scale(1.05); /* Tăng kích thước khi hover */
-}
-.auth-links {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    top: 0;
+    left: 0;
+    height: auto;
     position: relative;
-    right: 3rem;
   }
   
-  .auth-links a,
-  .auth-links button {
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 7rem ;
+    padding-right: 2rem; /* Adjusted padding */
+    position: relative;
+    height: 100px; /* Reduced height */
+  }
+  
+  .logo {
+    position: absolute;
+    left: 5rem; /* Adjusted to make the left edge of the logo align with the right edge of the slogan */
+    z-index: 1;
+    background: white;
+    width: auto;
+    height: 100%;
+    border-radius: 50%;
+  }
+
+  .logo img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+  }
+  
+  .slogan {
+    margin-bottom: 0;
+    position: relative; /* Ensure proper positioning context for logo */
+  }
+  
+  .slogan img {
+    height: 95px; /* Reduced height */
+    width: auto;
+  }
+  
+  /* Ensure the nav links are at the bottom */
+  .nav-links-headers2 {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    gap: 4rem;
+    background-color: #519fc9;
+    padding: 0.75rem;
+    padding-left: 20rem;
+    position: relative;
+    margin-top: 0; /* Remove any top margin */
+  }
+  
+  .header-between {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-left: 6rem;
+    margin: 0 2rem;
+  }
+  
+/* Thay đổi hover trên nav-links */
+.nav-links-headers2 a {
     text-decoration: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 5px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    position: relative;
+    padding: 0.3rem 1rem;
+    overflow: hidden; /* Để ẩn các hiệu ứng vượt ra ngoài */
+    display: inline-block; /* Để sử dụng hiệu ứng với ::after */
+    transition: color 0.3s ease;
+  }
+  
+  /* Hiệu ứng hover: gạch chân động */
+  .nav-links-headers2 a::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%; /* Bắt đầu từ giữa */
+    width: 0;
+    height: 2px;
+    background-color: white; /* Màu gạch chân */
+    transition: width 0.3s ease, left 0.3s ease;
+  }
+  
+  /* Khi hover */
+  .nav-links-headers2 a:hover::after {
+    width: 100%; /* Gạch chân phủ hết */
+    left: 0; /* Gạch chân di chuyển từ giữa ra ngoài */
+  }
+  
+  /* Hiệu ứng hover đổi màu chữ */
+  .nav-links-headers2 a:hover {
+    color: #1a1917; /* Màu chữ khi hover */
+  }
+  
+  
+  .auth-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .header-img {
+    margin-right: 0.5rem;
+  }
+  
+  .header-img img {
+    height: 10rem; /* Reduced height */
+    width: auto;
+  }
+  
+  .login-btn, .register-btn {
+    text-decoration: none;
+    padding: 0.3rem 1rem; /* Reduced padding */
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 0.9rem; /* Reduced font size */
+  }
+  
+  .login-btn {
+    color: #519fc9;
+    border: 1px solid #519fc9;
+  }
+  
+  .login-btn:hover {
+    background-color: #0056b3;
+    color: white;
+  }
+  
+  .register-btn {
+    background-color: #519fc9;
+    color: white;
+    border: 1px solid #519fc9;
+  }
+  
+  .register-btn:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+  
+  /* Menu chính */
+ul.menu-user {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  ul.menu-user > li {
+    position: relative;
+  }
+  
+  /* Label của menu toggle */
+  ul.menu-user > li > label {
     cursor: pointer;
+    font-size: 20px;
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #0056b3;
+    color: #333;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease; /* Hiệu ứng chuyển tiếp */
+  }
+  
+  /* Hiệu ứng hover */
+  ul.menu-user > li > label:hover {
+    background-color: #0056b3  ;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Icon trong label */
+  ul.menu-user > li > label > i {
+    color: inherit; /* Đồng bộ màu với label */
+    transition: color 0.3s ease;
+  }
+  
+  /* Ẩn checkbox */
+  .menu-toggle {
+    display: none;
+  }
+  
+  /* Menu con (submenu) */
+  ul.submenu-user {
+    display: none; /* Ẩn mặc định */
+    list-style: none;
+    padding: 10px 0;
+    margin: 10px 0 0;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    min-width: 160px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: all 0.3s ease; /* Hiệu ứng chuyển đổi */
+  }
+  
+  /* Hiển thị menu con khi checkbox được check */
+  .menu-toggle:checked + label + .submenu-user {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Các mục trong menu con */
+  ul.submenu-user li {
+    text-align: left;
+  }
+  
+  ul.submenu-user li a {
+    display: block;
+    padding: 10px 20px;
+    color: #333;
+    text-decoration: none;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
   
-  .auth-links .login {
-    background-color: #0abde3; /* Màu xanh lá */
-    color: white;
-    border: none;
+  /* Hiệu ứng hover trên mục con */
+  ul.submenu-user li a:hover {
+    background-color: #519fc9;
+    color: #fff;
   }
   
-  .auth-links .register {
-    background-color: #0abde3; /* Màu xanh dương */
-    color: white;
-    border: none;
+  /* Định dạng riêng cho từng mục */
+  .account {
+    margin-bottom: 5px;
   }
   
-  .auth-links button {
-    background-color: #f44336; /* Màu đỏ */
-    color: white;
-    border: none;
+  .log-out {
+    margin-top: 5px;
   }
   
-  .auth-links a:hover,
-  .auth-links button:hover {
-    background-color: #333; /* Màu xám đậm khi hover */
-    color: white;
-  }
-  
-
-.welcome{
-    color: #05a5a5;
-}
-
-
-  /*  */
-  ul.menu-user {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-ul.menu-user > li {
-    position: relative;
-}
-
-ul.menu-user > li > label {
-    cursor: pointer;
-    font-size: 20px;
-    padding: 10px;
-    background-color: #fff; /* Màu nền mặc định */
-    border: 1px solid #00bcd4;
-    color: #333; /* Màu chữ mặc định */
-    width: 40%;
-    border-radius: 50%;
-    display: inline-block;
-    transition: background-color 0.3s, color 0.3s; /* Thêm hiệu ứng chuyển màu */
-}
-
-/* Thay đổi màu nền và icon khi hover */
-ul.menu-user > li > label:hover {
-    background-color: #00bcd4; /* Màu nền khi hover (xanh) */
-    color: white; /* Màu chữ khi hover */
-}
-
-ul.menu-user > li > label > i {
-    position: relative;
-    left: 0.1rem;
-    color: #000; /* Màu icon mặc định */
-    transition: color 0.3s; /* Thêm hiệu ứng chuyển màu cho icon */
-}
-
-/* Thay đổi màu icon khi hover */
-ul.menu-user > li > label:hover > i {
-    color: white; /* Màu icon khi hover (trắng) */
-}
-
-/* Hover  */
-
-/* Ẩn checkbox */
-.menu-toggle {
-    display: none;
-}
-/* Menu chồng (submenu-user) */
-ul.submenu-user {
-    display: none; /* Ẩn menu con mặc định */
-    list-style-type: none;
-    padding: 0px;
-    margin-top: 10px;
-    position: absolute;
-    left: 2rem;
-    top: 40px; /* Điều chỉnh vị trí của submenu */
-    background-color: #fff;
-    border: 1px solid #fdf0f0;
-    border-radius: 5px;
-    min-width: 140px;
-    height: 80px;
-
-    /* Hiệu ứng màu trắng nổi */
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.6); 
-    transition: box-shadow 0.3s ease-in-out; /* Thêm hiệu ứng chuyển tiếp mượt mà */
-}
-
-/* Khi di chuột vào menu con, làm nổi bật nền với glow effect */
-ul.submenu-user:hover {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 30px rgba(255, 255, 255, 0.7); /* Tăng độ sáng khi hover */
-}
-
-ul.submenu-user li a,
-ul.submenu-user li button {
-    padding: 10px;
-    /* background-color: #f39c12; */
-    color: white;
-    text-decoration: none;
-    border: none;
-    width: 100%;
-    text-align: left;
-    
-}
-
-/* Khi checkbox được tick, hiển thị submenu */
-.menu-toggle:checked + label + .submenu-user {
-    display: block;
-}
-.account{
-    position: relative;
-    top: 0.5rem;
-}
-.log-out{
-    position: relative;
-    top: 1rem;
-}
-
-.user-info {
+  /* Tối ưu hóa tổng thể */
+  .user-info {
     display: flex;
-    flex-direction: column; /* Đảm bảo nội dung xếp theo cột */
-    text-align: center;
-}
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  

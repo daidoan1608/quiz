@@ -4,9 +4,11 @@ import { Button, Checkbox, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { publicAxios } from "../../api/axiosConfig";
 import "./Login.css";
+import { useAuth } from "../Context/AuthProvider";
 
 function Login() {
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth(); // Lấy hàm login từ context
   const navigate = useNavigate();
 
   const handleSubmit = async (values) => {
@@ -18,11 +20,7 @@ function Login() {
       });
 
       const { accessToken, refreshToken, userId } = response.data;
-      localStorage.setItem("accessToken", accessToken);
-      sessionStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("userId", userId);
-
-      message.success("Đăng nhập thành công!");
+      login(accessToken, refreshToken, userId);
       navigate("/");
     } catch (error) {
       const errorMessage =
@@ -38,7 +36,7 @@ function Login() {
     <div className="login-container">
       <div className="form-login">
         <div className="logo-container">
-          <img src="/logoschool.png" alt="Logo" className="logo" />
+          <img src="/logoschool.png" alt="Logo" className="logo-form" />
           <h2 className="login-title">ĐĂNG NHẬP</h2>
         </div>
 

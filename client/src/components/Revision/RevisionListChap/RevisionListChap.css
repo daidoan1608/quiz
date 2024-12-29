@@ -31,11 +31,11 @@
 .chapter-item:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  border-left: 4px solid #178FA5;
+  border-left: 4px solid #0056b3;
 }
 
 .chapter-item h3 {
-  color: #178FA5;
+  color: #519fc9;
   margin: 0;
   font-size: 18px;
   font-weight: 600;

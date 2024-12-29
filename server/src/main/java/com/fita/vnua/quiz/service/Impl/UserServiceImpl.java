@@ -78,6 +78,7 @@ public class UserServiceImpl implements UserService {
         existingUser.setFullName(userDto.getFullName());
         existingUser.setEmail(userDto.getEmail());
         existingUser.setRole(userDto.getRole());
+        existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
         var updatedUser = userRepository.save(existingUser);
         return modelMapper.map(updatedUser, UserDto.class);
     }

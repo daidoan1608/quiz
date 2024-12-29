@@ -1,22 +1,21 @@
 package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.UserDto;
-import com.fita.vnua.quiz.model.dto.request.LoginRequest;
-import com.fita.vnua.quiz.model.dto.request.LogoutRequest;
-import com.fita.vnua.quiz.model.dto.request.RefreshTokenRequest;
-import com.fita.vnua.quiz.model.dto.request.RegisterRequest;
+import com.fita.vnua.quiz.model.dto.request.*;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.dto.response.TokenRefreshResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.UserService;
 import com.fita.vnua.quiz.service.impl.AuthService;
+import com.fita.vnua.quiz.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,32 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final AuthService authService;
-    private final UserService userService;
+    private final UserServiceImpl userService;
+    private final PasswordEncoder passwordEncoder;
+
+    @PostMapping("/change-password/{userId}")
+    public ResponseEntity<?> changePassword(@PathVariable("userId") UUID userId,
+                                            @RequestBody ChangePasswordRequest request) {
+        try {
+            // Lấy userId từ token của người dùng hiện tại
+            UserDto userDto = userService.getUserById(userId);
+
+            // Kiểm tra quyền sở hữu
+            if (!passwordEncoder.matches(request.getOldPassword(),userDto.getPassword()) || !userDto.getUserId().equals(userId)) {
+                return ResponseEntity.status(403).body(Map.of("error", "You are not authorized to change this password"));
+            }
+
+            userDto.setPassword(request.getNewPassword());
+            userService.update(userId, userDto);
+
+            return ResponseEntity.ok(Response.builder()
+                    .responseCode("200 OK")
+                    .responseMessage("Password changed successfully")
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Change password failed: " + e.getMessage()));
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -121,4 +145,5 @@ public class AuthController {
                     .body(Map.of("error", "Registration failed: " + e.getMessage()));
         }
     }
+
 }

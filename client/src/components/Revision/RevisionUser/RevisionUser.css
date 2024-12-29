@@ -25,7 +25,6 @@
   margin: 0 auto; /* Căn giữa */
   display: flex;
   flex-wrap: wrap; /* Cho phép các phần tử bên trong xuống dòng khi không đủ không gian */
-  gap: 20px; /* Khoảng cách giữa các thẻ card */
 }
 
 .card {
@@ -55,7 +54,7 @@
 }
 
 .card-button {
-  background-color: #008080;
+  background-color: #519fc9;
   color: #fff;
   border: none;
   border-radius: 20px;

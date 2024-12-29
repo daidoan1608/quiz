@@ -79,7 +79,7 @@
 }
 
 .card-button-listexam {
-    background-color: #008080;
+    background-color: #519fc9;
     color: #fff;
     border: none;
     border-radius: 20px;
@@ -93,7 +93,7 @@
 }
 
 .card-button-listexam:hover {
-    background-color: #006666;
+    background-color: #0056b3;
     transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
 }
 

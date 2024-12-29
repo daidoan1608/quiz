@@ -72,7 +72,7 @@ export default function RevisionUser() {
                     onClick={() =>
                       // navigate(`/subject/${selectedSubject.subjectId}`)
                       handleSelectChapters(selectedSubject.subjectId)
-                    } // Navigate to chapters page
+                    }
                   >
                     Chọn chương
                   </button>

@@ -10,6 +10,8 @@ import java.util.List;
 @Data
 @Builder
 public class UserExamResponse {
-    UserExamDto userExamDto;
-    List<UserAnswerDto> userAnswerDtos;
+    private String subjectName;
+    private String title;
+    private UserExamDto userExamDto;
+    private List<UserAnswerDto> userAnswerDtos;
 }

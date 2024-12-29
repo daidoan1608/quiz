@@ -71,7 +71,7 @@
 .submit-btn-result{
     width: auto;
     padding: 10px 20px;
-    background-color: #008080;
+    background-color: #519fc9;
     color: white;
     font-size: 16px;
     border: none;
@@ -86,7 +86,7 @@
     
 }
 .submit-btn-result:hover {
-    background-color: #006666;
+    background-color: #0056b3;
   }
   
   .submit-btn-result:focus {

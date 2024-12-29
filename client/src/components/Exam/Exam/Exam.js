@@ -212,6 +212,7 @@ export default function Exam() {
             <div key={answer.optionId} className="option">
               <input
                 type="radio"
+                id={answer.optionId}
                 name={`question-${questionIndex}`}
                 value={answerIndex}
                 checked={isSelected}
@@ -221,6 +222,7 @@ export default function Exam() {
                 className="radio-input"
               />
               <label
+                htmlFor={answer.optionId} // Kết nối label với input qua htmlFor
                 className={`radio-label ${isSelected ? 'selected' : ''}`}
               >
                 {answer.content}

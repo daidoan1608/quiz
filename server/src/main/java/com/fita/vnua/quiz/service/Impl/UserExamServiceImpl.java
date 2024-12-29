@@ -1,11 +1,13 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.UserAnswerDto;
 import com.fita.vnua.quiz.model.dto.UserExamDto;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;
+import com.fita.vnua.quiz.service.SubjectService;
 import com.fita.vnua.quiz.service.UserExamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -27,19 +30,14 @@ public class UserExamServiceImpl implements UserExamService {
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final ModelMapper modelMapper;
+    private final SubjectService subjectService;
 
 
     @Override
     public UserExamResponse getUserExamById(Long id) {
         UserExam userExam = userExamRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User exam not found with id: " + id));
-        UserExamDto userExamDto = new UserExamDto();
-        userExamDto.setUserExamId(userExam.getUserExamId());
-        userExamDto.setStartTime(userExam.getStartTime());
-        userExamDto.setEndTime(userExam.getEndTime());
-        userExamDto.setScore(userExam.getScore());
-        userExamDto.setUserId(userExam.getUser().getUserId());
-        userExamDto.setExamId(userExam.getExam().getExamId());
+        UserExamDto userExamDto = convertUserExamsToUserExamDto(userExam);
         List<UserAnswer> userAnswer = userAnswerRepository.findUserAnswersByUserExamId(id);
         List<UserAnswerDto> userAnswerDtos = new ArrayList<>();
         for (UserAnswer userAnswer1 : userAnswer) {
@@ -98,5 +96,33 @@ public class UserExamServiceImpl implements UserExamService {
             userAnswerRepository.save(userAnswer);
         }
         return modelMapper.map(savedUserExam, UserExamDto.class);
+    }
+
+    @Override
+    public List<UserExamResponse> getUserExamByUserId(UUID userId) {
+        List<UserExam> userExams = userExamRepository.findUserExamsByUserId(userId);
+        List<UserExamResponse> userExamResponses = new ArrayList<>();
+        for (UserExam userExam : userExams) {
+            SubjectDto subject = subjectService.getSubjectById(userExam.getExam().getExamId());
+            UserExamResponse userExamResponse = UserExamResponse
+                    .builder()
+                    .userExamDto(convertUserExamsToUserExamDto(userExam))
+                    .subjectName(subject.getName())
+                    .title(userExam.getExam().getTitle())
+                    .build();
+            userExamResponses.add(userExamResponse);
+        }
+        return userExamResponses;
+    }
+
+    protected UserExamDto convertUserExamsToUserExamDto(UserExam userExam) {
+        UserExamDto userExamDto = new UserExamDto();
+            userExamDto.setUserExamId(userExam.getUserExamId());
+            userExamDto.setStartTime(userExam.getStartTime());
+            userExamDto.setEndTime(userExam.getEndTime());
+            userExamDto.setScore(userExam.getScore());
+            userExamDto.setUserId(userExam.getUser().getUserId());
+            userExamDto.setExamId(userExam.getExam().getExamId());
+        return userExamDto;
     }
 }

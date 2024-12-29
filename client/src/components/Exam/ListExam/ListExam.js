@@ -5,6 +5,7 @@ import Headers from "../../Headers";
 import { useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../Footer";
 import LoginPrompt from "../../User/LoginPrompt";
+import { useAuth } from "../../Context/AuthProvider";
 
 export default function ExamUsers() {
   const [examDto, setExamUsers] = useState([]);
@@ -14,7 +15,8 @@ export default function ExamUsers() {
   const navigate = useNavigate();
   const location = useLocation();
   const { subjectId } = location.state || {};
-  const accessToken = localStorage.getItem("accessToken");
+  const { isLoggedIn } = useAuth(); // Lấy trạng thái và hàm logout từ context
+  
 
   useEffect(() => {
     getAllExam();
@@ -40,7 +42,7 @@ export default function ExamUsers() {
   };
 
   const handleExamClick = (examId) => {
-    if (!accessToken) {
+    if (!isLoggedIn) {
       setShowLoginPrompt(true);
       return;
     }
@@ -62,7 +64,7 @@ export default function ExamUsers() {
       <div
         key={index}
         className={`card ${isCompleted ? "completed" : ""}`}
-        onClick={() => handleExamClick(item.examId)}
+        // onClick={() => handleExamClick(item.examId)}
       >
         <div className="card-content-listexam">
           <h2>{item.title}</h2>

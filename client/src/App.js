@@ -12,9 +12,15 @@ import Result from "./components/Exam/Result/Result";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
 import ChooseExam from "./components/Exam/ChooseExam/ChooseExam";
 import Account from "./components/Account/Account";
+import { AuthProvider } from "./components/Context/AuthProvider";
+import GuestOnlyRoute from "./components/Context/GuestOnlyRoute";
+
+
 
 function App() {
+  
   return (
+    <AuthProvider>
     <Router>
       {" "}
       {/* Đảm bảo <Router> bao bọc toàn bộ ứng dụng */}
@@ -26,10 +32,22 @@ function App() {
         <Route path="/listChap" element={<RevisionListChap />} />
         {/* Danh sách chương */}
         <Route exact path="/chap" element={<RevisionChap />} />
-        {/* câu hỏi ôn tập theo chương */}
-        <Route path="/login" element={<Login />} />
-        {/* Trang Đăng nhập */}
-        <Route path="/register" element={<RegisterForm />} />
+        <Route
+            path="/login"
+            element={
+              <GuestOnlyRoute>
+                <Login />
+              </GuestOnlyRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <GuestOnlyRoute>
+                <RegisterForm />
+              </GuestOnlyRoute>
+            }
+          />
         {/* Trang Đăng ký */}
         <Route path="/account" element={<Account />} />
       </Routes>
@@ -46,6 +64,7 @@ function App() {
         {/* Kết quả thi */}
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 

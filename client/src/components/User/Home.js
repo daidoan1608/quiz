@@ -46,22 +46,34 @@ export default function Home() {
       <div className="school-introduction">
         <h2>Giới thiệu về Team Dự Án Web Thực Tập</h2>
         <p>
-          Chúng mình là một nhóm sinh viên với niềm đam mê và nhiệt huyết trong
-          việc phát triển công nghệ. Với mục tiêu tạo ra một nền tảng học tập
-          hiệu quả, chúng tôi đã hợp tác để xây dựng một trang web thực tập giúp
-          sinh viên ôn tập và nâng cao kiến thức.{" "}
+          Chúng mình là một nhóm sinh viên đam mê công nghệ và giáo dục, với mục
+          tiêu tạo ra một nền tảng học tập trực tuyến hiệu quả dành cho sinh
+          viên. Qua dự án này, chúng mình muốn giúp các bạn sinh viên ôn tập,
+          củng cố kiến thức và chuẩn bị tốt cho các kỳ thi.
         </p>
         <p>
-          {" "}
-          Dự án này không chỉ đơn giản là một công cụ học tập, mà còn là nơi
-          sinh viên có thể chia sẻ tài liệu, bài giảng, bài tập và giải đáp thắc
-          mắc với nhau. Chúng tôi hy vọng dự án này sẽ giúp các bạn sinh viên
-          tối ưu hóa quá trình học tập, tiết kiệm thời gian và nâng cao hiệu quả
-          học tập của mình.
+          Dự án này không chỉ là một công cụ học tập thông thường, mà còn là một
+          cộng đồng giúp các bạn chia sẻ tài liệu, bài giảng, bài tập và giải
+          đáp thắc mắc. Chúng mình hy vọng rằng dự án sẽ giúp sinh viên tiết
+          kiệm thời gian, nâng cao hiệu quả học tập và đạt được kết quả cao
+          trong các kỳ thi.
         </p>
         <p>
-          Chúng mình sẽ đồng hành cùng sinh viên trên con đường chinh phục tri
-          thức và chuẩn bị cho tương lai tươi sáng.
+          Nhóm chúng mình gồm những thành viên trẻ trung, năng động, với các kỹ
+          năng về phát triển phần mềm, thiết kế web, và quản lý dự án. Chúng
+          mình đã cùng nhau làm việc không ngừng để tạo ra một sản phẩm tốt
+          nhất, sử dụng những công nghệ tiên tiến như ReactJS, Spring Fw và
+          MySQL để xây dựng nền tảng này.
+        </p>
+        <p>
+          Chúng mình tin rằng nền tảng học tập này sẽ là người bạn đồng hành
+          tuyệt vời giúp các bạn sinh viên tự tin hơn trong việc ôn tập và chinh
+          phục các mục tiêu học tập. Cùng chúng mình bước vào hành trình học tập
+          đầy thú vị và hiệu quả!
+        </p>
+        <p>
+          Đừng quên theo dõi chúng mình để cập nhật thêm nhiều tài liệu và bài
+          học mới!
         </p>
       </div>
       <div className="category">

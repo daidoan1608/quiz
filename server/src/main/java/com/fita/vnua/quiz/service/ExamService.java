@@ -11,6 +11,7 @@ public interface ExamService {
 
     ExamDto getExamById(Long id);
 
+
     ExamDto createExam(ExamDto examDto, int numberOfQuestions);
 
     ExamDto updateExam(Long id, ExamDto examDto);

@@ -14,6 +14,7 @@ export default function RevisionChap1() {
   const questionsPerPage = 8;
   const location = useLocation();
   const { chapterId } = location.state || {};
+  
 
   const questionRefs = useRef([]);
 
@@ -51,13 +52,6 @@ export default function RevisionChap1() {
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-  };
-
-  const handleArrowChange = (direction) => {
-    const newPage = currentPage + direction;
-    if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
   };
 
   const goToQuestion = (questionIndex) => {

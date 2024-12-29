@@ -71,7 +71,7 @@ export default function ChooseExam() {
                   </div>
                 </div>
               ) : (
-                <div className="subject-list">
+                <>
                   {subjects.map((item) => (
                     <div className="card-exam" key={item.subjectId}>
                       <div className='card-img-exam'>
@@ -90,7 +90,7 @@ export default function ChooseExam() {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </>
               )}
             </div>
           </section>

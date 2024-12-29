@@ -21,7 +21,7 @@
   margin-bottom: 30px;
 }
 
-.logo {
+.logo-form {
   width: 120px;
   height: 120px;
   margin-bottom: 20px;
@@ -56,10 +56,6 @@
   margin-top: 15px; 
   text-align: center; 
   font-size: 14px; 
-}
-
-.register {
-   color: #1890ff; 
 }
 
 .register:hover {

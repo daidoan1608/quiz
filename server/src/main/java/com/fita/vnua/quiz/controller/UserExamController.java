@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 public class UserExamController {
@@ -30,5 +32,10 @@ public class UserExamController {
             return ResponseEntity.ok(Response.builder().responseCode("400").responseMessage("User exam not created").build());
         }
         return ResponseEntity.ok(saveUserExam);
+    }
+
+    @GetMapping("userexams/user/{userId}")
+    public ResponseEntity<?> getUserExamByUserId(@PathVariable("userId") UUID userId) {
+        return ResponseEntity.ok(userExamService.getUserExamByUserId(userId));
     }
 }

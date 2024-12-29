@@ -7,7 +7,7 @@ const LoginPrompt = ({ onLoginRedirect, onClose }) => {
         <div className="login-overlay">
             <div className="login-prompt">
                 <p className="login-message">
-                    Bạn cần đăng nhập để thực hiện thao tác này.
+                    Bạn cần đăng nhập để sử dụng chức năng này.
                 </p>
                 <div style={{ textAlign: "center" }}>
                     <button

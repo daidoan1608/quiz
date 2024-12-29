@@ -5,6 +5,7 @@ import "./RevisionListChap.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoginPrompt from "../../User/LoginPrompt";
 import Footer from "../../Footer";
+import { useAuth } from "../../Context/AuthProvider";
 
 export default function RevisionListChap() {
   const [chapters, setChapters] = useState([]);
@@ -14,6 +15,8 @@ export default function RevisionListChap() {
   const location = useLocation();
   const navigate = useNavigate();
   const { subjectId } = location.state || {};
+  const { isLoggedIn } = useAuth(); // Lấy trạng thái và hàm logout từ context
+  
 
   const getChapterBySubjectId = async (subjectId) => {
     try {
@@ -48,9 +51,7 @@ export default function RevisionListChap() {
 
   // Handle chapter click
   const handleChapterClick = (chapter) => {
-    const accessToken = localStorage.getItem("accessToken");
-
-    if (!accessToken) {
+    if (!isLoggedIn) {
       setShowLoginPrompt(true); // Show login prompt
       return;
     }

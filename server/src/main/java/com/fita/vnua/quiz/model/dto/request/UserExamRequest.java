@@ -12,6 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserExamRequest {
-    UserExamDto userExamDto;
-    List<UserAnswerDto> userAnswerDtos;
+    private UserExamDto userExamDto;
+    private List<UserAnswerDto> userAnswerDtos;
 }

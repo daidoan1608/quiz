@@ -11,3 +11,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+#root {
+  max-width: 1600px; /* Độ rộng tối đa */
+  margin: 0 auto;    /* Căn giữa theo chiều ngang */
+  padding: 0;   /* Khoảng cách hai bên */
+  background-color: #fff; /* Màu nền của ứng dụng */
+  min-height: 100vh; /* Đảm bảo chiếm đủ chiều cao màn hình */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm hiệu ứng đổ bóng */
+}
