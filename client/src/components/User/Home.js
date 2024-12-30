@@ -16,8 +16,8 @@ export default function Home() {
     setSubjects(resp.data);
   };
 
-  const elementSubjects = subjects.map((item, index) => {
-    return (
+  const elementSubjects = subjects.length > 0 ? (
+    subjects.map((item, index) => (
       <div className="category" key={index}>
         <div className="container">
           <div className="course">
@@ -25,8 +25,12 @@ export default function Home() {
           </div>
         </div>
       </div>
-    );
-  });
+    ))
+  ) : (
+    <div className="no-subjects">
+      Không có môn học
+    </div>
+  );
 
   return (
     <div>
