@@ -296,6 +296,24 @@
 					"response": []
 				},
 				{
+					"name": "Get chapter by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base-url}}/subject/chapters",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"subject",
+								"chapters"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get all chapter by subject",
 					"request": {
 						"method": "GET",
@@ -744,6 +762,35 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get user exam by userId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInVzZXJJZCI6ImRlMGY1MzcwLTczNzItNGM3ZS1hYzhjLTVjMGNkMjI0Y2VmOSIsInN1YiI6ImRhaWRvYW4xNjA4IiwiaWF0IjoxNzM1NDg1NDA1LCJleHAiOjE3MzU0ODYzMDV9.DX6Vr1SOb3Q3yWGNiUlmsCOqOwGv1rw91cYxwOURYNE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base-url}}/userexams/user/de0f5370-7372-4c7e-ac8c-5c0cd224cef9",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"userexams",
+								"user",
+								"de0f5370-7372-4c7e-ac8c-5c0cd224cef9"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -853,6 +900,44 @@
 							"path": [
 								"auth",
 								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInVzZXJJZCI6IjU1ZWQ3MTE2LTU5YWItNGJiMS1hMWU5LTE5OTkyZWI2ZmMxZSIsInN1YiI6ImRhaWRvYW4xNjA4MSIsImlhdCI6MTczNTQ0NzI5NywiZXhwIjoxNzM1NDQ4MTk3fQ.j72iUKxq7p3t2ad5hjBGzGsz3yUF_Zmm5CwJrUlaOC4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\" : \"123456\",\r\n    \"newPassword\" : \"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base-url}}/auth/change-password/55ed7116-59ab-4bb1-a1e9-19992eb6fc1e",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"auth",
+								"change-password",
+								"55ed7116-59ab-4bb1-a1e9-19992eb6fc1e"
 							]
 						}
 					},

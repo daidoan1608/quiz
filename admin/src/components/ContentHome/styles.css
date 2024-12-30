@@ -1,0 +1,47 @@
+
+  
+  .content-container {
+    padding: 0px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 5000px; /* Giới hạn chiều rộng */
+    margin: 0px; /* Căn giữa màn hình */
+  }
+  
+  .content-list {
+    display: flex; /* Kích hoạt flexbox */
+    justify-content: space-between; /* Tạo khoảng cách đều giữa các cột */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    padding: 0;
+    margin: 0;
+    list-style-type: none; /* Xóa dấu chấm đầu dòng */
+  }
+  
+  .content-block {
+    background-color: #e0e0e0; /* Màu xám sáng */
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center; /* Căn giữa nội dung */
+    width: 30%; /* Chiều rộng mỗi cột */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  
+  .content-block:hover {
+    background-color: #d6d6d6; /* Màu xám đậm hơn khi hover */
+    transform: translateY(-5px); /* Nhấc khối lên khi hover */
+  }
+  
+  .content-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333; /* Màu chữ đậm */
+    margin: 0;
+  }
+  
+  .content-description {
+    font-size: 14px;
+    color: #666; /* Màu chữ nhạt */
+    margin: 10px 0 0;
+  }
+  

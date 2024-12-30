@@ -3,6 +3,7 @@
   flex-direction: column;
   align-items: center; /* Centers all content horizontally */
   padding: 20px;
+  min-height: 100vh;
 }
 
 .question-selector {

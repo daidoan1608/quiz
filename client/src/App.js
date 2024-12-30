@@ -14,7 +14,7 @@ import ChooseExam from "./components/Exam/ChooseExam/ChooseExam";
 import Account from "./components/Account/Account";
 import { AuthProvider } from "./components/Context/AuthProvider";
 import GuestOnlyRoute from "./components/Context/GuestOnlyRoute";
-
+import ProtectedRoute from "./components/Context/ProtectedRoute";
 
 
 function App() {
@@ -31,7 +31,14 @@ function App() {
         {/* Ôn Tập */}
         <Route path="/listChap" element={<RevisionListChap />} />
         {/* Danh sách chương */}
-        <Route exact path="/chap" element={<RevisionChap />} />
+        <Route 
+          exact path="/chap"
+          element={
+            <ProtectedRoute>
+              <RevisionChap />
+            </ProtectedRoute>
+          }
+        />
         <Route
             path="/login"
             element={
@@ -58,7 +65,14 @@ function App() {
         {/* Bài Thi */}
         <Route exact path="/detail" element={<DetailExam />} />
         {/* Chi tiết bài thi */}
-        <Route exact path="/taketheexam" element={<Exam />} />
+        <Route 
+          exact path="/taketheexam"
+          element={
+            <ProtectedRoute>
+              <Exam />
+            </ProtectedRoute>
+          }
+        />
         {/* Làm bài thi */}
         <Route exact path="/result" element={<Result />} /> 
         {/* Kết quả thi */}

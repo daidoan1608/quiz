@@ -3,7 +3,7 @@
     display: flex; /* Sử dụng Flexbox để căn giữa các phần tử con */
     justify-content: center; /* Căn giữa theo chiều ngang */
     align-items: center; /* Căn giữa theo chiều dọc */
-    /* height: 100vh; Đảm bảo container chiếm toàn bộ chiều cao của viewport */
+    min-height: 80vh; /*Đảm bảo container chiếm toàn bộ chiều cao của viewport */
     padding: 20px;
 }
 
