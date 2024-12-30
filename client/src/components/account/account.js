@@ -1,7 +1,7 @@
 import { message, Button, Form, Input, List, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "../account/account.css";
+import "./Account.css";
 import { authAxios } from "../../api/axiosConfig";
 import Headers from "../Headers";
 import Footer from "../Footer";
