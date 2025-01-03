@@ -1,94 +1,119 @@
-import React, { useState } from 'react'; // Import React và hook useState để quản lý trạng thái
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'; // Import các icon từ Ant Design
-import { Flex, message, Upload } from 'antd'; // Import các component cần thiết từ Ant Design
+import React, { useState } from 'react';
+import { LoadingOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { message, Upload, Button, Modal } from 'antd';
 
-// Hàm chuyển đổi ảnh sang Base64
 const getBase64 = (img, callback) => {
-  const reader = new FileReader(); // Tạo một FileReader để đọc file
-  reader.addEventListener('load', () => callback(reader.result)); // Khi đọc xong, gọi callback với kết quả Base64
-  reader.readAsDataURL(img); // Đọc file dưới dạng DataURL
+  const reader = new FileReader(); // Tạo một đối tượng FileReader để đọc file
+  reader.addEventListener('load', () => callback(reader.result));
+  reader.readAsDataURL(img);
 };
 
-// Hàm kiểm tra trước khi upload
+//kiểm tra trước khi ảnh được upload
 const beforeUpload = (file) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'; // Kiểm tra định dạng ảnh có phải JPG hoặc PNG không
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
   if (!isJpgOrPng) {
-    message.error('You can only upload JPG/PNG file!'); // Hiển thị thông báo lỗi nếu không đúng định dạng
+    message.error('Chỉ hỗ trợ định dạng JPG/PNG!');
   }
-  const isLt2M = file.size / 1024 / 1024 < 2; // Kiểm tra kích thước ảnh có nhỏ hơn 2MB không
+  const isLt2M = file.size / 1024 / 1024 < 2;
   if (!isLt2M) {
-    message.error('Image must smaller than 2MB!'); // Hiển thị thông báo lỗi nếu ảnh lớn hơn 2MB
+    message.error('Dung lượng ảnh không được vượt quá 2MB!');
   }
-  return isJpgOrPng && isLt2M; // Chỉ cho phép upload nếu cả hai điều kiện đều đúng
+  return isJpgOrPng && isLt2M;
 };
 
-// Component chính
+//component chính
 const UploadImage = () => {
-  const [loading, setLoading] = useState(false); // Trạng thái để hiển thị biểu tượng tải khi đang upload
-  const [imageUrl, setImageUrl] = useState(null); // Trạng thái lưu URL của ảnh đã upload
+  const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [error, setError] = useState(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
 
-  // Hàm xử lý khi trạng thái upload thay đổi
   const handleChange = (info) => {
     if (info.file.status === 'uploading') {
-      setLoading(true); // Nếu đang upload, bật trạng thái loading
+      setLoading(true);
+      setError(null);
       return;
     }
     if (info.file.status === 'done') {
-      // Nếu upload thành công, lấy URL của file
-      getBase64(info.file.originFileObj, (url) => {
-        setLoading(false); // Tắt trạng thái loading
-        setImageUrl(url); // Lưu URL ảnh vào state
-      });
+      const response = info.file.response;
+      if (response && response.url) {
+        setImageUrl(response.url); // URL trả về từ API
+        message.success('Tải ảnh thành công!');
+      } else {
+        message.error('Lỗi khi tải ảnh!');
+      }
+      setLoading(false);
+    }
+    if (info.file.status === 'error') {
+      message.error('Lỗi trong quá trình tải lên.');
+      setLoading(false);
     }
   };
 
-  // Nút upload (hiển thị khi chưa có ảnh hoặc đang tải)
+  const handleRemove = () => {
+    setImageUrl(null);
+    message.success('Ảnh đã được xóa.');
+  };
+
   const uploadButton = (
-    <div
-      style={{
-        textAlign: 'center',
-        cursor: 'pointer',
-      }}
-    >
-      {loading ? <LoadingOutlined /> : <PlusOutlined />} {/* Hiển thị icon tải hoặc thêm tùy trạng thái */}
-      <div
-        style={{
-          marginTop: 8, // Cách phần chữ "Upload" so với icon
-        }}
-      >
-        Upload {/* Văn bản hiển thị trên nút */}
-      </div>
+    <div style={{ textAlign: 'center', cursor: 'pointer' }}>
+      {loading ? <LoadingOutlined /> : <PlusOutlined />}
+      <div style={{ marginTop: 8 }}>Upload</div>
     </div>
   );
 
   return (
-    <Flex gap="middle" wrap> {/* Flexbox để căn chỉnh các phần tử */}
-
-      {/* Component upload với kiểu "picture-circle" */}
+    <div style={{ textAlign: 'center', marginTop: 20 }}>
       <Upload
-        name="avatar" // Tên của file khi gửi lên server
-        listType="picture-circle" // Kiểu hiển thị upload
-        className="avatar-uploader" // Lớp CSS
-        showUploadList={false} // Ẩn danh sách file đã upload
-        action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload" // API upload
-        beforeUpload={beforeUpload} // Kiểm tra file trước khi upload
-        onChange={handleChange} // Hàm xử lý khi trạng thái upload thay đổi
+        name="avatar"
+        listType="picture-circle"
+        className="avatar-uploader"
+        showUploadList={false}
+        action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload" // Thay bằng API thực tế
+        beforeUpload={beforeUpload}
+        onChange={handleChange}
       >
         {imageUrl ? (
           <img
-            src={imageUrl} // URL của ảnh đã upload
-            alt="avatar" // Thuộc tính thay thế
+            src={imageUrl}
+            alt="avatar"
             style={{
-              width: '100%', // Chiều rộng ảnh là 100% của khung
-              borderRadius: '50%', // Viền bo tròn hoàn toàn để tạo hình tròn
+              width: '100%',
+              borderRadius: '50%',
+              objectFit: 'cover',
             }}
+            onClick={() => setPreviewVisible(true)} // Click để xem trước
           />
         ) : (
-          uploadButton // Hiển thị nút upload nếu chưa có ảnh
+          uploadButton
         )}
       </Upload>
-    </Flex>
+
+      {imageUrl && (
+        <Button
+          type="primary"
+          danger
+          icon={<DeleteOutlined />}
+          style={{ marginTop: 10 }}
+          onClick={handleRemove}
+        >
+          Xóa ảnh
+        </Button>
+      )}
+
+      {error && <p style={{ color: 'red', marginTop: 10 }}>{error}</p>}
+
+      {/* Modal xem trước ảnh */}
+      <Modal
+        visible={previewVisible}
+        footer={null}
+        onCancel={() => setPreviewVisible(false)}
+        centered
+      >
+        <img alt="preview" style={{ width: '100%' }} src={imageUrl} />
+      </Modal>
+    </div>
   );
 };
 
-export default UploadImage; // Xuất component để sử dụng ở nơi khác
+export default UploadImage;
