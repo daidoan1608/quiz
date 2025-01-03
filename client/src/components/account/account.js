@@ -1,19 +1,16 @@
 import { message, Button, Form, Input, List, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "./Account.css";
+import "./account.css";
 import { authAxios } from "../../api/axiosConfig";
 import Headers from "../Headers";
 import Footer from "../Footer";
 import { useAuth } from "../Context/AuthProvider";
+import UploadImage from './uploadimage';
 
 const AccountInfo = ({ user, onChangePassword }) => (
   <div className="account-info">
-    <img
-      src="https://via.placeholder.com/120"
-      alt="Avatar"
-      className="avatar"
-    />
+    <UploadImage/>
     <h2>Thông tin người dùng</h2>
     <div className="account-details">
       <p><strong>Tên người dùng:</strong> {user.username}</p>

@@ -11,7 +11,7 @@ import Exam from "./components/Exam/Exam/Exam";
 import Result from "./components/Exam/Result/Result";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
 import ChooseExam from "./components/Exam/ChooseExam/ChooseExam";
-import Account from "./components/Account/Account";
+import Account from "./components/account/account";
 import { AuthProvider } from "./components/Context/AuthProvider";
 import GuestOnlyRoute from "./components/Context/GuestOnlyRoute";
 import ProtectedRoute from "./components/Context/ProtectedRoute";
