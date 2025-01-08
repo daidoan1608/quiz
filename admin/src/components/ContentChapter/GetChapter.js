@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import {authAxios} from '../../Api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../Pagination'; // Sử dụng thành phần Pagination đã xây dựng
+import { BiEdit, BiPlus, BiTrash } from 'react-icons/bi';
 
 export default function GetChapter() {
     const [chapters, setChapters] = useState([]);
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
     const [itemsPerPage] = useState(5); // Số mục trên mỗi trang
     const navigate = useNavigate();
-
-    // Lấy token từ localStorage hoặc từ nơi bạn lưu trữ token
-    const token = localStorage.getItem('token'); // Ví dụ lấy từ localStorage
 
     // Lấy danh sách chương
     useEffect(() => {
@@ -20,11 +18,7 @@ export default function GetChapter() {
     // Hàm lấy dữ liệu chương
     const fetchChapters = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/public/subject/chapters', {
-                headers: {
-                    Authorization: `Bearer ${token}`  // Thêm Bearer Token vào header
-                }
-            });
+            const response = await authAxios.get('/public/subject/chapters');
             setChapters(response.data);
         } catch (error) {
             console.error('Lỗi API:', error.response?.data || error.message);
@@ -35,11 +29,7 @@ export default function GetChapter() {
     // Hàm xóa chương
     const deleteChapter = async (chapterId) => {
         try {
-            await axios.delete(`http://localhost:8080/admin/chapters/${chapterId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`  // Thêm Bearer Token vào header
-                }
-            });
+            await authAxios.delete(`/admin/chapters/${chapterId}`);
             setChapters((prevChapters) => prevChapters.filter((chapter) => chapter.chapterId !== chapterId));
             alert('Xóa chương thành công!');
         } catch (error) {
@@ -62,7 +52,7 @@ export default function GetChapter() {
                 className="btn btn-primary mb-3 float-end"
                 onClick={() => navigate('/admin/add/chapter')}
             >
-                Thêm chương
+            <BiPlus />  
             </button>
 
             {/* Bảng danh sách chương */}
@@ -88,7 +78,7 @@ export default function GetChapter() {
                                     className="btn btn-danger mx-1"
                                     onClick={() => deleteChapter(chapter.chapterId)}
                                 >
-                                    Xóa
+                                <BiTrash    />  
                                 </button>
                                 <button
                                     className="btn btn-success mx-1"
@@ -96,7 +86,7 @@ export default function GetChapter() {
                                         navigate(`/admin/chapters/${chapter.chapterId}`)
                                     }
                                 >
-                                    Cập nhật
+                                <BiEdit />
                                 </button>
                             </td>
                         </tr>

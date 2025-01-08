@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axiosGetExam from '../../Api/userApi';
+import {authAxios} from '../../Api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../Pagination'; // Sử dụng thành phần Pagination đã tạo
+import { BiPlus } from "react-icons/bi"; // Import các icon từ react-icons
+
 
 export default function GetExam() {
     const [exams, setExams] = useState([]); // Lưu danh sách bài thi
@@ -15,7 +17,7 @@ export default function GetExam() {
 
     const getAllExams = async () => {
         try {
-            const response = await axiosGetExam.get("/public/admin/exams");
+            const response = await authAxios.get("/public/admin/exams");
             setExams(response.data); // Lưu dữ liệu vào state
         } catch (error) {
             console.error('Error fetching exams: ', error);
@@ -47,7 +49,7 @@ export default function GetExam() {
                 className="btn btn-primary mb-3 float-end"
                 onClick={() => navigate('/admin/add/exams')}
             >
-                Thêm bài thi
+            <BiPlus />
             </button>
 
             <table className='table table-bordered'>

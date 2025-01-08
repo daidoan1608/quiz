@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axiosGetSubject from '../../Api/userApi';
+import {authAxios} from '../../Api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 
 export default function AddSubject() {
@@ -13,13 +13,7 @@ export default function AddSubject() {
     const addSubject = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token'); // Lấy token từ localStorage hoặc nơi bạn lưu trữ token
-            const response = await axiosGetSubject.post("/admin/subjects", newSubject, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`, // Thêm Bearer Token vào header
-                },
-            });
+            const response = await authAxios.post("/admin/subjects", newSubject);
             console.log('Thêm môn học thành công: ', response.data);
             setNewSubject({
                 name: '',

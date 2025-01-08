@@ -1,34 +1,32 @@
-// Pagination.js
 import React from 'react';
 
 export default function Pagination({ totalPages, currentPage, onPageChange }) {
-    // Hàm chuyển trang lên 5 trang
-    const handleNextFive = () => {
-        if (currentPage + 5 <= totalPages) {
-            onPageChange(currentPage + 5);
-        } else {
-            onPageChange(totalPages); // Chuyển đến trang cuối cùng nếu không đủ 5 trang
+    // Hàm chuyển sang trang tiếp theo
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            onPageChange(currentPage + 1);
         }
     };
 
-    // Hàm chuyển trang xuống 5 trang
-    const handlePrevFive = () => {
-        if (currentPage - 5 > 0) {
-            onPageChange(currentPage - 5);
-        } else {
-            onPageChange(1); // Chuyển về trang đầu tiên nếu không đủ 5 trang
+    // Hàm chuyển về trang trước
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            onPageChange(currentPage - 1);
         }
     };
 
     return (
         <div className="pagination">
+            {/* Nút về trang trước */}
             <button
                 className="btn btn-secondary mx-1"
-                onClick={handlePrevFive}
+                onClick={handlePrevPage}
+                disabled={currentPage === 1} // Vô hiệu hóa nếu đang ở trang đầu tiên
             >
-                &lt;&lt; {/* Hiển thị "<<" */}
+                &lt; {/* Hiển thị "<" */}
             </button>
             
+            {/* Hiển thị danh sách các trang */}
             {Array.from({ length: totalPages }, (_, index) => (
                 <button
                     key={index}
@@ -39,11 +37,13 @@ export default function Pagination({ totalPages, currentPage, onPageChange }) {
                 </button>
             ))}
             
+            {/* Nút sang trang kế tiếp */}
             <button
                 className="btn btn-secondary mx-1"
-                onClick={handleNextFive}
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages} // Vô hiệu hóa nếu đang ở trang cuối cùng
             >
-                &gt;&gt; {/* Hiển thị ">>" */}
+                &gt; {/* Hiển thị ">" */}
             </button>
         </div>
     );

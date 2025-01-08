@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import {authAxios} from '../../Api/axiosConfig';
 
 export default function UpdateChapter() {
     const { chapterId } = useParams(); // Lấy chapterId từ URL
@@ -18,17 +18,8 @@ export default function UpdateChapter() {
 
     const fetchChapterDetails = async () => {
         try {
-            // Lấy Bearer Token từ localStorage
-            const token = localStorage.getItem('token');
 
-            const response = await axios.get(
-                `http://localhost:8080/admin/chapters/${chapterId}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`  // Thêm Bearer Token vào header
-                    }
-                }
-            );
+            const response = await authAxios.get(`/public/chapters/${chapterId}`);
             setChapter(response.data);
         } catch (error) {
             console.error('Lỗi API:', error.response?.data || error.message);
@@ -39,18 +30,7 @@ export default function UpdateChapter() {
     // Hàm xử lý cập nhật chương
     const handleUpdate = async () => {
         try {
-            // Lấy Bearer Token từ localStorage
-            const token = localStorage.getItem('token');
-
-            await axios.patch(
-                `http://localhost:8080/admin/chapters/${chapterId}`,
-                chapter,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`  // Thêm Bearer Token vào header
-                    }
-                }
-            );
+            await authAxios.patch(`/admin/chapters/${chapterId}`,chapter);
             alert('Cập nhật chương thành công!');
             navigate('/subject/chapters');
         } catch (error) {

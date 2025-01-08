@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axiosGetSubject from '../../Api/userApi';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../Pagination'; // Đường dẫn tùy theo dự án của bạn
+import { authAxios } from '../../Api/axiosConfig';
+import { BiEdit, BiTrash, BiCheckCircle, BiPlus } from 'react-icons/bi';
 
 export default function GetSubject() {
     const [subjects, setSubjects] = useState([]);
@@ -17,12 +18,7 @@ export default function GetSubject() {
     // Hàm gọi API để lấy dữ liệu môn học
     const getAllSubject = async () => {
         try {
-            const token = localStorage.getItem('token');  // Lấy token từ localStorage hoặc cookie
-            const rep = await axiosGetSubject.get('public/subjects', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,  // Thêm Bearer Token vào header
-                },
-            });
+            const rep = await authAxios.get('public/subjects');
             setSubjects(rep.data);
         } catch (error) {
             console.error("Error fetching subjects:", error);
@@ -33,12 +29,7 @@ export default function GetSubject() {
     // Hàm xóa môn học
     const deleteSubject = async (subjectId) => {
         try {
-            const token = localStorage.getItem('token');
-            await axiosGetSubject.delete(`/admin/subjects/${subjectId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
-            });
+            await authAxios.delete(`/admin/subjects/${subjectId}`);
             setSubjects((prevSubjects) => prevSubjects.filter(subject => subject.subjectId !== subjectId));
             alert('Môn học đã được xóa thành công!');
         } catch (error) {
@@ -67,19 +58,19 @@ export default function GetSubject() {
                     className="btn btn-danger mx-1"
                     onClick={() => deleteSubject(item.subjectId)}
                 >
-                    Xóa
+                <BiTrash />
                 </button>
                 <button
                     className="btn btn-warning mx-1"
                     onClick={() => goToChapters(item.subjectId)}
                 >
-                    Chọn chương
+                <BiCheckCircle />
                 </button>
                 <button
                     className="btn btn-success mx-1"
                     onClick={() => navigate(`/admin/subjects/${item.subjectId}`)}
                 >
-                    Cập nhật
+                <BiEdit />
                 </button>
             </td>
         </tr>
@@ -92,8 +83,7 @@ export default function GetSubject() {
                 className="btn btn-primary mb-3 float-end"
                 onClick={() => navigate('/admin/subjects')}
             >
-                Thêm môn học
-            </button>
+<BiPlus/>            </button>
             <table className="table table-bordered">
                 <thead>
                     <tr>

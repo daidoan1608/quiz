@@ -24,16 +24,14 @@ import UpdateUser from './ContentUser/UpdateUser';
 
 export default function Content() {
   return (
+    <>
     <div className='content'>
         <ContentHeader />
         <Routes>
-
           <Route path='/home' element={<ContentHome />} />
-
           <Route path='/admin/users' element={<GetUser />} />
           <Route path='/admin/add/user' element={<AddUser />} />
           <Route path='/update/users/:userId' element={<UpdateUser />} />
-
 
           <Route path='/admin/exams' element={<GetExam />} />
           <Route path='/admin/add/exams' element={<AddExam />} />
@@ -43,19 +41,19 @@ export default function Content() {
           <Route path='/admin/subjects' element={<AddSubject />} />
           <Route path='/subjects/:subjectId' element={<ChooseChapter />} />
           <Route path='/subjects/addChapters/:subjectId' element={<AddChapterById />} />
+
           <Route path='/chapter/questions/:chapterId' element={<ChooseQuestion />} />
           <Route path='/chapter/addQuestions/:chapterId' element={<AddQuestionById />} />
-
           <Route path='/subject/chapters' element={<GetChapter />} />
           <Route path='/admin/add/chapter' element={<AddChapter />} />
           <Route path='/admin/chapters/:chapterId' element={<UpdateChapter />} />
-
+          
           <Route path='/chapter/questions' element={<GetQuestion />} />
           <Route path='/admin/questions' element={<AddQuestion />} />
           <Route path='/admin/questions/:questionId' element={<UpdateQuestion />} />
-
-          
-        </Routes>       
-    </div>
-  )
+        </Routes>
+        </div>
+        <div/>
+    </>
+  );
 }

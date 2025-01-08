@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+body {
+  background: #dde6ed;
+}
+
+.management-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 16px;
+  text-align: left;
+}
+
+.management-table th, 
+.management-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+}
+
+.management-table th {
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+/* Định dạng nút hành động */
+.action-btn {
+  background: none;
+  border: 2px solid #ddd; /* Viền mặc định */
+  border-radius: 1px;
+  cursor: pointer;
+  margin: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+/* Nút chỉnh sửa */
+.edit-btn {
+  color: #4CAF50; /* Màu xanh lá */
+}
+
+.edit-btn:hover {
+  background-color: rgba(76, 175, 80, 0.1); /* Hiệu ứng hover */
+}
+
+/* Nút xóa */
+.delete-btn {
+  color: #f44336; /* Màu đỏ */
+}
+
+.delete-btn:hover {
+  background-color: rgba(244, 67, 54, 0.1); /* Hiệu ứng hover */
+}
+
+/* Biểu tượng */
+.action-btn .icon {
+  font-size: 20px;
+}

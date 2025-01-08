@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import {authAxios} from '../../Api/axiosConfig';
 import './styles.css';
 
 export default function ContentHome() {
@@ -12,12 +12,7 @@ export default function ContentHome() {
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
-        const token = localStorage.getItem('token'); // Lấy token từ localStorage
-        const response = await axios.get('http://localhost:8080/admin/statistics', {
-          headers: {
-            Authorization: `Bearer ${token}`, // Thêm Bearer Token vào header
-          },
-        });
+        const response = await authAxios.get('http://localhost:8080/admin/statistics');
         setStatistics(response.data); // Cập nhật dữ liệu thống kê
       } catch (error) {
         console.error('Error fetching statistics:', error);

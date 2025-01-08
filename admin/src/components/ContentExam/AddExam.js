@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from '../../Api/userApi';
+import {authAxios} from '../../Api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 
 export default function AddExam() {
@@ -19,20 +19,12 @@ export default function AddExam() {
             alert("Vui lòng điền đầy đủ thông tin!");
             return;
         }
-
         const userId = localStorage.getItem('userId'); // Lấy userId từ localStorage
-        const token = localStorage.getItem('token'); // Lấy token từ localStorage
-        console.log(userId, token);
-
-        if (!userId || !token) {
-            alert('Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!');
-            return;
-        }
 
         setLoading(true); // Bắt đầu gửi dữ liệu
         try {
             // Gọi API để thêm bài thi với Bearer Token
-            const response = await axios.post(
+            const response = await authAxios.post(
                 '/admin/exams',
                 {
                     examDto: {
@@ -43,11 +35,6 @@ export default function AddExam() {
                         createdBy: userId, // Gán userId vào createdBy
                     },
                     numberOfQuestion, // Số câu hỏi từ input người dùng
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`, // Thêm Bearer Token vào headers
-                    },
                 }
             );
 

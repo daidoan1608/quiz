@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import {authAxios} from '../../Api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 
 export default function AddChapter() {
@@ -19,16 +19,8 @@ export default function AddChapter() {
                 chapterNumber
             };
 
-            // Lấy Bearer Token từ localStorage
-            const token = localStorage.getItem('token');
-
             // Gửi yêu cầu POST với Bearer Token
-            await axios.post('http://localhost:8080/admin/chapters', newChapter, {
-                headers: {
-                    'Authorization': `Bearer ${token}`, // Thêm Bearer Token vào header
-                },
-            });
-
+            await authAxios.post('/admin/chapters', newChapter);
             alert('Thêm chương thành công!');
             navigate('/subject/chapters');  // Quay lại trang danh sách chương
         } catch (error) {

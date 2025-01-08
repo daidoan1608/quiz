@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosGetSubject from '../../Api/userApi';
+import {authAxios} from '../../Api/axiosConfig';
 
 export default function UpdateSubject() {
     const { subjectId } = useParams();
@@ -14,14 +14,7 @@ export default function UpdateSubject() {
 
     const getSubjectDetails = async () => {
         try {
-            // Lấy Bearer Token từ localStorage
-            const token = localStorage.getItem('token');
-
-            const res = await axiosGetSubject.get(`/subjects/${subjectId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`, // Thêm Bearer Token vào header
-                }
-            });
+            const res = await authAxios.get(`/subjects/${subjectId}`);
             setSubject(res.data);
         } catch (error) {
             alert('Không thể lấy thông tin môn học!');
@@ -31,14 +24,7 @@ export default function UpdateSubject() {
     // Cập nhật thông tin môn học
     const handleUpdate = async () => {
         try {
-            // Lấy Bearer Token từ localStorage
-            const token = localStorage.getItem('token');
-
-            await axiosGetSubject.patch(`/admin/subjects/${subjectId}`, subject, {
-                headers: {
-                    'Authorization': `Bearer ${token}`, // Thêm Bearer Token vào header
-                }
-            });
+            await authAxios.patch(`/admin/subjects/${subjectId}`, subject);
             alert('Môn học đã được cập nhật thành công!');
             navigate('/subjects');
         } catch (error) {

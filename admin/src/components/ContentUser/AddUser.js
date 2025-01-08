@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import {authAxios} from '../../Api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 
 export default function AddUser() {
@@ -16,13 +16,7 @@ export default function AddUser() {
     const addUser = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token'); // Lấy token từ localStorage hoặc nơi bạn lưu trữ token
-            await axios.post('http://localhost:8080/admin/add/users', newUser, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`, // Thêm Bearer Token vào header
-                },
-            });
+            await authAxios.post('/admin/add/users', newUser);
             alert('Thêm người dùng thành công!');
             navigate('/admin/users'); // Điều hướng đến trang quản lý user
         } catch (error) {

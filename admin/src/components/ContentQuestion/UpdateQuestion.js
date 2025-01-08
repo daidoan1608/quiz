@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../Api/userApi'; // Sử dụng axios đã cấu hình từ file axios.js
+import {authAxios} from '../../Api/axiosConfig';
 import { useParams, useNavigate } from 'react-router-dom';
 
 export default function UpdateQuestion() {
@@ -11,12 +11,7 @@ export default function UpdateQuestion() {
         // Lấy dữ liệu câu hỏi
         const fetchQuestion = async () => {
             try {
-                const token = localStorage.getItem('token'); // Lấy token từ localStorage
-                const response = await axios.get(`/admin/questions/${questionId}`, {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : '',
-                    },
-                });
+                const response = await authAxios.get(`/admin/questions/${questionId}`);
                 setQuestion(response.data);
             } catch (error) {
                 console.error('Error fetching question:', error);
@@ -40,12 +35,7 @@ export default function UpdateQuestion() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token'); // Lấy token từ localStorage
-            await axios.patch(`/admin/questions/${questionId}`, question, {
-                headers: {
-                    Authorization: token ? `Bearer ${token}` : '',
-                },
-            });
+            await authAxios.patch(`/admin/questions/${questionId}`, question);
             alert('Cập nhật câu hỏi thành công!');
             navigate('/chapter/questions'); // Chuyển hướng về trang danh sách câu hỏi
         } catch (error) {
