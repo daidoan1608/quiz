@@ -2,8 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useLocation } from "react-router-dom";
 import "./RevisionChap.css";
-import Footer from "../../Footer";
-import Headers from "../../Headers";
 
 export default function RevisionChap1() {
   const [questionAnswers, setQuestionAnswers] = useState([]);
@@ -132,7 +130,6 @@ export default function RevisionChap1() {
 
   return (
     <div>
-      <Headers />
       <div className={`revision-container ${error ? "center-text" : ""}`}>
         {error ? (
           <div className="error-message">{error}</div>
@@ -190,7 +187,6 @@ export default function RevisionChap1() {
           </>
         )}
       </div>
-      <Footer />
     </div>
   );
 }

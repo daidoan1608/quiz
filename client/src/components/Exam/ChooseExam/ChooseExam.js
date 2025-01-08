@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom"; // Dùng useNavigate để điều hướng
 import "./ChooseExam.css";
-import Footer from "../../Footer";
-import Sidebar from "../../User/SideBar"; // Import the Sidebar component
-import Headers from "../../Headers";
+import Sidebar from "../../User/Sidebar"; // Import the Sidebar component
 
 export default function ChooseExam() {
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null); // Môn học đã chọn
+    const [filteredSubjects, setFilteredSubjects] = useState([]); // Môn học đã lọc
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,10 +20,23 @@ export default function ChooseExam() {
       const resp = await publicAxios.get("/public/subjects");
       console.log("Dữ liệu nhận được:", resp.data);
       setSubjects(resp.data); // Lưu danh sách môn học
+      setFilteredSubjects(resp.data); // Cập nhật môn học đã lọc ban đầu
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
     }
   };
+
+    // Hàm xử lý tìm kiếm
+    const handleSearchChange = (query) => {
+
+      setSelectedSubject(null);
+
+      const filtered = subjects.filter((subject) =>
+        subject.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredSubjects(filtered); // Cập nhật danh sách môn học đã lọc
+    };
+
 
   // Hàm chọn môn học
   const handleSelectSubject = (subjectId) => {
@@ -38,12 +51,12 @@ export default function ChooseExam() {
 
   return (
     <div>
-      <Headers />
       <div className="revision">
         <Sidebar
           subjects={subjects}
           selectedSubject={selectedSubject}
           onSelectSubject={handleSelectSubject}
+          onSearchChange={handleSearchChange}  // Truyền hàm tìm kiếm vào Sidebar
         />
 
         {/* Main Content */}
@@ -55,7 +68,7 @@ export default function ChooseExam() {
                 <div className="card-exam" key={selectedSubject.subjectId}>
                   <div className='card-img-exam'>
                       <div className='card-img-ex'>
-                      <img src='/exam.png'></img>
+                      <img alt="Hình bài thi" src='/exam.png'></img>
                       </div>
                   </div>
                   <div className="card-content">
@@ -72,11 +85,11 @@ export default function ChooseExam() {
                 </div>
               ) : (
                 <>
-                  {subjects.map((item) => (
+                  {filteredSubjects.map((item) => (
                     <div className="card-exam" key={item.subjectId}>
                       <div className='card-img-exam'>
                         <div className='card-img'>
-                        <img src='/exam.png'></img>
+                        <img alt="Hình bài thi" src='/exam.png'></img>
                         </div>
                       </div>
                       <div className="card-content">
@@ -96,7 +109,6 @@ export default function ChooseExam() {
           </section>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

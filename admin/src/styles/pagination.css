@@ -1,0 +1,42 @@
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 5px; /* Khoảng cách giữa các nút */
+  }
+  
+  .pagination .btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa; /* Màu nền mặc định */
+    color: #333; /* Màu chữ mặc định */
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Hiệu ứng khi hover */
+  }
+  
+  .pagination .btn:hover {
+    background-color: #e9ecef; /* Màu nền khi hover */
+    border-color: #bbb;
+  }
+  
+  .pagination .btn-primary {
+    background-color: #007bff; /* Màu xanh cho nút được chọn */
+    color: #fff;
+    border-color: #007bff;
+  }
+  
+  .pagination .btn-primary:hover {
+    background-color: #0056b3; /* Màu xanh đậm khi hover */
+    border-color: #004085;
+  }
+  
+  .pagination .btn:disabled {
+    background-color: #e9ecef; /* Màu nền cho nút bị vô hiệu */
+    color: #6c757d; /* Màu chữ xám nhạt */
+    cursor: not-allowed; /* Biểu tượng không cho nhấn */
+    border-color: #ddd;
+  }
+  

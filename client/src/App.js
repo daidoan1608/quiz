@@ -15,31 +15,16 @@ import Account from "./components/Account/Account";
 import { AuthProvider } from "./components/Context/AuthProvider";
 import GuestOnlyRoute from "./components/Context/GuestOnlyRoute";
 import ProtectedRoute from "./components/Context/ProtectedRoute";
+import Layout from "./components/User/Layout";
 
 
 function App() {
-  
   return (
     <AuthProvider>
-    <Router>
-      {" "}
-      {/* Đảm bảo <Router> bao bọc toàn bộ ứng dụng */}
-      <Routes>
-        <Route exact path="/" element={<Home />} />
-        {/* Trang Chủ */}
-        <Route exact path="/revision" element={<RevisionUser />} />
-        {/* Ôn Tập */}
-        <Route path="/listChap" element={<RevisionListChap />} />
-        {/* Danh sách chương */}
-        <Route 
-          exact path="/chap"
-          element={
-            <ProtectedRoute>
-              <RevisionChap />
-            </ProtectedRoute>
-          }
-        />
-        <Route
+      <Router>
+        {" "}
+        <Routes>
+          <Route
             path="/login"
             element={
               <GuestOnlyRoute>
@@ -55,29 +40,43 @@ function App() {
               </GuestOnlyRoute>
             }
           />
-        {/* Trang Đăng ký */}
-        <Route path="/account" element={<Account />} />
-      </Routes>
-      <Routes>
-        <Route exact path="/chooseExams" element={<ChooseExam />} />
-        {/* Trang chọn đề */}
-        <Route exact path="/exams" element={<ListExam />} /> 
-        {/* Bài Thi */}
-        <Route exact path="/detail" element={<DetailExam />} />
-        {/* Chi tiết bài thi */}
-        <Route 
-          exact path="/taketheexam"
-          element={
-            <ProtectedRoute>
-              <Exam />
-            </ProtectedRoute>
-          }
-        />
-        {/* Làm bài thi */}
-        <Route exact path="/result" element={<Result />} /> 
-        {/* Kết quả thi */}
-      </Routes>
-    </Router>
+          <Route element={<Layout />}>
+            <Route
+              exact
+              path="/taketheexam"
+              element={
+                <ProtectedRoute>
+                  <Exam />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              exact
+              path="/chap"
+              element={
+                <ProtectedRoute>
+                  <RevisionChap />
+                </ProtectedRoute>
+              }
+            />
+            <Route exact path="/revision" element={<RevisionUser />} />
+            <Route exact path="/chooseExams" element={<ChooseExam />} />
+            <Route exact path="/" element={<Home />} />
+
+            {/* Ôn Tập */}
+            <Route path="/listChap" element={<RevisionListChap />} />
+            {/* Danh sách chương */}
+            <Route path="/account" element={<Account />} />
+            {/* Trang chọn đề */}
+            <Route exact path="/exams" element={<ListExam />} />
+            {/* Bài Thi */}
+            <Route exact path="/detail" element={<DetailExam />} />
+            {/* Chi tiết bài thi */}
+            <Route exact path="/result" element={<Result />} />
+            {/* Kết quả thi */}
+          </Route>
+        </Routes>
+      </Router>
     </AuthProvider>
   );
 }

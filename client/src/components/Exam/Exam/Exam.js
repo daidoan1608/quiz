@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { authAxios } from "../../../api/axiosConfig";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Exam.css";
-import Headers from "../../Headers";
-import Footer from "../../Footer";
 
 export default function Exam() {
   const [questions, setExamQuestionAnswers] = useState([]);
@@ -86,7 +84,15 @@ export default function Exam() {
         alert("Đã xảy ra lỗi khi nộp bài. Vui lòng thử lại sau.");
       }
     }
-  }, [questions, selectedAnswers, examId, startTime, duration, timeLeft, navigate]);
+  }, [
+    questions,
+    selectedAnswers,
+    examId,
+    startTime,
+    duration,
+    timeLeft,
+    navigate,
+  ]);
 
   useEffect(() => {
     const getAllQuestionsByExamId = async () => {
@@ -117,16 +123,16 @@ export default function Exam() {
   useEffect(() => {
     // Chỉ bắt đầu đếm ngược khi timeLeft đã được khởi tạo
     if (timeLeft === null) return;
-    
+
     if (timeLeft === 0) {
       handleSubmit();
       return;
     }
-  
+
     const timerId = setInterval(() => {
       setTimeLeft((prevTime) => prevTime - 1);
     }, 1000);
-  
+
     return () => clearInterval(timerId);
   }, [timeLeft, handleSubmit]);
 
@@ -151,7 +157,6 @@ export default function Exam() {
 
   return (
     <>
-      <Headers />
       <div className="category-center">
         <div className="table-left">
           <div className="info">
@@ -196,49 +201,48 @@ export default function Exam() {
         </div>
       </div>
       <div className="category-end">
-  {questions.map((item, questionIndex) => (
-    <div
-      key={item.questionId}
-      className="container-end"
-      ref={questionRefs.current[questionIndex]}
-    >
-      <div className="question">
-        Câu {questionIndex + 1}: {item.content}
-      </div>
-      <div className="options">
-        {item.answers?.map((answer, answerIndex) => {
-          const isSelected = selectedAnswers[questionIndex] === answerIndex;
-          return (
-            <div key={answer.optionId} className="option">
-              <input
-                type="radio"
-                id={answer.optionId}
-                name={`question-${questionIndex}`}
-                value={answerIndex}
-                checked={isSelected}
-                onChange={() =>
-                  handleAnswerSelect(questionIndex, answerIndex)
-                }
-                className="radio-input"
-              />
-              <label
-                htmlFor={answer.optionId} // Kết nối label với input qua htmlFor
-                className={`radio-label ${isSelected ? 'selected' : ''}`}
-              >
-                {answer.content}
-              </label>
+        {questions.map((item, questionIndex) => (
+          <div
+            key={item.questionId}
+            className="container-end"
+            ref={questionRefs.current[questionIndex]}
+          >
+            <div className="question">
+              Câu {questionIndex + 1}: {item.content}
             </div>
-          );
-        })}
+            <div className="options">
+              {item.answers?.map((answer, answerIndex) => {
+                const isSelected =
+                  selectedAnswers[questionIndex] === answerIndex;
+                return (
+                  <div key={answer.optionId} className="option">
+                    <input
+                      type="radio"
+                      id={answer.optionId}
+                      name={`question-${questionIndex}`}
+                      value={answerIndex}
+                      checked={isSelected}
+                      onChange={() =>
+                        handleAnswerSelect(questionIndex, answerIndex)
+                      }
+                      className="radio-input"
+                    />
+                    <label
+                      htmlFor={answer.optionId} // Kết nối label với input qua htmlFor
+                      className={`radio-label ${isSelected ? "selected" : ""}`}
+                    >
+                      {answer.content}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        <button className="submit-btn" onClick={handleSubmit}>
+          Nộp bài
+        </button>
       </div>
-    </div>
-  ))}
-  <button className="submit-btn" onClick={handleSubmit}>
-    Nộp bài
-  </button>
-</div>
-
-      <Footer />
     </>
   );
 }

@@ -1,15 +1,12 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import "./index.css";
 import { useAuth } from "../Context/AuthProvider";
 
 export default function Headers() {
   const { isLoggedIn, logout } = useAuth();
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate("/");
   };
 
   return (
@@ -57,7 +54,7 @@ export default function Headers() {
                         </a>
                       </li>
                       <li>
-                        <a onClick={handleLogout} className="log-out">
+                        <a href="/" onClick={handleLogout} className="log-out">
                           Đăng xuất
                         </a>
                       </li>

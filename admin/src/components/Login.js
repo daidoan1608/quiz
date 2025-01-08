@@ -6,14 +6,12 @@ import '../styles/Login.css';
 import { useAuth } from './Context/AuthProvider';
 
 function Login() {
-  const [loading, setLoading] = useState(false);
   const { login } = useAuth(); // Lấy hàm login từ context
   const navigate = useNavigate();
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    setLoading(true);
     try {
       const response = await publicAxios.post("/auth/login", {
         username,
@@ -32,8 +30,6 @@ function Login() {
         error.response?.data?.message ||
         "Đăng nhập thất bại. Vui lòng thử lại!";
       message.error(errorMessage);
-    } finally {
-      setLoading(false);
     }
   };
 

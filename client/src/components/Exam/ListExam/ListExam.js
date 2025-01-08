@@ -1,29 +1,48 @@
 import React, { useEffect, useState } from "react";
-import { publicAxios } from "../../../api/axiosConfig";
+import { authAxios, publicAxios } from "../../../api/axiosConfig";
 import "./ListExam.css";
-import Headers from "../../Headers";
 import { useLocation, useNavigate } from "react-router-dom";
-import Footer from "../../Footer";
 import LoginPrompt from "../../User/LoginPrompt";
 import { useAuth } from "../../Context/AuthProvider";
 
 export default function ExamUsers() {
   const [examDto, setExamUsers] = useState([]);
-  const [completedExams, setCompletedExams] = useState(new Set());
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { subjectId } = location.state || {};
   const { isLoggedIn } = useAuth(); // Lấy trạng thái và hàm logout từ context
+  const [numbersOfExam, setNumbersOfExam] = useState(new Map());
+  const userId = localStorage.getItem("userId")
+  const [completedExams, setCompletedExams] = useState(new Set());
+
   
 
   useEffect(() => {
     getAllExam();
-    const savedCompletedExams =
-      JSON.parse(localStorage.getItem("completedExams")) || [];
-      setCompletedExams(new Set(savedCompletedExams));
+    if (isLoggedIn) {
+      fetchUserExamCounts();
+    }
   }, []);
+
+  const fetchUserExamCounts = async () => {
+    try {
+      const response = await authAxios.get(`/userexams/count/${userId}`);
+      const attemptsMap = new Map();
+      const completedSet = new Set();
+      response.data.forEach((item) => {
+        attemptsMap.set(item.examId, item.attempts);
+        if (item.attempts > 0) {
+          completedSet.add(item.examId); // Đánh dấu bài thi đã hoàn thành
+        }
+      });
+      setNumbersOfExam(attemptsMap);
+      setCompletedExams(completedSet); // Cập nhật danh sách bài thi đã hoàn thành
+    } catch (error) {
+      console.error("Error fetching exam counts:", error);
+    }
+  };
 
   const getAllExam = async () => {
     try {
@@ -60,6 +79,8 @@ export default function ExamUsers() {
 
   const elementExamUsers = examDto.map((item, index) => {
     const isCompleted = completedExams.has(item.examId);
+    const attempts = numbersOfExam.get(item.examId) || 0; // Lấy số lần từ Map, mặc định 0 nếu không có
+
     return (
       <div
         key={index}
@@ -70,8 +91,7 @@ export default function ExamUsers() {
           <h2>{item.title}</h2>
           <h3>{item.description}</h3>
           <div className="details">
-            <span>Lần thi:</span>
-
+            <span>Lần thi: {attempts} </span>
           </div>
         </div>
         <button
@@ -89,8 +109,6 @@ export default function ExamUsers() {
 
   return (
     <div>
-      {/* <Headers /> */}
-      <Headers />
       {showLoginPrompt && (
         <LoginPrompt
           onLoginRedirect={handleLoginRedirect}
@@ -114,7 +132,6 @@ export default function ExamUsers() {
           </div>
         </>
       )}
-      <Footer />
     </div>
   );
 }

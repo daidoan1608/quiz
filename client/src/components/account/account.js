@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "./Account.css";
 import { authAxios } from "../../api/axiosConfig";
-import Headers from "../Headers";
+import Headers from "../Header";
 import Footer from "../Footer";
 import { useAuth } from "../Context/AuthProvider";
 

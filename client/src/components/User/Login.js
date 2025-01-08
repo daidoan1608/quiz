@@ -70,7 +70,6 @@ function Login() {
           <Form.Item>
             <div className="checkbox-container">
               <Checkbox>Ghi nhớ đăng nhập</Checkbox>
-              <Checkbox>Ghi nhớ đăng nhập 123</Checkbox>
               <a href="/forgot" className="forgot-password">
                 Quên mật khẩu?
               </a>

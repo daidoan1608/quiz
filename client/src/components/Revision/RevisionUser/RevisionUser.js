@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
-import Headers2 from "../../Headers";
 import { useNavigate } from "react-router-dom";
 import "./RevisionUser.css";
-import Footer from "../../Footer";
-import Sidebar from "../../User/SideBar";
+import Sidebar from "../../User/Sidebar";
 
 export default function RevisionUser() {
   const [subjects, setSubjects] = useState([]); // Store subject data
   const [selectedSubject, setSelectedSubject] = useState(null); // Store selected subject
+  const [filteredSubjects, setFilteredSubjects] = useState([]); // Môn học đã lọc
   const navigate = useNavigate(); // Initialize useNavigate
 
   // Initial loading
@@ -22,6 +21,7 @@ export default function RevisionUser() {
       const resp = await publicAxios.get("/public/subjects"); // Call API to fetch subjects
       console.log("Dữ liệu nhận được:", resp.data);
       setSubjects(resp.data); // Store data in state
+      setFilteredSubjects(resp.data); // Cập nhật môn học đã lọc ban đầu
     } catch (error) {
       if (error.response) {
         console.error("Lỗi từ server:", error.response.data);
@@ -32,6 +32,17 @@ export default function RevisionUser() {
       }
     }
   };
+
+    // Hàm xử lý tìm kiếm
+    const handleSearchChange = (query) => {
+
+      setSelectedSubject(null);
+
+      const filtered = subjects.filter((subject) =>
+        subject.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredSubjects(filtered); // Cập nhật danh sách môn học đã lọc
+    };
 
   // Handle selecting chapters
   const handleSelectChapters = (subjectId) => {
@@ -48,13 +59,14 @@ export default function RevisionUser() {
 
   return (
     <div>
-      <Headers2 />
       <div className="revision">
         {/* Sidebar */}
         <Sidebar
           subjects={subjects}
           selectedSubject={selectedSubject}
           onSelectSubject={handleSelectSubject}
+          onSearchChange={handleSearchChange}  // Truyền hàm tìm kiếm vào Sidebar
+
         />
 
         {/* Main Content */}
@@ -79,7 +91,7 @@ export default function RevisionUser() {
                 </div>
               ) : (
                 <>
-                  {subjects.map((item) => (
+                  {filteredSubjects.map((item)=> (
                     <div className="card" key={item.subjectId}>
                       <div className="card-content">
                         <h3>{item.name}</h3> {/* Display subject name */}
@@ -98,7 +110,6 @@ export default function RevisionUser() {
           </section>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

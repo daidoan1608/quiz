@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { authAxios } from "../../Api/axiosConfig";
 import Pagination from "../Pagination"; // Sử dụng thành phần Pagination
-import { BiEdit, BiTrash, BiCheckCircle, BiPlus } from "react-icons/bi";
+import { BiEdit, BiTrash, BiPlus } from "react-icons/bi";
 
 export default function GetQuestion() {
   const [questions, setQuestions] = useState([]);
@@ -27,7 +27,6 @@ export default function GetQuestion() {
     );
     if (confirmDelete) {
       try {
-        const token = localStorage.getItem("token");
         await authAxios.delete(`/admin/questions/${questionId}`);
         alert("Xóa câu hỏi thành công!");
         setQuestions((prevQuestions) =>

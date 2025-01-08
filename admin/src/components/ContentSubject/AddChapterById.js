@@ -17,11 +17,7 @@ export default function AddChapter() {
                 name,
                 subjectId,
                 chapterNumber
-            };
-
-            // Lấy Bearer Token từ localStorage
-            const token = localStorage.getItem('token');
-            
+            };            
             // Gửi yêu cầu POST với Bearer Token
             await authAxios.post('/admin/chapters', newChapter);
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { authAxios } from "../../Api/axiosConfig";
 import { useParams, useNavigate } from "react-router-dom";
 import Pagination from "../Pagination"; // Import thành phần Pagination
-import { BiEdit, BiTrash, BiCheckCircle, BiPlus } from "react-icons/bi";
+import { BiEdit, BiTrash, BiPlus } from "react-icons/bi";
 
 export default function ChooseQuestion() {
   const { chapterId } = useParams(); // Lấy chapterId từ URL
@@ -10,9 +10,6 @@ export default function ChooseQuestion() {
   const [questions, setQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
   const [itemsPerPage] = useState(5); // Số câu hỏi hiển thị trên mỗi trang
-
-  // Lấy token từ localStorage hoặc từ nơi bạn lưu trữ token
-  const token = localStorage.getItem("token"); // Ví dụ lấy từ localStorage
 
   // Lấy danh sách câu hỏi theo chapterId
   useEffect(() => {

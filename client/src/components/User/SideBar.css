@@ -42,3 +42,27 @@
 .sidebar button.selected {
     background-color: rgb(0,128,128); /* Highlight selected item */
 }
+
+/* Styling for the search bar */
+.search-bar {
+    width: 100%; /* Full width of the sidebar */
+    padding: 10px; /* Add padding inside the input box */
+    margin-bottom: 15px; /* Space below the search bar */
+    border: 2px solid #ddd; /* Border for the search bar */
+    border-radius: 10px; /* Rounded corners */
+    font-size: 16px; /* Font size for the input text */
+    color: #333; /* Text color */
+    box-sizing: border-box; /* Ensure padding doesn't exceed width */
+}
+
+.search-bar:focus {
+    outline: none; /* Remove default focus outline */
+    border-color: #178FA5; /* Change border color on focus */
+    box-shadow: 0 0 8px rgba(23, 143, 165, 0.5); /* Add a glowing effect */
+}
+
+/* Placeholder styling */
+.search-bar::placeholder {
+    color: #aaa; /* Light gray for placeholder text */
+    font-style: italic; /* Italic placeholder */
+}

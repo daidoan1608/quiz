@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../api/axiosConfig";
 import "./Home.css";
-import Footer from "../Footer";
-import Headers from "../Headers";
 
 export default function Home() {
   const [subjects, setSubjects] = useState([]);
@@ -21,7 +19,7 @@ export default function Home() {
       <div className="category" key={index}>
         <div className="container">
           <div className="course">
-            <a href="/">{item.name}</a>
+            <h3>{item.name}</h3>
           </div>
         </div>
       </div>
@@ -34,7 +32,6 @@ export default function Home() {
 
   return (
     <div>
-      <Headers />
       <main className="main-content">
         <div className="image-container">
           <h1>TRẮC NGHIỆM ONLINE</h1>
@@ -84,7 +81,6 @@ export default function Home() {
         <h2>Những môn học chúng mình hỗ trợ ôn tập</h2>
         {elementSubjects}
       </div>
-      <Footer />
     </div>
   );
 }

@@ -25,6 +25,11 @@ public class UserExamController {
         return ResponseEntity.ok(userExam);
     }
 
+    @GetMapping("userexams/count/{userId}")
+    public ResponseEntity<?> getExamAttemptsByUserId(@PathVariable("userId") UUID userId) {
+        return ResponseEntity.ok(userExamService.getExamAttemptsByUserId(userId));
+    }
+
     @PostMapping("userexams")
     public ResponseEntity<?> createUserExam(@RequestBody UserExamRequest userExamRequest) {
         UserExamDto saveUserExam = userExamService.createUserExam(userExamRequest);

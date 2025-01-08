@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -69,6 +71,7 @@ public class ExamServiceImpl implements ExamService {
         examDto.setQuestions(questionService.getQuestionsByExamId(exam.getExamId()));
         return examDto;
     }
+
 
     @Override
     public ExamDto createExam(ExamDto examDto, int numberOfQuestions) {

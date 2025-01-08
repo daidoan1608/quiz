@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {authAxios} from '../../Api/axiosConfig';
+import StatisticsChart from '../StatisticsChart';
 import './styles.css';
 
 export default function ContentHome() {
   const [statistics, setStatistics] = useState({
+    totalSubjects: 0,
     totalQuestions: 0,
     totalUsers: 0,
     totalExams: 0,
@@ -26,6 +28,10 @@ export default function ContentHome() {
   return (
     <div className="content-container">
       <ul className="content-list">
+      <li className="content-block">
+          <h3 className="content-number">{statistics.totalSubjects}</h3>
+          <p className="content-description">Số môn học</p>
+        </li>
         <li className="content-block">
           <h3 className="content-number">{statistics.totalQuestions}</h3>
           <p className="content-description">Số câu hỏi</p>
@@ -39,6 +45,7 @@ export default function ContentHome() {
           <p className="content-description">Số người dùng</p>
         </li>
       </ul>
+      <StatisticsChart statistics={statistics} />
     </div>
   );
 }

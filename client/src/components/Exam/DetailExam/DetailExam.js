@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import Headers from "../../Headers";
 import { authAxios } from "../../../api/axiosConfig";
 import "./DetailExam.css";
-import Footer from "../../Footer";
 
 export default function DetailExam() {
   const [examData, setExamData] = useState(null);
@@ -88,12 +86,10 @@ export default function DetailExam() {
 
   return (
     <>
-      <Headers />
       <div className="p-4">
         <h2 className="text-xl font-bold mb-4">{examData.title}</h2>
         {renderQuestions()}
       </div>
-      <Footer />
     </>
   );
 }

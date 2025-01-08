@@ -39,3 +39,6 @@
     background: #27374d;
     color: #dde6ed;
 }
+.logout:hover{
+    cursor: pointer;
+}

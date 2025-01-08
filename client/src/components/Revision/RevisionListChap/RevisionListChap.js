@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
-import Headers from "../../Headers";
 import "./RevisionListChap.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoginPrompt from "../../User/LoginPrompt";
-import Footer from "../../Footer";
 import { useAuth } from "../../Context/AuthProvider";
 
 export default function RevisionListChap() {
@@ -99,18 +97,15 @@ export default function RevisionListChap() {
   if (isLoading) {
     return (
       <div>
-        <Headers />
         <div className="subject-detail">
           <div className="loading">Đang tải dữ liệu...</div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div>
-      <Headers />
       {showLoginPrompt && (
         <LoginPrompt
           onLoginRedirect={handleLoginRedirect}
@@ -124,7 +119,6 @@ export default function RevisionListChap() {
           <div className="chapters">{renderChaps(chapters)}</div>
         )}
       </div>
-      <Footer />
     </div>
   );
 }
