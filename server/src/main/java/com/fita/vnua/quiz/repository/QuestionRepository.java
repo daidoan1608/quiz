@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.repository;
 
+import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,4 +33,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     @Query(value = "SELECT q.* FROM Question q JOIN Exam_Question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId", nativeQuery = true)
     List<Question> findQuestionsByExamId(Long examId);
+
+    long countByDifficulty(Question.Difficulty difficulty);
+
+    int countByChapter(Chapter chapter);
+
+    long countByChapterAndDifficulty(Chapter chapter, Question.Difficulty difficulty);
 }

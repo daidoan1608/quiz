@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { authAxios } from "../../Api/axiosConfig";
 import Pagination from "../Pagination"; // Sử dụng thành phần Pagination
 import { BiEdit, BiTrash, BiPlus } from "react-icons/bi";
+import { CiImport } from "react-icons/ci";
+import "../../styles/GetQuestion.css";
 
 export default function GetQuestion() {
   const [questions, setQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const [itemsPerPage] = useState(5); // Số câu hỏi mỗi trang
+  const [itemsPerPage] = useState(10); // Số câu hỏi mỗi trang
 
   useEffect(() => {
     getAllQuestions();
@@ -41,10 +43,10 @@ export default function GetQuestion() {
 
   const renderAnswers = (answers) => {
     const columns = answers.map((answer, index) => (
-      <td key={index}>{answer.content}</td>
+      <td key={index} className="truncated-text">{answer.content}</td>
     ));
     while (columns.length < 4) {
-      columns.push(<td key={`empty-${columns.length}`}>-</td>);
+      columns.push(<td key={`empty-${columns.length}`} className="truncated-text">-</td>);
     }
     return columns;
   };
@@ -56,12 +58,12 @@ export default function GetQuestion() {
 
   const elementQuestion = currentQuestions.map((item) => (
     <tr key={item.questionId}>
-      <td>{item.questionId}</td>
-      <td>{item.content}</td>
-      <td>{item.difficulty}</td>
-      <td>{item.chapterName}</td>
+      <td className="truncated-text">{item.questionId}</td>
+      <td className="truncated-text" title={item.content}>{item.content}</td>
+      <td className="truncated-text">{item.difficulty}</td>
+      <td className="truncated-text">{item.chapterName}</td>
       {renderAnswers(item.answers)}
-      <td>
+      <td className="truncated-text">
         {item.answers.find((answer) => answer.isCorrect)?.content ||
           "No correct answer"}
       </td>
@@ -88,12 +90,21 @@ export default function GetQuestion() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Quản lý câu hỏi</h2>
-        <button
-          className="btn btn-primary"
-          onClick={() => (window.location.href = "/admin/questions")}
-        >
-          <BiPlus />
-        </button>
+        <div>
+          <button
+            className="btn btn-primary me-3"
+            onClick={() => (window.location.href = "/admin/questions")}
+          >
+            <BiPlus />
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => (window.location.href = "/import")}
+          >
+            <CiImport />
+            Import
+          </button>
+        </div>
       </div>
       <table className="table table-bordered">
         <thead>

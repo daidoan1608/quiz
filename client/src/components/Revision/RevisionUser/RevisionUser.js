@@ -6,7 +6,7 @@ import Sidebar from "../../User/Sidebar";
 
 export default function RevisionUser() {
   const [subjects, setSubjects] = useState([]); // Store subject data
-  const [selectedSubject, setSelectedSubject] = useState(null); // Store selected subject
+  const [selectedCategory, setSelectedCategory] = useState(); // Store selected subject
   const [filteredSubjects, setFilteredSubjects] = useState([]); // Môn học đã lọc
   const navigate = useNavigate(); // Initialize useNavigate
 
@@ -36,7 +36,7 @@ export default function RevisionUser() {
     // Hàm xử lý tìm kiếm
     const handleSearchChange = (query) => {
 
-      setSelectedSubject(null);
+      setSelectedCategory(null);
 
       const filtered = subjects.filter((subject) =>
         subject.name.toLowerCase().includes(query.toLowerCase())
@@ -50,47 +50,28 @@ export default function RevisionUser() {
   };
 
   // Handle selecting a subject in sidebar
-  const handleSelectSubject = (subjectId) => {
-    const selected = subjects.find(
-      (subject) => subject.subjectId === subjectId
+  const handleSelectCategory = (categoryId) => {
+    const filtered = subjects.filter(
+      (subject) => subject.categoryId === categoryId
     );
-    setSelectedSubject(selected);
-  };
+    setFilteredSubjects(filtered);
+    setSelectedCategory(categoryId);
+    };
 
   return (
     <div>
       <div className="revision">
         {/* Sidebar */}
         <Sidebar
-          subjects={subjects}
-          selectedSubject={selectedSubject}
-          onSelectSubject={handleSelectSubject}
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleSelectCategory}
           onSearchChange={handleSearchChange}  // Truyền hàm tìm kiếm vào Sidebar
-
         />
 
         {/* Main Content */}
         <div className="content">
           <section className="category-re">
             <div className="container-re">
-              {/* Display details of selected subject */}
-              {selectedSubject ? (
-                <div className="card">
-                  <div className="card-content" key={selectedSubject.subjectId}>
-                    <h3>{selectedSubject.name}</h3>
-                  </div>
-                  <button
-                    className="card-button"
-                    onClick={() =>
-                      // navigate(`/subject/${selectedSubject.subjectId}`)
-                      handleSelectChapters(selectedSubject.subjectId)
-                    }
-                  >
-                    Chọn chương
-                  </button>
-                </div>
-              ) : (
-                <>
                   {filteredSubjects.map((item)=> (
                     <div className="card" key={item.subjectId}>
                       <div className="card-content">
@@ -104,8 +85,6 @@ export default function RevisionUser() {
                       </button>
                     </div>
                   ))}
-                </>
-              )}
             </div>
           </section>
         </div>

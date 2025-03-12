@@ -1,79 +1,159 @@
-import React, { useState } from 'react';
-import {authAxios} from '../../Api/axiosConfig';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { authAxios } from "../../Api/axiosConfig";
+import { useNavigate } from "react-router-dom";
 
 export default function AddChapter() {
-    const [name, setName] = useState('');
-    const [subjectId, setSubjectId] = useState('');
-    const [chapterNumber, setChapterNumber] = useState('');
-    const navigate = useNavigate();
+  const [categories, setCategories] = useState([]); // Danh sách khoa và môn học
+  const [selectedCategory, setSelectedCategory] = useState(""); // Khoa được chọn
+  const [subjects, setSubjects] = useState([]); // Danh sách môn học theo khoa được chọn
+  const [selectedSubject, setSelectedSubject] = useState(""); // Môn học được chọn
+  const [name, setName] = useState(""); // Tên chương
+  const [chapterNumber, setChapterNumber] = useState(""); // Số chương
+  const navigate = useNavigate();
 
-    // Hàm gửi yêu cầu thêm chương
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  useEffect(() => {
+    fetchCategories(); // Lấy danh sách khoa và môn học khi component được mount
+  }, []);
 
-        try {
-            const newChapter = {
-                name,
-                subjectId,
-                chapterNumber
-            };
+  const fetchCategories = async () => {
+    try {
+      const response = await authAxios.get("/public/categories");
+      setCategories(response.data); // Lưu dữ liệu vào state
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách khoa:", error);
+    }
+  };
 
-            // Gửi yêu cầu POST với Bearer Token
-            await authAxios.post('/admin/chapters', newChapter);
-            alert('Thêm chương thành công!');
-            navigate('/subject/chapters');  // Quay lại trang danh sách chương
-        } catch (error) {
-            console.error('Lỗi khi thêm chương:', error.response?.data || error.message);
-            alert('Không thể thêm chương!');
-        }
-    };
+  const handleCategoryChange = (e) => {
+    const categoryId = e.target.value;
+    setSelectedCategory(categoryId); // Lưu khoa được chọn
+    setSelectedSubject(""); // Reset môn học được chọn
 
-    // Hàm quay lại trang danh sách chương
-    const handleCancel = () => {
-        navigate('/subject/chapters');
-    };
-
-    return (
-        <div>
-            <h2>Thêm Chương</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                    <label htmlFor="name" className="form-label">Tên chương</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="subjectId" className="form-label">Mã môn học</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        id="subjectId"
-                        value={subjectId}
-                        onChange={(e) => setSubjectId(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="chapterNumber" className="form-label">Số chương</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        id="chapterNumber"
-                        value={chapterNumber}
-                        onChange={(e) => setChapterNumber(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit" className="btn btn-primary me-2">Thêm Chương</button>
-                <button type="button" className="btn btn-secondary" onClick={handleCancel}>Hủy</button>
-            </form>
-        </div>
+    // Tìm danh sách môn học thuộc khoa được chọn
+    const selectedCategoryData = categories.find(
+      (category) => category.categoryId === parseInt(categoryId)
     );
+    setSubjects(selectedCategoryData ? selectedCategoryData.subjects : []);
+  };
+
+  const handleSubjectChange = (e) => {
+    setSelectedSubject(e.target.value); // Lưu môn học được chọn
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedCategory || !selectedSubject || !name || !chapterNumber) {
+      alert("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+
+    try {
+      const newChapter = {
+        name,
+        subjectId: selectedSubject,
+        chapterNumber,
+      };
+
+      // Gửi dữ liệu đến API
+      await authAxios.post("/admin/chapters", newChapter);
+      alert("Thêm chương thành công!");
+      navigate("/subject/chapters"); // Quay lại trang danh sách chương
+    } catch (error) {
+      console.error("Lỗi khi thêm chương:", error);
+      alert("Không thể thêm chương. Vui lòng thử lại.");
+    }
+  };
+
+  // Hàm quay lại trang danh sách chương
+  const handleCancel = () => {
+    navigate("/subject/chapters");
+  };
+
+  return (
+    <div>
+      <h2>Thêm Chương</h2>
+      <form onSubmit={handleSubmit}>
+        {/* Dropdown chọn khoa */}
+        <div className="mb-3">
+          <label htmlFor="categorySelect" className="form-label">
+            Chọn Khoa
+          </label>
+          <select
+            id="categorySelect"
+            className="form-select"
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+          >
+            <option value="">-- Chọn Khoa --</option>
+            {categories.map((category) => (
+              <option key={category.categoryId} value={category.categoryId}>
+                {category.categoryName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Dropdown chọn môn học */}
+        <div className="mb-3">
+          <label htmlFor="subjectSelect" className="form-label">
+            Chọn Môn Học
+          </label>
+          <select
+            id="subjectSelect"
+            className="form-select"
+            value={selectedSubject}
+            onChange={handleSubjectChange}
+            disabled={!selectedCategory || subjects.length === 0} // Vô hiệu hóa nếu chưa chọn khoa
+          >
+            <option value="">-- Chọn Môn Học --</option>
+            {subjects.map((subject) => (
+              <option key={subject.subjectId} value={subject.subjectId}>
+                {subject.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Tên chương */}
+        <div className="mb-3">
+          <label htmlFor="name" className="form-label">
+            Tên chương
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* Số chương */}
+        <div className="mb-3">
+          <label htmlFor="chapterNumber" className="form-label">
+            Số chương
+          </label>
+          <input
+            type="number"
+            className="form-control"
+            id="chapterNumber"
+            value={chapterNumber}
+            onChange={(e) => setChapterNumber(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* Nút lưu */}
+        <button type="submit" className="btn btn-primary me-2">
+          Thêm Chương
+        </button>
+        {/* Nút hủy */}
+        <button type="button" className="btn btn-secondary" onClick={handleCancel}>
+          Hủy
+        </button>
+      </form>
+    </div>
+  );
 }

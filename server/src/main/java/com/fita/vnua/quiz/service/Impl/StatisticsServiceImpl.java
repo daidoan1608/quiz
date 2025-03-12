@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.repository.ExamRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
@@ -25,8 +26,14 @@ public class StatisticsServiceImpl implements StatisticsService {
         long questionCount = questionRepository.count();
         long userCount = userRepository.count();
         long examCount = examRepository.count();
+        long questionCountByMedium = questionRepository.countByDifficulty(Question.Difficulty.MEDIUM);
+        long questionCountByEasy = questionRepository.countByDifficulty(Question.Difficulty.EASY);
+        long questionCountByHard = questionRepository.countByDifficulty(Question.Difficulty.HARD);
 
         Map<String, Object> stats = new HashMap<>();
+        stats.put("questionCountByMedium", questionCountByMedium);
+        stats.put("questionCountByEasy", questionCountByEasy);
+        stats.put("questionCountByHard", questionCountByHard);
         stats.put("totalSubjects", subjectCount);
         stats.put("totalQuestions", questionCount);
         stats.put("totalUsers", userCount);

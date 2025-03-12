@@ -23,22 +23,18 @@ export default function GetUser() {
   };
 
   // Hàm xóa người dùng
-  const deleteUser = async (userId) => {
-    try {
-      console.log(`Xóa người dùng với ID: ${userId}`);
-      await authAxios.delete(`/admin/delete/users/${userId}`);
-      setUsers((prevUsers) =>
-        prevUsers.filter((user) => user.userId !== userId)
-      );
-      alert("Xóa người dùng thành công!");
-    } catch (error) {
-      console.error(
-        "Lỗi khi xóa người dùng:",
-        error.response?.data || error.message
-      );
-      alert("Không thể xóa người dùng!");
+  const deleteUser = async (userId,userName) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa người dùng ${userName} ?`)) {
+      try {
+        await authAxios.delete(`/admin/delete/users/${userId}`);
+        setUsers((prevUsers) => prevUsers.filter((user) => user.userId !== userId));
+        alert("Xóa người dùng thành công!");
+      } catch (error) {
+        console.error("Lỗi khi xóa người dùng:", error.response?.data || error.message);
+        alert("Không thể xóa người dùng!"); 
+      }
     }
-  };
+   };
 
   // Hàm cập nhật người dùng
   const updateUser = (userId) => {
@@ -104,7 +100,7 @@ export default function GetUser() {
                 </button>
                 <button
                   className="btn btn-danger mx-1"
-                  onClick={() => deleteUser(user.userId)}
+                  onClick={() => deleteUser(user.userId,user.username)}
                 >
                   <BiTrash className="icon" />
                 </button>

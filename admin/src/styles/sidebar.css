@@ -1,44 +1,79 @@
 .menu {
+    width: 240px;
+    background-color: #f4f4f9;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease;
     display: flex;
     flex-direction: column;
-    gap: 2.3rem;
-    height: 94vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
-.logo {
-    text-align: center;
-    padding: 20px;
+.menu.collapsed {
+    width: 60px;
+}
+
+.menu .menu-header {
+    position: sticky;
+    top: 0;
+    background-color: #f4f4f9;
+    z-index: 10;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.menu .menu-toggle-icon {
+    font-size: 30px;
+    cursor: pointer;
     color: #27374d;
-    align-items: center;
-    display: flex;
-    gap: 20px;
 }
 
-.logo .icon{
-    font-size: 1.4rem;
-}
-.menu--list{
+.menu--list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
+    margin-top: 20px;
 }
 
-.menu--list .item{
+.menu--list .item {
     display: flex;
     align-items: center;
-    gap: 20px;
-    font-size: 1.1rem;
+    gap: 15px; /* Giữ khoảng cách giữa icon và text */
+    font-size: 1rem;
     text-decoration: none;
-    font-weight: 600;
-    padding: 10px;
-    border-radius: 10px;
-    transition: 0.3 ease-in-out;
+    font-weight: 500;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease, padding 0.3s ease;
     color: #27374d;
 }
-.menu--list .item:hover{
-    background: #27374d;
-    color: #dde6ed;
+
+.menu--list .item span {
+    white-space: nowrap;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
-.logout:hover{
+
+.menu.collapsed .item {
+    justify-content: center; /* Giữ icon căn giữa */
+}
+
+.menu.collapsed .item .icon {
+    transform: scale(1); /* Giữ nguyên kích thước icon */
+}
+
+.menu.collapsed .item span {
+    opacity: 0; /* Ẩn chữ nhưng giữ không gian */
+    transform: translateX(-20px); /* Di chuyển chữ ra ngoài */
+    pointer-events: none; /* Không cho tương tác với chữ */
+    width: 0; /* Giữ không gian cho chữ */
+    overflow: hidden; /* Ẩn chữ ra ngoài */
+}
+
+.logout:hover {
     cursor: pointer;
 }

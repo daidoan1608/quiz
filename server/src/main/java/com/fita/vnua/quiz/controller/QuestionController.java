@@ -13,6 +13,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QuestionController {
     private final QuestionServiceImpl questionService;
+
+    @GetMapping("/admin/questions/total-questions/{subjectId}")
+    public ResponseEntity<?> getTotalQuestions(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(questionService.totalQuestionBySubject(subjectId));
+    }
+
     @GetMapping("/by-subject/{subjectId}")
     public ResponseEntity<?> getQuestionsBySubject(@PathVariable Long subjectId) {
         List<QuestionDto> questions = questionService.getQuestionsBySubject(subjectId);

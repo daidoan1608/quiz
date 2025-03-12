@@ -1,0 +1,43 @@
+services:
+  backend:
+    build: ./server
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=quiz
+  user:
+    build: ./client
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend
+
+  admin:
+    build: ./admin
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: quiz
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql.init:/docker-entrypoint-initdb.d
+      - db-data:/var/lib/mysql
+volumes:
+  db-data:
