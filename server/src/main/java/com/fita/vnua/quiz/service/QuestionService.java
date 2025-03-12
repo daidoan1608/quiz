@@ -4,9 +4,11 @@ import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface QuestionService {
+
     Optional<QuestionDto> getQuestionById(Long questionId);
 
     List<QuestionDto> getQuestionsByChapterId(Long chapterId);
@@ -24,5 +26,7 @@ public interface QuestionService {
     QuestionDto update(Long questionId, QuestionDto questionDto);
 
     Response delete(Long questionId);
+
+    Map<String, Object> totalQuestionBySubject(Long subjectId);
 
 }

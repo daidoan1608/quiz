@@ -154,18 +154,15 @@ const Account = () => {
   if (loading) {
     return (
       <div>
-        <Headers />
         <div className="account-container">
           <Spin size="large" />
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div>
-      <Headers />
       <div className="account-container">
         <AccountInfo user={user} onChangePassword={() => setShowChangePassword(true)} />
         {showChangePassword && (
@@ -199,8 +196,6 @@ const Account = () => {
           )}
         />
       </div>
-
-      <Footer />
     </div>
   );
 };

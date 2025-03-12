@@ -9,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 public class SubjectDto {
     private Long subjectId;
+    private Long categoryId;
     private String name;
     private String description;
     private List<ChapterDto> chapters;

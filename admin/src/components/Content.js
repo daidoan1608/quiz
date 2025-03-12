@@ -21,6 +21,7 @@ import UpdateSubject from './ContentSubject/UpdateSubject';
 import AddUser from './ContentUser/AddUser';
 import GetUser from './ContentUser/GetUser';
 import UpdateUser from './ContentUser/UpdateUser';
+import ImportInterface from './Import/ImportInterface';
 
 export default function Content() {
   return (
@@ -28,6 +29,8 @@ export default function Content() {
     <div className='content'>
         <ContentHeader />
         <Routes>
+          <Route path='/import' element={<ImportInterface />} />
+
           <Route path='/home' element={<ContentHome />} />
           <Route path='/admin/users' element={<GetUser />} />
           <Route path='/admin/add/user' element={<AddUser />} />
