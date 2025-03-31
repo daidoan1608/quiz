@@ -6,9 +6,12 @@ import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.dto.response.TokenRefreshResponse;
 import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.UserService;
 import com.fita.vnua.quiz.service.impl.AuthService;
+import com.fita.vnua.quiz.service.impl.OtpServiceImpl;
 import com.fita.vnua.quiz.service.impl.UserServiceImpl;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +35,8 @@ public class AuthController {
     private final AuthService authService;
     private final UserServiceImpl userService;
     private final PasswordEncoder passwordEncoder;
+    private final OtpServiceImpl otpServiceImpl;
+    private final UserRepository userRepository;
 
     @PostMapping("/change-password/{userId}")
     public ResponseEntity<?> changePassword(@PathVariable("userId") UUID userId,
@@ -118,7 +123,6 @@ public class AuthController {
             user.setFullName(registerRequest.getFullName());
             user.setRole(User.Role.USER);
             userService.create(user);
-            // Tự động đăng nhập
 
             // Tự động đăng nhập
             try {
@@ -144,6 +148,31 @@ public class AuthController {
             return ResponseEntity.status(500)
                     .body(Map.of("error", "Registration failed: " + e.getMessage()));
         }
+    }
+
+    // Gửi OTP
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(otpServiceImpl.generateOtp(request.getEmail()));
+    }
+
+    // Đặt lại mật khẩu
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody VerifyOtpRequest request) {
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (user == null) return ResponseEntity.badRequest().body("Email không tồn tại.");
+        if (request.getNewPassword().length() < 6) return ResponseEntity.badRequest().body("Mật khẩu phải có ít nhất 6 ký tự.");
+
+        boolean isVerified = otpServiceImpl.verifyOtp(request.getEmail(),request.getOtp());
+        if (isVerified == false) {
+            return ResponseEntity.badRequest().body("Mã OTP không hợp lệ.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        User success = userRepository.save(user);
+        if (null == success) return ResponseEntity.badRequest().body("Email không hợp lệ.");
+        return ResponseEntity.ok("Mật khẩu đã được đặt lại.");
     }
 
 }

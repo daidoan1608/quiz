@@ -16,6 +16,7 @@ import { AuthProvider } from "./components/Context/AuthProvider";
 import GuestOnlyRoute from "./components/Context/GuestOnlyRoute";
 import ProtectedRoute from "./components/Context/ProtectedRoute";
 import Layout from "./components/User/Layout";
+import ForgotPassword from "./components/User/ForgotPassword";
 
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
               </GuestOnlyRoute>
             }
           />
+          <Route path="/forgot" element={<ForgotPassword />} />
           <Route element={<Layout />}>
             <Route
               exact
@@ -62,7 +64,6 @@ function App() {
             <Route exact path="/revision" element={<RevisionUser />} />
             <Route exact path="/chooseExams" element={<ChooseExam />} />
             <Route exact path="/" element={<Home />} />
-
             {/* Ôn Tập */}
             <Route path="/listChap" element={<RevisionListChap />} />
             {/* Danh sách chương */}
