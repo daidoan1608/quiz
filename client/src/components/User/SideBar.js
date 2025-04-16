@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../api/axiosConfig";
-import "./Sidebar.css";
+import '../User/SideBar.css'
+
 
 const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
   const [searchQuery, setSearchQuery] = useState(""); // Từ khóa tìm kiếm

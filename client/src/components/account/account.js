@@ -1,36 +1,90 @@
-import { message, Button, Form, Input, List, Spin } from 'antd';
+import { message, Button, Form, Input, List, Spin, Upload } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "./Account.css";
 import { authAxios } from "../../api/axiosConfig";
-import Headers from "../Header";
-import Footer from "../Footer";
 import { useAuth } from "../Context/AuthProvider";
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 
-const AccountInfo = ({ user, onChangePassword }) => (
-  <div className="account-info">
-    <img
-      src="https://via.placeholder.com/120"
-      alt="Avatar"
-      className="avatar"
-    />
-    <h2>Thông tin người dùng</h2>
-    <div className="account-details">
-      <p><strong>Tên người dùng:</strong> {user.username}</p>
-      <p><strong>Họ và tên:</strong> {user.fullName}</p>
-      <p><strong>Email:</strong> {user.email}</p>
-      <p><strong>Vai trò:</strong> {user.role}</p>
+// Hàm chuyển file thành base64 để preview
+const getBase64 = (img, callback) => {
+  const reader = new FileReader();
+  reader.addEventListener('load', () => callback(reader.result));
+  reader.readAsDataURL(img);
+};
+
+// Kiểm tra file trước khi upload
+const beforeUpload = file => {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+  if (!isJpgOrPng) {
+    message.error('Chỉ được upload file JPG/PNG!');
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error('Ảnh phải nhỏ hơn 2MB!');
+  }
+  return isJpgOrPng && isLt2M;
+};
+
+const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
+  const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState(user.avatarUrl); // Khởi tạo với avatar từ server
+
+  const handleChange = info => {
+    if (info.file.status === 'uploading') {
+      setLoading(true);
+      return;
+    }
+    if (info.file.status === 'done' || !info.file.status) { // Xử lý cả khi không dùng action
+      getBase64(info.file.originFileObj, url => {
+        setLoading(false);
+        setImageUrl(url);
+        onUploadAvatar(info); // Gọi hàm upload lên server
+      });
+    }
+  };
+
+  const uploadButton = (
+    <button style={{ border: 0, background: 'none' }} type="button">
+      {loading ? <LoadingOutlined /> : <PlusOutlined />}
+      <div style={{ marginTop: 8 }}>Tải lên</div>
+    </button>
+  );
+
+  return (
+    <div className="account-info">
+      <Upload
+        name="avatar"
+        listType="picture-circle" // Hiển thị khung tròn
+        className="avatar-uploader"
+        showUploadList={false}
+        beforeUpload={beforeUpload}
+        onChange={handleChange}
+        customRequest={({ file, onSuccess }) => {
+          // Gửi file lên server trong onUploadAvatar, gọi onSuccess để bỏ qua action mặc định
+          setTimeout(() => onSuccess("ok"), 0);
+        }}
+      >
+        {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+      </Upload>
+      <h2>Thông tin người dùng</h2>
+      <div className="account-details">
+        <p><strong>Tên người dùng:</strong> {user.username}</p>
+        <p><strong>Họ và tên:</strong> {user.fullName}</p>
+        <p><strong>Email:</strong> {user.email}</p>
+        <p><strong>Vai trò:</strong> {user.role}</p>
+      </div>
+      <Button
+        onClick={onChangePassword}
+        type="primary"
+        danger
+        className="change-password-btn"
+      >
+        Đổi mật khẩu
+      </Button>
     </div>
-    <Button
-      onClick={onChangePassword}
-      type="primary"
-      danger
-      className="change-password-btn"
-    >
-      Đổi mật khẩu
-    </Button>
-  </div>
-);
+  );
+};
 
 const ChangePasswordForm = ({ onCancel, onSubmit }) => (
   <div className="change-password-form">
@@ -92,7 +146,7 @@ const Account = () => {
   const [user, setUser] = useState(null);
   const [exams, setExams] = useState([]);
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const [loading, setLoading] = useState(true); // Thêm loading
+  const [loading, setLoading] = useState(true);
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -100,7 +154,7 @@ const Account = () => {
     const fetchData = async () => {
       const userId = localStorage.getItem("userId");
       try {
-        setLoading(true); // Bắt đầu loading
+        setLoading(true);
         const [userResponse, examsResponse] = await Promise.all([
           authAxios.get(`/${userId}`),
           authAxios.get(`/userexams/user/${userId}`)
@@ -111,7 +165,7 @@ const Account = () => {
       } catch (error) {
         message.error("Lỗi khi lấy thông tin người dùng hoặc bài thi!");
       } finally {
-        setLoading(false); // Dừng loading
+        setLoading(false);
       }
     };
 
@@ -140,6 +194,30 @@ const Account = () => {
     }
   };
 
+  const handleUploadAvatar = async (info) => {
+    const file = info.file;
+    const userId = localStorage.getItem("userId");
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    try {
+      setLoading(true);
+      const response = await authAxios.post(`/upload-avatar/${userId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const updatedUser = { ...user, avatarUrl: response.data.avatarUrl };
+      setUser(updatedUser);
+      message.success("Tải lên avatar thành công!");
+    } catch (error) {
+      message.error("Tải lên avatar thất bại!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatDateTime = (isoString) => {
     const date = new Date(isoString);
     return new Intl.DateTimeFormat('vi-VN', {
@@ -153,10 +231,8 @@ const Account = () => {
 
   if (loading) {
     return (
-      <div>
-        <div className="account-container">
-          <Spin size="large" />
-        </div>
+      <div className="account-container">
+        <Spin size="large" />
       </div>
     );
   }
@@ -164,7 +240,11 @@ const Account = () => {
   return (
     <div>
       <div className="account-container">
-        <AccountInfo user={user} onChangePassword={() => setShowChangePassword(true)} />
+        <AccountInfo
+          user={user}
+          onChangePassword={() => setShowChangePassword(true)}
+          onUploadAvatar={handleUploadAvatar}
+        />
         {showChangePassword && (
           <>
             <div className="overlay" onClick={() => setShowChangePassword(false)} />

@@ -4,9 +4,9 @@ import { LockOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { publicAxios } from "../../api/axiosConfig";
 import { useAuth } from "../Context/AuthProvider";
-import "./Register.css"; // Importing the CSS file
+import "./Register.css";
 
-const RegisterForm = ({ setShowRegister }) => { // Nhận setShowRegister từ App.js
+const RegisterForm = ({ setShowRegister }) => {
   const { login } = useAuth();
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -20,11 +20,8 @@ const RegisterForm = ({ setShowRegister }) => { // Nhận setShowRegister từ A
         fullName: values.fullName,
       });
 
-      const { accessToken, refreshToken, userId } = response.data;
-      login(accessToken, refreshToken, userId);
-
-      message.success("Đăng ký thành công! Chuyển đến trang chủ");
-      navigate("/");
+      message.success("Đăng ký thành công! Chuyển đến trang đăng nhập");
+      navigate("/login"); 
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại!";
@@ -62,10 +59,10 @@ const RegisterForm = ({ setShowRegister }) => { // Nhận setShowRegister từ A
           <Form.Item
             label="Họ và tên"
             name="fullName"
-            rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
           >
-            <Input 
-              placeholder="Nhập họ và tên" 
+            <Input
+              placeholder="Nhập họ và tên"
               prefix={<UserOutlined className="input-icon" />}
               size="large"
             />
@@ -75,12 +72,12 @@ const RegisterForm = ({ setShowRegister }) => { // Nhận setShowRegister từ A
             label="Email"
             name="email"
             rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' },
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
-            <Input 
-              placeholder="Nhập email" 
+            <Input
+              placeholder="Nhập email"
               prefix={<MailOutlined className="input-icon" />}
               size="large"
             />
@@ -90,12 +87,12 @@ const RegisterForm = ({ setShowRegister }) => { // Nhận setShowRegister từ A
             label="Mật khẩu"
             name="password"
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu!' },
-              { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+              { required: true, message: "Vui lòng nhập mật khẩu!" },
+              { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
             ]}
           >
-            <Input.Password 
-              placeholder="Nhập mật khẩu" 
+            <Input.Password
+              placeholder="Nhập mật khẩu"
               prefix={<LockOutlined className="input-icon" />}
               size="large"
             />
@@ -119,8 +116,8 @@ const RegisterForm = ({ setShowRegister }) => { // Nhận setShowRegister từ A
               }),
             ]}
           >
-            <Input.Password 
-              placeholder="Xác nhận mật khẩu" 
+            <Input.Password
+              placeholder="Xác nhận mật khẩu"
               prefix={<LockOutlined className="input-icon" />}
               size="large"
             />
@@ -139,7 +136,10 @@ const RegisterForm = ({ setShowRegister }) => { // Nhận setShowRegister từ A
           </Form.Item>
 
           <div className="login-link">
-            Đã có tài khoản? <a href="/login" className="login">Đăng nhập ngay!</a>
+            Đã có tài khoản?{" "}
+            <a href="/login" className="login">
+              Đăng nhập ngay!
+            </a>
           </div>
         </Form>
       </div>

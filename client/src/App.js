@@ -17,6 +17,7 @@ import GuestOnlyRoute from "./components/Context/GuestOnlyRoute";
 import ProtectedRoute from "./components/Context/ProtectedRoute";
 import Layout from "./components/User/Layout";
 import ForgotPassword from "./components/User/ForgotPassword";
+import Rank from "./components/Rank/Rank";
 
 
 function App() {
@@ -74,6 +75,8 @@ function App() {
             <Route exact path="/detail" element={<DetailExam />} />
             {/* Chi tiết bài thi */}
             <Route exact path="/result" element={<Result />} />
+            {/* Kết quả thi */}
+            <Route exact path="/rank" element={<Rank />} />
             {/* Kết quả thi */}
           </Route>
         </Routes>

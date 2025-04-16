@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -8,8 +8,36 @@ import { useAuth } from "../Context/AuthProvider";
 
 function Login() {
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth(); // Lấy hàm login từ context
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const [form] = Form.useForm();
+
+  // Khởi tạo giá trị ban đầu từ localStorage
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("rememberedUsername"); // Đảm bảo tên key khớp
+    const isRemembered = localStorage.getItem("rememberMe") === "true"; // Đảm bảo tên key khớp
+
+    console.log("savedUsername:", savedUsername, "isRemembered:", isRemembered); // Debug
+
+    if (savedUsername && isRemembered) {
+      form.setFieldsValue({
+        username: savedUsername,
+        remember: true,
+      });
+    } else {
+      form.setFieldsValue({
+        username: "",
+        remember: false,
+      });
+    }
+  }, [form]);
+
+  const handleRememberChange = (e) => {
+    if (!e.target.checked) {
+      localStorage.removeItem("rememberedUsername");
+      localStorage.removeItem("rememberMe");
+    }
+  };
 
   const handleSubmit = async (values) => {
     setLoading(true);
@@ -20,6 +48,15 @@ function Login() {
       });
 
       const { accessToken, refreshToken, userId } = response.data;
+
+      if (values.remember) {
+        localStorage.setItem("rememberedUsername", values.username);
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        localStorage.removeItem("rememberedUsername");
+        localStorage.removeItem("rememberMe");
+      }
+
       login(accessToken, refreshToken, userId);
       navigate("/");
     } catch (error) {
@@ -41,9 +78,10 @@ function Login() {
         </div>
 
         <Form
+          form={form}
           name="login"
           onFinish={handleSubmit}
-          initialValues={{ remember: true }}
+          initialValues={{ remember: false }}
         >
           <Form.Item
             name="username"
@@ -67,9 +105,11 @@ function Login() {
               size="large"
             />
           </Form.Item>
-          <Form.Item>
+          <Form.Item name="remember" valuePropName="checked">
             <div className="checkbox-container">
-              <Checkbox>Ghi nhớ đăng nhập</Checkbox>
+              <Checkbox onChange={handleRememberChange}>
+                Ghi nhớ đăng nhập
+              </Checkbox>
               <a href="/forgot" className="forgot-password">
                 Quên mật khẩu?
               </a>
