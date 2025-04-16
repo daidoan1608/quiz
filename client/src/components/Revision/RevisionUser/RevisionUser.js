@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./RevisionUser.css";
-import Sidebar from "../../User/Sidebar";
+import Sidebar from "../../User/SideBar";
 
 export default function RevisionUser() {
   const [subjects, setSubjects] = useState([]); // Store subject data

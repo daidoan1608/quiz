@@ -31,9 +31,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // Chỉ xóa thông tin phiên đăng nhập, giữ lại "Ghi nhớ đăng nhập"
     localStorage.removeItem('accessToken');
     sessionStorage.removeItem('refreshToken');
     localStorage.removeItem('userId');
+    // Không xóa 'rememberedUsername' và 'rememberMe'
     setIsLoggedIn(false);
     setUser(null);
     message.success('Đăng xuất thành công!');
