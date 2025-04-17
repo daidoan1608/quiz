@@ -37,6 +37,7 @@ public class UserExamController {
             return ResponseEntity.ok(Response.builder().responseCode("400").responseMessage("User exam not created").build());
         }
         return ResponseEntity.ok(saveUserExam);
+        
     }
 
     @GetMapping("userexams/user/{userId}")

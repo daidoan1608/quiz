@@ -73,21 +73,36 @@ const ImportInterface = () => {
     setSelectedFile(event.target.files[0]);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!selectedCategory || !selectedSubject || !selectedChapter || !selectedFile) {
       alert("Vui lòng chọn đầy đủ các trường và file trước khi upload.");
       return;
     }
-
-    // Xử lý logic tải lên
-    alert(`
-      Đã chọn:
-      - Khoa: ${selectedCategory}
-      - Môn học: ${selectedSubject}
-      - Chapter: ${selectedChapter}
-      - File: ${selectedFile.name}
-    `);
+  
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("categoryId", selectedCategory);
+    formData.append("subjectId", selectedSubject);
+    formData.append("chapterId", selectedChapter);
+  
+    try {
+      const response = await authAxios.post("/admin/questions/import", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.status === 200) {
+        // Handle success response
+        console.log("Upload thành công:", response.data);
+        alert("Upload thành công!");
+        navigate("/admin/questions");
+      }
+    } catch (error) {
+      console.error("Lỗi khi upload file:", error);
+      alert("Lỗi khi upload file. Vui lòng thử lại.");
+    }
   };
+  
 
   return (
     <div className="container mt-5">

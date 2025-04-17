@@ -36,7 +36,12 @@ const RegisterForm = ({ setShowRegister }) => { // Nhận setShowRegister từ A
     <div className="register-container">
       <div className="form-register">
         <div className="logo-container">
-          <img src="/logoschool.png" alt="Logo" className="logo-form" />
+          <img src="/logoschool.png"
+          alt="Logo"
+          className="logo-form"
+          onClick={() => navigate("/")} // Khi click vào logo sẽ về trang chủ
+          style={{ cursor: "pointer" }} // Thêm hiệu ứng con trỏ để người dùng biết có thể click
+          />
           <h2 className="register-title">ĐĂNG KÝ</h2>
         </div>
 

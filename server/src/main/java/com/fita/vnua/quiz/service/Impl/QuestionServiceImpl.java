@@ -12,11 +12,14 @@ import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.QuestionService;
+import com.fita.vnua.quiz.utils.ExcelHelper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,6 +74,36 @@ public class QuestionServiceImpl implements QuestionService {
                 .map(question -> modelMapper.map(question, QuestionDto.class))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void importQuestionsFromExcel(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException {
+        List<QuestionDto> dtos = ExcelHelper.excelToQuestions(file.getInputStream());
+
+        List<Question> questions = dtos.stream().map(dto -> {
+            Question question = new Question();
+            question.setContent(dto.getContent());
+            question.setDifficulty(Question.Difficulty.valueOf(dto.getDifficulty().toUpperCase()));
+
+            Chapter chapter = chapterRepository.findById(chapterId)
+                    .orElseThrow(() -> new RuntimeException("Chapter không tồn tại"));
+            question.setChapter(chapter);
+
+            List<Answer> answers = dto.getAnswers().stream().map(ansDto -> {
+                Answer answer = new Answer();
+                answer.setContent(ansDto.getContent());
+                answer.setIsCorrect(ansDto.getIsCorrect());
+                answer.setQuestion(question);
+                return answer;
+            }).collect(Collectors.toList());
+
+            question.setAnswers(answers);
+            return question;
+        }).collect(Collectors.toList());
+
+        questionRepository.saveAll(questions);
+    }
+
+
 
 
     @Override
