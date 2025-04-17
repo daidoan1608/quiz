@@ -32,6 +32,15 @@ function Login() {
       });
 
       const { accessToken, refreshToken, userId } = response.data;
+
+      if (values.remember) {
+        localStorage.setItem("rememberedUsername", values.username);
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        localStorage.removeItem("rememberedUsername");
+        localStorage.removeItem("rememberMe");
+      }
+
       login(accessToken, refreshToken, userId);
 
       if (remember) {
@@ -70,14 +79,27 @@ function Login() {
           <h2 className="login-title">ĐĂNG NHẬP</h2>
         </div>
 
-        <Form form={form} name="login" onFinish={handleSubmit}>
-          <Form.Item name="username" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập!" }]}> 
-            <Input prefix={<UserOutlined className="input-icon" />} placeholder="Tên đăng nhập" size="large" />
+        <Form
+          name="login"
+          onFinish={handleSubmit}
+          initialValues={{ remember: true }}
+        >
+          <Form.Item
+            name="username"
+            rules={[
+              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined className="input-icon" />}
+              placeholder="Tên đăng nhập"
+              size="large"
+            />
           </Form.Item>
           <Form.Item name="password" rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}> 
             <Input.Password prefix={<LockOutlined className="input-icon" />} placeholder="Mật khẩu" size="large" />
           </Form.Item>
-          <Form.Item>
+          <Form.Item name="remember" valuePropName="checked">
             <div className="checkbox-container">
               <Checkbox checked={remember} onChange={(e) => setRemember(e.target.checked)}>Ghi nhớ đăng nhập</Checkbox>
               <a href="/forgot" className="forgot-password">Quên mật khẩu?</a>
