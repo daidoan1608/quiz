@@ -35,8 +35,6 @@ public class AuthController {
     private final AuthService authService;
     private final UserServiceImpl userService;
     private final PasswordEncoder passwordEncoder;
-    private final OtpServiceImpl otpServiceImpl;
-    private final UserRepository userRepository;
 
     @PostMapping("/change-password/{userId}")
     public ResponseEntity<?> changePassword(@PathVariable("userId") UUID userId,
@@ -46,7 +44,7 @@ public class AuthController {
             UserDto userDto = userService.getUserById(userId);
 
             // Kiểm tra quyền sở hữu
-            if (!passwordEncoder.matches(request.getOldPassword(),userDto.getPassword()) || !userDto.getUserId().equals(userId)) {
+            if (!passwordEncoder.matches(request.getOldPassword(), userDto.getPassword()) || !userDto.getUserId().equals(userId)) {
                 return ResponseEntity.status(403).body(Map.of("error", "You are not authorized to change this password"));
             }
 
@@ -149,30 +147,4 @@ public class AuthController {
                     .body(Map.of("error", "Registration failed: " + e.getMessage()));
         }
     }
-
-    // Gửi OTP
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        return ResponseEntity.ok(otpServiceImpl.generateOtp(request.getEmail()));
-    }
-
-    // Đặt lại mật khẩu
-    @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody VerifyOtpRequest request) {
-        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
-        if (user == null) return ResponseEntity.badRequest().body("Email không tồn tại.");
-        if (request.getNewPassword().length() < 6) return ResponseEntity.badRequest().body("Mật khẩu phải có ít nhất 6 ký tự.");
-
-        boolean isVerified = otpServiceImpl.verifyOtp(request.getEmail(),request.getOtp());
-        if (isVerified == false) {
-            return ResponseEntity.badRequest().body("Mã OTP không hợp lệ.");
-        }
-
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-
-        User success = userRepository.save(user);
-        if (null == success) return ResponseEntity.badRequest().body("Email không hợp lệ.");
-        return ResponseEntity.ok("Mật khẩu đã được đặt lại.");
-    }
-
 }

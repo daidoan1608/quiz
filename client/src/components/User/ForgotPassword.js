@@ -10,13 +10,14 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Nhập email, 2: Nhập OTP, 3: Đặt lại mật khẩu
   const [email, setEmail] = useState(""); // Lưu email để dùng ở các bước sau
+  const [token, setToken] = useState(""); // Lưu email để dùng ở các bước sau
   const navigate = useNavigate();
 
   // Bước 1: Gửi yêu cầu OTP qua email
   const handleSendOtp = async (values) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post("/auth/forgot-password", {
+      const response = await publicAxios.post("/api/otp/send", {
         email: values.email,
       });
       if (response.status === 200) {
@@ -39,12 +40,13 @@ const ForgotPassword = () => {
   const handleVerifyOtp = async (values) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post("/auth/verify-otp", {
-        email,
+      const response = await publicAxios.post("/api/otp/verify", {
+        email: email,
         otp: values.otp,
       });
       if (response.status === 200) {
         message.success("Xác nhận OTP thành công!", 3);
+        setToken(values.resetToken); // Lưu token
         setStep(3); // Chuyển sang bước đặt lại mật khẩu
       }
     } catch (error) {
@@ -58,8 +60,8 @@ const ForgotPassword = () => {
   const handleResetPassword = async (values) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post("/auth/reset-password", {
-        email,
+      const response = await publicAxios.post("/api/otp/reset", {
+        resetToken: token,
         newPassword: values.password,
       });
       if (response.status === 200) {

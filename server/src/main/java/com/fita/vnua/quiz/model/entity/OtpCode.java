@@ -25,4 +25,11 @@ public class OtpCode {
     @Column(nullable = false)
     private Instant otpExpiry; // Thời gian hết hạn
 
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private Instant resetTokenExpiry;
+
+
 }

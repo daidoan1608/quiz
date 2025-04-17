@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface OtpCodeRepository extends JpaRepository<OtpCode, Long> {
     Optional<OtpCode> findByUser(Optional<User> user);
-
+    Optional<OtpCode> findByResetToken(String resetToken);
     @Modifying
     @Query("DELETE FROM OtpCode o WHERE o.user.userId = :userId")
     void deleteByUserId(@Param("userId") UUID userId);

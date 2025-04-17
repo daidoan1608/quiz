@@ -8,6 +8,7 @@ import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.OtpService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -22,6 +23,7 @@ public class OtpServiceImpl implements OtpService {
     private final OtpCodeRepository otpCodeRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     // Gửi OTP
     @Transactional
@@ -34,6 +36,7 @@ public class OtpServiceImpl implements OtpService {
         otpCodeRepository.deleteByUserId(userId); // Xóa OTP cũ nếu có
 
         String otp = String.format("%06d", new Random().nextInt(1000000));
+
         OtpCodeDto otpCode = new OtpCodeDto();
         otpCode.setOtp(otp);
         otpCode.setOtpExpiry(Instant.now().plus(5, ChronoUnit.MINUTES));
@@ -52,22 +55,48 @@ public class OtpServiceImpl implements OtpService {
 
     // Xác minh OTP
     @Transactional
-    public boolean verifyOtp(String email, String otp) {
+    public String verifyOtp(String email, String otp) {
         Optional<User> user = userRepository.findByEmail(email);
-        if (user == null) return false;
+        if (user.isEmpty()) return "Email không tồn tại.";
 
         UUID userId = user.get().getUserId();
         Optional<OtpCode> otpCodeOpt = otpCodeRepository.findByUser(user);
-        if (otpCodeOpt.isEmpty()) return false;
+        if (otpCodeOpt.isEmpty()) return "Không tìm thấy mã OTP.";
 
         OtpCode otpCode = otpCodeOpt.get();
-        if (!otpCode.getOtp().equals(otp) || otpCode.getOtpExpiry().isBefore(Instant.now())) {
-            return false;
+
+        if (!otpCode.getOtp().equals(otp))
+            return "Mã OTP không chính xác.";
+
+        if (otpCode.getOtpExpiry().isBefore(Instant.now()))
+            return "Mã OTP đã hết hạn.";
+
+        String resetToken = UUID.randomUUID().toString();
+        otpCode.setResetToken(resetToken);
+        otpCode.setResetTokenExpiry(Instant.now().plus(15, ChronoUnit.MINUTES));
+        otpCodeRepository.save(otpCode);
+
+        return resetToken;
+    }
+
+    @Transactional
+    public String resetPassword(String resetToken, String newPassword) {
+        Optional<OtpCode> otpCodeOpt = otpCodeRepository.findByResetToken(resetToken);
+        if (otpCodeOpt.isEmpty()) return "Token không hợp lệ.";
+
+        OtpCode otpCode = otpCodeOpt.get();
+        if (otpCode.getResetTokenExpiry() != null &&
+                otpCode.getResetTokenExpiry().isBefore(Instant.now())) {
+            return "Token đã hết hạn.";
         }
 
-        otpCodeRepository.deleteByUserId(userId); // Xóa OTP sau khi sử dụng
+        User user = otpCode.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword)); // Đảm bảo đã inject `PasswordEncoder`
+        userRepository.save(user);
 
-        return true;
+        otpCodeRepository.deleteByUserId(user.getUserId()); // Xoá token sau khi dùng
+
+        return "Đặt lại mật khẩu thành công.";
     }
 }
 

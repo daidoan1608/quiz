@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/public/**").permitAll()  // Public authentication endpoints
                         .requestMatchers("/auth/**").permitAll()  // Public authentication endpoints
+                        .requestMatchers("/api/otp/**").permitAll()  // Public OTP endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")  // Admin-only endpoints
                         .requestMatchers("/mod/**").hasAnyRole("ADMIN", "MOD")  // Moderator or admin endpoints
                         .anyRequest().authenticated()
