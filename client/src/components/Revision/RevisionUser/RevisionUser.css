@@ -3,30 +3,6 @@
   height: 100vh; /* Full chiều cao của viewport */
   width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
 }
-
-.content {
-  flex-grow: 1; /* Cho phép phần nội dung chiếm không gian còn lại */
-  padding: 20px; /* Khoảng cách giữa các phần tử trong content */
-  background-color: #f9f9f9; /* Màu nền của phần nội dung */
-  overflow-y: auto; /* Cho phép cuộn khi nội dung vượt quá chiều cao */
-  display: flex;
-  flex-direction: column; /* Sắp xếp nội dung theo chiều dọc */
-}
-
-.category-re {
-  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
-  display: flex;
-  justify-content: center; /* Căn giữa nội dung */
-}
-
-.container-re {
-  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
-  max-width: 600px; /* Giới hạn chiều rộng của container */
-  margin: 0 auto; /* Căn giữa */
-  display: flex;
-  flex-wrap: wrap; /* Cho phép các phần tử bên trong xuống dòng khi không đủ không gian */
-}
-
 .card {
   display: flex; /* Sử dụng flex để sắp xếp các phần tử bên trong card */
   flex-direction: column; /* Sắp xếp theo chiều dọc */
@@ -69,3 +45,4 @@
 .card-button:hover {
   background-color: #0056b3; /* Màu nền khi hover */
 }
+

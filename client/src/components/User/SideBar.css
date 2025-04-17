@@ -29,7 +29,7 @@
     padding: 10px 15px; /* Add padding for button */
     text-align: left; /* Align text to the left */
     width: 100%; /* Full width */
-    font-size: 18px;
+    font-size: 22px;
 }
 
 .sidebar button:hover {
@@ -40,7 +40,8 @@
 
 /* Optional styling for active or selected button */
 .sidebar button.selected {
-    background-color: rgb(0,128,128); /* Highlight selected item */
+    background-color: #519fc9;
+    color: #ffffff; /* Highlight selected item */
 }
 
 /* Styling for the search bar */

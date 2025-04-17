@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./ChooseExam.css";
-import Sidebar from "../../User/Sidebar";
+import Sidebar from "../../User/SideBar";
 
 export default function ChooseExam() {
   const [subjects, setSubjects] = useState([]);

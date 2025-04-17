@@ -1,0 +1,76 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .Rank {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  h1 {
+    color: #519fc9;
+  }
+  
+  .filter {
+    margin-bottom: 20px;
+  }
+  
+  .filter label {
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  
+  .filter select {
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .leaderboard {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  th {
+    background-color: #1a73e8;
+    color: white;
+  }
+  
+  tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .top-rank {
+    background-color: #e8f0fe;
+    font-weight: bold;
+  }
+  
+  .top-rank td:first-child::before {
+    content: '🏅';
+    margin-right: 5px;
+  }
+  
+  .Toastify__toast--success {
+    background-color: #4caf50 !important;
+    color: white !important;
+  }
+  
+  .Toastify__toast--warning {
+    background-color: #ff9800 !important;
+    color: white !important;
+  }
