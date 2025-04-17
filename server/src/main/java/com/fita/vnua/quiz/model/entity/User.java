@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.security.AuthProvider;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +24,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
     @Column(unique = true)
@@ -35,6 +36,15 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String fullName;
 
+    @Column(nullable = true)
+    private String avatarUrl;
+
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    public enum AuthProvider {
+        LOCAL, GOOGLE, FACEBOOK
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -3,6 +3,7 @@ import React from "react";
 import Headers from "../Header"; // Đảm bảo import Header của bạn
 import { Outlet } from "react-router-dom"; // Outlet dùng để render các component con
 import Footer from "../Footer";
+import ChatWidget from "./ChatWidget";
 
 const Layout = () => {
   return (

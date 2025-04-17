@@ -6,6 +6,7 @@ import com.fita.vnua.quiz.service.impl.QuestionServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -13,6 +14,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QuestionController {
     private final QuestionServiceImpl questionService;
+
+    @PostMapping("admin/questions/import")
+    public ResponseEntity<String> importQuestions(@RequestParam("file") MultipartFile file,
+                                                  @RequestParam("categoryId") Long categoryId,
+                                                  @RequestParam("subjectId") Long subjectId,
+                                                  @RequestParam("chapterId") Long chapterId) {
+        try {
+            questionService.importQuestionsFromExcel(file, categoryId, subjectId, chapterId);
+            return ResponseEntity.ok("Import câu hỏi thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi import: " + e.getMessage());
+        }
+    }
+
 
     @GetMapping("/admin/questions/total-questions/{subjectId}")
     public ResponseEntity<?> getTotalQuestions(@PathVariable Long subjectId) {

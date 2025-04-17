@@ -10,7 +10,7 @@ public class Answer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long optionId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // Tối ưu hiệu suất với FetchType.LAZY
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
@@ -19,4 +19,5 @@ public class Answer {
 
     @Column(nullable = false)
     private Boolean isCorrect;
+
 }
