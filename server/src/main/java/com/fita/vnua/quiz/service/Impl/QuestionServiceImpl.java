@@ -6,7 +6,6 @@ import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.entity.Answer;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
-import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.repository.AnswerRepository;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
@@ -104,8 +103,6 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
 
-
-
     @Override
     public QuestionDto create(QuestionDto questionDto) {
         Question question = new Question();
@@ -146,7 +143,6 @@ public class QuestionServiceImpl implements QuestionService {
             }
         }
 
-
         return questionDto;
     }
 
@@ -172,7 +168,6 @@ public class QuestionServiceImpl implements QuestionService {
                 answerRepository.save(answer);
             }
         }
-
         // Lưu câu hỏi đã cập nhật
         Question question = questionRepository.save(existingQuestion);
 
@@ -198,14 +193,14 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Map<String, Object> totalQuestionBySubject(Long subjectId) {
         List<Chapter> chapters = chapterRepository.findBySubject(subjectId);
-        int totalQuestion = 0,totalMedium = 0,totalEasy = 0,totalHard = 0;
-        Map<String,Integer> tolalQuestionByChapter = new java.util.HashMap<>(Map.of());
+        int totalQuestion = 0, totalMedium = 0, totalEasy = 0, totalHard = 0;
+        Map<String, Integer> tolalQuestionByChapter = new java.util.HashMap<>(Map.of());
         for (Chapter chapter : chapters) {
-            tolalQuestionByChapter.put(chapter.getName(),(int)questionRepository.countByChapter(chapter));
+            tolalQuestionByChapter.put(chapter.getName(), (int) questionRepository.countByChapter(chapter));
             totalQuestion += questionRepository.countByChapter(chapter);
-            totalMedium += (int)questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.MEDIUM);
-            totalEasy += (int)questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.EASY);
-            totalHard += (int)questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.HARD);
+            totalMedium += (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.MEDIUM);
+            totalEasy += (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.EASY);
+            totalHard += (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.HARD);
         }
         return Map.of("totalQuestion", totalQuestion, "totalMedium", totalMedium, "totalEasy", totalEasy, "totalHard", totalHard, "totalQuestionByChapter", tolalQuestionByChapter);
     }

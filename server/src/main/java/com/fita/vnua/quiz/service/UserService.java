@@ -8,12 +8,20 @@ import java.util.UUID;
 
 public interface UserService {
     List<UserDto> getAllUsers();
+
     UserDto getUserById(UUID userId);
+
     List<UserDto> getUserBySearchKey(String keyword);
+
     UserDto create(UserDto userDto);
+
     UserDto update(UUID userId, UserDto userDto);
+
     Response delete(UUID userId);
+
     boolean isUsernameExisted(String username);
+
     boolean isEmailExisted(String email);
+
     UserDto getUserByUsername(String username);
 }

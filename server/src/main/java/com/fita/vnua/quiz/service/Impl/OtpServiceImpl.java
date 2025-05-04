@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -29,7 +30,7 @@ public class OtpServiceImpl implements OtpService {
     @Transactional
     public String generateOtp(String email) {
         Optional<User> user = userRepository.findByEmail(email);
-        if (user == null) return "Email không tồn tại.";
+        if (user.isEmpty()) return "Email không tồn tại.";
 
         UUID userId = user.get().getUserId();
 

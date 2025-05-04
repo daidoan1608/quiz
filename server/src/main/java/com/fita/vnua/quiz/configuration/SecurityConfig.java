@@ -33,11 +33,16 @@ public class SecurityConfig {
                 .cors(cors -> { /* Nếu bạn đã cấu hình WebMvcConfigurer, không cần cấu hình thêm ở đây */ })
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/public/**").permitAll()  // Public authentication endpoints
-                        .requestMatchers("/auth/**").permitAll()  // Public authentication endpoints
-                        .requestMatchers("/api/otp/**").permitAll()  // Public OTP endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN")  // Admin-only endpoints
-                        .requestMatchers("/mod/**").hasAnyRole("ADMIN", "MOD")  // Moderator or admin endpoints
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()  // Public authentication endpoints
+                        .requestMatchers("/api/v1/otp/**").permitAll()  // Public OTP endpoints
+                        .requestMatchers("/api/v1/public/**").permitAll()
+                        // Admin-only endpoints
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        // Mod and Admin endpoints
+                        .requestMatchers("/api/v1/mod/**").hasAnyRole("ADMIN", "MOD")
+                        // User and above
+                        .requestMatchers("/api/v1/user/**").hasAnyRole("ADMIN", "MOD", "USER") // Moderator or admin endpoints
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

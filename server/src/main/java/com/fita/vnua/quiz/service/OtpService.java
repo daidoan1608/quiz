@@ -5,4 +5,5 @@ public interface OtpService {
 
     String verifyOtp(String email, String otp);
 
+    String resetPassword(String resetToken, String newPassword);
 }

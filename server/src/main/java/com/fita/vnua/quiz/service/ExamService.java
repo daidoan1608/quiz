@@ -3,8 +3,6 @@ package com.fita.vnua.quiz.service;
 import com.fita.vnua.quiz.model.dto.ExamDto;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public interface ExamService {
     List<ExamDto> getAllExams();
