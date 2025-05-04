@@ -7,21 +7,55 @@ import com.fita.vnua.quiz.repository.RefreshTokenRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
 
+import com.fita.vnua.quiz.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthServiceImpl implements AuthService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
+
+    public AuthResponse createAuthResponse(OAuth2User oAuth2User) {
+        // Lấy thông tin người dùng từ OAuth2User
+        String username = oAuth2User.getAttribute("name");
+        String email = oAuth2User.getAttribute("email");
+
+        // Kiểm tra nếu người dùng đã có trong hệ thống, nếu chưa thì tạo mới
+        User user = userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setUsername(username);
+                    newUser.setEmail(email);
+                    newUser.setFullName(username);  // Thêm fullName từ OAuth2User
+                    return userRepository.save(newUser);
+                });
+
+        // Tạo AccessToken và RefreshToken
+        String accessToken = generateAccessToken(user);
+        String refreshToken = generateRefreshToken(user);
+
+        // Trả về AuthResponse
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .build();
+    }
 
     public AuthResponse createAuthResponse(UserDetails userDetails) {
         // Tạo AccessToken và RefreshToken

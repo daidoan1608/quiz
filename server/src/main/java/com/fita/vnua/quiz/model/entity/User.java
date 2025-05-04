@@ -43,7 +43,7 @@ public class User implements UserDetails {
     private AuthProvider authProvider = AuthProvider.LOCAL;
 
     public enum AuthProvider {
-        LOCAL, GOOGLE, FACEBOOK
+        LOCAL, GOOGLE, FACEBOOK, GITHUB
     }
 
     @Override

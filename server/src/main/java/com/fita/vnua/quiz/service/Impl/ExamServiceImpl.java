@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +85,7 @@ public class ExamServiceImpl implements ExamService {
         examDto.setExamId(exam.getExamId());
         examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
         // Lấy câu hỏi ngẫu nhiên
-        List<QuestionDto> questionDtos = questionService.getQuestionsBySubjectAndNumber(examDto.getSubjectId(),numberOfQuestions);
+        List<QuestionDto> questionDtos = questionService.getQuestionsBySubjectAndNumber(examDto.getSubjectId(), numberOfQuestions);
         List<Question> randomQuestions = questionDtos.stream().map(questionDto -> modelMapper.map(questionDto, Question.class)).toList();
 
         examDto.setQuestions(questionDtos);
