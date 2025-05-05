@@ -16,7 +16,7 @@ public class SubjectController {
     private final SubjectService subjectService;
 
     // Lấy tất cả các môn học (public)
-    @GetMapping("public//subjects")
+    @GetMapping("public/subjects")
     public ResponseEntity<ApiResponse<List<SubjectDto>>> getAllSubject() {
         try {
             List<SubjectDto> subjects = subjectService.getAllSubject();

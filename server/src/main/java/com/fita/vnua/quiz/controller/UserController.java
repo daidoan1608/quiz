@@ -49,7 +49,7 @@ public class UserController {
     }
 
     // Lấy người dùng theo userId (admin)
-    @GetMapping("users/{userId}")
+    @GetMapping("user/{userId}")
     @Operation(summary = "Get user by ID", description = "This API fetches a user by their ID")
     public ResponseEntity<ApiResponse<UserDto>> getUserById(
             @Parameter(description  = "User ID", required = true) @PathVariable("userId") UUID userId) {

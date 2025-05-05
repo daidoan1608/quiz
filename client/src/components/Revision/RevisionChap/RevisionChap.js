@@ -22,13 +22,13 @@ export default function RevisionChap1() {
         setIsLoading(true);
         setError(null);
         const response = await publicAxios.get(
-          `/public/chapter/questions/${chapterId}`
+          `/public/questions/chapter/${chapterId}`
         );
         if (response.data.responseCode === "404") {
           setError(response.data.responseMessage);
           setQuestionAnswers([]);
         } else {
-          setQuestionAnswers(response.data);
+          setQuestionAnswers(response.data.data);
         }
       } catch (error) {
         setError("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.");

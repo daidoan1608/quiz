@@ -15,11 +15,11 @@ export default function DetailExam() {
     const fetchData = async () => {
       try {
         const [examResponse, userAnswersResponse] = await Promise.all([
-          authAxios.get(`/exams/${examId}`),
-          authAxios.get(`/userexams/${userExamId}`),
+          authAxios.get(`public/exams/${examId}`),
+          authAxios.get(`user/userexams/${userExamId}`),
         ]);
-        setExamData(examResponse.data);
-        setUserAnswers(userAnswersResponse.data);
+        setExamData(examResponse.data.data);
+        setUserAnswers(userAnswersResponse.data.data);
       } catch (error) {
         setError(error.message || "Error fetching exam data");
       } finally {

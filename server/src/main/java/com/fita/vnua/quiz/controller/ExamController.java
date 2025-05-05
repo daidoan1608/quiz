@@ -42,7 +42,7 @@ public class ExamController {
     }
 
     // Lấy kỳ thi theo subjectId (public)
-    @GetMapping("exams/{subjectId}")
+    @GetMapping("public/exams/subject/{subjectId}")
     public ResponseEntity<ApiResponse<List<ExamDto>>> getExamsBySubjectId(@PathVariable("subjectId") Long subjectId) {
         try {
             List<ExamDto> exams = examService.getExamsBySubjectId(subjectId);

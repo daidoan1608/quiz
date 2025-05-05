@@ -17,8 +17,8 @@ export default function ChooseExam() {
   const getAllSubjects = async () => {
     try {
       const resp = await publicAxios.get("/public/subjects");
-      setSubjects(resp.data);
-      setFilteredSubjects(resp.data);
+      setSubjects(resp.data.data);
+      setFilteredSubjects(resp.data.data);
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
     }

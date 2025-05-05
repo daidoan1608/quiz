@@ -31,7 +31,7 @@ function Login() {
         password: values.password,
       });
 
-      const { accessToken, refreshToken, userId } = response.data;
+      const { accessToken, refreshToken, userId } = response.data.data;
 
       if (values.remember) {
         localStorage.setItem("rememberedUsername", values.username);

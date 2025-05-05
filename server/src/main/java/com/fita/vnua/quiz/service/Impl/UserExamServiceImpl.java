@@ -104,7 +104,7 @@ public class UserExamServiceImpl implements UserExamService {
         List<UserExam> userExams = userExamRepository.findUserExamsByUserId(userId);
         List<UserExamResponse> userExamResponses = new ArrayList<>();
         for (UserExam userExam : userExams) {
-            SubjectDto subject = subjectService.getSubjectById(userExam.getExam().getExamId());
+            SubjectDto subject = subjectService.getSubjectById(userExam.getExam().getSubject().getSubjectId());
             UserExamResponse userExamResponse = UserExamResponse
                     .builder()
                     .userExamDto(convertUserExamsToUserExamDto(userExam))

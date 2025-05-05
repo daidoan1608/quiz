@@ -28,7 +28,7 @@ const beforeUpload = file => {
 
 const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState(user.avatarUrl); // Khởi tạo với avatar từ server
+  const [imageUrl, setImageUrl] = useState(user?.avatarUrl || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp" ); // Khởi tạo với avatar từ server
 
   const handleChange = info => {
     if (info.file.status === 'uploading') {
@@ -50,6 +50,10 @@ const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
       <div style={{ marginTop: 8 }}>Tải lên</div>
     </button>
   );
+
+  if (!user) {
+    return <div>Đang tải thông tin người dùng...</div>; // Thông báo khi dữ liệu chưa được tải xong
+  }
 
   return (
     <div className="account-info">
@@ -156,12 +160,11 @@ const Account = () => {
       try {
         setLoading(true);
         const [userResponse, examsResponse] = await Promise.all([
-          authAxios.get(`/${userId}`),
-          authAxios.get(`/userexams/user/${userId}`)
+          authAxios.get(`user/${userId}`),
+          authAxios.get(`user/userexams/user/${userId}`)
         ]);
-
-        setUser(userResponse.data);
-        setExams(examsResponse.data);
+        setUser(userResponse.data.data);
+        setExams(examsResponse.data.data);
       } catch (error) {
         message.error("Lỗi khi lấy thông tin người dùng hoặc bài thi!");
       } finally {
