@@ -49,7 +49,7 @@ public class UserExamController {
         }
     }
 
-    // Tạo bài thi cho người dùng (user exam)
+    // Tạo bài thi cho người dùng (user exam
     @PostMapping("user/userexams")
     public ResponseEntity<ApiResponse<UserExamDto>> createUserExam(@RequestBody UserExamRequest userExamRequest) {
         try {
@@ -66,11 +66,11 @@ public class UserExamController {
     // Lấy bài thi của người dùng theo userId
     @GetMapping("user/userexams/user/{userId}")
     @Operation(summary = "Get user exam by user ID")
-    public ResponseEntity<ApiResponse<UserExamResponse>> getUserExamByUserId(
+    public ResponseEntity<ApiResponse<?>> getUserExamByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
     ) {
         try {
-            UserExamResponse userExam = (UserExamResponse) userExamService.getUserExamByUserId(userId);
+            List<UserExamResponse> userExam = userExamService.getUserExamByUserId(userId);
             if (userExam == null) {
                 return ResponseEntity.status(404).body(ApiResponse.error("No user exam found", List.of("No user exam found for the given user ID")));
             }

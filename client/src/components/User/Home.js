@@ -11,7 +11,8 @@ export default function Home() {
 
   const getAllSubjects = async () => {
     const resp = await publicAxios.get("public/subjects");
-    setSubjects(resp.data);
+    console.log(resp.data.data);
+    setSubjects(resp.data.data);
   };
 
   const elementSubjects = subjects.length > 0 ? (

@@ -20,19 +20,16 @@ export default function RevisionListChap() {
     try {
       setIsLoading(true);
       setError(null);
-      const resp = await publicAxios.get(
-        `public/subject/chapters/${subjectId}`
-      );
+      const resp = await publicAxios.get(`public/chapters/subject/${subjectId}`);
 
-      if (resp.data.responseCode === "404") {
-        setError(resp.data.responseMessage);
-        setChapters([]);
+      // Kiểm tra xem dữ liệu trả về có đúng không
+      if (resp.data.status === "success") {
+        setChapters(resp.data.data); // Gán danh sách chapters vào state
       } else {
-        setChapters(resp.data);
+        setError("Không tìm thấy thông tin chương.");
       }
     } catch (error) {
       setError("Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.");
-      setChapters([]);
     } finally {
       setIsLoading(false);
     }

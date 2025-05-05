@@ -19,9 +19,8 @@ export default function RevisionUser() {
   const getAllSubjects = async () => {
     try {
       const resp = await publicAxios.get("/public/subjects"); // Call API to fetch subjects
-      console.log("Dữ liệu nhận được:", resp.data);
-      setSubjects(resp.data); // Store data in state
-      setFilteredSubjects(resp.data); // Cập nhật môn học đã lọc ban đầu
+      setSubjects(resp.data.data); // Store data in state
+      setFilteredSubjects(resp.data.data); // Cập nhật môn học đã lọc ban đầu
     } catch (error) {
       if (error.response) {
         console.error("Lỗi từ server:", error.response.data);

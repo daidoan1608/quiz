@@ -22,7 +22,8 @@ const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
   const getAllCategories = async () => {
     try {
       const res = await publicAxios.get("public/categories");
-      setCategories(res.data);
+      const categoryData = res.data.data.flat(); // Dùng flat() để xử lý dữ liệu nếu có nested array
+      setCategories(categoryData);
       setError(null);
     } catch (error) {
       console.error(error);

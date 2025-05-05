@@ -28,10 +28,10 @@ export default function ExamUsers() {
 
   const fetchUserExamCounts = async () => {
     try {
-      const response = await authAxios.get(`/userexams/count/${userId}`);
+      const response = await authAxios.get(`user/userexams/count/${userId}`);
       const attemptsMap = new Map();
       const completedSet = new Set();
-      response.data.forEach((item) => {
+      response.data.data.forEach((item) => {
         attemptsMap.set(item.examId, item.attempts);
         if (item.attempts > 0) {
           completedSet.add(item.examId); // Đánh dấu bài thi đã hoàn thành
@@ -46,12 +46,12 @@ export default function ExamUsers() {
 
   const getAllExam = async () => {
     try {
-      const resp = await publicAxios.get(`/public/exams/${subjectId}`);
+      const resp = await publicAxios.get(`/public/exams/subject/${subjectId}`);
       if (resp.data.responseCode === "404") {
         setError(resp.data.responseMessage);
         setExamUsers([]);
       } else {
-        setExamUsers(resp.data);
+        setExamUsers(resp.data.data);
         setError(null);
       }
     } catch (err) {

@@ -54,11 +54,11 @@ export default function Exam() {
     };
 
     try {
-      const response = await authAxios.post("/userexams", payload);
+      const response = await authAxios.post("user/userexams", payload);
 
       if (response.status === 200) {
-        const { userExamId } = response.data;
-
+        const { userExamId } = response.data.data;
+        console.log(userExamId);
         alert("Nộp bài thành công!");
         navigate("/result", {
           state: {
@@ -97,13 +97,13 @@ export default function Exam() {
   useEffect(() => {
     const getAllQuestionsByExamId = async () => {
       try {
-        const response = await authAxios.get(`/exams/${examId}`);
-        setSubjectName(response.data.subjectName);
-        setTitle(response.data.title);
-        setDuration(response.data.duration);
-        setTimeLeft(response.data.duration * 60);
-        setExamQuestionAnswers(response.data.questions);
-        questionRefs.current = response.data.questions.map(() =>
+        const response = await authAxios.get(`public/exams/${examId}`);
+        setSubjectName(response.data.data.subjectName);
+        setTitle(response.data.data.title);
+        setDuration(response.data.data.duration);
+        setTimeLeft(response.data.data.duration * 60);
+        setExamQuestionAnswers(response.data.data.questions);
+        questionRefs.current = response.data.data.questions.map(() =>
           React.createRef()
         );
       } catch (error) {

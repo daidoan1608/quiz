@@ -17,7 +17,7 @@ const ForgotPassword = () => {
   const handleSendOtp = async (values) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post("/api/otp/send", {
+      const response = await publicAxios.post("otp/send", {
         email: values.email,
       });
       if (response.status === 200) {
