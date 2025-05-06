@@ -1,4 +1,4 @@
-import { message, Button, Form, Input, List, Spin, Upload } from 'antd';
+import { message, Button, Form, Input, List, Spin, Upload, Collapse } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "./Account.css";
@@ -6,14 +6,14 @@ import { authAxios } from "../../api/axiosConfig";
 import { useAuth } from "../Context/AuthProvider";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 
-// Hàm chuyển file thành base64 để preview
+const { Panel } = Collapse;
+
 const getBase64 = (img, callback) => {
   const reader = new FileReader();
   reader.addEventListener('load', () => callback(reader.result));
   reader.readAsDataURL(img);
 };
 
-// Kiểm tra file trước khi upload
 const beforeUpload = file => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
   if (!isJpgOrPng) {
@@ -28,18 +28,18 @@ const beforeUpload = file => {
 
 const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState(user?.avatarUrl || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp" ); // Khởi tạo với avatar từ server
+  const [imageUrl, setImageUrl] = useState(user?.avatarUrl || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp");
 
   const handleChange = info => {
     if (info.file.status === 'uploading') {
       setLoading(true);
       return;
     }
-    if (info.file.status === 'done' || !info.file.status) { // Xử lý cả khi không dùng action
+    if (info.file.status === 'done' || !info.file.status) {
       getBase64(info.file.originFileObj, url => {
         setLoading(false);
         setImageUrl(url);
-        onUploadAvatar(info); // Gọi hàm upload lên server
+        onUploadAvatar(info);
       });
     }
   };
@@ -52,20 +52,19 @@ const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
   );
 
   if (!user) {
-    return <div>Đang tải thông tin người dùng...</div>; // Thông báo khi dữ liệu chưa được tải xong
+    return <div>Đang tải thông tin người dùng...</div>;
   }
 
   return (
     <div className="account-info">
       <Upload
         name="avatar"
-        listType="picture-circle" // Hiển thị khung tròn
+        listType="picture-circle"
         className="avatar-uploader"
         showUploadList={false}
         beforeUpload={beforeUpload}
         onChange={handleChange}
         customRequest={({ file, onSuccess }) => {
-          // Gửi file lên server trong onUploadAvatar, gọi onSuccess để bỏ qua action mặc định
           setTimeout(() => onSuccess("ok"), 0);
         }}
       >
@@ -101,7 +100,6 @@ const ChangePasswordForm = ({ onCancel, onSubmit }) => (
       >
         <Input.Password placeholder="Mật khẩu cũ" size="large" />
       </Form.Item>
-
       <Form.Item
         name="newPassword"
         label="Mật khẩu mới"
@@ -109,7 +107,6 @@ const ChangePasswordForm = ({ onCancel, onSubmit }) => (
       >
         <Input.Password placeholder="Mật khẩu mới" size="large" />
       </Form.Item>
-
       <Form.Item
         name="confirmPassword"
         label="Xác nhận mật khẩu mới"
@@ -128,7 +125,6 @@ const ChangePasswordForm = ({ onCancel, onSubmit }) => (
       >
         <Input.Password placeholder="Xác nhận mật khẩu mới" size="large" />
       </Form.Item>
-
       <Form.Item>
         <Button type="primary" htmlType="submit" block>
           Xác nhận đổi mật khẩu
@@ -157,23 +153,49 @@ const Account = () => {
   useEffect(() => {
     const fetchData = async () => {
       const userId = localStorage.getItem("userId");
+      if (!userId) {
+        message.error("Không tìm thấy userId. Vui lòng đăng nhập lại!");
+        navigate("/login");
+        return;
+      }
       try {
         setLoading(true);
         const [userResponse, examsResponse] = await Promise.all([
           authAxios.get(`user/${userId}`),
           authAxios.get(`user/userexams/user/${userId}`)
         ]);
+        console.log("Dữ liệu bài thi từ API:", examsResponse.data);
+        const examData = examsResponse.data.data || [];
+        console.log("Dữ liệu từng bài thi:", examData);
+        examData.forEach((exam, index) => {
+          console.log(`Bài thi ${index}:`, exam);
+        });
+
+        // Ánh xạ dữ liệu mà không lọc
+        const validatedExams = examData.map((exam) => ({
+          ...exam,
+          examId: exam.examId || exam.id || null,
+          userExamDto: exam.userExamDto || exam.userExam || {},
+          subjectName: exam.subjectName || "Không xác định",
+          title: exam.title || "Bài thi không tên",
+        }));
+        console.log("Dữ liệu bài thi sau ánh xạ:", validatedExams);
+
         setUser(userResponse.data.data);
-        setExams(examsResponse.data.data);
+        setExams(validatedExams);
+
+        if (!examData.length) {
+          message.info("Không có bài thi nào được tìm thấy từ API.");
+        }
       } catch (error) {
-        message.error("Lỗi khi lấy thông tin người dùng hoặc bài thi!");
+        message.error(`Lỗi khi lấy dữ liệu: ${error.message}`);
+        console.error("Chi tiết lỗi:", error.response?.data || error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleChangePassword = async (values) => {
     const userId = localStorage.getItem("userId");
@@ -182,18 +204,17 @@ const Account = () => {
         oldPassword: values.oldPassword,
         newPassword: values.newPassword,
       });
-
       if (response.data === "Mật khẩu không đúng") {
         message.error("Mật khẩu cũ không đúng!");
         return;
       }
-
       message.success("Đổi mật khẩu thành công!");
       setShowChangePassword(false);
       logout();
       navigate("/login");
     } catch (error) {
       message.error("Đổi mật khẩu thất bại. Vui lòng thử lại!");
+      console.error("Lỗi đổi mật khẩu:", error);
     }
   };
 
@@ -202,7 +223,6 @@ const Account = () => {
     const userId = localStorage.getItem("userId");
     const formData = new FormData();
     formData.append("avatar", file);
-
     try {
       setLoading(true);
       const response = await authAxios.post(`/upload-avatar/${userId}`, formData, {
@@ -210,18 +230,19 @@ const Account = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-
       const updatedUser = { ...user, avatarUrl: response.data.avatarUrl };
       setUser(updatedUser);
       message.success("Tải lên avatar thành công!");
     } catch (error) {
       message.error("Tải lên avatar thất bại!");
+      console.error("Lỗi tải avatar:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const formatDateTime = (isoString) => {
+    if (!isoString) return "Chưa xác định";
     const date = new Date(isoString);
     return new Intl.DateTimeFormat('vi-VN', {
       year: 'numeric',
@@ -232,13 +253,37 @@ const Account = () => {
     }).format(date);
   };
 
-  if (loading) {
-    return (
-      <div className="account-container">
-        <Spin size="large" />
-      </div>
-    );
-  }
+  const handleShowExamDetails = (exam) => {
+    console.log("Dữ liệu exam trước khi điều hướng:", exam);
+    const examId = exam.examId || exam.id;
+    const userExamId = exam.userExamDto?.userExamId || exam.userExamDto?.id || exam.userExam?.id;
+    if (!examId || !userExamId) {
+      message.error("Thông tin bài thi không hợp lệ!");
+      return;
+    }
+    navigate('/detail', { state: { examId, userExamId } });
+  };
+
+  const groupBySubject = (exams) => {
+    console.log("Dữ liệu đầu vào groupBySubject:", exams);
+    if (!exams || !Array.isArray(exams)) {
+      console.warn("Dữ liệu bài thi không hợp lệ hoặc rỗng");
+      return {};
+    }
+    const result = exams.reduce((acc, exam) => {
+      const subject = exam.subjectName || "Không xác định";
+      if (!acc[subject]) {
+        acc[subject] = [];
+      }
+      acc[subject].push(exam);
+      return acc;
+    }, {});
+    console.log("Kết quả groupBySubject:", result);
+    return result;
+  };
+
+  const groupedExams = groupBySubject(exams);
+  console.log("Dữ liệu groupedExams trước khi render:", groupedExams);
 
   return (
     <div>
@@ -261,23 +306,50 @@ const Account = () => {
 
       <div className="exam-list">
         <h3>Bài thi của bạn</h3>
-        <List
-          dataSource={exams}
-          renderItem={(test) => (
-            <List.Item className="exam-item">
-              <div className="exam-details">
-                <p className="subject-name">{test.subjectName}</p>
-                <p className="exam-title">{test.title}</p>
-                <p className="exam-score">
-                  Điểm: {(test.userExamDto.score || 0).toFixed(2)}
-                </p>
-                <p className="exam-time">
-                  Thời gian: {formatDateTime(test.userExamDto.startTime)} - {formatDateTime(test.userExamDto.endTime)}
-                </p>
-              </div>
-            </List.Item>
-          )}
-        />
+        {loading ? (
+          <Spin size="large" />
+        ) : Object.keys(groupedExams).length === 0 ? (
+          <p>Không có bài thi nào để hiển thị. Vui lòng kiểm tra lại dữ liệu hoặc liên hệ hỗ trợ.</p>
+        ) : (
+          <Collapse accordion>
+            {Object.keys(groupedExams).map((subject, index) => (
+              <Panel header={subject} key={index}>
+                <List
+                  dataSource={groupedExams[subject]}
+                  renderItem={(test) => (
+                    <List.Item className="exam-item">
+                      <div className="exam-details">
+                        <p className="exam-title">{test.title || "Bài thi không tên"}</p>
+                        <p className="exam-score">
+                          Điểm: {(test.userExamDto.score || 0).toFixed(2)}
+                        </p>
+                        {test.userExamDto.correctAnswers !== undefined &&
+                          test.userExamDto.totalQuestions !== undefined && (
+                            <p className="exam-result">
+                              Câu đúng: {test.userExamDto.correctAnswers}/
+                              {test.userExamDto.totalQuestions}
+                            </p>
+                          )}
+                        <p className="exam-time">
+                          Thời gian:{" "}
+                          {formatDateTime(test.userExamDto.startTime)} -{" "}
+                          {formatDateTime(test.userExamDto.endTime)}
+                        </p>
+                      </div>
+                      <Button
+                        type="link"
+                        onClick={() => handleShowExamDetails(test)}
+                        disabled={!test.examId && !test.id} // Chỉ vô hiệu hóa nếu không có examId hoặc id
+                      >
+                        Xem chi tiết
+                      </Button>
+                    </List.Item>
+                  )}
+                />
+              </Panel>
+            ))}
+          </Collapse>
+        )}
       </div>
     </div>
   );
