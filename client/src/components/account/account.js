@@ -343,7 +343,7 @@ const Account = () => {
                       <Button
                         type="link"
                         onClick={() => handleShowExamDetails(test)}
-                        
+                        className='btn-detail'
                       >
                         Xem chi tiết
                       </Button>
