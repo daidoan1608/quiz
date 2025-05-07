@@ -15,8 +15,12 @@ function Login() {
 
   useEffect(() => {
     const savedUsername = localStorage.getItem("savedUsername");
-    if (savedUsername) {
-      form.setFieldsValue({ username: savedUsername, remember: true });
+    const savedPassword = localStorage.getItem("savedPassword");
+    if (savedUsername && savedPassword) {
+      form.setFieldsValue({ 
+        username: savedUsername, 
+        password: savedPassword,
+        remember: true });
       setRemember(true);
     }
   }, [form]);
@@ -33,8 +37,10 @@ function Login() {
 
       if (values.remember) {
         localStorage.setItem("savedUsername", values.username);
+        localStorage.setItem("savedPassword", values.password);
       } else {
         localStorage.removeItem("savedUsername");
+        localStorage.removeItem("savedPassword");
       }
 
       login(accessToken, refreshToken, userId);
