@@ -5,6 +5,7 @@ import { authAxios } from "../../api/axiosConfig";
 import { useAuth } from "../Context/AuthProvider";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import './Account.css';
+import ScoreChart from './ScoreChart';
 
 const { Panel } = Collapse;
 
@@ -56,9 +57,7 @@ const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
     </button>
   );
 
-  if (!user) {
-    return <div>Đang tải thông tin người dùng...</div>;
-  }
+  if (!user) return <div>Đang tải thông tin người dùng...</div>;
 
   return (
     <div className="account-info">
@@ -69,9 +68,7 @@ const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
         showUploadList={false}
         beforeUpload={beforeUpload}
         onChange={handleChange}
-        customRequest={({ file, onSuccess }) => {
-          setTimeout(() => onSuccess("ok"), 0);
-        }}
+        customRequest={({ file, onSuccess }) => setTimeout(() => onSuccess("ok"), 0)}
       >
         {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
       </Upload>
@@ -82,14 +79,7 @@ const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
         <p><strong>Email:</strong> {user.email}</p>
         <p><strong>Vai trò:</strong> {user.role}</p>
       </div>
-      <Button
-        onClick={onChangePassword}
-        type="primary"
-        danger
-        className="change-password-btn"
-      >
-        Đổi mật khẩu
-      </Button>
+      <Button onClick={onChangePassword} type="primary" danger className="change-password-btn">Đổi mật khẩu</Button>
     </div>
   );
 };
@@ -98,50 +88,14 @@ const ChangePasswordForm = ({ onCancel, onSubmit }) => (
   <div className="change-password-form">
     <h3>Đổi mật khẩu</h3>
     <Form onFinish={onSubmit} layout="vertical">
-      <Form.Item
-        name="oldPassword"
-        label="Mật khẩu cũ"
-        rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ!" }]}
-      >
-        <Input.Password placeholder="Mật khẩu cũ" size="large" />
-      </Form.Item>
-      <Form.Item
-        name="newPassword"
-        label="Mật khẩu mới"
-        rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }, { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" }]}
-      >
-        <Input.Password placeholder="Mật khẩu mới" size="large" />
-      </Form.Item>
-      <Form.Item
-        name="confirmPassword"
-        label="Xác nhận mật khẩu mới"
-        dependencies={["newPassword"]}
-        rules={[
-          { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
-          ({ getFieldValue }) => ({
-            validator(_, value) {
-              if (!value || getFieldValue("newPassword") === value) {
-                return Promise.resolve();
-              }
-              return Promise.reject("Mật khẩu xác nhận không khớp!");
-            },
-          }),
-        ]}
-      >
+      <Form.Item name="oldPassword" label="Mật khẩu cũ" rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ!" }]}> <Input.Password placeholder="Mật khẩu cũ" size="large" /> </Form.Item>
+      <Form.Item name="newPassword" label="Mật khẩu mới" rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }, { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" }]}> <Input.Password placeholder="Mật khẩu mới" size="large" /> </Form.Item>
+      <Form.Item name="confirmPassword" label="Xác nhận mật khẩu mới" dependencies={["newPassword"]} rules={[{ required: true, message: "Vui lòng xác nhận mật khẩu mới!" }, ({ getFieldValue }) => ({ validator(_, value) { if (!value || getFieldValue("newPassword") === value) return Promise.resolve(); return Promise.reject("Mật khẩu xác nhận không khớp!"); } })]}>
         <Input.Password placeholder="Xác nhận mật khẩu mới" size="large" />
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit" block>
-          Xác nhận đổi mật khẩu
-        </Button>
-        <Button
-          type="default"
-          block
-          onClick={onCancel}
-          style={{ marginTop: 10 }}
-        >
-          Hủy
-        </Button>
+        <Button type="primary" htmlType="submit" block>Xác nhận đổi mật khẩu</Button>
+        <Button type="default" block onClick={onCancel} style={{ marginTop: 10 }}>Hủy</Button>
       </Form.Item>
     </Form>
   </div>
@@ -186,14 +140,10 @@ const Account = () => {
           title: exam.title || "Bài thi không tên",
         };
       });
-      
 
       setUser(userResponse.data.data);
       setExams(validatedExams);
-
-      if (!examData.length) {
-        message.info("Không có bài thi nào được tìm thấy.");
-      }
+      if (!examData.length) message.info("Không có bài thi nào được tìm thấy.");
     } catch (error) {
       handleError(error);
     } finally {
@@ -260,19 +210,12 @@ const Account = () => {
   const handleShowExamDetails = (exam) => {
     const examId = exam.examId || exam.id;
     const userExamId = exam.userExamDto?.userExamId || exam.userExamDto?.id || exam.userExam?.id;
-  
-    // Kiểm tra giá trị của examId và userExamId
-    console.log("examId: ", examId);
-    console.log("userExamId: ", userExamId);
-  
     if (!examId || !userExamId) {
       message.error("Thông tin bài thi không hợp lệ!");
       return;
     }
-  
     navigate('/detail', { state: { examId, userExamId } });
   };
-  
 
   const groupedExams = useMemo(() => {
     if (!exams || !Array.isArray(exams)) {
@@ -281,9 +224,7 @@ const Account = () => {
     }
     return exams.reduce((acc, exam) => {
       const subject = exam.subjectName || "Không xác định";
-      if (!acc[subject]) {
-        acc[subject] = [];
-      }
+      if (!acc[subject]) acc[subject] = [];
       acc[subject].push(exam);
       return acc;
     }, {});
@@ -318,35 +259,24 @@ const Account = () => {
           <Collapse accordion>
             {Object.keys(groupedExams).map((subject, index) => (
               <Panel header={subject} key={index}>
+                <ScoreChart data={groupedExams[subject]} />
                 <List
                   dataSource={groupedExams[subject]}
                   renderItem={(test) => (
                     <List.Item className="exam-item">
                       <div className="exam-details">
                         <p className="exam-title">{test.title || "Bài thi không tên"}</p>
-                        <p className="exam-score">
-                          Điểm: {(test.userExamDto.score || 0).toFixed(2)}
-                        </p>
-                        {test.userExamDto.correctAnswers !== undefined &&
-                          test.userExamDto.totalQuestions !== undefined && (
-                            <p className="exam-result">
-                              Câu đúng: {test.userExamDto.correctAnswers}/
-                              {test.userExamDto.totalQuestions}
-                            </p>
-                          )}
+                        <p className="exam-score">Điểm: {(test.userExamDto.score || 0).toFixed(2)}</p>
+                        {test.userExamDto.correctAnswers !== undefined && test.userExamDto.totalQuestions !== undefined && (
+                          <p className="exam-result">
+                            Câu đúng: {test.userExamDto.correctAnswers}/{test.userExamDto.totalQuestions}
+                          </p>
+                        )}
                         <p className="exam-time">
-                          Thời gian:{" "}
-                          {formatDateTime(test.userExamDto.startTime)} -{" "}
-                          {formatDateTime(test.userExamDto.endTime)}
+                          Thời gian: {formatDateTime(test.userExamDto.startTime)} - {formatDateTime(test.userExamDto.endTime)}
                         </p>
                       </div>
-                      <Button
-                        type="link"
-                        onClick={() => handleShowExamDetails(test)}
-                        className='btn-detail'
-                      >
-                        Xem chi tiết
-                      </Button>
+                      <Button type="link" onClick={() => handleShowExamDetails(test)} className='btn-detail'>Xem chi tiết</Button>
                     </List.Item>
                   )}
                 />
