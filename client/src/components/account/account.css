@@ -106,10 +106,11 @@
 }
 
 .exam-list h3 {
-  font-size: 1.5em;
+  font-size: 26px;
   margin-bottom: 20px;
   color: #333;
   text-align: center;
+  font-weight: 600;
 }
 
 .exam-item {
@@ -140,18 +141,42 @@
 }
 
 .exam-title {
-  font-size: 1em;
-  color: #555;
+  font-size: 20px;
+  color: #29a43c;
+  font-weight: 600;
 }
 
 .exam-score {
-  font-size: 1em;
-  color: #28a745;
+  font-size: 16px;
+  color: #be4343;
   font-weight: bold;
 }
 
 .exam-time {
-  font-size: 0.9em;
+  font-size: 14px;
   color: #666;
+}
+
+.ant-collapse-header{
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.ant-collapse .ant-collapse-arrow{
+  margin-top: 10px;
+}
+
+.btn-detail{
+  font-size: 16px;
+  margin-right: 35px;
+  padding: 5px 20px;
+  border: 1px solid #007bff;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-detail:hover{
+  background-color: #007bff !important;
+  color: #ffffff !important;
 }
 
