@@ -1,10 +1,10 @@
 import { message, Button, Form, Input, List, Spin, Upload, Collapse } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "./Account.css";
 import { authAxios } from "../../api/axiosConfig";
 import { useAuth } from "../Context/AuthProvider";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import './Account.css';
 
 const { Panel } = Collapse;
 
@@ -14,7 +14,7 @@ const getBase64 = (img, callback) => {
   reader.readAsDataURL(img);
 };
 
-const beforeUpload = file => {
+const beforeUpload = (file) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
   if (!isJpgOrPng) {
     message.error('Chỉ được upload file JPG/PNG!');
@@ -30,17 +30,22 @@ const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(user?.avatarUrl || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp");
 
-  const handleChange = info => {
+  const handleChange = (info) => {
     if (info.file.status === 'uploading') {
       setLoading(true);
       return;
     }
-    if (info.file.status === 'done' || !info.file.status) {
-      getBase64(info.file.originFileObj, url => {
+    if (info.file.status === 'done') {
+      const uploadedFile = info.file.originFileObj;
+      if (uploadedFile && uploadedFile !== imageUrl) {
+        getBase64(uploadedFile, url => {
+          setLoading(false);
+          setImageUrl(url);
+          onUploadAvatar(info);
+        });
+      } else {
         setLoading(false);
-        setImageUrl(url);
-        onUploadAvatar(info);
-      });
+      }
     }
   };
 
@@ -150,50 +155,53 @@ const Account = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        message.error("Không tìm thấy userId. Vui lòng đăng nhập lại!");
-        navigate("/login");
-        return;
-      }
-      try {
-        setLoading(true);
-        const [userResponse, examsResponse] = await Promise.all([
-          authAxios.get(`user/${userId}`),
-          authAxios.get(`user/userexams/user/${userId}`)
-        ]);
-        console.log("Dữ liệu bài thi từ API:", examsResponse.data);
-        const examData = examsResponse.data.data || [];
-        console.log("Dữ liệu từng bài thi:", examData);
-        examData.forEach((exam, index) => {
-          console.log(`Bài thi ${index}:`, exam);
-        });
+  const handleError = (error) => {
+    message.error(`Đã có lỗi xảy ra: ${error.message || error}`);
+    console.error("Lỗi chi tiết:", error.response?.data || error);
+  };
 
-        // Ánh xạ dữ liệu mà không lọc
-        const validatedExams = examData.map((exam) => ({
+  const fetchData = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      message.error("Không tìm thấy userId. Vui lòng đăng nhập lại!");
+      navigate("/login");
+      return;
+    }
+    try {
+      setLoading(true);
+      const [userResponse, examsResponse] = await Promise.all([
+        authAxios.get(`user/${userId}`),
+        authAxios.get(`user/userexams/user/${userId}`)
+      ]);
+
+      const examData = examsResponse.data.data || [];
+      const validatedExams = examData.map((exam) => {
+        const userExamDto = exam.userExamDto || exam.userExam || {};
+        const examId = exam.examId || exam.id || userExamDto.examId || null;
+        return {
           ...exam,
-          examId: exam.examId || exam.id || null,
-          userExamDto: exam.userExamDto || exam.userExam || {},
+          examId,
+          userExamDto,
           subjectName: exam.subjectName || "Không xác định",
           title: exam.title || "Bài thi không tên",
-        }));
-        console.log("Dữ liệu bài thi sau ánh xạ:", validatedExams);
+        };
+      });
+      
 
-        setUser(userResponse.data.data);
-        setExams(validatedExams);
+      setUser(userResponse.data.data);
+      setExams(validatedExams);
 
-        if (!examData.length) {
-          message.info("Không có bài thi nào được tìm thấy từ API.");
-        }
-      } catch (error) {
-        message.error(`Lỗi khi lấy dữ liệu: ${error.message}`);
-        console.error("Chi tiết lỗi:", error.response?.data || error);
-      } finally {
-        setLoading(false);
+      if (!examData.length) {
+        message.info("Không có bài thi nào được tìm thấy.");
       }
-    };
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [navigate]);
 
@@ -213,8 +221,7 @@ const Account = () => {
       logout();
       navigate("/login");
     } catch (error) {
-      message.error("Đổi mật khẩu thất bại. Vui lòng thử lại!");
-      console.error("Lỗi đổi mật khẩu:", error);
+      handleError(error);
     }
   };
 
@@ -226,16 +233,13 @@ const Account = () => {
     try {
       setLoading(true);
       const response = await authAxios.post(`/upload-avatar/${userId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
       const updatedUser = { ...user, avatarUrl: response.data.avatarUrl };
       setUser(updatedUser);
       message.success("Tải lên avatar thành công!");
     } catch (error) {
-      message.error("Tải lên avatar thất bại!");
-      console.error("Lỗi tải avatar:", error);
+      handleError(error);
     } finally {
       setLoading(false);
     }
@@ -254,23 +258,28 @@ const Account = () => {
   };
 
   const handleShowExamDetails = (exam) => {
-    console.log("Dữ liệu exam trước khi điều hướng:", exam);
     const examId = exam.examId || exam.id;
     const userExamId = exam.userExamDto?.userExamId || exam.userExamDto?.id || exam.userExam?.id;
+  
+    // Kiểm tra giá trị của examId và userExamId
+    console.log("examId: ", examId);
+    console.log("userExamId: ", userExamId);
+  
     if (!examId || !userExamId) {
       message.error("Thông tin bài thi không hợp lệ!");
       return;
     }
+  
     navigate('/detail', { state: { examId, userExamId } });
   };
+  
 
-  const groupBySubject = (exams) => {
-    console.log("Dữ liệu đầu vào groupBySubject:", exams);
+  const groupedExams = useMemo(() => {
     if (!exams || !Array.isArray(exams)) {
       console.warn("Dữ liệu bài thi không hợp lệ hoặc rỗng");
       return {};
     }
-    const result = exams.reduce((acc, exam) => {
+    return exams.reduce((acc, exam) => {
       const subject = exam.subjectName || "Không xác định";
       if (!acc[subject]) {
         acc[subject] = [];
@@ -278,12 +287,7 @@ const Account = () => {
       acc[subject].push(exam);
       return acc;
     }, {});
-    console.log("Kết quả groupBySubject:", result);
-    return result;
-  };
-
-  const groupedExams = groupBySubject(exams);
-  console.log("Dữ liệu groupedExams trước khi render:", groupedExams);
+  }, [exams]);
 
   return (
     <div>
@@ -305,11 +309,11 @@ const Account = () => {
       </div>
 
       <div className="exam-list">
-        <h3>Bài thi của bạn</h3>
+        <h3>Danh sách các môn đã thi</h3>
         {loading ? (
           <Spin size="large" />
         ) : Object.keys(groupedExams).length === 0 ? (
-          <p>Không có bài thi nào để hiển thị. Vui lòng kiểm tra lại dữ liệu hoặc liên hệ hỗ trợ.</p>
+          <p>Không có bài thi nào để hiển thị.</p>
         ) : (
           <Collapse accordion>
             {Object.keys(groupedExams).map((subject, index) => (
@@ -339,7 +343,7 @@ const Account = () => {
                       <Button
                         type="link"
                         onClick={() => handleShowExamDetails(test)}
-                        disabled={!test.examId && !test.id} // Chỉ vô hiệu hóa nếu không có examId hoặc id
+                        
                       >
                         Xem chi tiết
                       </Button>

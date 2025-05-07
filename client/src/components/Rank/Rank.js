@@ -1,51 +1,46 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Filter from './Filter';
 import Leaderboard from './Leaderboard';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../Rank/Rank.css'
-
-// Dữ liệu giả lập (mock data)
-const initialData = [
-  { rank: 1, username: 'CodeMaster', score: 950, badge: '🏆 Chuyên gia C', subject: 'Trí tuệ nhân tạo', time: '12:30' },
-  { rank: 2, username: 'DataWizard', score: 920, badge: '🌟 Vua thi thử', subject: 'Thiết kế mạng máy tính', time: '13:15' },
-  { rank: 3, username: 'NetworkNinja', score: 890, badge: '💡 Người mới', subject: 'Mạng máy tính', time: '14:00' },
-  { rank: 4, username: 'AlgoPro', score: 850, badge: '💡 Người mới', subject: 'Lập trình C', time: '15:10' },
-  { rank: 5, username: 'CodeRiser', score: 820, badge: '💡 Người mới', subject: 'Cơ sở dữ liệu', time: '16:20' },
-];
+import './Rank.css';
+import { useAuth } from '../Context/AuthProvider';
 
 const Rank = () => {
-  const [leaderboardData, setLeaderboardData] = useState(initialData);
+  const [leaderboardData, setLeaderboardData] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('Tất cả');
   const [previousRank, setPreviousRank] = useState(null);
 
-  // Giả định người dùng hiện tại (current user)
-  const currentUser = 'CodeRiser'; // Thay bằng dữ liệu thực từ hệ thống đăng nhập
+  const { isLoggedIn, user } = useAuth();
 
-  // Tìm thứ hạng của người dùng hiện tại
   const getUserRank = (data) => {
-    const user = data.find((item) => item.username === currentUser);
-    return user ? user.rank : null;
+    if (!user) return null;
+    const userEntry = data.find((item) => item.username === user);
+    return userEntry ? userEntry.rank : null;
   };
 
-  // Lọc dữ liệu theo môn học
-  const handleFilter = (subject) => {
-    setSelectedSubject(subject);
-    let filteredData = initialData;
-    if (subject !== 'Tất cả') {
-      filteredData = initialData.filter((item) => item.subject === subject);
+  const fetchLeaderboardData = async (subject = 'Tất cả') => {
+    try {
+      const response = await axios.get('/api/leaderboard', {
+        params: { subject: subject === 'Tất cả' ? undefined : subject },
+      });
+      setLeaderboardData(response.data);
+    } catch (error) {
+      console.error('Lỗi khi lấy dữ liệu bảng xếp hạng:', error);
+      toast.error('Không thể tải dữ liệu bảng xếp hạng!', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
+  };
 
-    // Lấy thứ hạng hiện tại trước khi cập nhật
+  const handleFilter = async (subject) => {
+    setSelectedSubject(subject);
     const currentRank = getUserRank(leaderboardData);
+    await fetchLeaderboardData(subject);
+    const newRank = getUserRank(leaderboardData);
 
-    // Cập nhật dữ liệu bảng xếp hạng
-    setLeaderboardData(filteredData);
-
-    // Lấy thứ hạng mới sau khi cập nhật
-    const newRank = getUserRank(filteredData);
-
-    // So sánh và hiển thị thông báo
     if (previousRank !== null && newRank !== null && currentRank !== newRank) {
       if (newRank < currentRank) {
         toast.success(`🎉 Chúc mừng! Bạn đã tăng hạng từ ${currentRank} lên ${newRank}!`, {
@@ -60,22 +55,28 @@ const Rank = () => {
       }
     }
 
-    // Cập nhật thứ hạng trước đó
     if (newRank !== null) {
       setPreviousRank(newRank);
     }
   };
 
-  // Giả lập cập nhật dữ liệu định kỳ
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const updatedData = [...initialData];
-      updatedData[4] = { ...updatedData[4], score: updatedData[4].score + 10 };
+  const updateLeaderboard = async () => {
+    if (!user) return;
+
+    try {
+      const currentUser = leaderboardData.find((item) => item.username === user);
+      const updatedScore = (currentUser?.score || 0) + 10;
+
+      const response = await axios.post('/api/update-score', {
+        username: user,
+        score: updatedScore,
+      });
+
+      const updatedData = response.data.updatedData;
       updatedData.sort((a, b) => b.score - a.score);
       updatedData.forEach((item, index) => (item.rank = index + 1));
 
       const currentRank = getUserRank(leaderboardData);
-      setLeaderboardData(updatedData);
       const newRank = getUserRank(updatedData);
 
       if (previousRank !== null && newRank !== null && currentRank !== newRank) {
@@ -92,19 +93,40 @@ const Rank = () => {
         }
       }
 
+      setLeaderboardData(updatedData);
       if (newRank !== null) {
         setPreviousRank(newRank);
       }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật điểm:', error);
+      toast.error('Không thể cập nhật bảng xếp hạng!', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn || !user) return;
+
+    fetchLeaderboardData();
+
+    const interval = setInterval(() => {
+      updateLeaderboard();
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [leaderboardData, previousRank]);
+  }, [isLoggedIn, user]);
 
-  // Khởi tạo thứ hạng ban đầu
   useEffect(() => {
+    if (!isLoggedIn) return;
     const initialRank = getUserRank(leaderboardData);
     setPreviousRank(initialRank);
-  }, []);
+  }, [leaderboardData, isLoggedIn]);
+
+  if (!isLoggedIn) {
+    return <div>Vui lòng đăng nhập để xem bảng xếp hạng.</div>;
+  }
 
   return (
     <div className="Rank">
