@@ -8,28 +8,10 @@ const Filter = ({ onFilter, selectedSubject }) => {
   const [error, setError] = useState(null);
 
   const getAllSubjects = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const resp = await publicAxios.get('/public/subjects');
-      console.log('Dữ liệu nhận được:', resp.data);
-      setSubjects(resp.data);
-      setFilteredSubjects(resp.data);
-    } catch (error) {
-      if (error.response) {
-        console.error('Lỗi từ server:', error.response.data);
-        setError('Không thể tải danh sách môn học. Vui lòng thử lại sau.');
-      } else if (error.request) {
-        console.error('Không có phản hồi từ server:', error.request);
-        setError('Không có phản hồi từ server. Kiểm tra kết nối mạng.');
-      } else {
-        console.error('Lỗi khác:', error.message);
-        setError('Đã xảy ra lỗi: ' + error.message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      const resp = await publicAxios.get("public/subjects");
+      console.log(resp.data.data);
+      setSubjects(resp.data.data);
+    };
 
   useEffect(() => {
     getAllSubjects();
