@@ -40,7 +40,7 @@ const ForgotPassword = () => {
   const handleVerifyOtp = async (values) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post("/api/otp/verify", {
+      const response = await publicAxios.post("otp/verify", {
         email: email,
         otp: values.otp,
       });
@@ -60,7 +60,7 @@ const ForgotPassword = () => {
   const handleResetPassword = async (values) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post("/api/otp/reset", {
+      const response = await publicAxios.post("otp/reset", {
         resetToken: token,
         newPassword: values.password,
       });
