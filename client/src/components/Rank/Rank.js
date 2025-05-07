@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Filter from './Filter';
 import Leaderboard from './Leaderboard';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Rank.css';
-import { useAuth } from '../Context/AuthProvider';
+
+// MOCK dữ liệu người dùng đăng nhập (thay vì useAuth)
+const mockAuth = {
+  isLoggedIn: true,
+  user: 'alice',
+};
+
+// MOCK dữ liệu bảng xếp hạng với nhiều bài thi và điểm
+const mockLeaderboardData = [
+  { username: 'alice', scores: [95, 85], badge: 'Vàng', rank: 1, subject: 'Nguyên lý hệ điều hành' },
+  { username: 'bob', scores: [80, 90], badge: 'Bạc', rank: 2, subject: 'Mạng máy tính' },
+  { username: 'charlie', scores: [70, 75], badge: 'Đồng', rank: 3, subject: 'Nguyên lý hệ điều hành' },
+  { username: 'david', scores: [60, 70], badge: 'Thường', rank: 4, subject: 'Khai phá dữ liệu' },
+];
 
 const Rank = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('Tất cả');
   const [previousRank, setPreviousRank] = useState(null);
 
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, user } = mockAuth;
 
   const getUserRank = (data) => {
     if (!user) return null;
@@ -20,14 +32,26 @@ const Rank = () => {
     return userEntry ? userEntry.rank : null;
   };
 
+  // Hàm tính tổng điểm từ tất cả các bài thi
+  const calculateTotalScore = (scores) => {
+    return scores.reduce((total, score) => total + score, 0);
+  };
+
   const fetchLeaderboardData = async (subject = 'Tất cả') => {
     try {
-      const response = await axios.get('/api/leaderboard', {
-        params: { subject: subject === 'Tất cả' ? undefined : subject },
-      });
-      setLeaderboardData(response.data);
+      // Sử dụng mock thay vì gọi API
+      let filteredData = mockLeaderboardData;
+      if (subject !== 'Tất cả') {
+        filteredData = mockLeaderboardData.filter((item) => item.subject === subject);
+      }
+      // Tính tổng điểm cho mỗi người dùng
+      const updatedData = filteredData.map((item) => ({
+        ...item,
+        score: calculateTotalScore(item.scores), // Thêm tổng điểm vào dữ liệu
+      }));
+      setLeaderboardData(updatedData);
     } catch (error) {
-      console.error('Lỗi khi lấy dữ liệu bảng xếp hạng:', error);
+      console.error('Lỗi mock:', error);
       toast.error('Không thể tải dữ liệu bảng xếp hạng!', {
         position: 'top-right',
         autoClose: 3000,
@@ -48,7 +72,7 @@ const Rank = () => {
           autoClose: 3000,
         });
       } else if (newRank > currentRank) {
-        toast.warning(`⚠️ Bạn đã bị vượt! Thứ hạng giảm từ ${currentRank} xuống ${newRank}. Cố gắng lên nhé!`, {
+        toast.warning(`⚠️ Bạn đã bị vượt! Thứ hạng giảm từ ${currentRank} xuống ${newRank}.`, {
           position: 'top-right',
           autoClose: 3000,
         });
@@ -60,62 +84,9 @@ const Rank = () => {
     }
   };
 
-  const updateLeaderboard = async () => {
-    if (!user) return;
-
-    try {
-      const currentUser = leaderboardData.find((item) => item.username === user);
-      const updatedScore = (currentUser?.score || 0) + 10;
-
-      const response = await axios.post('/api/update-score', {
-        username: user,
-        score: updatedScore,
-      });
-
-      const updatedData = response.data.updatedData;
-      updatedData.sort((a, b) => b.score - a.score);
-      updatedData.forEach((item, index) => (item.rank = index + 1));
-
-      const currentRank = getUserRank(leaderboardData);
-      const newRank = getUserRank(updatedData);
-
-      if (previousRank !== null && newRank !== null && currentRank !== newRank) {
-        if (newRank < currentRank) {
-          toast.success(`🎉 Chúc mừng! Bạn đã tăng hạng từ ${currentRank} lên ${newRank}!`, {
-            position: 'top-right',
-            autoClose: 3000,
-          });
-        } else if (newRank > currentRank) {
-          toast.warning(`⚠️ Bạn đã bị vượt! Thứ hạng giảm từ ${currentRank} xuống ${newRank}. Cố gắng lên nhé!`, {
-            position: 'top-right',
-            autoClose: 3000,
-          });
-        }
-      }
-
-      setLeaderboardData(updatedData);
-      if (newRank !== null) {
-        setPreviousRank(newRank);
-      }
-    } catch (error) {
-      console.error('Lỗi khi cập nhật điểm:', error);
-      toast.error('Không thể cập nhật bảng xếp hạng!', {
-        position: 'top-right',
-        autoClose: 3000,
-      });
-    }
-  };
-
   useEffect(() => {
     if (!isLoggedIn || !user) return;
-
     fetchLeaderboardData();
-
-    const interval = setInterval(() => {
-      updateLeaderboard();
-    }, 10000);
-
-    return () => clearInterval(interval);
   }, [isLoggedIn, user]);
 
   useEffect(() => {
