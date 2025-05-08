@@ -88,8 +88,12 @@ const ChangePasswordForm = ({ onCancel, onSubmit }) => (
   <div className="change-password-form">
     <h3>Đổi mật khẩu</h3>
     <Form onFinish={onSubmit} layout="vertical">
-      <Form.Item name="oldPassword" label="Mật khẩu cũ" rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ!" }]}> <Input.Password placeholder="Mật khẩu cũ" size="large" /> </Form.Item>
-      <Form.Item name="newPassword" label="Mật khẩu mới" rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }, { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" }]}> <Input.Password placeholder="Mật khẩu mới" size="large" /> </Form.Item>
+      <Form.Item name="oldPassword" label="Mật khẩu cũ" rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ!" }]}> 
+        <Input.Password placeholder="Mật khẩu cũ" size="large" /> 
+      </Form.Item>
+      <Form.Item name="newPassword" label="Mật khẩu mới" rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }, { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" }]}> 
+        <Input.Password placeholder="Mật khẩu mới" size="large" /> 
+      </Form.Item>
       <Form.Item name="confirmPassword" label="Xác nhận mật khẩu mới" dependencies={["newPassword"]} rules={[{ required: true, message: "Vui lòng xác nhận mật khẩu mới!" }, ({ getFieldValue }) => ({ validator(_, value) { if (!value || getFieldValue("newPassword") === value) return Promise.resolve(); return Promise.reject("Mật khẩu xác nhận không khớp!"); } })]}>
         <Input.Password placeholder="Xác nhận mật khẩu mới" size="large" />
       </Form.Item>
@@ -262,6 +266,12 @@ const Account = () => {
                 <ScoreChart data={groupedExams[subject]} />
                 <List
                   dataSource={groupedExams[subject]}
+                  pagination={{
+                    pageSize: 5, // Số bài thi mỗi trang
+                    showSizeChanger: false, // Tạm thời tắt thay đổi số lượng mỗi trang
+                    showQuickJumper: false, // Tắt nhảy nhanh đến trang
+                    showTotal: (total) => `Tổng cộng ${total} bài thi`, // Hiển thị tổng số bài thi
+                  }}
                   renderItem={(test) => (
                     <List.Item className="exam-item">
                       <div className="exam-details">
