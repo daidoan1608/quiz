@@ -36,27 +36,27 @@ export default function Sidebar() {
       </div>
 
       <div className="menu--list">
-        <NavLink to="/home" className="item">
+        <NavLink to="/home" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
           <BiHome className="icon" />
           <span>Home</span>
         </NavLink>
-        <NavLink to="/admin/users" className="item">
+        <NavLink to="/admin/users" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
           <BiUser className="icon" />
           <span>Quản lý user</span>
         </NavLink>
-        <NavLink to="/admin/exams" className="item">
+        <NavLink to="/admin/exams" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
           <PiExam className="icon" />
           <span>Quản lý bài thi</span>
         </NavLink>
-        <NavLink to="/subjects" className="item">
+        <NavLink to="/subjects" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
           <BiStats className="icon" />
           <span>Quản lý môn học</span>
         </NavLink>
-        <NavLink to="/subject/chapters" className="item">
+        <NavLink to="/subject/chapters" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
           <BiMessage className="icon" />
           <span>Quản lý chương</span>
         </NavLink>
-        <NavLink to="/chapter/questions" className="item">
+        <NavLink to="/chapter/questions" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
           <BiQuestionMark className="icon" />
           <span>Quản lý câu hỏi</span>
         </NavLink>

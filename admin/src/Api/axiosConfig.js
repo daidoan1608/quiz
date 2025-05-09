@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "http://localhost:8080/api/v1/";
 
 // Tạo instance axios với config mặc định
 const authAxios = axios.create({
@@ -38,7 +38,7 @@ const refreshToken = async () => {
     const refreshToken = sessionStorage.getItem("refreshToken");
     const response = await publicAxios.post("/auth/refresh", { refreshToken });
     
-    const { accessToken } = response.data;
+    const { accessToken } = response.data.data;
     localStorage.setItem("accessToken", accessToken);
     
     return accessToken;

@@ -18,8 +18,8 @@ export default function GetChapter() {
     // Hàm lấy dữ liệu chương
     const fetchChapters = async () => {
         try {
-            const response = await authAxios.get('/public/subject/chapters');
-            setChapters(response.data);
+            const response = await authAxios.get('/public/chapters');
+            setChapters(response.data.data);
         } catch (error) {
             console.error('Lỗi API:', error.response?.data || error.message);
             alert('Không thể lấy danh sách chương!');

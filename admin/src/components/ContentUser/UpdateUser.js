@@ -10,11 +10,11 @@ export default function UpdateUser() {
     // Hàm lấy thông tin người dùng
     const fetchUserDetails = async () => {
         try {
-            const response = await authAxios.get(`/${userId}`);
+            const response = await authAxios.get(`user/${userId}`);
             setUser({
-                fullName: response.data.fullName,
-                email: response.data.email,
-                role: response.data.role || '', // Đảm bảo lấy đúng role của người dùng
+                fullName: response.data.data.fullName,
+                email: response.data.data.email,
+                role: response.data.data.role || '', // Đảm bảo lấy đúng role của người dùng
             });
         } catch (error) {
             console.error('Lỗi khi lấy thông tin người dùng:', error.response?.data || error.message);

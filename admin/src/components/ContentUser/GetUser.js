@@ -14,8 +14,7 @@ export default function GetUser() {
   const fetchUsers = async () => {
     try {
       const response = await authAxios.get("/admin/users");
-      setUsers(response.data);
-      console.log("Danh sách người dùng:", response.data);
+      setUsers(response.data.data);
     } catch (error) {
       console.error("Lỗi API:", error.response?.data || error.message);
       alert("Không thể lấy danh sách người dùng!");

@@ -14,8 +14,8 @@ export default function ContentHome() {
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
-        const response = await authAxios.get('http://localhost:8080/admin/statistics');
-        setStatistics(response.data); // Cập nhật dữ liệu thống kê
+        const response = await authAxios.get('/admin/statistics');
+        setStatistics(response.data.data); // Cập nhật dữ liệu thống kê
       } catch (error) {
         console.error('Error fetching statistics:', error);
         alert('Không thể tải dữ liệu thống kê!');

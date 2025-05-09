@@ -56,8 +56,8 @@ const ImportInterface = () => {
   const fetchChapters = async (subjectId) => {
     try {
       const response = await authAxios.get(`/public/subject/chapters/${subjectId}`);
-      if (response.data && response.data.length > 0) {
-        setChapters(response.data); // Cập nhật danh sách chapters
+      if (response.data.data && response.data.data.length > 0) {
+        setChapters(response.data.data); // Cập nhật danh sách chapters
         setIsChaptersEmpty(false); // Nếu có chương, set là không rỗng
       } else {
         setChapters([]); // Nếu không có chương, set mảng rỗng
@@ -86,14 +86,14 @@ const ImportInterface = () => {
     formData.append("chapterId", selectedChapter);
   
     try {
-      const response = await authAxios.post("/admin/questions/import", formData, {
+      const response = await authAxios.post("admin/questions/import", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
       if (response.status === 200) {
         // Handle success response
-        console.log("Upload thành công:", response.data);
+        console.log("Upload thành công:", response.data.data);
         alert("Upload thành công!");
         navigate("/admin/questions");
       }
