@@ -24,13 +24,14 @@
   }
   
   .image-container h1 {
+    font-family: 'Roboto', sans-serif;
     position: absolute; 
     top: 20%; 
     left: 25%; 
     transform: translate(-50%, -50%);
     z-index: 2; 
     color: #178FA5;
-    font-size: 4rem;
+    font-size: 4.5rem;
     font-weight: 800;
   }
   .image-container p {

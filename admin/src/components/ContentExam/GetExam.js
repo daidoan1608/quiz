@@ -17,8 +17,8 @@ export default function GetExam() {
 
     const getAllExams = async () => {
         try {
-            const response = await authAxios.get("/public/admin/exams");
-            setExams(response.data); // Lưu dữ liệu vào state
+            const response = await authAxios.get("/admin/exams");
+            setExams(response.data.data); // Lưu dữ liệu vào state
         } catch (error) {
             console.error('Error fetching exams: ', error);
         }

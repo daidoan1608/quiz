@@ -16,8 +16,8 @@ export default function GetQuestion() {
 
   const getAllQuestions = async () => {
     try {
-      const response = await authAxios.get("/chapter/questions");
-      setQuestions(response.data);
+      const response = await authAxios.get("/admin/questions");
+      setQuestions(response.data.data);
     } catch (error) {
       console.error("Error fetching questions:", error);
     }

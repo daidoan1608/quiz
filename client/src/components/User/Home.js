@@ -15,8 +15,12 @@ export default function Home() {
     setSubjects(resp.data.data);
   };
 
-  const elementSubjects = subjects.length > 0 ? (
-    subjects.map((item, index) => (
+  const displaySubjects = subjects.length >= 5
+  ? subjects.slice(0, 5)
+  : subjects;
+
+  const elementSubjects = displaySubjects.length > 0 ? (
+    displaySubjects.map((item, index) => (
       <div className="category" key={index}>
         <div className="container">
           <div className="course">

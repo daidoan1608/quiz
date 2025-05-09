@@ -18,8 +18,8 @@ function Login() {
         password,
       });
 
-      const { accessToken, refreshToken, userId } = response.data;
-      if(response.data.role !== 'ADMIN') {
+      const { accessToken, refreshToken, userId } = response.data.data;
+      if(response.data.data.role !== 'ADMIN') {
         message.error('Bạn không có quyền truy cập!');
         return;
       }

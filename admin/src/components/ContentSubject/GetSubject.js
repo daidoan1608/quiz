@@ -19,7 +19,7 @@ export default function GetSubject() {
     const getAllSubject = async () => {
         try {
             const rep = await authAxios.get('public/subjects');
-            setSubjects(rep.data);
+            setSubjects(rep.data.data);
         } catch (error) {
             console.error("Error fetching subjects:", error);
             alert("Không thể tải danh sách môn học!");
