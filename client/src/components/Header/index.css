@@ -161,32 +161,25 @@
 
 
 
-/* ////////////////////////////////////////////////////////// */
 .auth-links {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-
-/* /////////////////////////////////////////////////// */
-
 .header-img img {
   height: 10rem;
   width: auto;
 }
 
-/* /////////////////////////////////////////////// */
 .login-btn,
 .register-btn {
   text-decoration: none;
   padding: 0.3rem 1rem;
-  /* Reduced padding */
   border-radius: 4px;
   font-weight: 500;
   transition: all 0.3s ease;
   font-size: 0.9rem;
-  /* Reduced font size */
 }
 
 .login-btn {
