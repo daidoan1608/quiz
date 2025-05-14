@@ -22,7 +22,7 @@ const Footer = () => {
 
         {/* Footer bottom */}
         <div className="footer-bottom text-center mt-4">
-          <p style={{ fontSize: '1.8vw' }}>
+          <p style={{ fontSize: '1vw' }}>
             &copy; {new Date().getFullYear()} Bản quyền thuộc khoa CNTT Vnua.
           </p>
         </div>

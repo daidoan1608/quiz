@@ -46,10 +46,10 @@ export default function Home() {
             style={{ maxHeight: '500px', objectFit: 'cover' }}
           />
           <div
-            className="position-absolute top-0 start-0 w-100 h-100"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.10)',
-            }}
+            className="overlay-hover position-absolute top-0 start-0 w-100 h-100"
+          // style={{
+          //   backgroundColor: 'rgba(0, 0, 0, 0.10)',
+          // }}
           ></div>
         </div>
 
