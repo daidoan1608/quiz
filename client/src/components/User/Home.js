@@ -45,19 +45,15 @@ export default function Home() {
             className="img-fluid w-100"
             style={{ maxHeight: '500px', objectFit: 'cover' }}
           />
-
-          {/* Lớp phủ mờ */}
           <div
             className="position-absolute top-0 start-0 w-100 h-100"
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.11)', // Lớp mờ màu đen
-              // boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.6)', // Bóng bên trong
+              backgroundColor: 'rgba(0, 0, 0, 0.10)',
             }}
           ></div>
         </div>
 
 
-        {/* Nội dung chữ được căn giữa và co dãn theo kích thước màn hình */}
         <div
           className="position-absolute start-50 translate-middle-x text-center text-white px-3"
           style={{
@@ -69,9 +65,12 @@ export default function Home() {
           <h1
             className="fw-bold"
             style={{
-              color: '#0088a9',
-              fontSize: '8vw',
-              textShadow: '0 0 10px rgba(255, 255, 255, 0.8)', // chữ phát sáng
+              position: 'absolute',
+              top: '0',
+              left: '2%',
+              color: '#336699',
+              fontSize: '7vw',
+              textShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
             }}
           >
             TRẮC NGHIỆM ONLINE
@@ -80,15 +79,20 @@ export default function Home() {
           <p
             className="fst-italic"
             style={{
-              color: '#1e7785',
-              fontSize: '4vw',
-              whiteSpace: 'nowrap',
-              // textShadow: '0 0 8px rgba(255, 255, 255, 0.7)', // bóng sáng nhẹ
+              position: 'absolute',
+              top: 'calc(25% + 9vw)',  // Tính toán vị trí dưới <h1>
+              right: '0',
+              color: '#0088a9',
+              fontSize: '3vw',
+              transform: 'translateY(10%)',  // Đảm bảo nó không bị lệch
+              textShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
             }}
           >
             Rèn luyện mỗi ngày, tự động đạt điểm cao
           </p>
         </div>
+
+
 
 
       </main>
