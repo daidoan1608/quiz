@@ -97,7 +97,6 @@ export default function Home() {
 
       </main>
 
-      {/* PHẦN GIỚI THIỆU NHÓM */}
       <div className="container-fluid mt-5">
         <div className="row">
           <div className="col-12">
@@ -132,13 +131,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* CÁC MÔN HỌC HỖ TRỢ ÔN TẬP */}
         <div className="row">
           <div className="col-12">
             <h2 className="text-center my-4" style={{ color: '#0088a9' }}>
               Những môn học chúng mình hỗ trợ ôn tập
             </h2>
-            {/* Placeholder hiển thị danh sách môn học */}
             {elementSubjects}
           </div>
         </div>
