@@ -1,43 +1,61 @@
 .revision {
-  display: flex; /* Sử dụng flexbox để bố trí hai phần sidebar và content */
-  height: 100vh; /* Full chiều cao của viewport */
-  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
+  display: flex;
+  /* Sử dụng flexbox để bố trí hai phần sidebar và content */
+  height: 100vh;
+  /* Full chiều cao của viewport */
+  width: 100%;
+  /* Đảm bảo chiếm toàn bộ chiều rộng */
 }
 
 .content {
-  flex-grow: 1; /* Cho phép phần nội dung chiếm không gian còn lại */
-  padding: 20px; /* Khoảng cách giữa các phần tử trong content */
-  background-color: #f9f9f9; /* Màu nền của phần nội dung */
-  overflow-y: auto; /* Cho phép cuộn khi nội dung vượt quá chiều cao */
+  flex-grow: 1;
+  /* Cho phép phần nội dung chiếm không gian còn lại */
+  padding: 20px;
+  /* Khoảng cách giữa các phần tử trong content */
+  background-color: #f9f9f9;
+  /* Màu nền của phần nội dung */
+  overflow-y: auto;
+  /* Cho phép cuộn khi nội dung vượt quá chiều cao */
   display: flex;
-  flex-direction: column; /* Sắp xếp nội dung theo chiều dọc */
+  flex-direction: column;
+  /* Sắp xếp nội dung theo chiều dọc */
 }
 
 .category-re {
-  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
+  width: 100%;
+  /* Đảm bảo chiếm toàn bộ chiều rộng */
   display: flex;
-  justify-content: center; /* Căn giữa nội dung */
+  justify-content: center;
+  /* Căn giữa nội dung */
 }
 
 .container-re {
-  width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
-  max-width: 600px; /* Giới hạn chiều rộng của container */
-  margin: 0 auto; /* Căn giữa */
+  width: 100%;
+  /* Đảm bảo chiếm toàn bộ chiều rộng */
+  max-width: 600px;
+  /* Giới hạn chiều rộng của container */
+  margin: 0 auto;
+  /* Căn giữa */
   display: flex;
-  flex-wrap: wrap; /* Cho phép các phần tử bên trong xuống dòng khi không đủ không gian */
+  flex-wrap: wrap;
+  /* Cho phép các phần tử bên trong xuống dòng khi không đủ không gian */
 }
 
 .card-exam {
-  display: flex; /* Sắp xếp các phần tử theo chiều ngang */
-  flex-direction: row; /* Các phần tử nằm theo chiều ngang */
-  justify-content: flex-start; /* Đặt các phần tử từ trái sang phải */
+  display: flex;
+  /* Sắp xếp các phần tử theo chiều ngang */
+  flex-direction: row;
+  /* Các phần tử nằm theo chiều ngang */
+  justify-content: flex-start;
+  /* Đặt các phần tử từ trái sang phải */
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
   width: 100%;
-  max-width: 100%; /* Giới hạn chiều rộng tối đa của card */
+  max-width: 100%;
+  /* Giới hạn chiều rộng tối đa của card */
   margin-bottom: 2rem;
 }
 
@@ -48,27 +66,36 @@
 
 /* Card Image (chiếm 10% chiều ngang) */
 .card-img-exam {
-  flex: 0 0 10%; /* Chiếm 10% chiều ngang */
+  flex: 0 0 10%;
+  /* Chiếm 10% chiều ngang */
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 20px; /* Khoảng cách giữa ảnh và nội dung */
+  margin-right: 20px;
+  /* Khoảng cách giữa ảnh và nội dung */
 }
 
 .card-img-exam img {
-  width: 110%; /* Đẩy ảnh ra ngoài một chút */
+  width: 110%;
+  /* Đẩy ảnh ra ngoài một chút */
   height: auto;
-  max-width: 100px; /* Giới hạn kích thước ảnh */
-  margin-left: -10%; /* Đẩy ảnh ra ngoài từ bên trái */
+  max-width: 100px;
+  /* Giới hạn kích thước ảnh */
+  margin-left: -10%;
+  /* Đẩy ảnh ra ngoài từ bên trái */
 }
 
 /* Card Content (phần nội dung) */
 .card-content {
   display: flex;
-  flex-direction: column; /* Các phần tử trong content xếp theo chiều dọc */
-  justify-content: center; /* Căn giữa phần nội dung */
-  flex-grow: 1; /* Làm cho phần nội dung này chiếm không gian còn lại */
-  text-align: center; /* Căn giữa text trong phần nội dung */
+  flex-direction: column;
+  /* Các phần tử trong content xếp theo chiều dọc */
+  justify-content: center;
+  /* Căn giữa phần nội dung */
+  flex-grow: 1;
+  /* Làm cho phần nội dung này chiếm không gian còn lại */
+  text-align: center;
+  /* Căn giữa text trong phần nội dung */
 }
 
 /* Card Content Title */
@@ -76,7 +103,8 @@
   margin: 0;
   font-size: 25px;
   font-weight: bold;
-  margin-bottom: 10px; /* Khoảng cách giữa tiêu đề và nút */
+  margin-bottom: 10px;
+  /* Khoảng cách giữa tiêu đề và nút */
 }
 
 /* Card Button (phần nút) */
@@ -89,10 +117,50 @@
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s ease;
-  margin-top: 15px; /* Khoảng cách giữa phần nội dung và nút */
+  margin-top: 15px;
+  /* Khoảng cách giữa phần nội dung và nút */
   text-align: center;
 }
 
 .card-button-exam:hover {
   background-color: #006666;
 }
+
+.card-button {
+  width: fit-content;
+  /* Kích thước theo nội dung */
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0 auto;
+  /* Căn giữa theo chiều ngang */
+  display: block;
+  /* Đảm bảo margin auto hoạt động */
+  transition: background-color 0.3s ease;
+}
+
+.card-button:hover {
+  background-color: #0056b3;
+}
+
+
+
+
+
+/* .card-button {
+  
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.card-button:hover {
+  background-color: #0056b3;
+} */

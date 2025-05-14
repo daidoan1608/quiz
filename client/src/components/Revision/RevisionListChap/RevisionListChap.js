@@ -10,21 +10,22 @@ export default function RevisionListChap() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [favoriteChapters, setFavoriteChapters] = useState({});
+
   const location = useLocation();
   const navigate = useNavigate();
   const { subjectId } = location.state || {};
-  const { isLoggedIn } = useAuth(); // Lấy trạng thái và hàm logout từ context
-  
+  const { isLoggedIn } = useAuth();
 
+  // Lấy danh sách các chương từ API
   const getChapterBySubjectId = async (subjectId) => {
     try {
       setIsLoading(true);
       setError(null);
       const resp = await publicAxios.get(`public/chapters/subject/${subjectId}`);
 
-      // Kiểm tra xem dữ liệu trả về có đúng không
       if (resp.data.status === "success") {
-        setChapters(resp.data.data); // Gán danh sách chapters vào state
+        setChapters(resp.data.data);
       } else {
         setError("Không tìm thấy thông tin chương.");
       }
@@ -44,7 +45,12 @@ export default function RevisionListChap() {
     }
   }, [subjectId]);
 
-  // Handle chapter click
+  useEffect(() => {
+    // Load favorite chapters from localStorage
+    const savedFavorites = JSON.parse(localStorage.getItem("favoriteChapters")) || {};
+    setFavoriteChapters(savedFavorites);
+  }, []);
+
   const handleChapterClick = (chapter) => {
     if (!isLoggedIn) {
       setShowLoginPrompt(true); // Show login prompt
@@ -65,7 +71,24 @@ export default function RevisionListChap() {
     setShowLoginPrompt(false); // Close login prompt
   };
 
-  // Render chapters
+  // Toggle trạng thái yêu thích
+  const toggleFavorite = (chapterId, chapterName) => {
+    const updatedFavorites = {
+      ...favoriteChapters,
+      [chapterId]: !favoriteChapters[chapterId], // Toggle the favorite state
+    };
+    setFavoriteChapters(updatedFavorites);
+
+    // Lưu trạng thái yêu thích và tên chương vào localStorage
+    const favoriteData = JSON.parse(localStorage.getItem("favoriteChapters")) || {};
+    favoriteData[chapterId] = {
+      isFavorite: !favoriteData[chapterId]?.isFavorite,
+      name: chapterName,
+    };
+    localStorage.setItem("favoriteChapters", JSON.stringify(favoriteData));
+  };
+
+
   const renderChaps = (chapters) => {
     if (!Array.isArray(chapters) || chapters.length === 0) {
       return null;
@@ -75,18 +98,33 @@ export default function RevisionListChap() {
       <div
         key={item.chapterId}
         className="chapter-item"
-        onClick={() => handleChapterClick(item)}
         role="button"
         tabIndex={0}
+        onClick={() => handleChapterClick(item)}
         onKeyPress={(e) => {
           if (e.key === "Enter") {
             handleChapterClick(item);
           }
         }}
       >
-        <h3>
-          {item.chapterNumber}. {item.name}
-        </h3>
+        <div className="chapter-header">
+          <h3>
+            {item.chapterNumber}. {item.name}
+          </h3>
+          {/* Biểu tượng yêu thích */}
+          <i
+            className={`fa-heart ${favoriteChapters[item.chapterId] ? "fa-solid" : "fa-regular"}`}
+            style={{
+              cursor: "pointer",
+              color: favoriteChapters[item.chapterId] ? "red" : "gray",
+            }}
+            onClick={(e) => {
+              e.stopPropagation(); // Ngăn chặn click lan ra thẻ cha
+              toggleFavorite(item.chapterId, item.name); // Truyền thêm tên chương
+            }}
+          ></i>
+
+        </div>
       </div>
     ));
   };
