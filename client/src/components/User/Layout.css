@@ -1,0 +1,21 @@
+/* Đảm bảo layout chiếm toàn bộ chiều cao màn hình */
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Đẩy footer xuống dưới */
+.main-content {
+    flex-grow: 1;
+    padding-bottom: 2rem; /* Đảm bảo nội dung không bị đè lên footer */
+}
+
+/* Đảm bảo footer bám đáy */
+.footer {
+    margin-top: auto;
+    background-color: #000;
+    color: #f5f5f5;
+    padding: 2rem 0;
+    border-top: 2px solid #444;
+}
