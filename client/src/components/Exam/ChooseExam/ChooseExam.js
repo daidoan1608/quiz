@@ -6,8 +6,9 @@ import Sidebar from "../../User/SideBar";
 
 export default function ChooseExam() {
   const [subjects, setSubjects] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState();
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [filteredSubjects, setFilteredSubjects] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,8 +25,11 @@ export default function ChooseExam() {
     }
   };
 
-  const handleSearchChange = (query) => {
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
     setSelectedCategory(null);
+
     const filtered = subjects.filter((subject) =>
       subject.name.toLowerCase().includes(query.toLowerCase())
     );
@@ -42,6 +46,7 @@ export default function ChooseExam() {
     );
     setFilteredSubjects(filtered);
     setSelectedCategory(categoryId);
+    setSearchQuery(""); // Xoá từ khóa tìm kiếm khi chọn danh mục
   };
 
   return (
@@ -53,13 +58,20 @@ export default function ChooseExam() {
           onSearchChange={handleSearchChange}
         />
         <div className="content">
+          <input
+            type="text"
+            placeholder="Tìm kiếm môn học..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="search-bar"
+          />
           <section className="category-re">
             <div className="container-re">
               {filteredSubjects.map((item) => (
                 <div className="card-exam" key={item.subjectId}>
-                  <div className='card-img-exam'>
-                    <div className='card-img'>
-                      <img alt="Hình bài thi" src='/exam.png'></img>
+                  <div className="card-img-exam">
+                    <div className="card-img">
+                      <img alt="Hình bài thi" src="/exam.png" />
                     </div>
                   </div>
                   <div className="card-content">

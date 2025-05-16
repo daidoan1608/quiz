@@ -68,7 +68,7 @@ export default function Headers() {
           </div>
         </div>
 
-        <div className="nav-links-headers2 d-flex justify-content-center my-3">
+        <div className="nav-links-headers2 d-flex justify-content-center">
           <a href="/" className="mx-3">TRANG CHỦ</a>
           <a href="/revision" className="mx-3">ÔN TẬP</a>
           <a href="/chooseExams" className="mx-3">BÀI THI</a>

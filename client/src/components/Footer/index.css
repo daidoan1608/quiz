@@ -1,27 +1,6 @@
-/* src/components/Footer.css */
-.footer {
-  background-color: #333;
-  color: white;
-  padding: 20px;
-  text-align: center;
+.social-links{
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 
-.footer-content {
-  margin-bottom: 10px;
-}
-
-.footer-bottom {
-  font-size: 0.8em;
-}
-
-@media (max-width: 768px) {
-  .footer p {
-    font-size: 4vw;
-  }
-}
-
-@media (min-width: 769px) {
-  .footer p {
-    font-size: 1.2vw;
-  }
-}
