@@ -16,4 +16,6 @@ public interface UserExamService {
     List<UserExamResponse> getUserExamByUserId(UUID userId);
 
     List<Map<Long, Object>> getExamAttemptsByUserId(UUID userId);
+
+    List<UserExamResponse> getAllUserExams();
 }

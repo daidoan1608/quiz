@@ -21,6 +21,20 @@ import java.util.UUID;
 public class UserExamController {
     private final UserExamService userExamService;
 
+    @GetMapping("/admin/userexams")
+    @Operation(summary = "Get all user exams")
+    public ResponseEntity<ApiResponse<List<UserExamResponse>>> getAllUserExams() {
+        try {
+            List<UserExamResponse> userExams = userExamService.getAllUserExams();
+            if (userExams.isEmpty()) {
+                return ResponseEntity.status(404).body(ApiResponse.error("No user exams found", List.of("No user exams available")));
+            }
+            return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch user exams", List.of(e.getMessage())));
+        }
+    }
+
     // Lấy bài thi của người dùng theo userExamId
     @GetMapping("/user/userexams/{userExamId}")
     public ResponseEntity<ApiResponse<UserExamResponse>> getUserExamById(@PathVariable("userExamId") Long userExamId) {
@@ -49,7 +63,7 @@ public class UserExamController {
         }
     }
 
-    // Tạo bài thi cho người dùng (user exam
+    // Tạo bài thi cho người dùng (user exam)
     @PostMapping("user/userexams")
     public ResponseEntity<ApiResponse<UserExamDto>> createUserExam(@RequestBody UserExamRequest userExamRequest) {
         try {
