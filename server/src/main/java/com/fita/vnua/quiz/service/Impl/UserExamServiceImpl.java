@@ -48,9 +48,12 @@ public class UserExamServiceImpl implements UserExamService {
             userAnswerDto.setUserExamId(userAnswer1.getUserExam().getUserExamId());
             userAnswerDtos.add(userAnswerDto);
         }
+        SubjectDto subject = subjectService.getSubjectById(userExam.getExam().getSubject().getSubjectId());
         return UserExamResponse.builder()
                 .userExamDto(userExamDto)
                 .userAnswerDtos(userAnswerDtos)
+                .subjectName(subject.getName())
+                .title(userExam.getExam().getTitle())
                 .build();
     }
 
@@ -73,9 +76,7 @@ public class UserExamServiceImpl implements UserExamService {
 
         for (UserAnswerDto userAnswerDto : userAnswerDtos) {
             // Kiểm tra các trường quan trọng trước khi thao tác
-            if (userAnswerDto.getAnswerId() == null ||
-                    userAnswerDto.getQuestionId() == null ||
-                    savedUserExam == null) {
+            if (userAnswerDto.getAnswerId() == null || userAnswerDto.getQuestionId() == null) {
                 // Xử lý trường hợp thiếu dữ liệu
                 log.error("Invalid user answer data: {}", userAnswerDto);
                 continue;
@@ -102,6 +103,21 @@ public class UserExamServiceImpl implements UserExamService {
     @Override
     public List<UserExamResponse> getUserExamByUserId(UUID userId) {
         List<UserExam> userExams = userExamRepository.findUserExamsByUserId(userId);
+        return getUserExamResponses(userExams);
+    }
+
+    @Override
+    public List<Map<Long, Object>> getExamAttemptsByUserId(UUID userId) {
+        return userExamRepository.countExamsByUserId(userId);
+    }
+
+    @Override
+    public List<UserExamResponse> getAllUserExams() {
+        List<UserExam> userExams = userExamRepository.findAll();
+        return getUserExamResponses(userExams);
+    }
+
+    private List<UserExamResponse> getUserExamResponses(List<UserExam> userExams) {
         List<UserExamResponse> userExamResponses = new ArrayList<>();
         for (UserExam userExam : userExams) {
             SubjectDto subject = subjectService.getSubjectById(userExam.getExam().getSubject().getSubjectId());
@@ -114,11 +130,6 @@ public class UserExamServiceImpl implements UserExamService {
             userExamResponses.add(userExamResponse);
         }
         return userExamResponses;
-    }
-
-    @Override
-    public List<Map<Long, Object>> getExamAttemptsByUserId(UUID userId) {
-        return userExamRepository.countExamsByUserId(userId);
     }
 
     protected UserExamDto convertUserExamsToUserExamDto(UserExam userExam) {

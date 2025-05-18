@@ -36,11 +36,9 @@ const processQueue = (error, token = null) => {
 const refreshToken = async () => {
   try {
     const refreshToken = sessionStorage.getItem("refreshToken");
-    const response = await publicAxios.post("/auth/refresh", { refreshToken });
-    
-    const { accessToken } = response.data.data.accessToken;
+    const response = await publicAxios.post("auth/refresh", { refreshToken });
+    const { accessToken } = response.data.data;
     localStorage.setItem("accessToken", accessToken);
-    
     return accessToken;
   } catch (error) {
     localStorage.removeItem("accessToken");

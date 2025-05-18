@@ -87,9 +87,29 @@ export default function DetailExam() {
   return (
     <>
       <div className="p-4">
-        <h2 className="text-xl font-bold mb-4">{examData.title}</h2>
+        <div className="bg-gray-100 p-6 rounded-lg shadow-lg border mb-4">
+          <h2 className="text-xl font-bold mb-4">Môn: {examData.subjectName}</h2>
+          <h2 className="text-xl font-bold mb-4">{examData.title}</h2>
+          <h2 className="text-xl font-bold mb-4">Điểm: {userAnswers.userExamDto.score}</h2>
+          <h2 className="text-xl font-bold mb-4">
+            Ngày làm bài: {formatDate(userAnswers.userExamDto.startTime)}
+          </h2> 
+        </div>
         {renderQuestions()}
       </div>
     </>
   );
+}
+
+function formatDate(startTime) {
+  // Chuyển đổi thành đối tượng Date
+  const date = new Date(startTime);
+
+  // Lấy ngày, tháng, năm
+  const day = date.getDate();  // Ngày
+  const month = date.getMonth() + 1;  // Tháng (cộng 1 vì getMonth() trả về từ 0 đến 11)
+  const year = date.getFullYear();  // Năm
+
+  // Trả về chuỗi ngày/tháng/năm
+  return `${day}-${month}-${year}`;
 }

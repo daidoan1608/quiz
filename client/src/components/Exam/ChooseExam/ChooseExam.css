@@ -4,6 +4,28 @@
   width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng */
 }
 
+.card-exam {
+  position: relative; /* Để có thể sử dụng vị trí tuyệt đối cho bookmark */
+}
+
+.bookmark-button {
+  position: absolute;
+  top: 10px; /* Cách phía trên 10px */
+  right: 10px; /* Cách phía phải 10px */
+  z-index: 10; /* Đảm bảo nút bookmark luôn nằm trên các phần tử khác */
+}
+
+.bookmark-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bookmark-icon img {
+  width: 20px;
+  height: 20px;
+}
+
 .content {
   flex-grow: 1; /* Cho phép phần nội dung chiếm không gian còn lại */
   padding: 20px; /* Khoảng cách giữa các phần tử trong content */
