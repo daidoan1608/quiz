@@ -6,11 +6,11 @@ import Sidebar from "../../User/SideBar";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 
 export default function ChooseExam() {
-  const [subjects, setSubjects] = useState([]); // Tất cả môn học
-  const [selectedCategory, setSelectedCategory] = useState(null); // Khoa đã chọn
-  const [filteredSubjects, setFilteredSubjects] = useState([]); // Môn học đã lọc
-  const [bookmarkedExams, setBookmarkedExams] = useState([]); // Môn học đã bookmark
-  const navigate = useNavigate(); // Hook useNavigate
+  const [subjects, setSubjects] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [filteredSubjects, setFilteredSubjects] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   // Khi component được load, gọi API lấy tất cả môn học
   useEffect(() => {
@@ -28,9 +28,11 @@ export default function ChooseExam() {
     }
   };
 
-  // Hàm xử lý tìm kiếm môn học
-  const handleSearchChange = (query) => {
-    setSelectedCategory(null); // Reset khoa đã chọn khi tìm kiếm
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setSelectedCategory(null);
+
     const filtered = subjects.filter((subject) =>
       subject.name.toLowerCase().includes(query.toLowerCase())
     );
@@ -44,32 +46,12 @@ export default function ChooseExam() {
 
   // Hàm xử lý chọn khoa
   const handleSelectCategory = (categoryId) => {
-    // Kiểm tra nếu khoa đã được chọn và nhấp lại lần thứ hai
-    if (selectedCategory === categoryId) {
-      // Nếu khoa đã được chọn, hiển thị lại toàn bộ môn học
-      setSelectedCategory(null); // Bỏ chọn khoa
-      setFilteredSubjects(subjects); // Hiển thị lại tất cả các môn học
-    } else {
-      // Lọc danh sách môn học theo khoa đã chọn
-      const filtered = subjects.filter(
-        (subject) => subject.categoryId === categoryId
-      );
-      setFilteredSubjects(filtered); // Cập nhật môn học đã lọc theo khoa
-      setSelectedCategory(categoryId); // Cập nhật khoa đã chọn
-    }
-  };
-
-  // Hàm xử lý bookmark môn học
-  const handleBookmark = (subjectId) => {
-    setBookmarkedExams((prevBookmarks) => {
-      // Kiểm tra nếu bài thi đã được bookmark, thì bỏ bookmark
-      if (prevBookmarks.includes(subjectId)) {
-        return prevBookmarks.filter((id) => id !== subjectId);
-      } else {
-        // Nếu chưa bookmark, thêm vào danh sách bookmark
-        return [...prevBookmarks, subjectId];
-      }
-    });
+    const filtered = subjects.filter(
+      (subject) => subject.categoryId === categoryId
+    );
+    setFilteredSubjects(filtered);
+    setSelectedCategory(categoryId);
+    setSearchQuery(""); // Xoá từ khóa tìm kiếm khi chọn danh mục
   };
 
   return (
@@ -82,26 +64,20 @@ export default function ChooseExam() {
           onSearchChange={handleSearchChange} // Truyền hàm tìm kiếm vào Sidebar
         />
         <div className="content">
+          <input
+            type="text"
+            placeholder="Tìm kiếm môn học..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="search-bar"
+          />
           <section className="category-re">
             <div className="container-re">
               {filteredSubjects.map((item) => (
                 <div className="card-exam" key={item.subjectId}>
-                  <div className="bookmark-button">
-                    <button
-                      className="bookmark-icon"
-                      onClick={() => handleBookmark(item.subjectId)}
-                    >
-                      {/* Hiển thị icon bookmark đầy đủ hoặc chưa đầy đủ */}
-                      {bookmarkedExams.includes(item.subjectId) ? (
-                        <FaBookmark size={24} color="blue" /> // Icon đã bookmark
-                      ) : (
-                        <FaRegBookmark size={24} color="gray" /> // Icon chưa bookmark
-                      )}
-                    </button>
-                  </div>
                   <div className="card-img-exam">
                     <div className="card-img">
-                      <img alt="Hình bài thi" src="/exam.png"></img>
+                      <img alt="Hình bài thi" src="/exam.png" />
                     </div>
                   </div>
                   <div className="card-content">

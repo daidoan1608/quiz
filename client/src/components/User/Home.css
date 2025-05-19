@@ -1,105 +1,88 @@
-/* body {
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-} */
-.main-content {
-    position: relative;
-    text-align: center;
-    /* color: black; Đảm bảo chữ có màu sáng khi đặt trên ảnh tối */
-  }
-  
-  .image-container {
-    position: relative; /* Cho phép các phần tử con được đặt tuyệt đối so với phần tử này */
-    /* z-index: 1; */
-    width: 100%;
-}
-  
-  .image-container img {
-    width: 100%;
-    height: 400px;
-    object-fit: cover; /* Giữ tỉ lệ hình ảnh trong vùng chứa mà không bị méo */
-    opacity: 0.7;
-  }
-  
-  .image-container h1 {
-    font-family: 'Roboto', sans-serif;
-    position: absolute; 
-    top: 20%; 
-    left: 25%; 
-    transform: translate(-50%, -50%);
-    z-index: 2; 
-    color: #178FA5;
-    font-size: 4.5rem;
-    font-weight: 800;
-  }
-  .image-container p {
-    position: relative; 
-    top: 8rem; 
-    margin-left: 35rem; 
-    /* width: 100%; */
-     /* transform: translate(-50%, -50%); */
-    z-index: 2; 
-    color: #178FA5;
-    font-size: 2.5rem;
-    font-weight: 500;
-    font-style: italic;
-  }
-  .category {
-    padding: 20px; 
-}
-.category h2 {
-    color: #178FA5; 
-    font-size: 30px; 
-    font-weight: 700; 
-    text-align: center; 
-    margin-bottom: 20px; 
+/* Background chính */
+.main-background {
+  background-image: url('/public/bgimage.avif'); /* Đảm bảo bạn đã đặt ảnh đúng ở public/bgimg.avif */
+  background-size: contain;
+  background-position: right;
+  height: 500px; /* Chiều cao có thể điều chỉnh tùy ảnh */
+  position: relative;
+  background-repeat: no-repeat;
 }
 
-.container {
-    display: flex; 
-    flex-direction: column; 
-    gap: 30px; 
-    width: 70%;
-    position: relative;
+/* Tiêu đề và mô tả */
+.main-background h1 {
+  text-align: left;
+  font-weight: bold;
+  font-size: 4rem;
+  color: #336699;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  margin-left: 3%;
 }
+
+.main-background p {
+  text-align: left;
+  font-size: 1.8rem;
+  color: #0088a9;
+  margin-left: 3%;
+  margin-top: 1rem;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Giới thiệu */
+.container-fluid {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  color: #333;
+  
+}
+
+.container-fluid h2 {
+  font-weight: 600;
+}
+
+.container-fluid p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* Môn học */
+.category {
+  margin-bottom: 1.5rem;
+}
+
 .course {
-    /* background-color: #ffffff; Màu nền cho mỗi môn học */
-    display: flex; /* Sử dụng flexbox cho mỗi môn học */
-    justify-content: center; /* Căn giữa theo chiều ngang */
-    align-items: center; /* Căn giữa theo chiều dọc */
-
-    padding: 30px; /* Khoảng cách bên trong cho mỗi môn học */
-    border: 1px solid #178FA5; /* Đường viền cho mỗi môn học */
-    border-radius: 5px; /* Bo góc cho mỗi môn học */
-    transition: background-color 0.3s; /* Hiệu ứng chuyển màu nền khi di chuột */
+  background-color: #eef7fa;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  text-align: center;
 }
 
-.course a {
-    text-decoration: none; /* Bỏ gạch chân cho liên kết */
-    color: #333; /* Màu chữ cho liên kết */
-    font-weight: bold; /* Chữ đậm cho liên kết */
-    font-size: 22px;
-
+.course h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #005f73;
 }
 
-.modal {
-    display: block;  /* Đảm bảo modal được hiển thị khi trạng thái mở */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);  /* Màu nền mờ */
-    z-index: 1000; /* Đảm bảo modal ở trên cùng */
-  }
-  .school-introduction {
-    text-align: center;
-    font-size: 30px;
-    border: 1px solid #ccc;
-    padding: 20px;
-    margin: 20px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-  }
+.course:hover {
+  transform: translateY(-5px);
+}
+
+.no-subjects {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}
+
+.content-intro{
+  background-color: #bcddef;
+  border-radius: 8px;
+}
+
+
+
+.text-detail>p{
+  font-size: 2.5rem;
+  font-style: italic;
+}

@@ -4,16 +4,13 @@ import '../User/SideBar.css'
 
 
 const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
-  const [searchQuery, setSearchQuery] = useState(""); // Từ khóa tìm kiếm
+  
   const [categories, setCategories] = useState([]); // Danh sách khoa
   const [error, setError] = useState(null); // Lưu thông báo lỗi
 
 
   // Hàm xử lý thay đổi trong ô tìm kiếm
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    onSearchChange(e.target.value); // Gọi hàm từ component cha để lọc danh sách môn học
-  };
+  
 
   useEffect(() => {
     getAllCategories();
@@ -36,13 +33,7 @@ const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
     <div className="sidebar">
       <h3>Danh sách khoa</h3>
       {/* Thanh tìm kiếm */}
-      <input
-        type="text"
-        placeholder="Tìm kiếm môn học..."
-        value={searchQuery}
-        onChange={handleSearchChange}
-        className="search-bar"
-      />
+
       {error && <p className="error-message">{error}</p>}
 
       <ul>
