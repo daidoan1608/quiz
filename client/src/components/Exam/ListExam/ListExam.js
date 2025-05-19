@@ -4,6 +4,7 @@ import "./ListExam.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoginPrompt from "../../User/LoginPrompt";
 import { useAuth } from "../../Context/AuthProvider";
+import { useLanguage } from "../../Context/LanguageProvider";
 
 export default function ExamUsers() {
   const [examDto, setExamUsers] = useState([]);
@@ -16,8 +17,7 @@ export default function ExamUsers() {
   const [numbersOfExam, setNumbersOfExam] = useState(new Map());
   const userId = localStorage.getItem("userId")
   const [completedExams, setCompletedExams] = useState(new Set());
-
-  
+  const { texts } = useLanguage();
 
   useEffect(() => {
     getAllExam();
@@ -91,7 +91,7 @@ export default function ExamUsers() {
           <h2>{item.title}</h2>
           <h3>{item.description}</h3>
           <div className="details">
-            <span>Lần thi: {attempts} </span>
+            <span>{texts.examTime}: {attempts} </span>
           </div>
         </div>
         <button
@@ -101,7 +101,7 @@ export default function ExamUsers() {
             handleExamClick(item.examId);
           }}
         >
-          Làm bài
+          {texts.getExam}
         </button>
       </div>
     );
@@ -126,7 +126,7 @@ export default function ExamUsers() {
         <>
           <div className="category-exam">
             <div className="container-exam">
-              <div className="category-header">HÃY CHỌN BÀI THI!</div>
+              <div className="category-header">{texts.chooseExam}</div>
               {elementExamUsers}
             </div>
           </div>

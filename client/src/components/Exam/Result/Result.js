@@ -1,13 +1,14 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Result.css';
+import { useLanguage } from '../../Context/LanguageProvider';
 
 
 export default function Result() {
   const { state } = useLocation(); // Lấy dữ liệu từ navigation
   const navigate = useNavigate();
   const { examId, userExamId, correctAnswers, timeTaken, totalQuestions } = state || {};
-  
+  const { texts } = useLanguage();
   const score = ((correctAnswers / totalQuestions) * 100).toFixed(2); // Tính điểm
 
   // Xử lý điều hướng khi nhấn "Xem bài thi"
@@ -31,12 +32,12 @@ export default function Result() {
             />
           </div>
           <div className="result-text">
-            <h1>KẾT QUẢ BÀI THI!</h1>
-            <p>CÂU ĐÚNG: {correctAnswers}/{totalQuestions}</p>
-            <p>THỜI GIAN: {Math.floor(timeTaken / 60)}:{(timeTaken % 60).toString().padStart(2, '0')}</p>
-            <p>ĐIỂM: {score}</p>
-            <button className="submit-btn-result" onClick={handleDetail}>Xem bài thi</button>
-            <button className="submit-btn-result" onClick={handleExit}>THOÁT</button>
+            <h1>{texts.result}</h1>
+            <p>{texts.correct}: {correctAnswers}/{totalQuestions}</p>
+            <p>{texts.time}: {Math.floor(timeTaken / 60)}:{(timeTaken % 60).toString().padStart(2, '0')}</p>
+            <p>{texts.score}: {score}</p>
+            <button className="submit-btn-result" onClick={handleDetail}>{texts.detail}</button>
+            <button className="submit-btn-result" onClick={handleExit}>{texts.exit}</button>
           </div>
         </div>
       </div>

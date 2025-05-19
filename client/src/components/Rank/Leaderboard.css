@@ -1,0 +1,9 @@
+/* Bạn có thể tinh chỉnh thêm nếu muốn */
+.leaderboard-table .ant-table-thead > tr > th {
+  background-color: #f0f2f5;
+  text-align: center;
+}
+
+.leaderboard-table .ant-table-tbody > tr > td {
+  text-align: center;
+}
