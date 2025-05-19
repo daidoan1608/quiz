@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../api/axiosConfig";
-import '../User/SideBar.css'
-
+import "../User/SideBar.css";
+import { useLanguage } from "../../components/Context/LanguageProvider";
+import categoryTranslations from "../../Languages/categoryTranslations";
 
 const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
-  
   const [categories, setCategories] = useState([]); // Danh sách khoa
   const [error, setError] = useState(null); // Lưu thông báo lỗi
-
-
-  // Hàm xử lý thay đổi trong ô tìm kiếm
-  
+  const { texts, language } = useLanguage(); // Lấy văn bản từ LanguageContext
 
   useEffect(() => {
     getAllCategories();
@@ -25,14 +22,13 @@ const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
     } catch (error) {
       console.error(error);
       setCategories([]); // Trả về danh sách rỗng khi gặp lỗi
-      setError("Không thể tải danh sách khoa. Vui lòng thử lại sau.");
+      setError(texts.categoriesError); // Sử dụng văn bản lỗi từ texts
     }
   };
 
   return (
     <div className="sidebar">
-      <h3>Danh sách khoa</h3>
-      {/* Thanh tìm kiếm */}
+      <h3>{texts.categoriesTitle}</h3>
 
       {error && <p className="error-message">{error}</p>}
 
@@ -42,18 +38,20 @@ const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
             <li key={category.categoryId}>
               <button
                 onClick={() => onSelectCategory(category.categoryId)}
-                className={
-                  selectedCategory === category.categoryId ? "selected" : ""
-                }
+                className={selectedCategory === category.categoryId ? "selected" : ""}
+                aria-pressed={selectedCategory === category.categoryId}
               >
-                {category.categoryName}
+                {categoryTranslations[category.categoryName]
+                  ? categoryTranslations[category.categoryName][language]
+                  : category.categoryName}
               </button>
             </li>
           ))
         ) : (
-          <p>Không có danh mục nào.</p>
+          <p>{texts.noCategories}</p>
         )}
       </ul>
+
     </div>
   );
 };

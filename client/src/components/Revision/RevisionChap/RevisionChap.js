@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useLocation } from "react-router-dom";
 import "./RevisionChap.css";
+import { useLanguage } from "../../Context/LanguageProvider";
 
 export default function RevisionChap1() {
   const [questionAnswers, setQuestionAnswers] = useState([]);
@@ -12,6 +13,7 @@ export default function RevisionChap1() {
   const questionsPerPage = 8;
   const location = useLocation();
   const { chapterId } = location.state || {};
+  const { texts } = useLanguage();
   
 
   const questionRefs = useRef([]);
@@ -95,7 +97,7 @@ export default function RevisionChap1() {
         ref={(el) => (questionRefs.current[globalQuestionIndex] = el)}
       >
         <div className="question">
-          <strong>Câu {globalQuestionIndex + 1}:</strong> {item.content}
+          <strong>{texts.number} {globalQuestionIndex + 1}:</strong> {item.content}
         </div>
         <div className="options">
           {item.answers?.map((answer, answerIndex) => {
@@ -118,9 +120,9 @@ export default function RevisionChap1() {
         {selectedAnswers[globalQuestionIndex] !== undefined && (
           <div className="feedback">
             {item.answers[selectedAnswers[globalQuestionIndex]].isCorrect ? (
-              <span className="correct">Đáp án đúng!</span>
+              <span className="correct">{texts.correctAnswer}</span>
             ) : (
-              <span className="incorrect">Đáp án sai! Vui lòng thử lại.</span>
+              <span className="incorrect">{texts.wrongAnswer}</span>
             )}
           </div>
         )}
