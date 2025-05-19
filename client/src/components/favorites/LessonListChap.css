@@ -1,0 +1,17 @@
+.container-re {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.container-re p {
+    text-align: center;
+    /* Căn giữa ngang */
+    color: red;
+    /* Đổi màu chữ thành đỏ */
+    font-weight: 500;
+    /* (Tuỳ chọn) Làm đậm hơn */
+    margin-top: 20px;
+    /* (Tuỳ chọn) Thêm khoảng cách phía trên */
+}

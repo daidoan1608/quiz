@@ -81,3 +81,31 @@
   margin-right: 10px;
   font-weight: bold;
 }
+
+.chapter-header {
+  display: flex;
+  /* Sử dụng Flexbox để sắp xếp các phần tử theo hàng */
+  justify-content: space-between;
+  /* Đảm bảo khoảng cách giữa tên chương và biểu tượng yêu thích */
+  align-items: center;
+  /* Canh giữa dọc các phần tử trong hàng */
+}
+
+.chapter-item {
+  margin-bottom: 15px;
+  padding: 30px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.chapter-item:hover {
+  background-color: #f5f5f5;
+}
+
+.fa-heart {
+  margin-left: 10px;
+  /* Tạo khoảng cách giữa tên chương và biểu tượng yêu thích */
+  transition: color 0.3s;
+  font-size: 20px;
+}

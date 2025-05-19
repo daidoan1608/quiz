@@ -1,0 +1,93 @@
+.favorite-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Căn giữa ngang */
+    padding: 20px;
+}
+
+.container-re {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.container-re p {
+    text-align: center;
+    /* Căn giữa ngang */
+    color: red;
+    /* Đổi màu chữ thành đỏ */
+    font-weight: 500;
+    /* (Tuỳ chọn) Làm đậm hơn */
+    margin-top: 20px;
+    /* (Tuỳ chọn) Thêm khoảng cách phía trên */
+}
+
+
+.card-content-list {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.card-content-list h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    flex-grow: 1;
+}
+
+/* Hàng chứa nút và biểu tượng */
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Biểu tượng trái tim */
+.favorites-link i {
+    color: #e74c3c;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+/* Nút xóa */
+.card-button.remove {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.card-button.remove:hover {
+    background-color: #c0392b;
+}
+
+.favorites-link-list {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    color: #000;
+    text-decoration: none;
+    font-weight: 500;
+    gap: 6px;
+    /* khoảng cách giữa chữ và icon */
+    transition: background-color 0.2s, color 0.2s;
+    text-decoration: none;
+
+}
+
+.favorites-link-list:hover {
+    background-color: #ffecec;
+    color: #e60000;
+    border-color: #e60000;
+    text-decoration: none;
+
+}

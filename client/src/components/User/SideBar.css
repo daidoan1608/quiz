@@ -23,7 +23,8 @@
 
 .sidebar button {
     background: none; /* No background */
-    border-radius: 10px; 
+    border-radius: 10px;
+    border: 1px solid #ccc; /* Viền 1px màu xám nhạt */
     cursor: pointer; /* Pointer cursor */
     color: inherit; /* Inherit text color */
     padding: 10px 15px; /* Add padding for button */

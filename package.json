@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bootstrap": "^5.3.6",
     "lucide-react": "^0.486.0",
     "react-toastify": "^11.0.5"
   }
