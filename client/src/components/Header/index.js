@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import "./index.css";
 import { useAuth } from "../Context/AuthProvider";
-import { FaRegBookmark, FaBookmark } from "react-icons/fa"; // Icon yêu thích
+import { useLanguage } from "../Context/LanguageProvider";
 
 export default function Headers() {
   const { isLoggedIn, logout } = useAuth();
-  const [isModalOpen, setIsModalOpen] = useState(false); // Quản lý trạng thái mở modal
-  const [bookmarkedExams, setBookmarkedExams] = useState([]); // Môn học yêu thích đã được bookmark
+  const { language, toggleLanguage, texts } = useLanguage();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookmarkedExams, setBookmarkedExams] = useState([]); // Giả sử bạn sẽ set danh sách môn yêu thích ở đây
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -16,45 +18,41 @@ export default function Headers() {
     logout();
   };
 
-  // Hàm xử lý bookmark
-  const handleBookmark = (subjectId) => {
-    setBookmarkedExams((prevBookmarks) => {
-      if (prevBookmarks.includes(subjectId)) {
-        return prevBookmarks.filter((id) => id !== subjectId);
-      } else {
-        return [...prevBookmarks, subjectId];
-      }
-    });
-  };
-
   return (
-    <div>
-      <header className="header">
-        <div className="logo">
-          <img alt="FITA logo" src="logoschool.png" />
-        </div>
-        <div className="header-top">
-          <div className="header-between">
-            <div className="slogan">
-              <img alt="slogan" src="slogan-vi.png" />
-            </div>
+    <div className="header-container">
+      <header className="header" style={{ marginTop: "10px" }}>
+        <div className="d-flex justify-content-between align-items-center">
+          <div className="logo">
+            <img alt="FITA logo" src="logoschool.png" className="img-fluid" />
           </div>
-          <div className="auth-links">
-            <div className="header-img">
-              <img alt="Illustration" src="hat.png" />
+          <div className="header-top d-flex align-items-center">
+            <div className="header-between">
+              <div className="slogan">
+                <img alt="slogan" src="slogan-vi.png" className="img-fluid" />
+              </div>
             </div>
+
+            {/* Nút chuyển đổi ngôn ngữ luôn hiện */}
+            <button
+              onClick={toggleLanguage}
+              className="btn btn-outline-secondary mx-2"
+              aria-label={texts.toggleLanguageAria}
+            >
+              {language === "vi" ? "English" : "Tiếng Việt"}
+            </button>
+
             {!isLoggedIn ? (
               <>
-                <a href="/login" className="login-btn">
-                  Đăng nhập
+                <a href="/login" className="btn btn-primary mx-2">
+                  {texts.login}
                 </a>
-                <a href="/register" className="register-btn">
-                  Đăng ký
+                <a href="/register" className="btn btn-secondary mx-2">
+                  {texts.register}
                 </a>
               </>
             ) : (
               <div className="user-info">
-                <ul className="menu-user">
+                <ul className="menu-user list-unstyled">
                   <li>
                     <input
                       type="checkbox"
@@ -64,24 +62,20 @@ export default function Headers() {
                     <label htmlFor="menu-toggle">
                       <i className="fa-regular fa-user"></i>
                     </label>
-                    <ul className="submenu-user">
+                    <ul className="submenu-user list-unstyled">
                       <li>
                         <a href="/account" className="account">
-                          Tài khoản
+                          {texts.account}
                         </a>
                       </li>
                       <li>
-                        <a
-                          href="#"
-                          className="bookmark"
-                          onClick={toggleModal} // Mở modal khi nhấp vào yêu thích
-                        >
-                          Yêu thích
+                        <a href="#" className="bookmark" onClick={toggleModal}>
+                          {texts.favorites || "Yêu thích"}
                         </a>
                       </li>
                       <li>
                         <a href="/" onClick={handleLogout} className="log-out">
-                          Đăng xuất
+                          {texts.logout}
                         </a>
                       </li>
                     </ul>
@@ -91,11 +85,23 @@ export default function Headers() {
             )}
           </div>
         </div>
-        <div className="nav-links-headers2">
-          <a href="/">TRANG CHỦ</a>
-          <a href="/revision">ÔN TẬP</a>
-          <a href="/chooseExams">BÀI THI</a>
-          <a href="/rank">XẾP HẠNG</a>
+
+        <div className="nav-links-headers2 d-flex justify-content-center">
+          <a href="/" className="mx-3">
+            {texts.home}
+          </a>
+          <a href="/revision" className="mx-3">
+            {texts.revision}
+          </a>
+          <a href="/chooseExams" className="mx-3">
+            {texts.exams}
+          </a>
+          <a href="/rank" className="mx-3">
+            {texts.rank}
+          </a>
+          <a href="/favorites" className="favorites-link mx-3">
+            <i className="fa-solid fa-heart"></i>
+          </a>
         </div>
       </header>
 
@@ -103,22 +109,21 @@ export default function Headers() {
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Môn học yêu thích</h3>
+            <h3>{texts.favoriteSubjectsTitle || "Môn học yêu thích"}</h3>
             <ul>
               {bookmarkedExams.length > 0 ? (
                 bookmarkedExams.map((subjectId) => (
                   <li key={subjectId}>
-                    {/* Hiển thị môn học yêu thích */}
                     <div>
-                      Môn {subjectId} {/* Bạn có thể thay subjectId bằng tên môn học */}
+                      Môn {subjectId} {/* Thay bằng tên môn học nếu có */}
                     </div>
                   </li>
                 ))
               ) : (
-                <p>Chưa có môn học yêu thích nào.</p>
+                <p>{texts.noFavorites || "Chưa có môn học yêu thích nào."}</p>
               )}
             </ul>
-            <button onClick={toggleModal}>Đóng</button>
+            <button onClick={toggleModal}>{texts.close || "Đóng"}</button>
           </div>
         </div>
       )}

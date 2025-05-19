@@ -2,9 +2,13 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../api/axiosConfig";
 import { Pagination } from "antd";
 import "./Home.css";
+import { useLanguage } from "../../components/Context/LanguageProvider";
 
 export default function Home() {
   const [subjects, setSubjects] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+  const { texts } = useLanguage();
 
   useEffect(() => {
     getAllSubjects();
@@ -32,7 +36,7 @@ export default function Home() {
       </div>
     ))
   ) : (
-    <div className="no-subjects">Không có môn học</div>
+    <div className="no-subjects">{texts.noSubjects}</div>
   );
 
   return (
@@ -57,13 +61,13 @@ export default function Home() {
               textShadow: "0 0 10px rgba(255, 255, 255, 0.8)",
             }}
           >
-            TRẮC NGHIỆM ONLINE
+            {texts.onlineTest}
           </h1>
           <div className="text-detail" style={{ textAlign: "left", marginTop: "8rem", paddingLeft: "2%" }}>
-            <p>Rèn luyện mỗi ngày, tự tin đạt điểm cao</p>
-            <p>Học chủ động</p>
-            <p>Bám sát chương trình</p>
-            <p>Sẵn sàng cho kỳ thi</p>
+            <p>{texts.slogan1}</p>
+            <p>{texts.slogan2}</p>
+            <p>{texts.slogan3}</p>
+            <p>{texts.slogan4}</p>
           </div>
         </div>
       </main>
@@ -71,29 +75,19 @@ export default function Home() {
       <div className="container-fluid mt-5">
         <div className="row">
           <div className="col-12 content-intro">
-            <h2 className="text-center my-4">Giới thiệu về Team Dự Án Web Thực Tập</h2>
-            <p>
-              Chúng mình là một nhóm sinh viên đam mê công nghệ và giáo dục, với mục tiêu tạo ra một nền tảng học tập trực tuyến hiệu quả dành cho sinh viên.
-            </p>
-            <p>
-              Dự án này không chỉ là một công cụ học tập thông thường, mà còn là một cộng đồng giúp các bạn chia sẻ tài liệu, bài giảng, bài tập và giải đáp thắc mắc.
-            </p>
-            <p>
-              Nhóm chúng mình gồm những thành viên trẻ trung, năng động, với các kỹ năng về phát triển phần mềm, thiết kế web, và quản lý dự án. Chúng mình đã cùng nhau làm việc không ngừng để tạo ra một sản phẩm tốt nhất.
-            </p>
-            <p>
-              Chúng mình tin rằng nền tảng học tập này sẽ là người bạn đồng hành tuyệt vời giúp các bạn sinh viên tự tin hơn trong việc ôn tập và chinh phục các mục tiêu học tập.
-            </p>
-            <p>
-              Đừng quên theo dõi chúng mình để cập nhật thêm nhiều tài liệu và bài học mới!
-            </p>
+            <h2 className="text-center my-4">{texts.introTitle}</h2>
+            <p>{texts.intro1}</p>
+            <p>{texts.intro2}</p>
+            <p>{texts.intro3}</p>
+            <p>{texts.intro4}</p>
+            <p>{texts.intro5}</p>
           </div>
         </div>
 
         <div className="row">
           <div className="col-12">
             <h2 className="text-center my-4" style={{ color: "#0088a9" }}>
-              Những môn học chúng mình hỗ trợ ôn tập
+              {texts.subjectsTitle}
             </h2>
             {elementSubjects}
             <div className="d-flex justify-content-center mt-4">
