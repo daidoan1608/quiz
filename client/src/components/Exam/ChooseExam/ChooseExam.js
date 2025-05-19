@@ -3,7 +3,8 @@ import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./ChooseExam.css";
 import Sidebar from "../../User/SideBar";
-import { FaBookmark, FaRegBookmark } from "react-icons/fa";
+import { useLanguage } from "../../Context/LanguageProvider";
+import subjectTranslations from "../../../Languages/subjectTranslations";
 
 export default function ChooseExam() {
   const [subjects, setSubjects] = useState([]);
@@ -11,6 +12,7 @@ export default function ChooseExam() {
   const [filteredSubjects, setFilteredSubjects] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { texts, language } = useLanguage(); // lấy ngôn ngữ hiện tại
 
   // Khi component được load, gọi API lấy tất cả môn học
   useEffect(() => {
@@ -66,33 +68,36 @@ export default function ChooseExam() {
         <div className="content">
           <input
             type="text"
-            placeholder="Tìm kiếm môn học..."
+            placeholder={texts.placeholder}
             value={searchQuery}
             onChange={handleSearchChange}
             className="search-bar"
           />
           <section className="category-re">
             <div className="container-re">
-              {filteredSubjects.map((item) => (
-                <div className="card-exam" key={item.subjectId}>
-                  <div className="card-img-exam">
-                    <div className="card-img">
-                      <img alt="Hình bài thi" src="/exam.png" />
+              {filteredSubjects.map((item) => {
+                const translatedName =
+                  subjectTranslations[item.name]?.[language] || item.name;
+
+                return (
+                  <div className="card-exam" key={item.subjectId}>
+                    <div className="card-img-exam">
+                      <div className="card-img">
+                        <img alt="Hình bài thi" src="/exam.png" />
+                      </div>
+                    </div>
+                    <div className="card-content">
+                      <h3>{translatedName}</h3>
+                      <button
+                        className="card-button"
+                        onClick={() => handleSelectExamBySubjectId(item.subjectId)}
+                      >
+                        {texts.chooseTopic}
+                      </button>
                     </div>
                   </div>
-                  <div className="card-content">
-                    <h3>{item.name}</h3>
-                    <button
-                      className="card-button"
-                      onClick={() =>
-                        handleSelectExamBySubjectId(item.subjectId) // Chọn môn thi
-                      }
-                    >
-                      Chọn đề
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         </div>

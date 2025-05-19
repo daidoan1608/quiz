@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LessonList.css";
+import { useLanguage } from "../Context/LanguageProvider";
 
 export default function LessonList() {
     const [favoriteSubjects, setFavoriteSubjects] = useState([]);
     const navigate = useNavigate();
+    const { texts } = useLanguage();
 
     // Load favorite subjects from localStorage
     useEffect(() => {
@@ -20,10 +22,10 @@ export default function LessonList() {
 
     return (
         <div className="favorite-page">
-            <h2 className="title">Môn Học</h2>
+            <h2 className="title">{texts.listSubject}</h2>
             <div className="container-re">
                 {favoriteSubjects.length === 0 ? (
-                    <p>Bạn chưa có môn học yêu thích nào.</p>
+                    <p>{texts.noFavorites}</p>
                 ) : (
                     favoriteSubjects.map((item) => (
                         <div className="card" key={item.subjectId}>
@@ -32,13 +34,13 @@ export default function LessonList() {
 
                                 <div className="card-actions">
                                     <a href="/favoriteslistChap" className="favorites-link-list">
-                                        Chương<i className="fa-solid fa-heart"></i>
+                                        {texts.chapter}<i className="fa-solid fa-heart"></i>
                                     </a>
                                     <button
                                         className="card-button remove"
                                         onClick={() => handleRemoveFavorite(item.subjectId)}
                                     >
-                                        Xóa
+                                        {texts.delete}
                                     </button>
                                 </div>
                             </div>

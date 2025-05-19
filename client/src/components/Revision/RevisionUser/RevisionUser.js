@@ -3,7 +3,8 @@ import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./RevisionUser.css";
 import Sidebar from "../../User/SideBar";
-import { FaBookmark, FaRegBookmark } from "react-icons/fa";
+import { useLanguage } from "../../Context/LanguageProvider";
+import subjectTranslations from "../../../Languages/subjectTranslations";
 
 export default function RevisionUser() {
   const [subjects, setSubjects] = useState([]);
@@ -12,6 +13,7 @@ export default function RevisionUser() {
   const [favorites, setFavorites] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { texts, language } = useLanguage();
 
   useEffect(() => {
     getAllSubjects();
@@ -83,7 +85,7 @@ export default function RevisionUser() {
           {/* 🔍 Thanh tìm kiếm */}
           <input
             type="text"
-            placeholder="Tìm kiếm môn học..."
+            placeholder={texts.placeholder}
             value={searchQuery}
             onChange={handleSearchChange}
             className="search-bar"
@@ -91,43 +93,49 @@ export default function RevisionUser() {
 
           <section className="category-re">
             <div className="container-re">
-              {filteredSubjects.map((item) => (
-                <div className="card" key={item.subjectId}>
-                  <div className="card-content">
-                    <h3>{item.name}</h3>
-                  </div>
-                  <div className="card-actions">
-                    <button
-                      className="card-button-list"
-                      onClick={() =>
-                        navigate(`/listChap`, {
-                          state: { subjectId: item.subjectId },
-                        })
-                      }
-                    >
-                      Chọn chương
-                    </button>
-                    <button
-                      className={`favorites-button ${
-                        favorites.some((fav) => fav.subjectId === item.subjectId)
-                          ? "favorited"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        handleFavoriteToggle(item.subjectId, item.name)
-                      }
-                    >
-                      <i
-                        className={`fa-heart ${
+              {filteredSubjects.map((item) => {
+                // Lấy tên môn theo ngôn ngữ hiện tại, fallback về item.name nếu không có
+                const translatedName =
+                  subjectTranslations[item.name]?.[language] || item.name;
+
+                return (
+                  <div className="card" key={item.subjectId}>
+                    <div className="card-content">
+                      <h3>{translatedName}</h3>
+                    </div>
+                    <div className="card-actions">
+                      <button
+                        className="card-button-list"
+                        onClick={() =>
+                          navigate(`/listChap`, {
+                            state: { subjectId: item.subjectId },
+                          })
+                        }
+                      >
+                        {texts.chooseChapter}
+                      </button>
+                      <button
+                        className={`favorites-button ${
                           favorites.some((fav) => fav.subjectId === item.subjectId)
-                            ? "fa-solid"
-                            : "fa-regular"
+                            ? "favorited"
+                            : ""
                         }`}
-                      ></i>
-                    </button>
+                        onClick={() =>
+                          handleFavoriteToggle(item.subjectId, item.name)
+                        }
+                      >
+                        <i
+                          className={`fa-heart ${
+                            favorites.some((fav) => fav.subjectId === item.subjectId)
+                              ? "fa-solid"
+                              : "fa-regular"
+                          }`}
+                        ></i>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         </div>

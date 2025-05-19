@@ -52,7 +52,6 @@ button:hover {
   margin-top: 1.5rem;
 }
 
-
 .header-top {
   display: flex;
   align-items: center;
@@ -62,8 +61,6 @@ button:hover {
   position: relative;
   height: 100px;
 }
-
-
 
 .logo {
   position: absolute;
@@ -174,8 +171,6 @@ button:hover {
   font-size: 1.5rem;
 }
 
-
-
 /* Cải thiện khoảng cách giữa các link trong thanh điều hướng */
 .nav-links-headers2 a {
   font-size: 14px;
@@ -195,9 +190,6 @@ button:hover {
   font-size: 14px;
   padding: 5px 15px;
 }
-
-
-
 
 .auth-links {
   display: flex;
@@ -252,12 +244,12 @@ ul.menu-user {
   align-items: center;
 }
 
-ul.menu-user>li {
+ul.menu-user > li {
   position: relative;
 }
 
 /* Label của menu toggle */
-ul.menu-user>li>label {
+ul.menu-user > li > label {
   cursor: pointer;
   font-size: 20px;
   padding: 10px;
@@ -275,14 +267,14 @@ ul.menu-user>li>label {
 }
 
 /* Hiệu ứng hover */
-ul.menu-user>li>label:hover {
+ul.menu-user > li > label:hover {
   background-color: #0056b3;
   color: #fff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Icon trong label */
-ul.menu-user>li>label>i {
+ul.menu-user > li > label > i {
   color: inherit;
   /* Đồng bộ màu với label */
   transition: color 0.3s ease;
@@ -314,7 +306,7 @@ ul.submenu-user {
 }
 
 /* Hiển thị menu con khi checkbox được check */
-.menu-toggle:checked+label+.submenu-user {
+.menu-toggle:checked + label + .submenu-user {
   display: block;
   opacity: 1;
   transform: translateY(0);
@@ -354,4 +346,16 @@ ul.submenu-user li a:hover {
   flex-direction: column;
   align-items: center;
   position: relative;
+}
+
+.header-top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.language-and-user {
+  margin-left: auto; /* đẩy phần này sang phải */
+  display: flex;
+  align-items: center;
 }

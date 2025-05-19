@@ -9,7 +9,8 @@ body {
   }
   
   h1 {
-    color: #519fc9;
+    color: #519fc9 !important;
+    margin-bottom: 20px !important;
   }
   
   .filter {

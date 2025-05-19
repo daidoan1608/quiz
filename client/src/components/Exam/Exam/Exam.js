@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { authAxios } from "../../../api/axiosConfig";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Exam.css";
+import { useLanguage } from "../../Context/LanguageProvider";
 
 export default function Exam() {
   const [questions, setExamQuestionAnswers] = useState([]);
@@ -14,6 +15,7 @@ export default function Exam() {
   const location = useLocation();
   const { examId, startTime } = location.state || {};
   const questionRefs = useRef([]);
+  const { texts } = useLanguage();
 
   const handleSubmit = useCallback(async () => {
     const userId = localStorage.getItem("userId");
@@ -161,20 +163,20 @@ export default function Exam() {
         <div className="table-left">
           <div className="info">
             <p>
-              <span>BÀI THI MÔN:</span> {subjectName}
+              <span>{texts.subjectExam}:</span> {subjectName}
             </p>
             <p>
-              <span>ĐỀ THI:</span> {title}
+              <span>{texts.topic}:</span> {title}
             </p>
             <p>
-              <span>SỐ CÂU:</span> {questions.length}
+              <span>{texts.question}:</span> {questions.length}
             </p>
             <p>
-              <span>THỜI GIAN:</span> {duration} Phút
+              <span>{texts.time}:</span> {duration} Phút
             </p>
           </div>
           <div className="timer">
-            <h2>Thời gian còn lại</h2>
+            <h2>{texts.conutDown}</h2>
             <span>{`${minutes.toString().padStart(2, "0")}:${seconds
               .toString()
               .padStart(2, "0")}`}</span>
@@ -183,7 +185,7 @@ export default function Exam() {
         <div className="table-right">
           <div className="answer-sheet">
             <p>
-              <span>BẢNG TRẢ LỜI</span>
+              <span>{texts.table}</span>
             </p>
             {[...Array(questions.length)].map((_, idx) => (
               <div
@@ -240,7 +242,7 @@ export default function Exam() {
           </div>
         ))}
         <button className="submit-btn" onClick={handleSubmit}>
-          Nộp bài
+          {texts.submit}
         </button>
       </div>
     </>

@@ -6,6 +6,7 @@ import { useAuth } from "../Context/AuthProvider";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import './Account.css';
 import ScoreChart from './ScoreChart';
+import { useLanguage } from '../Context/LanguageProvider';
 
 const { Panel } = Collapse;
 
@@ -30,7 +31,7 @@ const beforeUpload = (file) => {
 const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(user?.avatarUrl || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp");
-
+  const { texts } = useLanguage()
   const handleChange = (info) => {
     if (info.file.status === 'uploading') {
       setLoading(true);
@@ -72,14 +73,14 @@ const AccountInfo = ({ user, onChangePassword, onUploadAvatar }) => {
       >
         {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
       </Upload>
-      <h2>Thông tin người dùng</h2>
+      <h2>{texts.infor}</h2>
       <div className="account-details">
-        <p><strong>Tên người dùng:</strong> {user.username}</p>
-        <p><strong>Họ và tên:</strong> {user.fullName}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Vai trò:</strong> {user.role}</p>
+        <p><strong>{texts.name}:</strong> {user.username}</p>
+        <p><strong>{texts.fullName}:</strong> {user.fullName}</p>
+        <p><strong>{texts.email}:</strong> {user.email}</p>
+        <p><strong>{texts.role}:</strong> {user.role}</p>
       </div>
-      <Button onClick={onChangePassword} type="primary" danger className="change-password-btn">Đổi mật khẩu</Button>
+      <Button onClick={onChangePassword} type="primary" danger className="change-password-btn">{texts.changePass}</Button>
     </div>
   );
 };
@@ -112,6 +113,8 @@ const Account = () => {
   const [loading, setLoading] = useState(true);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { texts } = useLanguage();
+
 
   const handleError = (error) => {
     message.error(`Đã có lỗi xảy ra: ${error.message || error}`);
@@ -254,7 +257,7 @@ const Account = () => {
       </div>
 
       <div className="exam-list">
-        <h3>Danh sách các môn đã thi</h3>
+    <h3>{texts.listSubject}</h3>
         {loading ? (
           <Spin size="large" />
         ) : Object.keys(groupedExams).length === 0 ? (
@@ -267,26 +270,26 @@ const Account = () => {
                 <List
                   dataSource={groupedExams[subject]}
                   pagination={{
-                    pageSize: 5, // Số bài thi mỗi trang
+                    pageSize: 3, // Số bài thi mỗi trang
                     showSizeChanger: false, // Tạm thời tắt thay đổi số lượng mỗi trang
                     showQuickJumper: false, // Tắt nhảy nhanh đến trang
-                    showTotal: (total) => `Tổng cộng ${total} bài thi`, // Hiển thị tổng số bài thi
+                    showTotal: (total) => `${texts.totalExam} : ${total}`, // Hiển thị tổng số bài thi
                   }}
                   renderItem={(test) => (
                     <List.Item className="exam-item">
                       <div className="exam-details">
                         <p className="exam-title">{test.title || "Bài thi không tên"}</p>
-                        <p className="exam-score">Điểm: {(test.userExamDto.score || 0).toFixed(2)}</p>
+                        <p className="exam-score">{texts.score} : {(test.userExamDto.score || 0).toFixed(2)}</p>
                         {test.userExamDto.correctAnswers !== undefined && test.userExamDto.totalQuestions !== undefined && (
                           <p className="exam-result">
-                            Câu đúng: {test.userExamDto.correctAnswers}/{test.userExamDto.totalQuestions}
+                            {texts.correct} : {test.userExamDto.correctAnswers}/{test.userExamDto.totalQuestions}
                           </p>
                         )}
                         <p className="exam-time">
-                          Thời gian: {formatDateTime(test.userExamDto.startTime)} - {formatDateTime(test.userExamDto.endTime)}
+                          {texts.time} : {formatDateTime(test.userExamDto.startTime)} - {formatDateTime(test.userExamDto.endTime)}
                         </p>
                       </div>
-                      <Button type="link" onClick={() => handleShowExamDetails(test)} className='btn-detail'>Xem chi tiết</Button>
+                      <Button type="link" onClick={() => handleShowExamDetails(test)} className='btn-detail'>{texts.showDetail}</Button>
                     </List.Item>
                   )}
                 />
