@@ -21,10 +21,10 @@ export default function ChooseQuestion() {
   const fetchQuestions = async (chapterId) => {
     try {
       const response = await authAxios.get(
-        `/public/chapter/questions/${chapterId}`
+        `/public/questions/chapter/${chapterId}`
       );
-      if (response.data && response.data.length > 0) {
-        setQuestions(response.data);
+      if (response.data.data && response.data.data.length > 0) {
+        setQuestions(response.data.data || []);
       } else {
         setQuestions([]); // Trường hợp không có câu hỏi nào
         alert("Không có câu hỏi nào cho chương này!");

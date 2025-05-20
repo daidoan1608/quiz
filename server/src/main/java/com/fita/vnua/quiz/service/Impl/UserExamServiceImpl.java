@@ -3,6 +3,7 @@ package com.fita.vnua.quiz.service.impl;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.UserAnswerDto;
 import com.fita.vnua.quiz.model.dto.UserExamDto;
+import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.*;
@@ -15,10 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,6 +36,30 @@ public class UserExamServiceImpl implements UserExamService {
     private final ModelMapper modelMapper;
     private final SubjectService subjectService;
 
+    @Override
+    public List<UserExamSummaryDto> getUserExamSummaries() {
+        List<UserExamRepository.UserExamSummaryProjection> projections = userExamRepository.getUserExamSummaries();
+
+        // Chuyển projection sang DTO
+        return projections.stream().map(proj -> {
+            UserExamSummaryDto dto = new UserExamSummaryDto();
+            dto.setUserId(bytesToUUID(proj.getUserId()));
+            dto.setUsername(proj.getUsername());
+            dto.setAttemptCount(proj.getAttemptCount());
+            dto.setAvgScore(proj.getAvgScore());
+            dto.setTotalScore(proj.getTotalScore());
+            dto.setTotalDurationSeconds(proj.getTotalDurationSeconds());
+            dto.setSubjectName(proj.getSubjects());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    protected UUID bytesToUUID(byte[] bytes) {
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
+        long high = bb.getLong();
+        long low = bb.getLong();
+        return new UUID(high, low);
+    }
 
     @Override
     public UserExamResponse getUserExamById(Long id) {

@@ -1,12 +1,14 @@
 package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.UserExamDto;
+import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.service.UserExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +20,19 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
+@Tag(name = "User Exam API", description = "API cho các chức năng liên quan đến bài thi của người dùng")
 public class UserExamController {
     private final UserExamService userExamService;
 
-    @GetMapping("/admin/userexams")
-    @Operation(summary = "Get all user exams")
+    @GetMapping("public/summaries")
+    @Operation(summary = "Thống kê điểm thi của người dùng")
+    public ResponseEntity<List<UserExamSummaryDto>> getUserExamSummaries() {
+        List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries();
+        return ResponseEntity.ok(summaries);
+    }
+
+    @GetMapping("admin/userexams")
+    @Operation(summary = "Lấy danh sách bài thi của tất cả người dùng")
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getAllUserExams() {
         try {
             List<UserExamResponse> userExams = userExamService.getAllUserExams();
@@ -35,8 +45,8 @@ public class UserExamController {
         }
     }
 
-    // Lấy bài thi của người dùng theo userExamId
-    @GetMapping("/user/userexams/{userExamId}")
+    @GetMapping("user/userexams/{userExamId}")
+    @Operation(summary = "Lấy bài thi của người dùng theo ID")
     public ResponseEntity<ApiResponse<UserExamResponse>> getUserExamById(@PathVariable("userExamId") Long userExamId) {
         try {
             UserExamResponse userExam = userExamService.getUserExamById(userExamId);
@@ -49,9 +59,8 @@ public class UserExamController {
         }
     }
 
-    // Lấy số lần làm bài thi của người dùng theo userId
     @GetMapping("user/userexams/count/{userId}")
-    @Operation(summary = "Get exam attempts by user ID")
+    @Operation(summary = "Lấy số lượng bài thi của người dùng theo userId")
     public ResponseEntity<ApiResponse<List<Map<Long, Object>>>> getExamAttemptsByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
     ) {
@@ -63,8 +72,8 @@ public class UserExamController {
         }
     }
 
-    // Tạo bài thi cho người dùng (user exam)
     @PostMapping("user/userexams")
+    @Operation(summary = "Tạo bài thi cho người dùng")
     public ResponseEntity<ApiResponse<UserExamDto>> createUserExam(@RequestBody UserExamRequest userExamRequest) {
         try {
             UserExamDto saveUserExam = userExamService.createUserExam(userExamRequest);
@@ -77,9 +86,8 @@ public class UserExamController {
         }
     }
 
-    // Lấy bài thi của người dùng theo userId
     @GetMapping("user/userexams/user/{userId}")
-    @Operation(summary = "Get user exam by user ID")
+    @Operation(summary = "Lấy bài thi của người dùng theo userId")
     public ResponseEntity<ApiResponse<?>> getUserExamByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
     ) {

@@ -1,10 +1,12 @@
 package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.UserDto;
+import com.fita.vnua.quiz.model.dto.request.ChangePasswordRequest;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,12 +18,34 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
+@Tag(name = "User API", description = "API thực hiện các thao tác với người dùng")
 public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    // Lấy tất cả người dùng (admin)
+    @PostMapping("user/change-password/{userId}")
+    @Operation(summary = "API đổi mật khẩu")
+    public ResponseEntity<ApiResponse<Object>> changePassword(@PathVariable("userId") UUID userId,
+                                                              @RequestBody ChangePasswordRequest request) {
+        try {
+            UserDto userDto = userService.getUserById(userId);
+
+            if (!passwordEncoder.matches(request.getOldPassword(), userDto.getPassword()) || !userDto.getUserId().equals(userId)) {
+                return ResponseEntity.status(403).body(ApiResponse.error("You are not authorized to change this password", List.of("Unauthorized")));
+            }
+
+            userDto.setPassword(request.getNewPassword());
+            userService.update(userId, userDto);
+
+            return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Change password failed: " + e.getMessage(), List.of(e.getMessage())));
+        }
+    }
+
     @GetMapping("admin/users")
+    @Operation(summary = "Lấy danh sách tất cả người dùng", description = "This API fetches all users")
     public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
         try {
             List<UserDto> users = userService.getAllUsers();
@@ -34,8 +58,8 @@ public class UserController {
         }
     }
 
-    // Tìm kiếm người dùng theo từ khóa (admin)
     @GetMapping("admin/users/search")
+    @Operation(summary = "Lấy danh sách người dùng theo từ khóa tìm kiếm", description = "This API fetches users by search key")
     public ResponseEntity<ApiResponse<List<UserDto>>> getUserBySearchKey(@RequestParam("key") String keyword) {
         try {
             List<UserDto> users = userService.getUserBySearchKey(keyword);
@@ -50,7 +74,7 @@ public class UserController {
 
     // Lấy người dùng theo userId (admin)
     @GetMapping("user/{userId}")
-    @Operation(summary = "Get user by ID", description = "This API fetches a user by their ID")
+    @Operation(summary = "Lấy ra người dùng theo ID", description = "This API fetches a user by their ID")
     public ResponseEntity<ApiResponse<UserDto>> getUserById(
             @Parameter(description  = "User ID", required = true) @PathVariable("userId") UUID userId) {
         try {
@@ -66,6 +90,7 @@ public class UserController {
 
     // Tạo người dùng mới (admin)
     @PostMapping("admin/add/users")
+    @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
     public ResponseEntity<ApiResponse<UserDto>> createUser(@RequestBody UserDto userDto) {
         try {
             userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -81,7 +106,7 @@ public class UserController {
 
     // Cập nhật thông tin người dùng (admin)
     @PatchMapping("update/users/{userId}")
-    @Operation(summary = "Delete a user")
+    @Operation(summary = "Cập nhập thông tin người dùng", description = "This API update info user")
     public ResponseEntity<ApiResponse<UserDto>> updateUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
             @RequestBody UserDto userDto) {
@@ -95,7 +120,7 @@ public class UserController {
 
     // Xóa người dùng (admin)
     @DeleteMapping("admin/delete/users/{userId}")
-    @Operation(summary = "Delete a user")
+    @Operation(summary = "Xóa người dùng", description = "This API deletes a user")
     public ResponseEntity<ApiResponse<Object>> deleteUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId) {
         try {

@@ -3,6 +3,8 @@ package com.fita.vnua.quiz.controller;
 import com.fita.vnua.quiz.model.dto.ChapterDto;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.service.ChapterService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +15,12 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
+@Tag(name="Chapter API", description = "API cho các chức năng liên quan đến chương")
 public class ChapterController {
     private final ChapterService chapterService;
 
-    // Lấy danh sách chương theo subjectId (public)
     @GetMapping("public/chapters/subject/{subjectId}")
+    @Operation(summary = "Lấy danh sách chương theo Id môn (public)")
     public ResponseEntity<ApiResponse<List<ChapterDto>>> getChapterBySubjectId(@PathVariable("subjectId") Long subjectId) {
         try {
             List<ChapterDto> chapters = chapterService.getChapterBySubject(subjectId);
@@ -30,8 +33,8 @@ public class ChapterController {
         }
     }
 
-    // Lấy tất cả các chương (public)
     @GetMapping("public/chapters")
+    @Operation(summary = "Lấy danh sách tất cả chương (public)")
     public ResponseEntity<ApiResponse<List<ChapterDto>>> getAllChapter() {
         try {
             List<ChapterDto> chapters = chapterService.getAllChapter();
@@ -44,8 +47,8 @@ public class ChapterController {
         }
     }
 
-    // Lấy chương theo chapterId (public)
     @GetMapping("public/chapters/{chapterId}")
+    @Operation(summary = "Lấy chương theo Id (public)")
     public ResponseEntity<ApiResponse<Optional<ChapterDto>>> getChapterById(@PathVariable("chapterId") Long chapterId) {
         try {
             Optional<ChapterDto> chapter = chapterService.getChapterById(chapterId);
@@ -58,8 +61,8 @@ public class ChapterController {
         }
     }
 
-    // Tạo chương mới (admin)
     @PostMapping("admin/chapters")
+    @Operation(summary = "Tạo chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> createChapter(@RequestBody ChapterDto chapterDto) {
         try {
             ChapterDto createdChapter = chapterService.create(chapterDto);
@@ -69,8 +72,8 @@ public class ChapterController {
         }
     }
 
-    // Cập nhật chương (admin)
     @PatchMapping("admin/chapters/{chapterId}")
+    @Operation(summary = "Cập nhật chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> updateChapter(@PathVariable("chapterId") Long chapterId, @RequestBody ChapterDto chapterDto) {
         try {
             ChapterDto updatedChapter = chapterService.update(chapterId, chapterDto);
@@ -80,8 +83,8 @@ public class ChapterController {
         }
     }
 
-    // Xóa chương (admin)
     @DeleteMapping("admin/chapters/{chapterId}")
+    @Operation(summary = "Xóa chương (admin)")
     public ResponseEntity<ApiResponse<Object>> deleteChapter(@PathVariable("chapterId") Long chapterId) {
         try {
             chapterService.delete(chapterId);

@@ -1,36 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { authAxios } from "../../Api/axiosConfig";
 
-const mockChapters = [
-  {
-    chapterId: 1,
-    chapterName: "Giới thiệu về môn học",
-    totalQuestions: {
-      easy: 10,
-      medium: 8,
-      hard: 5,
-    },
-  },
-  {
-    chapterId: 2,
-    chapterName: "Các khái niệm cơ bản",
-    totalQuestions: {
-      easy: 15,
-      medium: 10,
-      hard: 8,
-    },
-  },
-  {
-    chapterId: 3,
-    chapterName: "Nâng cao và ứng dụng",
-    totalQuestions: {
-      easy: 5,
-      medium: 7,
-      hard: 10,
-    },
-  },
-];
-
 export default function QuestionSelection() {
   const [numberOfQuestions, setNumberOfQuestions] = useState("");
   const [easyQuestions, setEasyQuestions] = useState(0);

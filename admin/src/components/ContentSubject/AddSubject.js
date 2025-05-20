@@ -16,7 +16,7 @@ export default function AddSubject() {
         const fetchCategories = async () => {
             try {
                 const response = await authAxios.get("/public/categories");
-                setCategories(response.data); // Lưu danh sách khoa vào state
+                setCategories(response.data.data[0]); // Lưu danh sách khoa vào state
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách khoa: ', error);
                 alert('Không thể lấy danh sách khoa!');
@@ -31,7 +31,7 @@ export default function AddSubject() {
         e.preventDefault();
         try {
             const response = await authAxios.post("/admin/subjects", newSubject);
-            console.log('Thêm môn học thành công: ', response.data);
+            console.log('Thêm môn học thành công: ', response.data.data);
             setNewSubject({
                 categoryId: '',
                 name: '',

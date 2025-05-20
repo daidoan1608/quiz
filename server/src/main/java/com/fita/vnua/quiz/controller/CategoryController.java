@@ -2,6 +2,8 @@ package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.CategoryDto;
 import com.fita.vnua.quiz.service.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +14,12 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
+@Tag(name="Category API", description = "API cho các chức năng liên quan đến danh mục")
 public class CategoryController {
     private final CategoryService categoryService;
 
-    // Lấy tất cả các danh mục (public)
     @GetMapping("public/categories")
+    @Operation(summary = "Lấy danh sách danh mục (public)")
     public ResponseEntity<ApiResponse<?>> getAllCategories() {
         try {
             return ResponseEntity.ok(ApiResponse.success("Categories fetched successfully", List.of(categoryService.getAllCategories())));
@@ -25,8 +28,8 @@ public class CategoryController {
         }
     }
 
-    // Lấy danh mục theo ID (admin)
     @GetMapping("admin/categories/{id}")
+    @Operation(summary = "Lấy danh mục theo Id (admin)")
     public ResponseEntity<ApiResponse<?>> getCategoryById(@PathVariable("id") Long id) {
         try {
             return ResponseEntity.ok(ApiResponse.success("Category fetched successfully", categoryService.getCategoryById(id)));
@@ -35,8 +38,8 @@ public class CategoryController {
         }
     }
 
-    // Thêm danh mục mới (admin)
     @PostMapping("admin/categories")
+    @Operation(summary = "Thêm danh mục (admin)")
     public ResponseEntity<ApiResponse<?>> addCategory(@RequestBody CategoryDto categoryDto) {
         try {
             return ResponseEntity.ok(ApiResponse.success("Category added successfully", categoryService.addCategory(categoryDto)));
@@ -45,8 +48,8 @@ public class CategoryController {
         }
     }
 
-    // Cập nhật danh mục (admin)
     @PutMapping("admin/categories/{id}")
+    @Operation(summary = "Cập nhật danh mục (admin)")
     public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("id") Long id, @RequestBody CategoryDto categoryDto) {
         try {
             return ResponseEntity.ok(ApiResponse.success("Category updated successfully", categoryService.updateCategory(id, categoryDto)));
@@ -55,8 +58,8 @@ public class CategoryController {
         }
     }
 
-    // Xóa danh mục (admin)
     @DeleteMapping("admin/categories/{id}")
+    @Operation(summary = "Xóa danh mục (admin)")
     public ResponseEntity<ApiResponse<?>> deleteCategory(@PathVariable("id") Long id) {
         try {
             categoryService.deleteCategory(id);

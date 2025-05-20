@@ -43,10 +43,16 @@ export default function GetQuestion() {
 
   const renderAnswers = (answers) => {
     const columns = answers.map((answer, index) => (
-      <td key={index} className="truncated-text">{answer.content}</td>
+      <td key={index} className="truncated-text">
+        {answer.content}
+      </td>
     ));
     while (columns.length < 4) {
-      columns.push(<td key={`empty-${columns.length}`} className="truncated-text">-</td>);
+      columns.push(
+        <td key={`empty-${columns.length}`} className="truncated-text">
+          -
+        </td>
+      );
     }
     return columns;
   };
@@ -59,7 +65,9 @@ export default function GetQuestion() {
   const elementQuestion = currentQuestions.map((item) => (
     <tr key={item.questionId}>
       <td className="truncated-text">{item.questionId}</td>
-      <td className="truncated-text" title={item.content}>{item.content}</td>
+      <td className="truncated-text" title={item.content}>
+        {item.content}
+      </td>
       <td className="truncated-text">{item.difficulty}</td>
       <td className="truncated-text">{item.chapterName}</td>
       {renderAnswers(item.answers)}

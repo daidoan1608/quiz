@@ -15,58 +15,83 @@ export default function AddQuestion() {
         { content: '', isCorrect: false },
     ]);
     const [categories, setCategories] = useState([]);
-    const [chapters, setChapters] = useState([]);
     const [filteredSubjects, setFilteredSubjects] = useState([]);
-    
+    const [chapters, setChapters] = useState([]);
+
     const navigate = useNavigate();
 
-    // Fetch categories when the component mounts
+    // Fetch categories on mount
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const response = await authAxios.get("/public/categories");
-                setCategories(response.data);
+                setCategories(response.data.data[0] || []);
             } catch (error) {
                 console.error("Error fetching categories:", error);
             }
         };
-
         fetchCategories();
     }, []);
 
-    // Fetch all chapters when the component mounts
-    useEffect(() => {
-        const fetchChapters = async () => {
-            try {
-                const response = await authAxios.get("/public/subject/chapters");
-                setChapters(response.data);
-            } catch (error) {
-                console.error("Error fetching chapters:", error);
-            }
-        };
-
-        fetchChapters();
-    }, []);
-
-    // Update subjects based on selected category
+    // Update subjects when category changes
     useEffect(() => {
         if (categoryId) {
             const selectedCategory = categories.find(cat => cat.categoryId === Number(categoryId));
-            if (selectedCategory) {
-                setFilteredSubjects(selectedCategory.subjects || []);
-            }
+            setFilteredSubjects(selectedCategory ? selectedCategory.subjects || [] : []);
+            // Reset subject and chapter selection when category changes
+            setSubjectId('');
+            setChapterId('');
+            setChapters([]);
         } else {
             setFilteredSubjects([]);
+            setSubjectId('');
+            setChapterId('');
+            setChapters([]);
         }
     }, [categoryId, categories]);
 
-    // Filter chapters by subjectId
-    const filteredChapters = chapters.filter(chapter => chapter.subjectId === Number(subjectId));
+    // Fetch chapters when subjectId changes
+    useEffect(() => {
+        const fetchChapters = async (subjectId) => {
+            if (!subjectId) {
+                setChapters([]);
+                setChapterId('');
+                return;
+            }
+            try {
+                const response = await authAxios.get(`/public/subjects/${subjectId}`);
+                if (response.data.status === 'success') {
+                    setChapters(response.data.data.chapters || []);
+                } else {
+                    setChapters([]);
+                    alert("Không có chương nào cho môn học này!");
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách chương:", error);
+                alert("Không thể lấy danh sách chương!");
+                setChapters([]);
+            }
+            setChapterId('');
+        };
+        fetchChapters(subjectId);
+    }, [subjectId]);
 
+    // Filter chapters by selected chapterId is automatic by selection
+
+    // Handle answer content or correctness change
     const handleAnswerChange = (index, field, value) => {
-        const updatedAnswers = [...answers];
-        updatedAnswers[index][field] = value;
-        setAnswers(updatedAnswers);
+        if (field === 'isCorrect' && value === true) {
+            // Only one answer can be correct
+            const updatedAnswers = answers.map((ans, i) => ({
+                ...ans,
+                isCorrect: i === index,
+            }));
+            setAnswers(updatedAnswers);
+        } else {
+            const updatedAnswers = [...answers];
+            updatedAnswers[index][field] = value;
+            setAnswers(updatedAnswers);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -112,6 +137,7 @@ export default function AddQuestion() {
                         ))}
                     </select>
                 </div>
+
                 <div className="mb-3">
                     <label htmlFor="subjectId" className="form-label">Chọn Môn</label>
                     <select
@@ -120,8 +146,9 @@ export default function AddQuestion() {
                         value={subjectId}
                         onChange={(e) => setSubjectId(e.target.value)}
                         required
+                        disabled={filteredSubjects.length === 0}
                     >
-                        <option value=""> --Chọn môn-- </option>
+                        <option value="">--Chọn môn--</option>
                         {filteredSubjects.map((subject) => (
                             <option key={subject.subjectId} value={subject.subjectId}>
                                 {subject.name}
@@ -129,6 +156,7 @@ export default function AddQuestion() {
                         ))}
                     </select>
                 </div>
+
                 <div className="mb-3">
                     <label htmlFor="chapterId" className="form-label">Chọn Chương</label>
                     <select
@@ -137,15 +165,17 @@ export default function AddQuestion() {
                         value={chapterId}
                         onChange={(e) => setChapterId(e.target.value)}
                         required
+                        disabled={chapters.length === 0}
                     >
-                        <option value=""> --Chọn chương--</option>
-                        {filteredChapters.map((chapter) => (
+                        <option value="">--Chọn chương--</option>
+                        {chapters.map((chapter) => (
                             <option key={chapter.chapterId} value={chapter.chapterId}>
                                 {chapter.name}
                             </option>
                         ))}
                     </select>
                 </div>
+
                 <div className="mb-3">
                     <label htmlFor="content" className="form-label">Nội dung câu hỏi</label>
                     <input
@@ -157,6 +187,7 @@ export default function AddQuestion() {
                         required
                     />
                 </div>
+
                 <div className="mb-3">
                     <label htmlFor="difficulty" className="form-label">Mức độ</label>
                     <select
@@ -166,12 +197,13 @@ export default function AddQuestion() {
                         onChange={(e) => setDifficulty(e.target.value)}
                         required
                     >
-                        <option value=""> --Chọn mức độ-- </option>
+                        <option value="">--Chọn mức độ--</option>
                         <option value="EASY">Dễ</option>
                         <option value="MEDIUM">Trung bình</option>
                         <option value="HARD">Khó</option>
                     </select>
                 </div>
+
                 {answers.map((answer, index) => (
                     <div key={index} className="mb-3">
                         <label className="form-label">Đáp án {String.fromCharCode(65 + index)}</label>
@@ -195,6 +227,7 @@ export default function AddQuestion() {
                         </div>
                     </div>
                 ))}
+
                 <button type="submit" className="btn btn-primary">Thêm Câu Hỏi</button>
             </form>
         </div>

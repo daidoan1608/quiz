@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { publicAxios } from "../../../api/axiosConfig";
+import { authAxios, publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./RevisionUser.css";
 import Sidebar from "../../User/SideBar";
@@ -15,6 +15,9 @@ export default function RevisionUser() {
   const navigate = useNavigate();
   const { texts, language } = useLanguage();
 
+  // TODO: Lấy userId từ auth hoặc context
+  const userId = localStorage.getItem("userId");
+
   useEffect(() => {
     getAllSubjects();
     loadFavorites();
@@ -22,7 +25,7 @@ export default function RevisionUser() {
 
   const getAllSubjects = async () => {
     try {
-      const resp = await publicAxios.get("/public/subjects");
+      const resp = await authAxios.get("/public/subjects");
       setSubjects(resp.data.data);
       setFilteredSubjects(resp.data.data);
     } catch (error) {
@@ -30,35 +33,47 @@ export default function RevisionUser() {
     }
   };
 
-  const loadFavorites = () => {
-    const savedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    setFavorites(savedFavorites);
-  };
-
-  const saveFavorites = (updatedFavorites) => {
-    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-  };
-
-  const handleFavoriteToggle = (subjectId, subjectName) => {
-    const updatedFavorites = [...favorites];
-    const index = updatedFavorites.findIndex((item) => item.subjectId === subjectId);
-
-    if (index === -1) {
-      updatedFavorites.push({ subjectId, subjectName });
-    } else {
-      updatedFavorites.splice(index, 1);
+  const loadFavorites = async () => {
+    try {
+      const resp = await authAxios.get(`/user/favorites/user/${userId}`);
+      setFavorites(resp.data.data || []);
+    } catch (error) {
+      console.error("Error loading favorites:", error);
+      setFavorites([]); // Đặt giá trị mặc định là mảng rỗng nếu có lỗi
     }
+  };
 
-    setFavorites(updatedFavorites);
-    saveFavorites(updatedFavorites);
+  const handleFavoriteToggle = async (subjectId, subjectName) => {
+    try {
+      const isFavorite = favorites.some((fav) => fav.subjectId === subjectId);
+
+      if (!isFavorite) {
+        // Thêm favorite
+        await authAxios.post("/user/favorites", {
+          userId,
+          subjectId,
+          subjectName,
+        });
+
+        setFavorites((prev) => [...prev, { subjectId, subjectName }]);
+      } else {
+        // Xóa favorite
+        await authAxios.delete("/user/favorites", {
+          data: { userId, subjectId, subjectName },
+        });
+
+        setFavorites((prev) => prev.filter((fav) => fav.subjectId !== subjectId));
+      }
+    } catch (error) {
+      console.error("Error updating favorites:", error);
+      // Bạn có thể hiển thị thông báo lỗi cho người dùng ở đây
+    }
   };
 
   const handleSelectCategory = (categoryId) => {
     setSelectedCategory(categoryId);
-    setSearchQuery(""); // Xoá tìm kiếm khi chọn danh mục
-    const filtered = subjects.filter(
-      (subject) => subject.categoryId === categoryId
-    );
+    setSearchQuery(""); // Xóa tìm kiếm khi chọn danh mục
+    const filtered = subjects.filter((subject) => subject.categoryId === categoryId);
     setFilteredSubjects(filtered);
   };
 
@@ -94,9 +109,10 @@ export default function RevisionUser() {
           <section className="category-re">
             <div className="container-re">
               {filteredSubjects.map((item) => {
-                // Lấy tên môn theo ngôn ngữ hiện tại, fallback về item.name nếu không có
                 const translatedName =
                   subjectTranslations[item.name]?.[language] || item.name;
+
+                const isFavorited = favorites.some((fav) => fav.subjectId === item.subjectId);
 
                 return (
                   <div className="card" key={item.subjectId}>
@@ -115,22 +131,10 @@ export default function RevisionUser() {
                         {texts.chooseChapter}
                       </button>
                       <button
-                        className={`favorites-button ${
-                          favorites.some((fav) => fav.subjectId === item.subjectId)
-                            ? "favorited"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          handleFavoriteToggle(item.subjectId, item.name)
-                        }
+                        className={`favorites-button ${isFavorited ? "favorited" : ""}`}
+                        onClick={() => handleFavoriteToggle(item.subjectId, item.name)}
                       >
-                        <i
-                          className={`fa-heart ${
-                            favorites.some((fav) => fav.subjectId === item.subjectId)
-                              ? "fa-solid"
-                              : "fa-regular"
-                          }`}
-                        ></i>
+                        <i className={`fa-heart ${isFavorited ? "fa-solid" : "fa-regular"}`}></i>
                       </button>
                     </div>
                   </div>

@@ -83,7 +83,8 @@ export default function GetSubject() {
                 className="btn btn-primary mb-3 float-end"
                 onClick={() => navigate('/admin/subjects')}
             >
-<BiPlus/>            </button>
+            <BiPlus/>
+            </button>
             <table className="table table-bordered">
                 <thead>
                     <tr>

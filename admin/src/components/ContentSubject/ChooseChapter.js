@@ -21,13 +21,18 @@ export default function ChooseChapter() {
   // Hàm gọi API để lấy danh sách các chương
   const fetchChapters = async (subjectId) => {
     try {
-      const response = await authAxios.get(
-        `/public/subject/chapters/${subjectId}`
-      );
-      if (response.data && response.data.length > 0) {
-        setChapters(response.data);
+      const response = await authAxios.get(`/public/subjects/${subjectId}`);
+      if (response.data.status === "success") {
+        // Lấy mảng chapters bên trong data
+        setChapters(response.data.data.chapters || []);
+        if (
+          !response.data.data.chapters ||
+          response.data.data.chapters.length === 0
+        ) {
+          alert("Không có chương nào cho môn học này!");
+        }
       } else {
-        setChapters([]); // Trường hợp không có chương nào
+        setChapters([]);
         alert("Không có chương nào cho môn học này!");
       }
     } catch (error) {
@@ -47,9 +52,7 @@ export default function ChooseChapter() {
     if (!confirmDelete) return;
 
     try {
-      await authAxios.delete(
-        `http://localhost:8080/admin/chapters/${chapterId}`
-      );
+      await authAxios.delete(`/admin/chapters/${chapterId}`);
       setChapters(
         chapters.filter((chapter) => chapter.chapterId !== chapterId)
       );
@@ -76,7 +79,7 @@ export default function ChooseChapter() {
           className="btn btn-primary"
           onClick={() => navigate(`/subjects/addChapters/${subjectId}`)}
         >
-        <BiPlus />
+          <BiPlus />
         </button>
       </div>
 
