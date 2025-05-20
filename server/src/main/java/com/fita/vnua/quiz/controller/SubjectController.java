@@ -3,6 +3,8 @@ package com.fita.vnua.quiz.controller;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.service.SubjectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +14,12 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
+@Tag(name="Subject API", description = "API thực hiện các chức năng liên quan đến môn học")
 public class SubjectController {
     private final SubjectService subjectService;
 
-    // Lấy tất cả các môn học (public)
     @GetMapping("public/subjects")
+    @Operation(summary = "Lấy danh sách tất cả các môn học")
     public ResponseEntity<ApiResponse<List<SubjectDto>>> getAllSubject() {
         try {
             List<SubjectDto> subjects = subjectService.getAllSubject();
@@ -29,8 +32,8 @@ public class SubjectController {
         }
     }
 
-    // Lấy môn học theo subjectId (public)
     @GetMapping("public/subjects/{subjectId}")
+    @Operation(summary = "Lấy môn học theo Id môn học")
     public ResponseEntity<ApiResponse<SubjectDto>> getSubjectById(@PathVariable("subjectId") Long subjectId) {
         try {
             SubjectDto subject = subjectService.getSubjectById(subjectId);
@@ -43,8 +46,8 @@ public class SubjectController {
         }
     }
 
-    // Tạo môn học mới (admin)
     @PostMapping("admin/subjects")
+    @Operation(summary = "Tạo môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> createSubject(@RequestBody SubjectDto subjectDto) {
         try {
             SubjectDto createdSubject = subjectService.create(subjectDto);
@@ -54,8 +57,8 @@ public class SubjectController {
         }
     }
 
-    // Cập nhật môn học (admin)
     @PatchMapping("admin/subjects/{subjectId}")
+    @Operation(summary = "Cập nhật môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> updateSubject(@PathVariable("subjectId") Long subjectId, @RequestBody SubjectDto subjectDto) {
         try {
             SubjectDto updatedSubject = subjectService.update(subjectId, subjectDto);
@@ -65,8 +68,8 @@ public class SubjectController {
         }
     }
 
-    // Xóa môn học (admin)
     @DeleteMapping("admin/subjects/{subjectId}")
+    @Operation(summary = "Xóa môn học (admin)")
     public ResponseEntity<ApiResponse<Object>> deleteSubject(@PathVariable("subjectId") Long subjectId) {
         try {
             subjectService.delete(subjectId);

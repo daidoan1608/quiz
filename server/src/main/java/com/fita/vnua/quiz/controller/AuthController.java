@@ -8,6 +8,8 @@ import com.fita.vnua.quiz.model.dto.response.TokenRefreshResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.AuthService;
 import com.fita.vnua.quiz.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,35 +26,15 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/auth/")
 @RequiredArgsConstructor
+@Tag(name = "Authencation API", description = "API thao tác liên quan bảo mật của người dùng")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final AuthService authService;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-
-    @PostMapping("change-password/{userId}")
-    public ResponseEntity<ApiResponse<Object>> changePassword(@PathVariable("userId") UUID userId,
-                                                              @RequestBody ChangePasswordRequest request) {
-        try {
-            UserDto userDto = userService.getUserById(userId);
-
-            if (!passwordEncoder.matches(request.getOldPassword(), userDto.getPassword()) || !userDto.getUserId().equals(userId)) {
-                return ResponseEntity.status(403).body(ApiResponse.error("You are not authorized to change this password", List.of("Unauthorized")));
-            }
-
-            userDto.setPassword(request.getNewPassword());
-            userService.update(userId, userDto);
-
-            return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Change password failed: " + e.getMessage(), List.of(e.getMessage())));
-        }
-    }
-
 
     @PostMapping("login")
+    @Operation(summary = "API đăng nhập")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -73,6 +55,7 @@ public class AuthController {
 
 
     @PostMapping("refresh")
+    @Operation(summary = "API lấy lại access token")
     public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshAccessToken(@RequestBody RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
 
@@ -87,6 +70,7 @@ public class AuthController {
 
 
     @PostMapping("logout")
+    @Operation(summary = "API đăng xuất")
     public ResponseEntity<ApiResponse<Object>> logout(@RequestBody LogoutRequest request) {
         String refreshTokenId = request.getRefreshToken();
 
@@ -100,6 +84,7 @@ public class AuthController {
 
 
     @PostMapping("register")
+    @Operation(summary = "API đăng ký tài khoản")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestBody RegisterRequest registerRequest) {
         try {
             if (userService.isEmailExisted(registerRequest.getEmail()))

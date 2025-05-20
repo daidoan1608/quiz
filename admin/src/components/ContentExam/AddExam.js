@@ -88,8 +88,8 @@ export default function AddExam() {
 
   const fetchCategories = async () => {
     try {
-      const response = await authAxios.get("/public/categories");
-      setCategories(response.data);
+      const response = await authAxios.get("/public/categories")
+      setCategories(response.data.data[0] || []);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách khoa:", error);
     }
@@ -100,8 +100,9 @@ export default function AddExam() {
       const res = await authAxios.get(
         `/admin/questions/total-questions/${subjectId}`
       );
-      setMaxQuestions(res.data);
-      const chapterData = Object.entries(res.data.totalQuestionByChapter).map(
+      console.log("Giới hạn câu hỏi:", res.data.data);
+      setMaxQuestions(res.data.data);
+      const chapterData = Object.entries(res.data.data.totalQuestionByChapter).map(
         ([name, count]) => ({
           chapterName: name,
           totalQuestions: count,

@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.UserExamDto;
+import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 
@@ -9,6 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface UserExamService {
+    List<UserExamSummaryDto> getUserExamSummaries();
+
     UserExamResponse getUserExamById(Long id);
 
     UserExamDto createUserExam(UserExamRequest userExamRequest);

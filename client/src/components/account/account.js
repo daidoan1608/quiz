@@ -165,7 +165,7 @@ const Account = () => {
   const handleChangePassword = async (values) => {
     const userId = localStorage.getItem("userId");
     try {
-      const response = await authAxios.post(`auth/change-password/${userId}`, {
+      const response = await authAxios.post(`user/change-password/${userId}`, {
         oldPassword: values.oldPassword,
         newPassword: values.newPassword,
       });

@@ -18,7 +18,7 @@ export default function AddChapter() {
   const fetchCategories = async () => {
     try {
       const response = await authAxios.get("/public/categories");
-      setCategories(response.data); // Lưu dữ liệu vào state
+      setCategories(response.data.data[0]); // Lưu dữ liệu vào state
     } catch (error) {
       console.error("Lỗi khi lấy danh sách khoa:", error);
     }

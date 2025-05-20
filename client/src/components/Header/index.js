@@ -2,16 +2,35 @@ import React, { useState } from "react";
 import "./index.css";
 import { useAuth } from "../Context/AuthProvider";
 import { useLanguage } from "../Context/LanguageProvider";
+import { publicAxios , authAxios} from "../../api/axiosConfig";
 
 export default function Headers() {
   const { isLoggedIn, logout } = useAuth();
   const { language, toggleLanguage, texts } = useLanguage();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bookmarkedExams, setBookmarkedExams] = useState([]); // Giả sử bạn sẽ set danh sách môn yêu thích ở đây
+  const [favorites, setFavorites] = useState([]); // Giả sử bạn sẽ set danh sách môn yêu thích ở đây
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
+  const userId = localStorage.getItem("userId");
+
+  const toggleModal = async () => {
+    const willOpen = !isModalOpen;
+    setIsModalOpen(willOpen);
+    if (willOpen) {
+    setLoading(true);
+    setError(null);
+    try {
+      const resp = await authAxios.get(`/user/favorites/user/${userId}`);
+      setFavorites(resp.data.data || []);
+    } catch (error) {
+      setError(texts.errorLoadingFavorites || "Lỗi tải danh sách yêu thích");
+      setFavorites([]);
+    } finally {
+      setLoading(false);
+    }
+  }
   };
 
   const handleLogout = () => {
@@ -99,9 +118,9 @@ export default function Headers() {
           <a href="/rank" className="mx-3">
             {texts.rank}
           </a>
-          <a href="/favorites" className="favorites-link mx-3">
+          {/* <a href="/favorites" className="favorites-link mx-3">
             <i className="fa-solid fa-heart"></i>
-          </a>
+          </a> */}
         </div>
       </header>
 
@@ -110,19 +129,24 @@ export default function Headers() {
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>{texts.favoriteSubjectsTitle || "Môn học yêu thích"}</h3>
-            <ul>
-              {bookmarkedExams.length > 0 ? (
-                bookmarkedExams.map((subjectId) => (
-                  <li key={subjectId}>
-                    <div>
-                      Môn {subjectId} {/* Thay bằng tên môn học nếu có */}
-                    </div>
-                  </li>
-                ))
+
+            {loading && <p>Đang tải...</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            {!loading && !error && (
+              favorites.length > 0 ? (
+                <ul>
+                  {favorites.map((fav) => (
+                    <li key={fav.subjectId}>
+                      <div>{fav.subjectName || `Môn ${fav.subjectId}`}</div>
+                    </li>
+                  ))}
+                </ul>
               ) : (
                 <p>{texts.noFavorites || "Chưa có môn học yêu thích nào."}</p>
-              )}
-            </ul>
+              )
+            )}
+
             <button onClick={toggleModal}>{texts.close || "Đóng"}</button>
           </div>
         </div>

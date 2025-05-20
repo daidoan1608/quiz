@@ -20,7 +20,7 @@ export default function UpdateChapter() {
         try {
 
             const response = await authAxios.get(`/public/chapters/${chapterId}`);
-            setChapter(response.data);
+            setChapter(response.data.data);
         } catch (error) {
             console.error('Lỗi API:', error.response?.data || error.message);
             alert('Không thể lấy thông tin chương!');

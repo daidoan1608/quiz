@@ -14,8 +14,9 @@ export default function UpdateSubject() {
 
     const getSubjectDetails = async () => {
         try {
-            const res = await authAxios.get(`/subjects/${subjectId}`);
-            setSubject(res.data);
+            const res = await authAxios.get(`public/subjects/${subjectId}`);
+            setSubject(res.data.data);
+            console.log(res.data.data);
         } catch (error) {
             alert('Không thể lấy thông tin môn học!');
         }
