@@ -94,10 +94,17 @@ const Rank = () => {
       <h1>{texts.rankings}</h1>
       <Filter onFilter={handleFilter} selectedSubject={selectedSubject} />
       <Leaderboard data={leaderboardData} currentUserId={user || ''} />
-      {userRank !== null && (
+      {userRank !== null ? (
         <div className="user-rank">
-          <strong>{texts.yourRank}</strong> :{' '}
-          <strong>{userRank <= 10 ? userRank : texts.noRank}</strong>
+          <strong>
+            {userRank <= 10
+              ? `${texts.yourRank} : ${userRank}`
+              : texts.noRank}
+          </strong>
+        </div>
+      ) : (
+        <div className="user-rank">
+          <strong>{texts.noResultMessage}</strong>
         </div>
       )}
     </div>
