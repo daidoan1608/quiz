@@ -1,90 +1,113 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Table } from 'antd';
 import { useLanguage } from '../Context/LanguageProvider';
 import './Leaderboard.css';
+import subjectTranslations from '../../Languages/subjectTranslations';
 
-// Hàm tính danh hiệu dựa trên điểm
-const getTitle = (score) => {
-  if (score >= 1000) return '🏆 Cao thủ';
-  if (score >= 500) return '⭐ Chuyên gia';
-  if (score >= 200) return '📘 Học giả';
-  return '🔰 Tân binh';
+export const getTitle = (averageScore, texts) => {
+  if (averageScore >= 30) return texts.master;
+  if (averageScore >= 20) return texts.expert;
+  if (averageScore >= 10) return texts.scholar;
+  return texts.novice;
 };
 
-const Leaderboard = ({ data = [] }) => {
-  const { texts } = useLanguage();
+const translateSubject = (subject, language = 'vi') => {
+  return subjectTranslations[subject]?.[language] || subjectTranslations[subject]?.vi || 'Không rõ';
+};
 
-  // Kiểm tra dữ liệu đầu vào
-  if (!Array.isArray(data)) {
-    return <div>Không có dữ liệu bảng xếp hạng.</div>;
+const Leaderboard = ({ data = [], currentUserId }) => {
+  const { texts, language } = useLanguage();
+
+  // Kiểm tra nếu currentUserId không hợp lệ
+  if (!currentUserId) {
+    console.warn('currentUserId không được cung cấp hoặc không hợp lệ:', currentUserId);
   }
 
-  const columns = [
-    {
-      title: texts.id,
-      dataIndex: 'rank',
-      key: 'rank',
-      render: (text, record) => (
-        <span style={record.rank <= 3 ? { fontWeight: 'bold', color: '#d48806' } : {}}>
-          {record.rank}
-        </span>
-      ),
-      sorter: (a, b) => a.rank - b.rank,
-    },
-    {
-      title: texts.user,
-      dataIndex: 'username',
-      key: 'username',
-    },
-    {
-      title: texts.attempts,
-      dataIndex: 'attempts',
-      key: 'attempts',
-      render: (text, record) => record.attempts ?? record.scores?.length ?? 0,
-      sorter: (a, b) => (a.attempts ?? 0) - (b.attempts ?? 0),
-    },
-    {
-      title: texts.averageScore,
-      dataIndex: 'averageScore',
-      key: 'averageScore',
-      render: (score) => (typeof score === 'number' ? score.toFixed(1) : '0.0'),
-      sorter: (a, b) => (a.averageScore ?? 0) - (b.averageScore ?? 0),
-    },
-    {
-      title: texts.totalScore || 'Tổng điểm',
-      dataIndex: 'score',
-      key: 'score',
-      sorter: (a, b) => (a.score ?? 0) - (b.score ?? 0),
-    },
-    {
-      title: texts.totalTime,
-      dataIndex: 'totalTime',
-      key: 'totalTime',
-      render: (time) => `${time ?? 0} ${texts.minutes || 'phút'}`,
-      sorter: (a, b) => (a.totalTime ?? 0) - (b.totalTime ?? 0),
-    },
-    {
-      title: texts.badge,
-      dataIndex: 'badge',
-      key: 'badge',
-      render: (badge, record) => badge || getTitle(record.score ?? 0),
-    },
-    {
-      title: texts.subject,
-      dataIndex: 'subject',
-      key: 'subject',
-      render: (subject) => subject || texts.unknown || 'Không rõ',
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        title: texts.id,
+        dataIndex: 'rank',
+        key: 'rank',
+        render: (text, record) => (
+          <span style={record.rank <= 3 ? { fontWeight: 'bold', color: '#d48806' } : {}}>
+            {record.rank}
+          </span>
+        ),
+        sorter: (a, b) => a.rank - b.rank,
+      },
+      {
+        title: texts.user,
+        dataIndex: 'username',
+        key: 'username',
+      },
+      {
+        title: texts.attempts,
+        dataIndex: 'attempts',
+        key: 'attempts',
+        render: (text, record) => record.attempts ?? record.scores?.length ?? 0,
+        sorter: (a, b) => (a.attempts ?? 0) - (b.attempts ?? 0),
+      },
+      {
+        title: texts.averageScore,
+        dataIndex: 'averageScore',
+        key: 'averageScore',
+        render: (score) => (typeof score === 'number' ? score.toFixed(1) : score || '0.0'),
+        sorter: (a, b) => (Number(a.averageScore) || 0) - (Number(b.averageScore) || 0),
+      },
+      {
+        title: texts.totalScore,
+        dataIndex: 'score',
+        key: 'score',
+        render: (score) => (typeof score === 'number' ? score.toFixed(1) : score || '0.0'),
+        sorter: (a, b) => (Number(a.score) || 0) - (Number(b.score) || 0),
+      },
+      {
+        title: texts.totalTime,
+        dataIndex: 'totalTime',
+        key: 'totalTime',
+        render: (time) => time || `0 ${texts.minutes} 0 ${texts.seconds}`,
+        sorter: (a, b) => {
+          const parseTime = (timeStr) => {
+            if (!timeStr || timeStr === `0 ${texts.minutes} 0 ${texts.seconds}`) return 0;
+            const parts = timeStr.split(' ').filter((part) => !isNaN(parseInt(part)));
+            const minutes = parts[0] ? parseInt(parts[0]) : 0;
+            const seconds = parts[1] ? parseInt(parts[1]) : 0;
+            return minutes * 60 + seconds;
+          };
+          return parseTime(a.totalTime) - parseTime(b.totalTime);
+        },
+      },
+      {
+        title: texts.badge,
+        dataIndex: 'badge',
+        key: 'badge',
+        render: (badge, record) => badge || getTitle(Number(record.averageScore) || 0, texts),
+      },
+      {
+        title: texts.subject,
+        dataIndex: 'subject',
+        key: 'subject',
+        render: (subject) => translateSubject(subject, language) || texts.unknown || 'Không rõ',
+      },
+    ],
+    [texts, language],
+  );
+
+  if (!Array.isArray(data)) {
+    console.warn('Dữ liệu bảng xếp hạng không phải là mảng:', data);
+    return <div>{texts.noData}</div>;
+  }
 
   return (
     <Table
-      dataSource={data}
+      dataSource={data.slice(0, 10)} // Giới hạn top 10
       columns={columns}
       rowKey="username"
-      pagination={{ pageSize: 10, showSizeChanger: true }}
+      pagination={false}
       className="leaderboard-table"
-      locale={{ emptyText: texts.noData || 'Không có dữ liệu' }}
+      locale={{ emptyText: texts.noData}}
+      rowClassName={(record) => (record.userId === currentUserId ? 'highlight-row' : '')}
     />
   );
 };

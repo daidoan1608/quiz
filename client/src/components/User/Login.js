@@ -158,6 +158,12 @@ function Login() {
             className="oauth-icon github"
           />
         </div>
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <span>Chưa có tài khoản? </span>
+          <a href="/register" onClick={() => navigate("/register")}>
+            Đăng ký
+          </a>
+        </div>
       </div>
     </div>
   );

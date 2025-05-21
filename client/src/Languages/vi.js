@@ -78,6 +78,16 @@ const vi = {
   chapter: "Chương",
   delete: "Xóa",
   favorites: "Yêu thích",
+  noData: "Không có dữ liệu",
+  minutes: "phút",
+  seconds: "giây",
+  master: "🏆 Cao thủ",
+  expert: "⭐ Chuyên gia",
+  scholar: "📘 Học giả",
+  novice: "🔰 Tân binh",
+  yourRank: "Thứ hạng của bạn",
+  noRank: "Bạn không trong bảng xếp hạng. Cố gắng cải thiện thành tích nhé!",
+  noResultMessage: "Hãy làm một bài thi bất kỳ để có xếp hạng!",
 };
 
 export default vi;
