@@ -45,6 +45,6 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
         Double getAvgScore();
         Double getTotalScore();
         Long getTotalDurationSeconds();
-        String getSubjects();  // Tên trường đúng như trong query: subjects
+        String getSubjects();
     }
 }

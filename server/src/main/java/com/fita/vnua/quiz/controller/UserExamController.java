@@ -26,9 +26,16 @@ public class UserExamController {
 
     @GetMapping("public/summaries")
     @Operation(summary = "Thống kê điểm thi của người dùng")
-    public ResponseEntity<List<UserExamSummaryDto>> getUserExamSummaries() {
-        List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries();
-        return ResponseEntity.ok(summaries);
+    public ResponseEntity<ApiResponse<List<UserExamSummaryDto>>> getUserExamSummaries() {
+        try {
+            List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries();
+            if (summaries.isEmpty()) {
+                return ResponseEntity.status(404).body(ApiResponse.error("No summaries found", List.of("No user exam summaries available")));
+            }
+            return ResponseEntity.ok(ApiResponse.success("Summaries fetched successfully", summaries));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch summaries", List.of(e.getMessage())));
+        }
     }
 
     @GetMapping("admin/userexams")
