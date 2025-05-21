@@ -76,17 +76,28 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public void importQuestionsFromExcel(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException {
+        // Đọc dữ liệu từ file Excel và chuyển thành danh sách DTO câu hỏi
         List<QuestionDto> dtos = ExcelHelper.excelToQuestions(file.getInputStream());
 
+        // Tìm chapter trước, tránh lặp lại tìm nhiều lần trong map
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new RuntimeException("Chapter không tồn tại"));
+
+        // Chuyển từng DTO thành entity Question
         List<Question> questions = dtos.stream().map(dto -> {
             Question question = new Question();
             question.setContent(dto.getContent());
-            question.setDifficulty(Question.Difficulty.valueOf(dto.getDifficulty().toUpperCase()));
 
-            Chapter chapter = chapterRepository.findById(chapterId)
-                    .orElseThrow(() -> new RuntimeException("Chapter không tồn tại"));
+            // Chuyển String difficulty sang enum, xử lý ngoại lệ nếu cần
+            try {
+                question.setDifficulty(Question.Difficulty.valueOf(dto.getDifficulty().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Difficulty không hợp lệ: " + dto.getDifficulty());
+            }
+
             question.setChapter(chapter);
 
+            // Tạo danh sách answer cho question
             List<Answer> answers = dto.getAnswers().stream().map(ansDto -> {
                 Answer answer = new Answer();
                 answer.setContent(ansDto.getContent());
@@ -96,11 +107,13 @@ public class QuestionServiceImpl implements QuestionService {
             }).collect(Collectors.toList());
 
             question.setAnswers(answers);
+
             return question;
         }).collect(Collectors.toList());
-
+        // Lưu tất cả câu hỏi cùng lúc
         questionRepository.saveAll(questions);
     }
+
 
 
     @Override
