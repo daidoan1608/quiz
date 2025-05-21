@@ -3,12 +3,13 @@ import { publicAxios } from "../../api/axiosConfig";
 import { Pagination } from "antd";
 import "./Home.css";
 import { useLanguage } from "../../components/Context/LanguageProvider";
+import subjectTranslations from "../../Languages/subjectTranslations";
 
 export default function Home() {
   const [subjects, setSubjects] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
-  const { texts } = useLanguage();
+  const { texts, language } = useLanguage();
 
   useEffect(() => {
     getAllSubjects();
@@ -26,19 +27,23 @@ export default function Home() {
   const currentSubjects = subjects.slice(0, 5);
 
   const elementSubjects = currentSubjects.length > 0 ? (
-    currentSubjects.map((item, index) => (
+  currentSubjects.map((item, index) => {
+    const translatedName =
+      subjectTranslations?.[item.name]?.[language] || item.name;
+
+    return (
       <div className="category" key={index}>
         <div className="container">
           <div className="course">
-            <h3>{item.name}</h3>
+            <h3>{translatedName}</h3>
           </div>
         </div>
       </div>
-    ))
-  ) : (
-    <div className="no-subjects">{texts.noSubjects}</div>
-  );
-
+    );
+  })
+) : (
+  <div className="no-subjects">{texts.noSubjects}</div>
+);
   return (
     <div>
       <main className="position-relative main-background">

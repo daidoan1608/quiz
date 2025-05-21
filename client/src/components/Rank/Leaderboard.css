@@ -1,4 +1,3 @@
-/* Bạn có thể tinh chỉnh thêm nếu muốn */
 .leaderboard-table .ant-table-thead > tr > th {
   background-color: #f0f2f5;
   text-align: center;
@@ -6,4 +5,18 @@
 
 .leaderboard-table .ant-table-tbody > tr > td {
   text-align: center;
+}
+
+.highlight-row {
+  background-color: #9ae894 !important;
+  font-weight: bold;
+  border-left: 4px solid #1890ff;
+}
+
+.highlight-row:hover {
+  background-color: #bae7ff;
+}
+
+.highlight-row .ant-table-cell {
+  background-color: #adeda8 !important;
 }

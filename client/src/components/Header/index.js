@@ -54,7 +54,7 @@ export default function Headers() {
             {/* Nút chuyển đổi ngôn ngữ luôn hiện */}
             <button
               onClick={toggleLanguage}
-              className="btn btn-outline-secondary mx-2"
+              className="btn btn-outline-secondary mx-5"
               aria-label={texts.toggleLanguageAria}
             >
               {language === "vi" ? "English" : "Tiếng Việt"}

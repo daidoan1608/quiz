@@ -135,7 +135,6 @@
   gap: 4rem;
   background-color: #519fc9;
   padding: 0.75rem;
-  padding-left: 20rem;
   position: relative;
   margin-top: 0;
   /* Remove any top margin */
@@ -146,7 +145,6 @@
   display: flex;
   flex-direction: column;
   padding-left: 6rem;
-  margin: 0 2rem;
 }
 
 /* Thiết lập hiệu ứng gạch chân động cho các liên kết */
@@ -215,12 +213,6 @@
   /* Giảm kích thước font */
   text-decoration: none;
   color: #000;
-}
-
-/* Thêm khoảng cách giữa các liên kết */
-.nav-links-headers2 {
-  margin-top: 5px;
-  /* Giảm khoảng cách phía trên */
 }
 
 /* Căn chỉnh các button đăng nhập và đăng ký */

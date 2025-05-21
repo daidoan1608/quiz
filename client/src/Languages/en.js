@@ -72,7 +72,16 @@ const en = {
   noFavorites: "You do not have any favorite subjects yet.",
   chapter: "Chapter",
   delete: "Delete",
-  favorites : "Favorites"
+  favorites : "Favorites",
+  noData: "No Data",
+  minutes: "minutes",
+  seconds: "seconds",
+  master: "🏆 Mater",
+  expert: "⭐ Expert",
+  scholar: "📘 Scholar",
+  novice: "🔰 Novice",
+  yourRank: "Your Rank",
+  noRank: "No Rank",
 };
 
 export default en;
