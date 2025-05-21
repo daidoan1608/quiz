@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 // import styled from "styled-components";
 import { AuthProvider } from "./components/Context/AuthProvider";
+import { FavoritesProvider } from "./components/Context/FavoritesContext";
+
 import GuestOnlyRoute from "./components/Context/GuestOnlyRoute";
 import ProtectedRoute from "./components/Context/ProtectedRoute";
 import Layout from "./components/User/Layout";
@@ -23,37 +25,13 @@ import LessonList from "./components/favorites/LessonList";
 import LessonListChap from "./components/favorites/LessonListChap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // để dropdown hoạt động
-// import 'bootstrap-icons/font/bootstrap-icons.css';
 
-
-// Styled Components
-// const Container = styled.div`
-//   display: flex;
-//   flex-wrap: wrap;
-//   gap: 20px;
-// `;
-
-// const Card = styled.div`
-//   flex: 1 1 300px;
-//   background-color: #f0f0f0;
-//   padding: 20px;
-//   margin: 10px;
-
-//   @media (max-width: 768px) {
-//     flex: 1 1 100%;
-//   }
-// `;
-
-// const AppWrapper = styled.div`
-//   min-height: 100vh;
-//   background-color: #fafafa;
-//   display: flex;
-//   flex-direction: column;
-// `;
 
 function App() {
   return (
     <AuthProvider>
+            <FavoritesProvider>  {/* Bọc thêm FavoritesProvider */}
+
       <Router>
         {/* <AppWrapper> */}
         <Routes>
@@ -113,6 +91,8 @@ function App() {
         </Routes>
         {/* </AppWrapper> */}
       </Router>
+            </FavoritesProvider>  {/* Bọc thêm FavoritesProvider */}
+
     </AuthProvider>
   );
 }

@@ -1,102 +1,59 @@
 import React, { useEffect, useState } from "react";
-import { authAxios, publicAxios } from "../../../api/axiosConfig";
+import { useFavorites } from "../../Context/FavoritesContext";
 import { useNavigate } from "react-router-dom";
-import "./RevisionUser.css";
+import subjectTranslations from "../../../Languages/subjectTranslations";
 import Sidebar from "../../User/SideBar";
 import { useLanguage } from "../../Context/LanguageProvider";
-import subjectTranslations from "../../../Languages/subjectTranslations";
+import { publicAxios } from "../../../api/axiosConfig";
+import "./RevisionUser.css";
 
 export default function RevisionUser() {
+  const { favorites, toggleFavorite } = useFavorites();
   const [subjects, setSubjects] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [filteredSubjects, setFilteredSubjects] = useState([]);
-  const [favorites, setFavorites] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { texts, language } = useLanguage();
 
-  // Lấy userId từ localStorage, cho phép null/undefined nếu chưa đăng nhập
-  const userId = localStorage.getItem("userId");
+  useEffect(() => {
+    const getAllSubjects = async () => {
+      try {
+        const resp = await publicAxios.get("/public/subjects");
+        setSubjects(resp.data.data || []);
+        setFilteredSubjects(resp.data.data || []);
+      } catch (error) {
+        setSubjects([]);
+        setFilteredSubjects([]);
+      }
+    };
+
+    getAllSubjects();
+  }, []);
 
   useEffect(() => {
-    getAllSubjects();
-    // Chỉ tải danh sách yêu thích nếu người dùng đã đăng nhập
-    if (userId) {
-      loadFavorites();
+    // Bộ lọc dựa vào danh mục hoặc tìm kiếm
+    if (selectedCategory) {
+      setFilteredSubjects(subjects.filter((subj) => subj.categoryId === selectedCategory));
+    } else if (searchQuery.trim()) {
+      setFilteredSubjects(
+        subjects.filter((subject) =>
+          subject.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
     } else {
-      setFavorites([]); // Đặt danh sách yêu thích rỗng cho người dùng chưa đăng nhập
+      setFilteredSubjects(subjects);
     }
-  }, [userId]);
-
-  const getAllSubjects = async () => {
-    try {
-      // Sử dụng publicAxios để cho phép truy cập không cần xác thực
-      const resp = await publicAxios.get("/public/subjects");
-      setSubjects(resp.data.data);
-      setFilteredSubjects(resp.data.data);
-    } catch (error) {
-      console.error("Lỗi từ server:", error);
-      setSubjects([]); // Đặt mảng rỗng nếu có lỗi
-      setFilteredSubjects([]);
-    }
-  };
-
-  const loadFavorites = async () => {
-    try {
-      const resp = await authAxios.get(`/user/favorites/user/${userId}`);
-      setFavorites(resp.data.data || []);
-    } catch (error) {
-      console.error("Lỗi khi tải danh sách yêu thích:", error);
-      setFavorites([]); // Đặt mảng rỗng nếu có lỗi
-    }
-  };
-
-  const handleFavoriteToggle = async (subjectId, subjectName) => {
-    // Ngăn thao tác yêu thích nếu người dùng chưa đăng nhập
-    if (!userId) {
-      alert(texts.pleaseLogin || "Vui lòng đăng nhập để sử dụng tính năng này"); // Thông báo cho người dùng
-      return;
-    }
-
-    try {
-      const isFavorite = favorites.some((fav) => fav.subjectId === subjectId);
-
-      if (!isFavorite) {
-        // Thêm vào danh sách yêu thích
-        await authAxios.post("/user/favorites", {
-          userId,
-          subjectId,
-          subjectName,
-        });
-        setFavorites((prev) => [...prev, { subjectId, subjectName }]);
-      } else {
-        // Xóa khỏi danh sách yêu thích
-        await authAxios.delete("/user/favorites", {
-          data: { userId, subjectId, subjectName },
-        });
-        setFavorites((prev) => prev.filter((fav) => fav.subjectId !== subjectId));
-      }
-    } catch (error) {
-      console.error("Lỗi khi cập nhật danh sách yêu thích:", error);
-      alert(texts.errorFavorites || "Có lỗi xảy ra khi cập nhật danh sách yêu thích");
-    }
-  };
+  }, [selectedCategory, searchQuery, subjects]);
 
   const handleSelectCategory = (categoryId) => {
     setSelectedCategory(categoryId);
-    setSearchQuery(""); // Xóa tìm kiếm khi chọn danh mục
-    const filtered = subjects.filter((subject) => subject.categoryId === categoryId);
-    setFilteredSubjects(filtered);
+    setSearchQuery("");
   };
 
   const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    setSelectedCategory(null); // Bỏ chọn danh mục khi tìm kiếm
-    const filtered = subjects.filter((subject) =>
-      subject.name.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredSubjects(filtered);
+    setSearchQuery(e.target.value);
+    setSelectedCategory(null);
   };
 
   return (
@@ -109,7 +66,6 @@ export default function RevisionUser() {
         />
 
         <div className="content">
-          {/* 🔍 Thanh tìm kiếm */}
           <input
             type="text"
             placeholder={texts.placeholder || "Tìm kiếm môn học..."}
@@ -135,19 +91,22 @@ export default function RevisionUser() {
                         <button
                           className="card-button-list"
                           onClick={() =>
-                            navigate(`/listChap`, {
-                              state: { subjectId: item.subjectId },
-                            })
+                            navigate(`/listChap`, { state: { subjectId: item.subjectId } })
                           }
                         >
                           {texts.chooseChapter || "Chọn chương"}
                         </button>
                         <button
                           className={`favorites-button ${isFavorited ? "favorited" : ""}`}
-                          onClick={() => handleFavoriteToggle(item.subjectId, item.name)}
-                          disabled={!userId} // Vô hiệu hóa nút nếu chưa đăng nhập
+                          onClick={() => toggleFavorite(item.subjectId, item.name)}
+                          disabled={!localStorage.getItem("userId")}
+                          aria-label={isFavorited ? "Bỏ yêu thích" : "Thêm yêu thích"}
                         >
-                          <i className={`fa-heart ${isFavorited ? "fa-solid" : "fa-regular"}`}></i>
+                          <i
+                            className={`fa-heart ${
+                              isFavorited ? "fa-solid" : "fa-regular"
+                            }`}
+                          ></i>
                         </button>
                       </div>
                     </div>

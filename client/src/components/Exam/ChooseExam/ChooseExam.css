@@ -1,3 +1,35 @@
+.card-buttons-row {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* khoảng cách giữa các nút */
+  margin-top: 10px; /* nếu cần khoảng cách so với tiêu đề */
+}
+
+.card-button {
+  /* giữ nguyên style nút chọn đề */
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.favorites-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #777;
+  transition: color 0.3s ease;
+}
+
+.favorites-button.favorited {
+  color: #e74c3c;
+}
+
+.favorites-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .revision {
   display: flex;
   /* Sử dụng flexbox để bố trí hai phần sidebar và content */
