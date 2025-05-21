@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { authAxios } from "../../Api/axiosConfig";
+import { authAxios, publicAxios } from "../../Api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 
 const ImportInterface = () => {
@@ -20,8 +20,8 @@ const ImportInterface = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await authAxios.get("/public/categories");
-      setCategories(response.data);
+      const response = await publicAxios.get("/public/categories");
+      setCategories(response.data.data[0] || []);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách khoa:", error);
     }
@@ -55,7 +55,7 @@ const ImportInterface = () => {
 
   const fetchChapters = async (subjectId) => {
     try {
-      const response = await authAxios.get(`/public/subject/chapters/${subjectId}`);
+      const response = await authAxios.get(`/public/chapters/subject/${subjectId}`);
       if (response.data.data && response.data.data.length > 0) {
         setChapters(response.data.data); // Cập nhật danh sách chapters
         setIsChaptersEmpty(false); // Nếu có chương, set là không rỗng
