@@ -5,6 +5,7 @@ import "./ChooseExam.css";
 import Sidebar from "../../User/SideBar";
 import { useLanguage } from "../../Context/LanguageProvider";
 import subjectTranslations from "../../../Languages/subjectTranslations";
+import { useFavorites } from "../../Context/FavoritesContext"; // Thêm import useFavorites
 
 export default function ChooseExam() {
   const [subjects, setSubjects] = useState([]);
@@ -14,6 +15,7 @@ export default function ChooseExam() {
   const navigate = useNavigate();
   const { texts, language } = useLanguage(); // lấy ngôn ngữ hiện tại
 
+  const { favorites, toggleFavorite } = useFavorites();
   // Khi component được load, gọi API lấy tất cả môn học
   useEffect(() => {
     getAllSubjects();
@@ -56,6 +58,10 @@ export default function ChooseExam() {
     setSearchQuery(""); // Xoá từ khóa tìm kiếm khi chọn danh mục
   };
 
+  // Kiểm tra môn học có được yêu thích chưa
+  const isFavorited = (subjectId) => {
+    return favorites.some((fav) => fav.subjectId === subjectId);
+  };
   return (
     <div>
       <div className="revision">
@@ -88,12 +94,38 @@ export default function ChooseExam() {
                     </div>
                     <div className="card-content">
                       <h3>{translatedName}</h3>
+                      <div className="card-buttons-row">
                       <button
                         className="card-button"
-                        onClick={() => handleSelectExamBySubjectId(item.subjectId)}
+                        onClick={() =>
+                          handleSelectExamBySubjectId(item.subjectId)
+                        }
                       >
                         {texts.chooseTopic}
                       </button>
+                      <button
+                        className={`favorites-button ${
+                          isFavorited(item.subjectId) ? "favorited" : ""
+                        }`}
+                        onClick={() =>
+                          toggleFavorite(item.subjectId, item.name)
+                        }
+                        disabled={!localStorage.getItem("userId")}
+                        aria-label={
+                          isFavorited(item.subjectId)
+                            ? "Bỏ yêu thích"
+                            : "Thêm yêu thích"
+                        }
+                      >
+                        <i
+                          className={`fa-heart ${
+                            isFavorited(item.subjectId)
+                              ? "fa-solid"
+                              : "fa-regular"
+                          }`}
+                        ></i>
+                      </button>
+                      </div>
                     </div>
                   </div>
                 );

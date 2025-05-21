@@ -2,35 +2,42 @@ import React, { useState } from "react";
 import "./index.css";
 import { useAuth } from "../Context/AuthProvider";
 import { useLanguage } from "../Context/LanguageProvider";
-import { publicAxios , authAxios} from "../../api/axiosConfig";
+import { useFavorites } from "../Context/FavoritesContext";
+import { useNavigate } from "react-router-dom";
+import { message } from "antd";
 
 export default function Headers() {
   const { isLoggedIn, logout } = useAuth();
   const { language, toggleLanguage, texts } = useLanguage();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [favorites, setFavorites] = useState([]); // Giả sử bạn sẽ set danh sách môn yêu thích ở đây
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { favorites, toggleFavorite, loading, error } = useFavorites();
+  const navigate = useNavigate();
 
-  const userId = localStorage.getItem("userId");
 
-  const toggleModal = async () => {
+  // Mở / Đóng modal, khi mở thì gọi lại loadFavorites từ context nếu cần
+  const toggleModal = () => {
     const willOpen = !isModalOpen;
     setIsModalOpen(willOpen);
-    if (willOpen) {
-    setLoading(true);
-    setError(null);
-    try {
-      const resp = await authAxios.get(`/user/favorites/user/${userId}`);
-      setFavorites(resp.data.data || []);
-    } catch (error) {
-      setError(texts.errorLoadingFavorites || "Lỗi tải danh sách yêu thích");
-      setFavorites([]);
-    } finally {
-      setLoading(false);
-    }
-  }
+    // loadFavorites đã được xử lý trong context useEffect nên không cần gọi ở đây nữa
+  };
+
+  // Xóa favorite qua toggleFavorite (đã xử lý xóa trong context)
+  const handleDelete = (subjectId, subjectName) => {
+    toggleFavorite(subjectId, subjectName);
+    message.success("Xóa môn yêu thích thành công!");
+  };
+
+  const handleReview = (subjectId) => {
+    setIsModalOpen(false);
+    navigate(`/listChap`, {
+      state: { subjectId },
+    });
+  };
+
+  const handleMockTest = (subjectId) => {
+    setIsModalOpen(false);
+    navigate(`/exams`, { state: { subjectId } });
   };
 
   const handleLogout = () => {
@@ -118,9 +125,6 @@ export default function Headers() {
           <a href="/rank" className="mx-3">
             {texts.rank}
           </a>
-          {/* <a href="/favorites" className="favorites-link mx-3">
-            <i className="fa-solid fa-heart"></i>
-          </a> */}
         </div>
       </header>
 
@@ -133,19 +137,40 @@ export default function Headers() {
             {loading && <p>Đang tải...</p>}
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            {!loading && !error && (
-              favorites.length > 0 ? (
-                <ul>
-                  {favorites.map((fav) => (
-                    <li key={fav.subjectId}>
-                      <div>{fav.subjectName || `Môn ${fav.subjectId}`}</div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>{texts.noFavorites || "Chưa có môn học yêu thích nào."}</p>
-              )
-            )}
+            {!loading && !error && (favorites.length > 0 ? (
+              <ul>
+                {favorites.map((fav) => (
+                  <li key={fav.subjectId}>
+                    <div>{fav.subjectName || `Môn ${fav.subjectId}`}</div>
+                    <div className="favorite-actions">
+                      <button
+                        className="btn btn-delete"
+                        onClick={() => handleDelete(fav.subjectId, fav.subjectName)}
+                        type="button"
+                      >
+                        Xóa
+                      </button>
+                      <button
+                        className="btn btn-review"
+                        onClick={() => handleReview(fav.subjectId)}
+                        type="button"
+                      >
+                        Ôn tập
+                      </button>
+                      <button
+                        className="btn btn-mocktest"
+                        onClick={() => handleMockTest(fav.subjectId)}
+                        type="button"
+                      >
+                        Thi thử
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>{texts.noFavorites || "Chưa có môn học yêu thích nào."}</p>
+            ))}
 
             <button onClick={toggleModal}>{texts.close || "Đóng"}</button>
           </div>

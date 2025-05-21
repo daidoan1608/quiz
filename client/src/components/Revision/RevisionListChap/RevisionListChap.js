@@ -10,7 +10,6 @@ export default function RevisionListChap() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [favoriteChapters, setFavoriteChapters] = useState({});
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -45,11 +44,6 @@ export default function RevisionListChap() {
     }
   }, [subjectId]);
 
-  useEffect(() => {
-    // Load favorite chapters from localStorage
-    const savedFavorites = JSON.parse(localStorage.getItem("favoriteChapters")) || {};
-    setFavoriteChapters(savedFavorites);
-  }, []);
 
   const handleChapterClick = (chapter) => {
     if (!isLoggedIn) {
@@ -70,24 +64,6 @@ export default function RevisionListChap() {
   const handleCloseLoginPrompt = () => {
     setShowLoginPrompt(false); // Close login prompt
   };
-
-  // Toggle trạng thái yêu thích
-  const toggleFavorite = (chapterId, chapterName) => {
-    const updatedFavorites = {
-      ...favoriteChapters,
-      [chapterId]: !favoriteChapters[chapterId], // Toggle the favorite state
-    };
-    setFavoriteChapters(updatedFavorites);
-
-    // Lưu trạng thái yêu thích và tên chương vào localStorage
-    const favoriteData = JSON.parse(localStorage.getItem("favoriteChapters")) || {};
-    favoriteData[chapterId] = {
-      isFavorite: !favoriteData[chapterId]?.isFavorite,
-      name: chapterName,
-    };
-    localStorage.setItem("favoriteChapters", JSON.stringify(favoriteData));
-  };
-
 
   const renderChaps = (chapters) => {
     if (!Array.isArray(chapters) || chapters.length === 0) {
@@ -111,19 +87,6 @@ export default function RevisionListChap() {
           <h3>
             {item.chapterNumber}. {item.name}
           </h3>
-          {/* Biểu tượng yêu thích */}
-          <i
-            className={`fa-heart ${favoriteChapters[item.chapterId] ? "fa-solid" : "fa-regular"}`}
-            style={{
-              cursor: "pointer",
-              color: favoriteChapters[item.chapterId] ? "red" : "gray",
-            }}
-            onClick={(e) => {
-              e.stopPropagation(); // Ngăn chặn click lan ra thẻ cha
-              toggleFavorite(item.chapterId, item.name); // Truyền thêm tên chương
-            }}
-          ></i>
-
         </div>
       </div>
     ));
