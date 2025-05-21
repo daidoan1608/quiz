@@ -47,31 +47,14 @@ body {
     border-bottom: 1px solid #ddd;
   }
   
-  th {
-    background-color: #1a73e8;
-    color: white;
-  }
-  
   tr:hover {
     background-color: #f5f5f5;
   }
   
-  .top-rank {
-    background-color: #e8f0fe;
-    font-weight: bold;
+  .user-rank{
+    font-size: 18px;
+    margin-top: 2rem;
   }
   
-  .top-rank td:first-child::before {
-    content: '🏅';
-    margin-right: 5px;
-  }
-  
-  .Toastify__toast--success {
-    background-color: #4caf50 !important;
-    color: white !important;
-  }
-  
-  .Toastify__toast--warning {
-    background-color: #ff9800 !important;
-    color: white !important;
-  }
+
+

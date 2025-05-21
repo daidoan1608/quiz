@@ -1,61 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import Filter from './Filter';
-import Leaderboard from './Leaderboard';
+import Leaderboard, { getTitle } from './Leaderboard';
 import './Rank.css';
 import { useLanguage } from '../Context/LanguageProvider';
+import { useAuth } from '../Context/AuthProvider';
+import subjectTranslations from '../../Languages/subjectTranslations';
 
-// MOCK dữ liệu người dùng đăng nhập
-const mockAuth = {
-  isLoggedIn: true,
-  user: 'alice',
+const translateSubject = (subject, language = 'vi') => {
+  return subjectTranslations[subject]?.[language] || subjectTranslations[subject]?.vi || 'Không rõ';
 };
-
-// MOCK dữ liệu bảng xếp hạng
-const mockLeaderboardData = [
-  {
-    username: 'alice',
-    scores: [95, 85],
-    times: [30, 40],
-    badge: 'Vàng',
-    subject: 'Nguyên lý hệ điều hành',
-  },
-  {
-    username: 'bob',
-    scores: [80, 90],
-    times: [25, 35],
-    badge: 'Bạc',
-    subject: 'Mạng máy tính',
-  },
-  {
-    username: 'charlie',
-    scores: [70, 75],
-    times: [20, 30],
-    badge: 'Đồng',
-    subject: 'Nguyên lý hệ điều hành',
-  },
-  {
-    username: 'david',
-    scores: [60, 70],
-    times: [15, 25],
-    badge: 'Thường',
-    subject: 'Khai phá dữ liệu',
-  },
-];
-
-// Hàm tính tổng điểm, thời gian, trung bình
-const calculateTotalScore = (scores) => scores.reduce((a, b) => a + b, 0);
-const calculateTotalTime = (times) => times.reduce((a, b) => a + b, 0);
-const calculateAverageScore = (scores) => scores.length ? calculateTotalScore(scores) / scores.length : 0;
 
 const Rank = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('Tất cả');
+  const [userRank, setUserRank] = useState(null);
+  const { isLoggedIn, user } = useAuth();
+  const { texts, language } = useLanguage();
 
-  const { isLoggedIn, user } = mockAuth;
-  const { texts } = useLanguage();
+  const formatTime = (seconds) => {
+    if (!seconds) return `0 ${texts.minutes} 0 ${texts.seconds}`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes} ${texts.minutes} ${remainingSeconds} ${texts.seconds}`;
+  };
 
   const rankData = (data) => {
-    const sorted = [...data].sort((a, b) => b.score - a.score);
+    const sorted = [...data].sort((a, b) => (Number(b.averageScore) || 0) - (Number(a.averageScore) || 0));
     return sorted.map((item, index) => ({
       ...item,
       rank: index + 1,
@@ -63,21 +33,42 @@ const Rank = () => {
   };
 
   const fetchLeaderboardData = async (subject = 'Tất cả') => {
-    let filtered = mockLeaderboardData;
-    if (subject !== 'Tất cả') {
-      filtered = mockLeaderboardData.filter((item) => item.subject === subject);
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/public/summaries');
+      if (!response.ok) throw new Error('Lỗi khi lấy dữ liệu bảng xếp hạng');
+      const result = await response.json();
+      let filtered = result.data || [];
+      if (subject !== 'Tất cả') {
+        filtered = result.data.filter((item) => item.subjectName === subject);
+      }
+
+      const updated = filtered.map((item) => ({
+        userId: item.userId, // Đảm bảo API trả về userId
+        username: item.username,
+        score: Number(item.totalScore).toFixed(1),
+        averageScore: Number(item.avgScore).toFixed(1),
+        totalTime: formatTime(item.totalDurationSeconds || 0),
+        attempts: item.attemptCount,
+        subject: item.subjectName,
+        badge: getTitle(Number(item.avgScore) || 0, texts),
+      }));
+
+      const ranked = rankData(updated);
+      setLeaderboardData(ranked);
+
+      // Tìm thứ hạng bằng userId (user là chuỗi userId)
+      if (user) {
+        const foundRank = ranked.find((item) => item.userId === user);
+        setUserRank(foundRank ? foundRank.rank : null);
+      } else {
+        console.warn('Không tìm thấy userId trong thông tin người dùng:', user);
+        setUserRank(null);
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy dữ liệu bảng xếp hạng:', error);
+      setLeaderboardData([]);
+      setUserRank(null);
     }
-
-    const updated = filtered.map((item) => ({
-      ...item,
-      score: calculateTotalScore(item.scores),
-      averageScore: calculateAverageScore(item.scores),
-      totalTime: calculateTotalTime(item.times),
-      attempts: item.scores.length,
-    }));
-
-    const ranked = rankData(updated);
-    setLeaderboardData(ranked);
   };
 
   const handleFilter = (subject) => {
@@ -87,9 +78,12 @@ const Rank = () => {
 
   useEffect(() => {
     if (isLoggedIn && user) {
+      console.log('Thông tin người dùng đăng nhập:', user);
       fetchLeaderboardData(selectedSubject);
+    } else {
+      setUserRank(null);
     }
-  }, [isLoggedIn, user]);
+  }, [isLoggedIn, user, selectedSubject, texts, language]);
 
   if (!isLoggedIn) {
     return <div>{texts.plsLogin}</div>;
@@ -99,9 +93,22 @@ const Rank = () => {
     <div className="Rank">
       <h1>{texts.rankings}</h1>
       <Filter onFilter={handleFilter} selectedSubject={selectedSubject} />
-      <Leaderboard data={leaderboardData} />
+      <Leaderboard data={leaderboardData} currentUserId={user || ''} />
+      {userRank !== null ? (
+        <div className="user-rank">
+          <strong>
+            {userRank <= 10
+              ? `${texts.yourRank} : ${userRank}`
+              : texts.noRank}
+          </strong>
+        </div>
+      ) : (
+        <div className="user-rank">
+          <strong>{texts.noResultMessage}</strong>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Rank;
+export default React.memo(Rank);
