@@ -80,8 +80,9 @@ const en = {
   expert: "⭐ Expert",
   scholar: "📘 Scholar",
   novice: "🔰 Novice",
-  yourRank: "Your Rank",
-  noRank: "No Rank",
+  yourRank: "Rank",
+  noRank: "No Rank. Try to improve your performance!",
+  noResultMessage: "Please take any test to get ranked!"
 };
 
 export default en;
