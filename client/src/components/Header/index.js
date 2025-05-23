@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./index.css";
+import "./responsiveHeader.css"
 import { useAuth } from "../Context/AuthProvider";
 import { useLanguage } from "../Context/LanguageProvider";
 import { useFavorites } from "../Context/FavoritesContext";
@@ -13,6 +14,10 @@ export default function Headers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { favorites, toggleFavorite, loading, error } = useFavorites();
   const navigate = useNavigate();
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(true);
+  const [isUserOpen, setIsUserOpen] = useState(true);
 
 
   // Mở / Đóng modal, khi mở thì gọi lại loadFavorites từ context nếu cần
@@ -40,94 +45,91 @@ export default function Headers() {
     navigate(`/exams`, { state: { subjectId } });
   };
 
-  const handleLogout = () => {
+  const handleLogout = (e) => {
+    e.preventDefault();
     logout();
+    setIsMenuOpen(false);
+    navigate("/");
   };
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const toggleNav = () => {
+    setIsNavOpen(!isNavOpen);
+  };
+
+  const toggleUser = () => {
+    setIsUserOpen(!isUserOpen)
+  }
+
+
   return (
-    <div className="header-container">
-      <header className="header" style={{ marginTop: "10px" }}>
-        <div className="d-flex justify-content-between align-items-center">
-          <div className="logo">
-            <img alt="FITA logo" src="logoschool.png" className="img-fluid" />
-          </div>
-          <div className="header-top d-flex align-items-center">
-            <div className="header-between">
-              <div className="slogan">
-                <img alt="slogan" src="slogan-vi.png" className="img-fluid" />
-              </div>
-            </div>
-
-            {/* Nút chuyển đổi ngôn ngữ luôn hiện */}
-            <button
-              onClick={toggleLanguage}
-              className="btn btn-outline-secondary mx-5"
-              aria-label={texts.toggleLanguageAria}
-            >
-              {language === "vi" ? "English" : "Tiếng Việt"}
-            </button>
-
-            {!isLoggedIn ? (
-              <>
-                <a href="/login" className="btn btn-primary mx-2">
-                  {texts.login}
-                </a>
-                <a href="/register" className="btn btn-secondary mx-2">
-                  {texts.register}
-                </a>
-              </>
-            ) : (
-              <div className="user-info">
-                <ul className="menu-user list-unstyled">
-                  <li>
-                    <input
-                      type="checkbox"
-                      id="menu-toggle"
-                      className="menu-toggle"
-                    />
-                    <label htmlFor="menu-toggle">
-                      <i className="fa-regular fa-user"></i>
-                    </label>
-                    <ul className="submenu-user list-unstyled">
-                      <li>
-                        <a href="/account" className="account">
-                          {texts.account}
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" className="bookmark" onClick={toggleModal}>
-                          {texts.favorites || "Yêu thích"}
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/" onClick={handleLogout} className="log-out">
-                          {texts.logout}
-                        </a>
-                      </li>
+          <div id="main">
+            <div id="header">
+              <ul id="nav" className={isNavOpen ? "nav-closed":"nav-open"}>
+                <li>
+                  <a href="/">{texts.home}</a>
+                  <i className="fas fa-bars menu-btn" onClick={toggleNav}></i>
+                </li>
+                <li>
+                  <a href="/revision">{texts.revision}</a>
+                </li>
+                <li>
+                  <a href="/chooseExams">{texts.exams}</a>
+                </li>
+                <li>
+                  <a href="/rank">{texts.rank}</a>
+                </li>
+                <li>
+                  <button
+                    onClick={toggleLanguage}
+                    className="btn-language"
+                    aria-label={texts.toggleLanguageAria}
+                  >
+                    {language === "vi" ? "English" : "Tiếng Việt"}
+                  </button>
+                </li>
+                <li className="user-li">
+                  <div className="user-icon" onClick={toggleMenu}>
+                    
+                      <i className="fas fa-user"></i>
+                      <i className="fas fa-caret-down"></i>
+                    
+                  </div>
+                  {isMenuOpen && (
+                    <ul className={`dropdown-menu ${toggleUser ? "show" : ""}`}>
+                      {!isLoggedIn ? (
+                        <>
+                          <li>
+                            <a href="/login">{texts.login}</a>
+                          </li>
+                          <li>
+                            <a href="/register">{texts.register}</a>
+                          </li>
+                        </>
+                      ) : (
+                        <>
+                          <li>
+                            <a href="/account">{texts.account}</a>
+                          </li>
+                          <li>
+                              <a href="#" className="bookmark" onClick={toggleModal}>{texts.favorites || "Yêu thích"}</a>
+                            </li>
+                          <li>
+                            <a href="/" onClick={handleLogout}>
+                              {texts.logout}
+                            </a>
+                          </li>
+                        </>
+                      )}
                     </ul>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="nav-links-headers2 d-flex justify-content-center">
-          <a href="/" className="mx-3">
-            {texts.home}
-          </a>
-          <a href="/revision" className="mx-3">
-            {texts.revision}
-          </a>
-          <a href="/chooseExams" className="mx-3">
-            {texts.exams}
-          </a>
-          <a href="/rank" className="mx-3">
-            {texts.rank}
-          </a>
-        </div>
-      </header>
-
+                  )}
+                </li>
+              </ul>
+            </div>
+      
       {/* Modal hiển thị danh sách môn học yêu thích */}
       {isModalOpen && (
         <div className="modal-overlay">

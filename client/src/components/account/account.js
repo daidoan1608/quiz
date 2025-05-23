@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { authAxios } from '../../api/axiosConfig';
 import { useAuth } from '../Context/AuthProvider';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import './Account.css';
+import './account.css';
 import ScoreChart from './ScoreChart';
 import { useLanguage } from '../Context/LanguageProvider';
 import subjectTranslations from '../../Languages/subjectTranslations';

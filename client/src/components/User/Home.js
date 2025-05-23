@@ -46,38 +46,17 @@ export default function Home() {
 );
   return (
     <div>
-      <main className="position-relative main-background">
-        <div
-          className="position-absolute start-50 translate-middle-x text-center text-white px-3 main-text"
-          style={{
-            top: "10%",
-            width: "100%",
-            transform: "translateX(-50%)",
-          }}
-        >
-          <h1
-            className="fw-bold"
-            style={{
-              position: "absolute",
-              top: "0",
-              left: "2%",
-              color: "#336699",
-              fontSize: "4.5rem",
-              textShadow: "0 0 10px rgba(255, 255, 255, 0.8)",
-            }}
-          >
-            {texts.onlineTest}
-          </h1>
-          <div className="text-detail" style={{ textAlign: "left", marginTop: "8rem", paddingLeft: "2%" }}>
-            <p>{texts.slogan1}</p>
-            <p>{texts.slogan2}</p>
-            <p>{texts.slogan3}</p>
-            <p>{texts.slogan4}</p>
-          </div>
+      <div id="banner">
+        <div className="text-banner">
+          <h1 className="heading-banner">{texts.onlineTest}</h1>
+          <p className="desc-banner">{texts.slogan1}</p>
+          <p className="desc-banner">{texts.slogan2}</p>
+          <p className="desc-banner">{texts.slogan3}</p>
+          <p className="desc-banner">{texts.slogan4}</p>
         </div>
-      </main>
+      </div>
 
-      <div className="container-fluid mt-5">
+      <div className="container-fluid">
         <div className="row">
           <div className="col-12 content-intro">
             <h2 className="text-center my-4">{texts.introTitle}</h2>

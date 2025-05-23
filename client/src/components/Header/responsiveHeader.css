@@ -1,0 +1,70 @@
+/* PC */
+
+@media (max-width:1024px) {
+    
+}
+
+/* Tablet and mobile */
+@media (max-width: 1023px) {
+
+}
+
+/* Tablet */
+@media (min-width:740px) and (max-width:1023px) {
+    
+}
+
+/* Mobile */
+@media (max-width:739px) {
+#nav {
+    display: block;
+    padding: 0;
+    margin: 0;
+    /* overflow: hidden; */
+}
+
+#nav > li {
+    display: block;
+    background-color: #519fc9;
+}
+
+#nav > li > a {
+    display: block;
+}
+
+#nav li:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-items {
+  overflow: visible;
+  height: auto;
+  transition: height 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 20px; /* khoảng cách giữa các mục */
+}
+
+.nav-closed {
+  overflow: hidden;
+  height: 0;
+  transition: height 0.3s ease;
+  display: none; /* ẩn luôn nếu muốn */
+}
+
+.dropdown-menu {
+    position: relative;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    border-radius: 0;
+}
+
+.menu-btn {
+    display: inline-block;
+    padding-right: 28px;
+}
+
+}

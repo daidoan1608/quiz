@@ -12,27 +12,8 @@ code {
     monospace;
 }
 
-#root {
-  max-width: 1600px; /* Độ rộng tối đa */
-  margin: 0 auto;    /* Căn giữa theo chiều ngang */
-  padding: 0;   /* Khoảng cách hai bên */
-  background-color: #fff; /* Màu nền của ứng dụng */
-  min-height: 100vh; /* Đảm bảo chiếm đủ chiều cao màn hình */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm hiệu ứng đổ bóng */
-}
-
-/* index.css */
-html, body {
-  height: 100%;
+* {
   margin: 0;
-}
-
-.layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng khung nhìn */
-}
-
-.main-content {
-  flex: 1; /* Nội dung chính chiếm toàn bộ không gian còn lại */
+  padding: 0;
+  box-sizing: border-box;
 }
