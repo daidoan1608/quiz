@@ -90,9 +90,12 @@
   /* Giới hạn chiều rộng của container */
   margin: 0 auto;
   /* Căn giữa */
-  display: flex;
+  display: grid !important;
   flex-wrap: wrap;
   /* Cho phép các phần tử bên trong xuống dòng khi không đủ không gian */
+  grid-template-columns: repeat(2, 1fr); /* 2 cột */
+  gap: 40px;
+
 }
 
 .card-exam {
@@ -107,7 +110,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
-  width: 100%;
+  width: 500px;
   max-width: 100%;
   /* Giới hạn chiều rộng tối đa của card */
   margin-bottom: 2rem;
