@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     const userInfo = localStorage.getItem('userId');
@@ -17,6 +16,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userInfo);
     } else {
       setIsLoggedIn(false);
+      setUser(null);
     }
     setLoading(false);
   }, []);
@@ -31,18 +31,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Chỉ xóa thông tin phiên đăng nhập, giữ lại "Ghi nhớ đăng nhập"
     localStorage.removeItem('accessToken');
     sessionStorage.removeItem('refreshToken');
     localStorage.removeItem('userId');
-    // Không xóa 'rememberedUsername' và 'rememberMe'
     setIsLoggedIn(false);
     setUser(null);
     message.success('Đăng xuất thành công!');
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, user }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, user, loading }}>
       {loading ? <div>Loading...</div> : children}
     </AuthContext.Provider>
   );
