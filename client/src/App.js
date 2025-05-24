@@ -18,7 +18,7 @@ import ListExam from "./components/Exam/ListExam/ListExam";
 import Exam from "./components/Exam/Exam/Exam";
 import Result from "./components/Exam/Result/Result";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
-import Account from "./components/Account/Account";
+import Account from './components/account/Account';
 import Rank from "./components/Rank/Rank";
 import LessonList from "./components/favorites/LessonList";
 import LessonListChap from "./components/favorites/LessonListChap";
@@ -29,9 +29,75 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 function App() {
   return (
     <AuthProvider>
+<<<<<<< HEAD
       <FavoritesProvider>
         <RouterApp />
       </FavoritesProvider>
+=======
+      <FavoritesProvider>  {/* Bọc thêm FavoritesProvider */}
+
+        <Router>
+          {/* <AppWrapper> */}
+          <Routes>
+            {/* Guest Only Routes */}
+            <Route
+              path="/login"
+              element={
+                <GuestOnlyRoute>
+                  <Login />
+                </GuestOnlyRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <GuestOnlyRoute>
+                  <RegisterForm />
+                </GuestOnlyRoute>
+              }
+            />
+            <Route path="/forgot" element={<ForgotPassword />} />
+
+            {/* Protected Routes wrapped inside Layout */}
+            <Route element={<Layout />}>
+              <Route
+                path="/taketheexam"
+                element={
+                  <ProtectedRoute>
+                    <Exam />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chap"
+                element={
+                  <ProtectedRoute>
+                    <RevisionChap />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/revision" element={<RevisionUser />} />
+              <Route path="/chooseExams" element={<ChooseExam />} />
+              <Route path="/" element={<Home />} />
+
+              {/* Exam and Revision Routes */}
+              <Route path="/listChap" element={<RevisionListChap />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/exams" element={<ListExam />} />
+              <Route path="/detail" element={<DetailExam />} />
+              <Route path="/result" element={<Result />} />
+              <Route path="/rank" element={<Rank />} />
+
+              {/* Favorite Lesson Routes */}
+              <Route path="/favorites" element={<LessonList />} />
+              <Route path="/favoriteslistChap" element={<LessonListChap />} />
+            </Route>
+          </Routes>
+          {/* </AppWrapper> */}
+        </Router>
+      </FavoritesProvider>  {/* Bọc thêm FavoritesProvider */}
+
+>>>>>>> aa34c0f (Upload)
     </AuthProvider>
   );
 }
