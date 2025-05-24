@@ -1,23 +1,24 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { authAxios } from "../../api/axiosConfig";
 import { message } from "antd";
+import { useAuth } from "./AuthProvider"; // Ensure correct path
 
 const FavoritesContext = createContext();
 
 export const FavoritesProvider = ({ children }) => {
+  const { user, isLoggedIn } = useAuth(); // Lấy từ AuthProvider
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const userId = localStorage.getItem("userId");
+  const userId = user;
 
-  // Load favorites initially
   useEffect(() => {
-    if (userId) {
+    if (isLoggedIn && userId) {
       loadFavorites();
     } else {
       setFavorites([]);
     }
-  }, [userId]);
+  }, [isLoggedIn, userId]);
 
   const loadFavorites = async () => {
     setLoading(true);
