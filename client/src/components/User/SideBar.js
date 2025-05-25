@@ -27,32 +27,65 @@ const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
   };
 
   return (
-    <div className="sidebar">
-      <h3>{texts.categoriesTitle}</h3>
+    <div className="container-fluid">
+      <div className="d-flex flex-column flex-lg-row min-vh-100">
+        {/* Sidebar */}
+        <div
+          className="flex-shrink-0 sidebar-container"
+          style={{
+            width: "100%",
+            maxWidth: "100%",
+          }}
+        >
+          <div
+            className="sidebar p-3 p-md-4 border rounded bg-light h-100"
+            style={{
+              width: "100%",
+            }}
+          >
 
-      {error && <p className="error-message">{error}</p>}
+            <h3 className="fs-5 fs-md-4 fs-lg-3 fs-xl-2">{texts.categoriesTitle}</h3>
 
-      <ul>
-        {categories.length > 0 ? (
-          categories.map((category) => (
-            <li key={category.categoryId}>
-              <button
-                onClick={() => onSelectCategory(category.categoryId)}
-                className={selectedCategory === category.categoryId ? "selected" : ""}
-                aria-pressed={selectedCategory === category.categoryId}
-              >
-                {categoryTranslations[category.categoryName]
-                  ? categoryTranslations[category.categoryName][language]
-                  : category.categoryName}
-              </button>
-            </li>
-          ))
-        ) : (
-          <p>{texts.noCategories}</p>
-        )}
-      </ul>
+            {error && <p className="text-danger small">{error}</p>}
 
+            <ul className="list-unstyled">
+              {categories.length > 0 ? (
+                categories.map((category) => (
+                  <li key={category.categoryId} className="mb-2">
+                    <button
+                      onClick={() => onSelectCategory(category.categoryId)}
+                      className={`btn w-100 text-start text-truncate btn-sm 
+                    ${selectedCategory === category.categoryId
+                          ? "btn-primary"
+                          : "btn-outline-primary"}`}
+                      aria-pressed={selectedCategory === category.categoryId}
+                    >
+                      <span className="d-block fs-sm-6 fs-md-6 fs-lg-5 fs-xl-4">
+                        {categoryTranslations[category.categoryName]
+                          ? categoryTranslations[category.categoryName][language]
+                          : category.categoryName}
+                      </span>
+                    </button>
+                  </li>
+                ))
+              ) : (
+                <p className="small">{texts.noCategories}</p>
+              )}
+            </ul>
+          </div>
+        </div>
+
+        {/* Nội dung chính */}
+        <div className="flex-grow-1 p-3">
+          {/* Nội dung chính ở đây */}
+        </div>
+      </div>
     </div>
+
+
+
+
+
   );
 };
 

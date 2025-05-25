@@ -29,11 +29,10 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 function App() {
   return (
     <AuthProvider>
-<<<<<<< HEAD
       <FavoritesProvider>
-        <RouterApp />
+        {/* <RouterApp /> */}
       </FavoritesProvider>
-=======
+
       <FavoritesProvider>  {/* Bọc thêm FavoritesProvider */}
 
         <Router>
@@ -97,43 +96,10 @@ function App() {
         </Router>
       </FavoritesProvider>  {/* Bọc thêm FavoritesProvider */}
 
->>>>>>> aa34c0f (Upload)
     </AuthProvider>
   );
 }
 
-function RouterApp() {
-  const { loading } = useAuth();
 
-  if (loading) return <div>Loading xác thực...</div>;
-
-  return (
-    <Router>
-      <Routes>
-        {/* Guest Only Routes */}
-        <Route path="/login" element={<GuestOnlyRoute><Login /></GuestOnlyRoute>} />
-        <Route path="/register" element={<GuestOnlyRoute><RegisterForm /></GuestOnlyRoute>} />
-        <Route path="/forgot" element={<ForgotPassword />} />
-
-        {/* Protected Layout */}
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/taketheexam" element={<ProtectedRoute><Exam /></ProtectedRoute>} />
-          <Route path="/chap" element={<ProtectedRoute><RevisionChap /></ProtectedRoute>} />
-          <Route path="/revision" element={<RevisionUser />} />
-          <Route path="/chooseExams" element={<ChooseExam />} />
-          <Route path="/listChap" element={<RevisionListChap />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/exams" element={<ListExam />} />
-          <Route path="/detail" element={<DetailExam />} />
-          <Route path="/result" element={<Result />} />
-          <Route path="/rank" element={<Rank />} />
-          <Route path="/favorites" element={<LessonList />} />
-          <Route path="/favoriteslistChap" element={<LessonListChap />} />
-        </Route>
-      </Routes>
-    </Router>
-  );
-}
 
 export default App;

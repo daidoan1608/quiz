@@ -1,8 +1,10 @@
 .card-buttons-row {
   display: flex;
   align-items: center;
-  gap: 12px; /* khoảng cách giữa các nút */
-  margin-top: 10px; /* nếu cần khoảng cách so với tiêu đề */
+  gap: 12px;
+  /* khoảng cách giữa các nút */
+  margin-top: 10px;
+  /* nếu cần khoảng cách so với tiêu đề */
 }
 
 .card-button {
@@ -40,14 +42,18 @@
 }
 
 .card-exam {
-  position: relative; /* Để có thể sử dụng vị trí tuyệt đối cho bookmark */
+  position: relative;
+  /* Để có thể sử dụng vị trí tuyệt đối cho bookmark */
 }
 
 .bookmark-button {
   position: absolute;
-  top: 10px; /* Cách phía trên 10px */
-  right: 10px; /* Cách phía phải 10px */
-  z-index: 10; /* Đảm bảo nút bookmark luôn nằm trên các phần tử khác */
+  top: 10px;
+  /* Cách phía trên 10px */
+  right: 10px;
+  /* Cách phía phải 10px */
+  z-index: 10;
+  /* Đảm bảo nút bookmark luôn nằm trên các phần tử khác */
 }
 
 .bookmark-icon {

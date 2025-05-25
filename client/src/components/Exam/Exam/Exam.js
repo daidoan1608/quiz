@@ -158,7 +158,111 @@ export default function Exam() {
   const seconds = timeLeft % 60;
 
   return (
-    <>
+    <div className="container my-4">
+      <div className="row">
+        <div className="col-lg-6 mb-4">
+          <div className="border p-3 rounded bg-light">
+            <div className="mb-3">
+              <p>
+                <strong>{texts.subjectExam}:</strong> {subjectName}
+              </p>
+              <p>
+                <strong>{texts.topic}:</strong> {title}
+              </p>
+              <p>
+                <strong>{texts.question}:</strong> {questions.length}
+              </p>
+              <p>
+                <strong>{texts.time}:</strong> {duration} Phút
+              </p>
+            </div>
+            <div className="text-center">
+              <h4>{texts.conutDown}</h4>
+              <span className="display-6">
+                {`${minutes.toString().padStart(2, "0")}:${seconds
+                  .toString()
+                  .padStart(2, "0")}`}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-lg-6 mb-4">
+          <div className="border p-3 rounded bg-light">
+            <p className="fw-bold mb-2">{texts.table}</p>
+            <div className="d-flex flex-wrap gap-2">
+              {[...Array(questions.length)].map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`btn btn-sm ${selectedAnswers[idx] !== undefined ? "btn-primary" : "btn-outline-secondary"
+                    }`}
+                  onClick={() => scrollToQuestion(idx)}
+                >
+                  {idx + 1}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row">
+        {questions.map((item, questionIndex) => (
+          <div
+            key={item.questionId}
+            className="col-12 mb-4"
+            ref={questionRefs.current[questionIndex]}
+          >
+            <div className="border p-3 rounded">
+              <div className="mb-2 fw-bold">
+                Câu {questionIndex + 1}: {item.content}
+              </div>
+              <div>
+                {item.answers?.map((answer, answerIndex) => {
+                  const isSelected =
+                    selectedAnswers[questionIndex] === answerIndex;
+                  return (
+                    <div
+                      key={answer.optionId}
+                      className="form-check mb-2"
+                    >
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name={`question-${questionIndex}`}
+                        id={answer.optionId}
+                        value={answerIndex}
+                        checked={isSelected}
+                        onChange={() =>
+                          handleAnswerSelect(questionIndex, answerIndex)
+                        }
+                      />
+                      <label
+                        className={`form-check-label ${isSelected ? "fw-bold text-primary" : ""
+                          }`}
+                        htmlFor={answer.optionId}
+                      >
+                        {answer.content}
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="col-12 text-center mt-4">
+          <button className="btn btn-success px-4 py-2" onClick={handleSubmit}>
+            {texts.submit}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+{/* <>
       <div className="category-center">
         <div className="table-left">
           <div className="info">
@@ -245,6 +349,4 @@ export default function Exam() {
           {texts.submit}
         </button>
       </div>
-    </>
-  );
-}
+    </> */}
