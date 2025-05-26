@@ -38,6 +38,10 @@
     align-items: center;
 }
 
+#nav .btn-language {
+    margin-left: 20px;
+}
+
 .nav-items {
   overflow: visible;
   height: auto;
@@ -66,5 +70,11 @@
     display: inline-block;
     padding-right: 28px;
 }
+
+
+.user-li .user-icon {
+    margin-left: 10px;
+}
+
 
 }

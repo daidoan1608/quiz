@@ -52,14 +52,17 @@ export default function Headers() {
     navigate("/");
   };
 
+  // Đóng mở menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Đóng mở thanh nav
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
   };
 
+  // Đóng mở icon user
   const toggleUser = () => {
     setIsUserOpen(!isUserOpen)
   }
@@ -99,7 +102,7 @@ export default function Headers() {
                     
                   </div>
                   {isMenuOpen && (
-                    <ul className={`dropdown-menu ${toggleUser ? "show" : ""}`}>
+                    <ul className={`dropdown-menu-icon ${toggleUser ? "show" : ""}`}>
                       {!isLoggedIn ? (
                         <>
                           <li>

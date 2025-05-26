@@ -86,7 +86,7 @@
 }
 
 /* Dropdown menu */
-.dropdown-menu {
+.dropdown-menu-icon {
   position: absolute;
   right: 8px;
   top: 46px;
@@ -98,21 +98,20 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   min-width: 150px;
   z-index: 10000;
-  display: none;
 }
 
-.dropdown-menu li {
+.dropdown-menu-icon li {
   padding: 8px 16px;
 }
 
-.dropdown-menu li a {
+.dropdown-menu-icon li a {
   color: #333;
   text-decoration: none;
   display: block;
   transition: background-color 0.2s ease;
 }
 
-.dropdown-menu li a:hover {
+.dropdown-menu-icon li a:hover {
   color: #1a1917;
   opacity: 0.8;
 }
