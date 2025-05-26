@@ -69,7 +69,7 @@ const en = {
   listSubject: "List Subject",
   showDetail: "Show Detail",
   totalExam: "Total Exam",
-  noFavorites: "You do not have any favorite subjects yet.",
+  noFavorites: "You don't have any favorite subjects yet.",
   chapter: "Chapter",
   delete: "Delete",
   favorites : "Favorites",

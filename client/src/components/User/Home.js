@@ -52,31 +52,9 @@ export default function Home() {
   return (
     <div>
       <main className="position-relative main-background">
-        <div
-          className="position-absolute start-50 translate-middle-x text-center text-white px-3 main-text"
-          style={{
-            top: "10%",
-            width: "100%",
-            transform: "translateX(-50%)",
-          }}
-        >
-          <h1
-            className="fw-bold"
-            style={{
-              position: "absolute",
-              top: "0",
-              left: "2%",
-              color: "#336699",
-              fontSize: "4.5rem",
-              textShadow: "0 0 10px rgba(255, 255, 255, 0.8)",
-            }}
-          >
-            {texts.onlineTest}
-          </h1>
-          <div
-            className="text-detail"
-            style={{ textAlign: "left", marginTop: "8rem", paddingLeft: "2%" }}
-          >
+        <div className="main-text">
+          <h1 className="main-title fw-bold">{texts.onlineTest}</h1>
+          <div className="text-detail">
             <p>{texts.slogan1}</p>
             <p>{texts.slogan2}</p>
             <p>{texts.slogan3}</p>

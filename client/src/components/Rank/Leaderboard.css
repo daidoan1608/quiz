@@ -1,22 +1,111 @@
+/* Leaderboard container */
+.leaderboard-table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto; /* Cho phép cuộn ngang */
+  -webkit-overflow-scrolling: touch; /* Cuộn mượt trên iOS */
+}
+
+/* Antd Table */
+.ant-table-wrapper {
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.ant-table {
+  min-width: 800px; /* Đảm bảo bảng đủ rộng để hiển thị các cột */
+}
+
+/* Table header */
 .leaderboard-table .ant-table-thead > tr > th {
-  background-color: #f0f2f5;
-  text-align: center;
-}
-
-.leaderboard-table .ant-table-tbody > tr > td {
-  text-align: center;
-}
-
-.highlight-row {
-  background-color: #9ae894 !important;
+  background-color: #f0f2f5; /* Màu nền tiêu đề (mới) */
+  text-align: center; /* Căn giữa (mới) */
+  color: #333;
   font-weight: bold;
-  border-left: 4px solid #1890ff;
+  padding: 12px;
+  font-size: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Table body */
+.leaderboard-table .ant-table-tbody > tr > td {
+  text-align: center; /* Căn giữa (mới) */
+  padding: 12px;
+  font-size: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Highlight top 3 ranks */
+.leaderboard-table .ant-table-tbody > tr > td:first-child span[style*="color: #d48806"] {
+  font-weight: bold;
+}
+
+/* Highlight current user */
+.highlight-row {
+  background-color: #9ae894 !important; /* Màu nền hàng người dùng hiện tại (mới) */
+  font-weight: bold; /* Chữ đậm (mới) */
+  border-left: 4px solid #1890ff; /* Viền trái (mới) */
 }
 
 .highlight-row:hover {
-  background-color: #bae7ff;
+  background-color: #bae7ff; /* Màu nền khi hover (mới) */
 }
 
 .highlight-row .ant-table-cell {
-  background-color: #adeda8 !important;
+  background-color: #adeda8 !important; /* Màu nền ô trong hàng (mới) */
+}
+
+/* Hover effect */
+.leaderboard-table .ant-table-tbody > tr:hover:not(.ant-table-placeholder) > td {
+  background-color: #f5f5f5;
+}
+
+/* Empty state */
+.leaderboard-table .ant-table-placeholder .ant-table-cell {
+  font-size: 16px;
+  color: #888;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Responsive: Màn hình nhỏ hơn 768px (tablet) */
+@media (max-width: 768px) {
+  .ant-table {
+    min-width: 700px; /* Giảm nhẹ chiều rộng tối thiểu */
+  }
+
+  .leaderboard-table .ant-table-thead > tr > th,
+  .leaderboard-table .ant-table-tbody > tr > td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .leaderboard-table .ant-table-placeholder .ant-table-cell {
+    font-size: 14px;
+    padding: 15px;
+  }
+}
+
+/* Responsive: Màn hình rất nhỏ (di động, dưới 576px) */
+@media (max-width: 576px) {
+  .leaderboard-table {
+    overflow-x: auto; /* Đảm bảo cuộn ngang */
+  }
+
+  .ant-table {
+    min-width: 600px; /* Giảm chiều rộng tối thiểu */
+  }
+
+  .leaderboard-table .ant-table-thead > tr > th,
+  .leaderboard-table .ant-table-tbody > tr > td {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .leaderboard-table .ant-table-placeholder .ant-table-cell {
+    font-size: 13px;
+    padding: 10px;
+  }
 }

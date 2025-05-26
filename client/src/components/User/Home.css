@@ -3,7 +3,7 @@
   background-image: url('/public/bgimage.avif'); /* Đảm bảo bạn đã đặt ảnh đúng ở public/bgimg.avif */
   background-size: contain;
   background-position: right;
-  height: 500px; /* Chiều cao có thể điều chỉnh tùy ảnh */
+  height: 450px; /* Chiều cao có thể điều chỉnh tùy ảnh */
   position: relative;
   background-repeat: no-repeat;
 }
@@ -29,7 +29,7 @@
 
 /* Giới thiệu */
 .container-fluid {
-  padding: 2rem;
+  padding: 1rem;
   background-color: #f9f9f9;
   color: #333;
   
@@ -80,9 +80,62 @@
   border-radius: 8px;
 }
 
-
-
 .text-detail>p{
   font-size: 2.5rem;
   font-style: italic;
+}
+
+.main-text{
+  padding-top: 2rem;
+}
+
+@media (max-width: 576px) {
+  .main-background{
+    height: 200px;
+  }
+
+  .main-background h1 {
+    font-size: 1.5rem; /* Giảm kích thước chữ */
+    text-align: left; /* Căn giữa */
+  }
+
+  .text-detail {
+    padding-left: 1rem;
+    text-align: center; /* Căn giữa văn bản */
+  }
+
+  .text-detail p {
+    font-size: 1.2rem; /* Giảm kích thước chữ */
+    margin: 0.5rem 0;
+  }
+
+  .container-fluid {
+    padding: 0.5rem;
+  }
+
+  .container-fluid h2 {
+    font-size: 1.5rem;
+  }
+
+  .container-fluid p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .content-intro {
+    padding: 0.8rem;
+    border-radius: 6px;
+  }
+
+  .course {
+    padding: 1rem;
+  }
+
+  .course h3 {
+    font-size: 1.1rem;
+  }
+
+  .no-subjects {
+    font-size: 1rem;
+  }
 }

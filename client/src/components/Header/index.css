@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6); /* nền mờ đậm hơn */
+  background: rgba(0, 0, 0, 0.6); /* nền mờ đậm ms */
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -65,9 +65,6 @@
   transition: background-color 0.2s ease;
   cursor: default;
 }
-/* .modal-content ul li:hover {
-  background-color: #f9f9f9;
-} */
 
 /* Tên môn học */
 .modal-content ul li > div:first-child {
@@ -131,7 +128,6 @@
   outline: none !important;
 }
 
-
 /* Nút đóng modal to, rộng full */
 .modal-content > button {
   margin-top: 15px;
@@ -153,95 +149,35 @@
   box-shadow: 0 5px 15px rgb(0 0 0 / 0.3);
 }
 
-
-
-.header {
+.navbar{
+  padding: 0 !important;
+}
+/* Tùy chỉnh các liên kết trong Navbar */
+.navbar-nav {
   display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  justify-content: flex-start; /* Giữ căn lề trái như nav-links-headers2 */
+  gap: 4rem; /* Khoảng cách giữa các liên kết */
   width: 100%;
-  top: 30%;
-  left: 0;
-  /* height: auto; */
-  position: relative;
 }
 
-.header {
-  margin-top: 1.5rem;
-}
-
-.header-top {
+a.nav-link{
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-left: 7rem;
-  padding-right: 2rem;
-  position: relative;
-  height: 100px;
+  justify-content: center;
 }
 
-.logo {
-  position: absolute;
-  top: -5%;
-  left: 5rem;
-  z-index: 1;
-  background: white;
-  width: auto;
-  height: 90%;
-  border-radius: 50%;
-}
-
-.logo img {
-  top: 30%;
-  height: 100%;
-  width: 100%;
-  object-fit: contain;
-}
-
-.slogan {
-  margin-bottom: 0;
-  position: relative;
-}
-
-.slogan img {
-  height: 95px;
-  width: auto;
-}
-
-.nav-links-headers2 {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  gap: 4rem;
-  background-color: #519fc9;
-  padding: 0.75rem;
-  position: relative;
-  margin-top: 0;
-  /* Remove any top margin */
-}
-
-.header-between {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding-left: 6rem;
-}
-
-/* Thiết lập hiệu ứng gạch chân động cho các liên kết */
-.nav-links-headers2 a {
+/* Tùy chỉnh liên kết */
+.nav-link {
   text-decoration: none;
-  color: white;
+  color: white !important; /* Màu chữ trắng */
   font-weight: 600;
   font-size: 1rem;
   position: relative;
-  padding: 0.3rem 1rem;
   display: inline-block;
   transition: color 0.3s ease;
 }
 
 /* Hiệu ứng gạch chân động */
-.nav-links-headers2 a::after {
+.nav-link::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -253,55 +189,78 @@
 }
 
 /* Khi hover, gạch chân động */
-.nav-links-headers2 a:hover::after {
+.nav-link:hover::after {
   width: 100%;
   left: 0;
 }
 
 /* Khi hover, thay đổi màu chữ */
-.nav-links-headers2 a:hover {
-  color: #1a1917;
+.nav-link:hover {
+  color: #1a1917 !important; /* Màu khi hover đồng bộ */
 }
 
-/* Đảm bảo biểu tượng yêu thích không bị gạch chân */
-.nav-links-headers2 a.favorites-link {
-  text-decoration: none;
-  /* Xóa gạch chân */
+/* Responsive: Điều chỉnh cho màn hình nhỏ */
+@media (max-width: 991px) {
+  .navbar-nav {
+    flex-direction: column; /* Xếp chồng các liên kết */
+    align-items: flex-start; /* Căn lề trái */
+    background-color: #519fc9; /* Giữ màu nền */
+    
+  }
+ 
+  .nav-item {
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    padding: 0;
+  }
+
+  .nav-link {
+    font-size: 0.9rem; /* Giảm kích thước chữ */
+    padding: 10px; /* Tăng khoảng cách để dễ chạm */
+    width: 100%;
+    text-align: left; /* Căn lề trái */
+  }
 }
 
-.nav-links-headers2 a.favorites-link::after {
-  content: none;
-  /* Loại bỏ hiệu ứng gạch chân động */
+/* Tùy chỉnh nút hamburger */
+.navbar-toggler {
+  border: none;
+  padding: 8px;
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
 
-/* Thiết lập màu cho biểu tượng yêu thích */
-.nav-links-headers2 i.fa-heart {
-  color: white;
-  cursor: pointer;
-  font-size: 1.5rem;
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); /* Icon trắng để đồng bộ với nền */
 }
 
-/* Thiết lập hover cho biểu tượng yêu thích */
-.nav-links-headers2 i.fa-heart:hover {
-  color: red;
-  cursor: pointer;
-  font-size: 1.5rem;
+/* Header */
+.header {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  top: 30%;
+  left: 0;
+  position: relative;
 }
 
-/* Cải thiện khoảng cách giữa các link trong thanh điều hướng */
-.nav-links-headers2 a {
-  font-size: 14px;
-  /* Giảm kích thước font */
-  text-decoration: none;
-  color: #000;
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  height: 100px;
+}
+
+
+
+.slogan {
+  margin-bottom: 0;
+  position: relative;
 }
 
 /* Căn chỉnh các button đăng nhập và đăng ký */
-.auth-links a {
-  font-size: 14px;
-  padding: 5px 15px;
-}
-
 .auth-links {
   display: flex;
   align-items: center;
@@ -309,9 +268,9 @@
   margin-left: 400px;
 }
 
-.header-img img {
-  height: 10rem;
-  width: auto;
+.auth-links a {
+  font-size: 14px;
+  padding: 5px 15px;
 }
 
 .login-btn,
@@ -374,7 +333,6 @@ ul.menu-user > li > label {
   justify-content: center;
   align-items: center;
   transition: all 0.3s ease;
-  /* Hiệu ứng chuyển tiếp */
 }
 
 /* Hiệu ứng hover */
@@ -387,7 +345,6 @@ ul.menu-user > li > label:hover {
 /* Icon trong label */
 ul.menu-user > li > label > i {
   color: inherit;
-  /* Đồng bộ màu với label */
   transition: color 0.3s ease;
 }
 
@@ -399,7 +356,6 @@ ul.menu-user > li > label > i {
 /* Menu con (submenu) */
 ul.submenu-user {
   display: none;
-  /* Ẩn mặc định */
   list-style: none;
   padding: 10px 0;
   margin: 10px 0 0;
@@ -413,7 +369,6 @@ ul.submenu-user {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   transition: all 0.3s ease;
-  /* Hiệu ứng chuyển đổi */
 }
 
 /* Hiển thị menu con khi checkbox được check */
@@ -457,6 +412,7 @@ ul.submenu-user li a:hover {
   flex-direction: column;
   align-items: center;
   position: relative;
+  margin-top: 10px;
 }
 
 .header-top {
@@ -471,3 +427,95 @@ ul.submenu-user li a:hover {
   align-items: center;
 }
 
+.navbar>.container-fluid{
+  background-color: #519fc9;
+  padding-left: 20px;
+}
+
+.navbar-nav{
+  display: flex;
+  justify-content: center;
+}
+
+/* Header-top: Điều chỉnh để hỗ trợ logo responsive */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 3rem;
+  height: 100px;
+
+}
+
+/* Logo: Sử dụng flex và tỷ lệ phần trăm */
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15vw; /* Kích thước dựa trên chiều rộng màn hình */
+  min-width: 100px; /* Đảm bảo không quá nhỏ */
+  max-width: 150px; /* Giới hạn kích thước tối đa */
+  height: auto; /* Tự động điều chỉnh chiều cao */
+  background: white;
+  border-radius: 50%;
+  z-index: 1;
+  padding-top: 5px;
+  padding-left: 10px;
+  padding-bottom: 5px;
+}
+
+/* Hình ảnh logo */
+.logo img {
+  width: 70%;/* Giữ tỷ lệ ảnh */
+  height: 70%;
+  object-fit: contain; /* Đảm bảo logo không bị méo */
+}
+
+/* Responsive: Màn hình nhỏ hơn 768px */
+@media (max-width: 768px) {
+  .header-top {
+    padding: 0 1.5rem; /* Giảm padding */
+    height: auto; /* Cho phép chiều cao linh hoạt */
+  }
+
+  .logo {
+    width: 14vw; /* Giảm kích thước theo tỷ lệ */
+    min-width: 60px; /* Kích thước tối thiểu nhỏ hơn */
+    max-width: 100px;
+  }
+}
+
+/* Responsive: Màn hình rất nhỏ (di động, dưới 576px) */
+@media (max-width: 576px) {
+  .header-top {
+    padding: 0 1rem;
+
+    align-items: flex-start;
+  }
+
+  .logo {
+    width: 40vw; /* Tăng nhẹ tỷ lệ để logo rõ ràng hơn */
+    min-width: 50px;
+    max-width: 80px;
+  }
+}
+
+/* Điều chỉnh header-between để tương thích */
+.header-between {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: 0; /* Bỏ padding-left cố định */
+}
+
+/* Đảm bảo slogan không bị ảnh hưởng */
+.slogan img {
+  width: auto;
+  max-width: 100%; /* Đảm bảo slogan không vượt quá khung */
+}
+
+@media (max-width: 576px) {
+  .slogan img {
+    display: none;
+  }
+}

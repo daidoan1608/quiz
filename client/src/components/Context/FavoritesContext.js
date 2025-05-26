@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { authAxios } from "../../api/axiosConfig";
 import { message } from "antd";
 import { useAuth } from "./AuthProvider"; // Ensure correct path
+import { useLanguage } from "./LanguageProvider";
 
 const FavoritesContext = createContext();
 
@@ -11,6 +12,7 @@ export const FavoritesProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const userId = user;
+  const { texts } = useLanguage();
 
   useEffect(() => {
     if (isLoggedIn && userId) {
@@ -27,7 +29,7 @@ export const FavoritesProvider = ({ children }) => {
       const resp = await authAxios.get(`/user/favorites/user/${userId}`);
       setFavorites(resp.data.data || []);
     } catch (err) {
-      setError("Không thể tải danh sách yêu thích.");
+      setError(texts.noFavorites);
       setFavorites([]);
     } finally {
       setLoading(false);

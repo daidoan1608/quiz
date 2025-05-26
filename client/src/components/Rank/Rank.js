@@ -43,7 +43,7 @@ const Rank = () => {
       }
 
       const updated = filtered.map((item) => ({
-        userId: item.userId, // Đảm bảo API trả về userId
+        userId: item.userId,
         username: item.username,
         score: Number(item.totalScore).toFixed(1),
         averageScore: Number(item.avgScore).toFixed(1),
@@ -56,7 +56,6 @@ const Rank = () => {
       const ranked = rankData(updated);
       setLeaderboardData(ranked);
 
-      // Tìm thứ hạng bằng userId (user là chuỗi userId)
       if (user) {
         const foundRank = ranked.find((item) => item.userId === user);
         setUserRank(foundRank ? foundRank.rank : null);
@@ -91,9 +90,9 @@ const Rank = () => {
 
   return (
     <div className="Rank">
-      <h1>{texts.rankings}</h1>
+      <h1 className="rank-title">{texts.rankings}</h1>
       <Filter onFilter={handleFilter} selectedSubject={selectedSubject} />
-      <Leaderboard data={leaderboardData} currentUserId={user || ''} />
+      <Leaderboard data={leaderboardData} currentUserId={user || ''} texts={texts} />
       {userRank !== null ? (
         <div className="user-rank">
           <strong>

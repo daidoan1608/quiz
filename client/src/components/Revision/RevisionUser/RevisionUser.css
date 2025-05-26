@@ -1,73 +1,85 @@
+/* Revision container */
 .revision {
   display: flex;
-  /* Sử dụng flexbox để bố trí hai phần sidebar và content */
-  height: 100vh;
-  /* Full chiều cao của viewport */
+  flex-direction: row;
+  min-height: 100vh;
   width: 100%;
-  /* Đảm bảo chiếm toàn bộ chiều rộng */
+  background-color: #f9f9f9;
 }
 
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #fff;
+  padding: 1.5rem;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Category section */
+.category-re {
+  width: 100%;
+}
+
+.container-re {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card */
 .card {
   display: flex;
-  /* Sử dụng flex để sắp xếp các phần tử bên trong card */
   flex-direction: column;
-  /* Sắp xếp theo chiều dọc */
   justify-content: space-between;
-  /* Căn đều nội dung trong card */
   background-color: white;
-  /* Màu nền trắng */
   border-radius: 8px;
-  /* Bo góc cho card */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  /* Bóng đổ nhẹ */
   padding: 2rem;
-  /* Khoảng cách bên trong card */
   width: 100%;
-  /* Đảm bảo card chiếm toàn bộ chiều rộng container */
   max-width: 100%;
-  /* Đặt giới hạn chiều rộng cho mỗi card */
   transition: box-shadow 0.3s ease, transform 0.3s ease;
-  /* Hiệu ứng hover */
   margin-bottom: 2rem;
 }
 
 .card:hover {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  /* Bóng đổ đậm hơn khi hover */
   transform: translateY(-5px);
-  /* Nâng card lên khi hover */
 }
 
 .card-content {
   font-size: 18px;
-  /* Cỡ chữ cho tên môn học */
   font-weight: bold;
-  /* Chữ đậm */
   margin-bottom: 10px;
-  /* Khoảng cách giữa tên môn học và nút */
   text-align: center;
-  /* Căn giữa tên môn học */
 }
 
 .card-actions {
   display: flex;
   justify-content: center;
-  /* Đưa cả cụm ra giữa */
   align-items: center;
-  /* Căn giữa theo chiều dọc */
   gap: 6px;
-  /* Khoảng cách giữa hai nút */
   margin-top: 10px;
 }
-
 
 .card-button-list,
 .favorites-button {
   padding: 6px 10px;
   font-size: 14px;
 }
-
-
 
 .card-button-list {
   padding: 8px 12px;
@@ -94,4 +106,126 @@
 
 .favorites-button.favorited i {
   color: red;
+}
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+  display: none; /* Ẩn trên desktop */
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #333;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1100;
+  cursor: pointer;
+}
+
+/* Responsive: Màn hình nhỏ hơn 768px (tablet) */
+@media (max-width: 768px) {
+  .revision {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    padding: 1rem;
+  }
+
+  .content {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .container-re {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .card-actions {
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .card-button-list,
+  .favorites-button {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+
+  .favorites-button {
+    font-size: 18px;
+  }
+}
+
+/* Responsive: Màn hình rất nhỏ (di động, dưới 576px) */
+@media (max-width: 576px) {
+  .revision {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+
+  .card-buttons-row{
+    display: block !important;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-color: #fff;
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  .content {
+    padding: 1rem;
+    display: none; /* Ẩn mặc định */
+  }
+
+  .content.visible {
+    display: flex; /* Hiển thị khi có danh mục được chọn */
+  }
+
+  .container-re {
+    grid-template-columns: 1fr; /* Một cột trên mobile */
+    gap: 0.8rem;
+  }
+
+  .card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-content h3 {
+    font-size: 1.2rem !important;
+  }
+
+  .card-actions {
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+  }
+
+  .card-button-list,
+  .favorites-button {
+    padding: 5px 8px;
+    font-size: 12px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .favorites-button {
+    font-size: 16px;
+  }
+  .card-button{
+    width: 100% !important;
+  }
 }
