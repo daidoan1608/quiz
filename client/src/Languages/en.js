@@ -82,7 +82,11 @@ const en = {
   novice: "🔰 Novice",
   yourRank: "Rank",
   noRank: "No Rank. Try to improve your performance!",
-  noResultMessage: "Please take any test to get ranked!"
+  noResultMessage: "Please take any test to get ranked!",
+  favoriteSubjectsTitle: "Favorite Subject",
+  test: "Test",
+  close: "Close",
+  
 };
 
 export default en;

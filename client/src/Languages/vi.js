@@ -88,6 +88,9 @@ const vi = {
   yourRank: "Thứ hạng của bạn",
   noRank: "Bạn không trong bảng xếp hạng. Cố gắng cải thiện thành tích nhé!",
   noResultMessage: "Hãy làm một bài thi bất kỳ để có xếp hạng!",
+  favoriteSubjectsTitle: "Môn học yêu thích",
+  test: "Thi thử",
+  close: "Đóng",
 };
 
 export default vi;

@@ -9,6 +9,7 @@ export default function Home() {
   const [subjects, setSubjects] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
+
   const { texts, language } = useLanguage();
 
   useEffect(() => {
@@ -24,26 +25,30 @@ export default function Home() {
     }
   };
 
-  const currentSubjects = subjects.slice(0, 5);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentSubjects = subjects.slice(startIndex, endIndex);
 
-  const elementSubjects = currentSubjects.length > 0 ? (
-  currentSubjects.map((item, index) => {
-    const translatedName =
-      subjectTranslations?.[item.name]?.[language] || item.name;
+  const elementSubjects =
+    currentSubjects.length > 0 ? (
+      currentSubjects.map((item, index) => {
+        const translatedName =
+          subjectTranslations?.[item.name]?.[language] || item.name;
 
-    return (
-      <div className="category" key={index}>
-        <div className="container">
-          <div className="course">
-            <h3>{translatedName}</h3>
+        return (
+          <div className="category" key={index}>
+            <div className="container">
+              <div className="course">
+                <h3>{translatedName}</h3>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        );
+      })
+    ) : (
+      <div className="no-subjects">{texts.noSubjects}</div>
     );
-  })
-) : (
-  <div className="no-subjects">{texts.noSubjects}</div>
-);
+
   return (
     <div>
       <main className="position-relative main-background">
@@ -68,7 +73,10 @@ export default function Home() {
           >
             {texts.onlineTest}
           </h1>
-          <div className="text-detail" style={{ textAlign: "left", marginTop: "8rem", paddingLeft: "2%" }}>
+          <div
+            className="text-detail"
+            style={{ textAlign: "left", marginTop: "8rem", paddingLeft: "2%" }}
+          >
             <p>{texts.slogan1}</p>
             <p>{texts.slogan2}</p>
             <p>{texts.slogan3}</p>
@@ -96,6 +104,13 @@ export default function Home() {
             </h2>
             {elementSubjects}
             <div className="d-flex justify-content-center mt-4">
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={subjects.length}
+                onChange={(page) => setCurrentPage(page)}
+                showSizeChanger={false}
+              />
             </div>
           </div>
         </div>

@@ -148,21 +148,21 @@ export default function Headers() {
                         onClick={() => handleDelete(fav.subjectId, fav.subjectName)}
                         type="button"
                       >
-                        Xóa
+                        {texts.delete}
                       </button>
                       <button
                         className="btn btn-review"
                         onClick={() => handleReview(fav.subjectId)}
                         type="button"
                       >
-                        Ôn tập
+                        {texts.revision}
                       </button>
                       <button
                         className="btn btn-mocktest"
                         onClick={() => handleMockTest(fav.subjectId)}
                         type="button"
                       >
-                        Thi thử
+                        {texts.test}  
                       </button>
                     </div>
                   </li>
@@ -172,7 +172,7 @@ export default function Headers() {
               <p>{texts.noFavorites || "Chưa có môn học yêu thích nào."}</p>
             ))}
 
-            <button onClick={toggleModal}>{texts.close || "Đóng"}</button>
+            <button onClick={toggleModal}>{texts.close}</button>
           </div>
         </div>
       )}
