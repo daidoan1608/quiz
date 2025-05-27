@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./index.css";
+import "./index2.css";
 import { useAuth } from "../Context/AuthProvider";
 import { useLanguage } from "../Context/LanguageProvider";
 import { useFavorites } from "../Context/FavoritesContext";
