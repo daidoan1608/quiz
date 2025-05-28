@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { authAxios } from "../../../api/axiosConfig";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Exam.css";
+import "./responsiveExam.css"
 import { useLanguage } from "../../Context/LanguageProvider";
 
 export default function Exam() {
@@ -157,6 +158,10 @@ export default function Exam() {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
+  // Đóng mở menu-answer
+  const [showMenuAnswer, setShowMenuAnswer] = useState(true);
+
+
   return (
     <>
       <div className="category-center">
@@ -184,21 +189,27 @@ export default function Exam() {
         </div>
         <div className="table-right">
           <div className="answer-sheet">
-            <p>
-              <span>{texts.table}</span>
+            <p className="onclick-menu" onClick={() => setShowMenuAnswer(!showMenuAnswer)}>
+              <span>
+                {texts.table} <i className="fas fa-caret-down answer-table"></i>
+              </span>
             </p>
-            {[...Array(questions.length)].map((_, idx) => (
-              <div
-                key={idx}
-                className={`number ${
-                  selectedAnswers[idx] !== undefined ? "selected" : ""
-                }`}
-                onClick={() => scrollToQuestion(idx)}
-                style={{ cursor: "pointer" }}
-              >
-                {idx + 1}
+            {showMenuAnswer && (
+              <div className="menu-answer">             
+                {[...Array(questions.length)].map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`number ${
+                      selectedAnswers[idx] !== undefined ? "selected" : ""
+                    }`}
+                    onClick={() => scrollToQuestion(idx)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {idx + 1}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

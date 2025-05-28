@@ -1,0 +1,27 @@
+/* PC */
+
+@media (max-width:1024px) {
+    
+}
+
+/* Tablet and mobile */
+@media (max-width: 1023px) {
+
+}
+
+/* Tablet */
+@media (min-width:740px) and (max-width:1023px) {
+
+}
+
+/* Mobile */
+@media (max-width:739px) {
+    .card .card-button-listexam {
+        top: 70%;
+        left: 60%;
+    }
+
+    .card-content-listexam h3 {
+        font-size: clamp(16px, 1vh, 25px);
+    }
+}

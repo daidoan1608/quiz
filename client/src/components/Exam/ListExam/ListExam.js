@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { authAxios, publicAxios } from "../../../api/axiosConfig";
 import "./ListExam.css";
+import "./responsiveListExam.css"
 import { useLocation, useNavigate } from "react-router-dom";
 import LoginPrompt from "../../User/LoginPrompt";
 import { useAuth } from "../../Context/AuthProvider";
@@ -83,6 +84,8 @@ export default function ExamUsers() {
     const attempts = numbersOfExam.get(item.examId) || 0; // Lấy số lần từ Map, mặc định 0 nếu không có
 
     return (
+      <div>
+
       <div
         key={index}
         className={`card ${isCompleted ? "completed" : ""}`}
@@ -104,6 +107,7 @@ export default function ExamUsers() {
         >
           {texts.getExam}
         </button>
+      </div>
       </div>
     );
   });

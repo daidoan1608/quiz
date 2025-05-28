@@ -6,6 +6,7 @@ import Sidebar from "../../User/SideBar";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { publicAxios } from "../../../api/axiosConfig";
 import "./RevisionUser.css";
+import "./responsiveRevision.css"
 
 export default function RevisionUser() {
   const { favorites, toggleFavorite } = useFavorites();
@@ -75,7 +76,7 @@ export default function RevisionUser() {
           />
 
           <section className="category-re">
-            <div className="container-re">
+            
               {filteredSubjects.length > 0 ? (
                 filteredSubjects.map((item) => {
                   const translatedName =
@@ -115,7 +116,7 @@ export default function RevisionUser() {
               ) : (
                 <p>{texts.noSubjects || "Không tìm thấy môn học nào."}</p>
               )}
-            </div>
+            
           </section>
         </div>
       </div>

@@ -1,3 +1,17 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.content .category-re {
+  display: block;
+}
+
+.category-re .card-content h3 {
+  font-size: clamp(20px, 2vw, 25px);
+}
+
 .revision {
   display: flex;
   /* Sử dụng flexbox để bố trí hai phần sidebar và content */
@@ -7,8 +21,16 @@
   /* Đảm bảo chiếm toàn bộ chiều rộng */
 }
 
-.card {
-  display: flex;
+.revision .sidebar {
+  width: 20%;
+}
+
+.revision .content {
+  width: 80%;
+}
+
+.category-re .card {
+  display: inline-block;
   /* Sử dụng flex để sắp xếp các phần tử bên trong card */
   flex-direction: column;
   /* Sắp xếp theo chiều dọc */
@@ -22,13 +44,13 @@
   /* Bóng đổ nhẹ */
   padding: 2rem;
   /* Khoảng cách bên trong card */
-  width: 100%;
+  width: 45%;
   /* Đảm bảo card chiếm toàn bộ chiều rộng container */
-  max-width: 100%;
+  /* max-width: 100%; */
   /* Đặt giới hạn chiều rộng cho mỗi card */
   transition: box-shadow 0.3s ease, transform 0.3s ease;
   /* Hiệu ứng hover */
-  margin-bottom: 2rem;
+  margin: 12px;
 }
 
 .card:hover {

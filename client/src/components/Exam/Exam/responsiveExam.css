@@ -1,0 +1,52 @@
+/* PC */
+
+@media (max-width:1024px) {
+    
+}
+
+/* Tablet and mobile */
+@media (max-width: 1023px) {
+
+}
+
+/* Tablet */
+@media (min-width:740px) and (max-width:1023px) {
+
+}
+
+/* Mobile */
+@media (max-width:739px) {
+    .main-content .category-center {
+        display: block;
+        padding: 0;
+    }
+
+    .category-center .table-right,
+    .category-center .table-left {
+        width: 100%;
+        padding: 0;
+        height: none;
+    }
+
+    .answer-table {
+        display: inline-block;
+    }
+
+    .answer-sheet {
+        padding: 0;
+    }
+
+    .answer-sheet > p {
+        margin: 0;
+    }
+
+    .answer-sheet > p > span {
+        margin-left: 32px;
+    }
+
+    .table-left .info p {
+        margin: 0;
+    }
+
+ 
+}

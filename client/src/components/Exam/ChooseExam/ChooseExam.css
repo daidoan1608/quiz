@@ -1,6 +1,26 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.category-re .card-exam {
+  display: inline-block;
+  width: 45%;
+  margin: 12px;
+}
+
+.card-buttons-row .card-button{
+  margin: 0;
+  padding: 8px 12px;
+}
+
+
+
 .card-buttons-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px; /* khoảng cách giữa các nút */
   margin-top: 10px; /* nếu cần khoảng cách so với tiêu đề */
 }
@@ -130,12 +150,11 @@
 }
 
 .card-img-exam img {
-  width: 110%;
+  width: 100%;
   /* Đẩy ảnh ra ngoài một chút */
   height: auto;
   max-width: 100px;
   /* Giới hạn kích thước ảnh */
-  margin-left: -10%;
   /* Đẩy ảnh ra ngoài từ bên trái */
 }
 

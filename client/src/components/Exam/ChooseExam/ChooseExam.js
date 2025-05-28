@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./ChooseExam.css";
+import "./responsiveChooseExam.css"
 import Sidebar from "../../User/SideBar";
 import { useLanguage } from "../../Context/LanguageProvider";
 import subjectTranslations from "../../../Languages/subjectTranslations";
@@ -80,7 +81,7 @@ export default function ChooseExam() {
             className="search-bar"
           />
           <section className="category-re">
-            <div className="container-re">
+            
               {filteredSubjects.map((item) => {
                 const translatedName =
                   subjectTranslations[item.name]?.[language] || item.name;
@@ -88,9 +89,7 @@ export default function ChooseExam() {
                 return (
                   <div className="card-exam" key={item.subjectId}>
                     <div className="card-img-exam">
-                      <div className="card-img">
-                        <img alt="Hình bài thi" src="/exam.png" />
-                      </div>
+                      <img className="card-img" alt="Hình bài thi" src="/exam.png" /> 
                     </div>
                     <div className="card-content">
                       <h3>{translatedName}</h3>
@@ -130,7 +129,7 @@ export default function ChooseExam() {
                   </div>
                 );
               })}
-            </div>
+            
           </section>
         </div>
       </div>

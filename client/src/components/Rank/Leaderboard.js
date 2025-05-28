@@ -106,8 +106,9 @@ const Leaderboard = ({ data = [], currentUserId }) => {
       rowKey="username"
       pagination={false}
       className="leaderboard-table"
-      locale={{ emptyText: texts.noData}}
+      locale={{ emptyText: texts.noData }}
       rowClassName={(record) => (record.userId === currentUserId ? 'highlight-row' : '')}
+      scroll={{ x: 'max-content' }} // Thanh cuộn do Table sinh ra
     />
   );
 };
