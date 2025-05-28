@@ -175,18 +175,20 @@ export default function Exam() {
               <span>{texts.time}:</span> {duration} Phút
             </p>
           </div>
+          
+        </div>
+        <div className="table-right">
           <div className="timer">
-            <h2>{texts.conutDown}</h2>
+            <h2>{texts.countDown} :</h2>
             <span>{`${minutes.toString().padStart(2, "0")}:${seconds
               .toString()
               .padStart(2, "0")}`}</span>
           </div>
-        </div>
-        <div className="table-right">
           <div className="answer-sheet">
             <p>
               <span>{texts.table}</span>
             </p>
+            
             {[...Array(questions.length)].map((_, idx) => (
               <div
                 key={idx}
@@ -230,7 +232,7 @@ export default function Exam() {
                       className="radio-input"
                     />
                     <label
-                      htmlFor={answer.optionId} // Kết nối label với input qua htmlFor
+                      htmlFor={answer.optionId} 
                       className={`radio-label ${isSelected ? "selected" : ""}`}
                     >
                       {answer.content}

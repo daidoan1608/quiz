@@ -1,3 +1,4 @@
+/* --- VÙNG THÔNG TIN VÀ BẢNG TRẢ LỜI (PHÍA TRÊN) --- */
 .category-center {
   display: flex;
   justify-content: space-between;
@@ -8,19 +9,72 @@
   top: 0;
   z-index: 10;
   background-color: #fff;
+  flex-wrap: wrap;
+  box-sizing: border-box;
 }
 
-.table-left,.table-right{
+.table-left,
+.table-right {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 49%;
   padding: 10px;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   height: 180px;
+  box-sizing: border-box;
+}
+
+.table-left{
+  width: 30%;
+}
+
+.table-right{
+  width: 65%;
+}
+
+.table-right {
+  flex-direction: column;
+  align-items: flex-start;
+  overflow-y: auto;
+  max-height: 180px;
+}
+
+.answer-sheet {
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.answer-sheet p {
+  font-weight: bold;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.number {
+  width: 36px;
+  height: 36px;
+  background-color: #f0f0f0;
+  text-align: center;
+  line-height: 36px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border 0.3s ease;
+  border: 1px solid #ccc;
+  margin-left: 11px;
+}
+
+.number.selected {
+  background-color: #2196f3;
+  color: white;
+  border: 2px solid #1976d2;
 }
 
 .table-left .info {
@@ -31,6 +85,7 @@
 
 .table-left .info p {
   font-size: 15px;
+  margin: 5px 0;
 }
 
 .table-left .timer {
@@ -41,24 +96,38 @@
   margin-right: 2rem;
 }
 
-.timer h2 {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 5px;
+.timer{
+  display: flex;
+  padding-left: 10px;
+  padding-top: 10px;
+}
+
+.timer h2{
+  font-size: 18px;
 }
 
 .timer span {
   color: red;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
+  position: relative;
+  bottom: 8px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  border: 1px solid;
+  margin-left: 10px;
 }
 
+/* --- PHẦN CÂU HỎI & ĐÁP ÁN (PHÍA DƯỚI) --- */
 .category-end {
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 0 10rem;
+  margin: 0 auto;
+  max-width: 1000px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .question {
@@ -72,29 +141,29 @@
 }
 
 .option {
-  display: flex; /* Đảm bảo radio và label nằm trên cùng một dòng */
-  align-items: center; /* Căn giữa các phần tử theo chiều dọc */
-  flex-wrap: nowrap; /* Không cho phép phần tử xuống dòng */
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
   margin-bottom: 10px;
 }
 
 .radio-input {
-  margin-right: 10px; /* Khoảng cách giữa nút radio và label */
+  margin-right: 10px;
   cursor: pointer;
 }
 
 .radio-label {
   font-size: 16px;
   display: inline-block;
-  padding: 5px 10px;
+  padding: 8px 12px;
   border: 1px solid grey;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease, border 0.3s ease;
-  word-wrap: break-word; /* Đảm bảo rằng văn bản dài không tràn ra ngoài */
-  white-space: normal; /* Cho phép văn bản xuống dòng nếu cần */
-  max-width: 100%; /* Đảm bảo label không vượt quá kích thước container */
-  overflow-wrap: break-word; /* Đảm bảo văn bản dài được ngắt dòng */
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .radio-label.selected {
@@ -104,7 +173,7 @@
 
 .submit-btn {
   padding: 10px 20px;
-  background-color: #519fc9  ;
+  background-color: #519fc9;
   color: white;
   font-size: 16px;
   border: none;
@@ -112,32 +181,112 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 20px;
-  align-self: center; /* Canh giữa nút submit */
-}
-
-.answer-sheet {
-  width: 100%;
-  padding: 10px;
-}
-
-.number {
-  width: 30px;
-  height: 30px;
-  margin: 5px;
-  background-color: #f0f0f0;
-  text-align: center;
-  line-height: 30px;
-  border-radius: 50%;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, border 0.3s ease;
-}
-
-.number.selected {
-  background-color: lightblue;
-  border: 2px solid blue;
+  align-self: center;
 }
 
 .submit-btn:hover {
   background-color: #0056b3;
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .category-center {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .table-left,
+  .table-right {
+    width: 100% !important;
+    margin-bottom: 10px;
+    height: 120px;
+  }
+
+  .answer-sheet{
+    gap: 0px;
+  }
+  .table-right {
+    max-height: 200px;
+  }
+
+  .table-left .info p {
+    font-size: 14px;
+    margin: 4px 0;
+  }
+
+  .timer span {
+    font-size: 20px;
+    bottom: 5px;
+  }
+
+  .question {
+    font-size: 16px;
+  }
+
+  .radio-label {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  .submit-btn {
+    font-size: 16px;
+    width: 100%;
+  }
+
+  .number {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+    line-height: 26px;
+  }
+
+  .answer-sheet p{
+    margin-top: 5px;
+  }
+}
+
+@media (max-width : 1024px){
+  .table-left,.table-right{
+    height: 120px;
+  }
+
+  .table-left{
+    width: 45%;
+  }
+
+  .table-right{
+    width: 50%;
+  }
+
+  .number{
+    width: 30px;
+    height: 30px;
+    line-height: 29px;
+  }
+
+  .timer{
+    padding: 0px 10px;
+  }
+
+  .timer h2{
+    font-size: 13px;
+  }
+
+  .timer span{
+    font-size: 14px;
+    margin-top: 3px;
+  }
+
+  .answer-sheet{
+    padding: 0px 10px;
+    gap: 0;
+  }
+
+  .answer-sheet p{
+    font-size: 13px;
+  }
+
+  .number{
+    margin-left: 10px;
+  }
 }
