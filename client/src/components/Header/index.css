@@ -1,472 +1,55 @@
-/* Overlay phủ toàn màn hình với nền mờ */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6); /* nền mờ đậm hơn */
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-}
-
-/* Khung modal chính giữa, rộng vừa phải */
-.modal-content {
-  background: linear-gradient(135deg, #e0f7fa, #80deea);
-  border-radius: 12px;
-  max-width: 600px;
-  max-height: 450px;
-  width: 100%;
-  overflow-y: auto;
-  padding: 30px 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  box-sizing: border-box;
-  text-align: center;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Tiêu đề modal */
-.modal-content h3 {
-  margin-bottom: 25px;
-  font-weight: 700;
-  font-size: 1.6rem;
-  color: #222;
-  letter-spacing: 0.03em;
-}
-
-/* Thông báo lỗi */
-.modal-content p[style*="color: red"] {
-  color: #e74c3c;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
-/* Danh sách môn học */
-.modal-content ul {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 30px 0;
-  max-height: 320px;
-  overflow-y: auto;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-}
-
-/* Mỗi dòng môn học */
-.modal-content ul li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s ease;
-  cursor: default;
-}
-/* .modal-content ul li:hover {
-  background-color: #f9f9f9;
-} */
-
-/* Tên môn học */
-.modal-content ul li > div:first-child {
-  font-weight: 600;
-  font-size: 1.05rem;
-  max-width: 65%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #2c3e50;
-  user-select: text;
-}
-
-/* Khung nút hành động */
-.favorite-actions {
-  display: flex;
-  gap: 12px;
-}
-
-/* Các nút trong modal */
-.modal-content .btn {
-  cursor: pointer;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: none;
-  transition: background-color 0.25s ease, box-shadow 0.25s ease;
-  user-select: none;
-}
-
-/* Hover chỉ đổ bóng */
-.modal-content .btn-delete:hover {
-  background-color: #e74c3c !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-}
-.modal-content .btn-review:hover {
-  background-color: #2980b9 !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-}
-.modal-content .btn-mocktest:hover {
-  background-color: #27ae60 !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Focus đổi màu nền + đổ bóng */
-.modal-content .btn-delete:focus {
-  background-color: #c0392b !important;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3) !important;
-  outline: none !important;
-}
-.modal-content .btn-review:focus {
-  background-color: #1c5980 !important;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3) !important;
-  outline: none !important;
-}
-.modal-content .btn-mocktest:focus {
-  background-color: #1f8c4a !important;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3) !important;
-  outline: none !important;
-}
-
-
-/* Nút đóng modal to, rộng full */
-.modal-content > button {
-  margin-top: 15px;
-  background-color: #0080ff;
-  color: white;
-  width: 100%;
-  padding: 12px 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  border-radius: 8px;
-  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  transition: background-color 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-.modal-content > button:hover,
-.modal-content > button:focus {
-  background-color: #2c3e50;
-  box-shadow: 0 5px 15px rgb(0 0 0 / 0.3);
-}
-
-
-
-.header {
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  top: 30%;
-  left: 0;
-  /* height: auto; */
-  position: relative;
-}
-
-.header {
-  margin-top: 1.5rem;
-}
-
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-left: 7rem;
-  padding-right: 2rem;
-  position: relative;
-  height: 100px;
-}
-
-.logo {
-  position: absolute;
-  top: -5%;
-  left: 5rem;
-  z-index: 1;
-  background: white;
+.logo-img {
+  height: auto;
+  max-height: 40px;
   width: auto;
-  height: 90%;
-  border-radius: 50%;
+  transition: max-height 0.3s ease;
+  transform: translateY(0px);
+  /* dịch ảnh xuống 5px */
 }
 
-.logo img {
-  top: 30%;
-  height: 100%;
-  width: 100%;
-  object-fit: contain;
+@media (min-width: 768px) {
+  .logo-img {
+    max-height: 60px;
+  }
 }
 
-.slogan {
-  margin-bottom: 0;
-  position: relative;
+@media (min-width: 1200px) {
+  .logo-img {
+    max-height: 80px;
+  }
 }
 
-.slogan img {
-  height: 95px;
-  width: auto;
-}
 
 .nav-links-headers2 {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  gap: 4rem;
-  background-color: #519fc9;
-  padding: 0.75rem;
-  position: relative;
-  margin-top: 0;
-  /* Remove any top margin */
-}
-
-.header-between {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding-left: 6rem;
-}
-
-/* Thiết lập hiệu ứng gạch chân động cho các liên kết */
-.nav-links-headers2 a {
-  text-decoration: none;
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-  position: relative;
-  padding: 0.3rem 1rem;
-  display: inline-block;
-  transition: color 0.3s ease;
-}
-
-/* Hiệu ứng gạch chân động */
-.nav-links-headers2 a::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background-color: white;
-  transition: width 0.3s ease, left 0.3s ease;
-}
-
-/* Khi hover, gạch chân động */
-.nav-links-headers2 a:hover::after {
-  width: 100%;
-  left: 0;
-}
-
-/* Khi hover, thay đổi màu chữ */
-.nav-links-headers2 a:hover {
-  color: #1a1917;
-}
-
-/* Đảm bảo biểu tượng yêu thích không bị gạch chân */
-.nav-links-headers2 a.favorites-link {
-  text-decoration: none;
-  /* Xóa gạch chân */
-}
-
-.nav-links-headers2 a.favorites-link::after {
-  content: none;
-  /* Loại bỏ hiệu ứng gạch chân động */
-}
-
-/* Thiết lập màu cho biểu tượng yêu thích */
-.nav-links-headers2 i.fa-heart {
-  color: white;
-  cursor: pointer;
-  font-size: 1.5rem;
-}
-
-/* Thiết lập hover cho biểu tượng yêu thích */
-.nav-links-headers2 i.fa-heart:hover {
-  color: red;
-  cursor: pointer;
-  font-size: 1.5rem;
-}
-
-/* Cải thiện khoảng cách giữa các link trong thanh điều hướng */
-.nav-links-headers2 a {
-  font-size: 14px;
-  /* Giảm kích thước font */
-  text-decoration: none;
-  color: #000;
-}
-
-/* Căn chỉnh các button đăng nhập và đăng ký */
-.auth-links a {
-  font-size: 14px;
-  padding: 5px 15px;
-}
-
-.auth-links {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 400px;
-}
-
-.header-img img {
-  height: 10rem;
-  width: auto;
-}
-
-.login-btn,
-.register-btn {
-  text-decoration: none;
-  padding: 0.3rem 1rem;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.login-btn {
-  color: #519fc9;
-  border: 1px solid #519fc9;
-}
-
-.login-btn:hover {
-  background-color: #0056b3;
-  color: white;
-}
-
-.register-btn {
-  background-color: #519fc9;
-  color: white;
-  border: 1px solid #519fc9;
-}
-
-.register-btn:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-/* Menu chính */
-ul.menu-user {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  background-color: #5cb4e4;
+  /* màu xanh (bootstrap primary) */
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 13px 0;
+  white-space: nowrap;
+  /* giữ các a không xuống dòng */
 }
 
-ul.menu-user > li {
-  position: relative;
-}
-
-/* Label của menu toggle */
-ul.menu-user > li > label {
-  cursor: pointer;
-  font-size: 20px;
-  padding: 10px;
-  background-color: #ffffff;
-  border: 1px solid #0056b3;
-  color: #333;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.3s ease;
-  /* Hiệu ứng chuyển tiếp */
-}
-
-/* Hiệu ứng hover */
-ul.menu-user > li > label:hover {
-  background-color: #0056b3;
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Icon trong label */
-ul.menu-user > li > label > i {
-  color: inherit;
-  /* Đồng bộ màu với label */
-  transition: color 0.3s ease;
-}
-
-/* Ẩn checkbox */
-.menu-toggle {
-  display: none;
-}
-
-/* Menu con (submenu) */
-ul.submenu-user {
-  display: none;
-  /* Ẩn mặc định */
-  list-style: none;
-  padding: 10px 0;
-  margin: 10px 0 0;
-  position: absolute;
-  top: 60px;
-  right: 0;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  min-width: 160px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  transition: all 0.3s ease;
-  /* Hiệu ứng chuyển đổi */
-}
-
-/* Hiển thị menu con khi checkbox được check */
-.menu-toggle:checked + label + .submenu-user {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Các mục trong menu con */
-ul.submenu-user li {
-  text-align: left;
-}
-
-ul.submenu-user li a {
-  display: block;
-  padding: 10px 20px;
-  color: #333;
+.nav-links-headers2 .nav-link {
+  color: black;
+  /* màu chữ mặc định */
   text-decoration: none;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: clamp(10px, 2vw, 18px);
+  /* thay đổi kích thước chữ theo màn hình */
+  transition: color 0.3s ease, border-color 0.3s ease;
+  border-bottom: 2px solid transparent;
+  /* border ẩn mặc định */
+  padding-bottom: 0;
+  /* tạo khoảng cách cho border */
 }
 
-/* Hiệu ứng hover trên mục con */
-ul.submenu-user li a:hover {
-  background-color: #519fc9;
-  color: #fff;
-}
 
-/* Định dạng riêng cho từng mục */
-.account {
-  margin-bottom: 5px;
-}
 
-.log-out {
-  margin-top: 5px;
-}
 
-/* Tối ưu hóa tổng thể */
-.user-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-.header-top {
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.language-and-user {
-  margin-left: auto; /* đẩy phần này sang phải */
-  display: flex;
-  align-items: center;
+.nav-links-headers2 .nav-link:hover {
+  color: white;
+  border-bottom-color: white;
+  /* khi hover, border dưới đổi màu trắng */
+  cursor: pointer;
 }
