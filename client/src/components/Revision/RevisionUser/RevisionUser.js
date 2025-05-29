@@ -16,6 +16,14 @@ export default function RevisionUser() {
   const navigate = useNavigate();
   const { texts, language } = useLanguage();
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+
+  // Hàm toggle sidebar cho màn hình nhỏ
+  // const toggleSidebar = () => {
+  //   setIsSidebarOpen((prev) => !prev);
+  // };
+
   useEffect(() => {
     const getAllSubjects = async () => {
       try {
@@ -57,68 +65,143 @@ export default function RevisionUser() {
   };
 
   return (
-    <div>
-      <div className="revision">
-        <Sidebar
-          selectedCategory={selectedCategory}
-          onSelectCategory={handleSelectCategory}
-          onSearchChange={handleSearchChange}
-        />
+    // <div>
+    <div className="container-fluid px-2 px-sm-3 px-md-4">
+      <div className="row">
+        {/* Nút mở sidebar - chỉ hiện trên mobile */}
+        <div className="col-12 d-lg-none">
+          <button
+            className="btn btn-outline-secondary mb-3 responsive-button"
+            onClick={() => setSidebarOpen(true)}
+          >
+            📚 Danh sách khoa
+          </button>
+        </div>
 
-        <div className="content">
+        {/* Overlay đen khi mở sidebar mobile */}
+        {sidebarOpen && (
+          <div
+            className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-lg-none"
+            style={{ zIndex: 1040 }}
+            onClick={() => setSidebarOpen(false)}
+          ></div>
+        )}
+
+        {/* Sidebar kiểu off-canvas trên mobile */}
+        <div
+          className={`position-fixed top-0 start-0 bg-light h-100 p-3 shadow d-lg-none ${sidebarOpen ? "d-block" : "d-none"
+            }`}
+          style={{ width: "80%", maxWidth: "300px", zIndex: 1050 }}
+        >
+          <button
+            className="btn btn-sm btn-danger mb-3 responsive-button"
+            onClick={() => setSidebarOpen(false)}
+          >
+            ✕ Đóng
+          </button>
+          <Sidebar
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleSelectCategory}
+            onSearchChange={handleSearchChange}
+          />
+        </div>
+
+        {/* Sidebar cố định trên desktop */}
+        <div className="col-lg-3 d-none d-lg-block">
+          <div className="bg-light p-3 h-100">
+            <Sidebar
+              selectedCategory={selectedCategory}
+              onSelectCategory={handleSelectCategory}
+              onSearchChange={handleSearchChange}
+            />
+          </div>
+        </div>
+
+        {/* Content chiếm phần còn lại */}
+        <div className="col-lg-9 col-md-8 col-12">
           <input
             type="text"
             placeholder={texts.placeholder || "Tìm kiếm môn học..."}
             value={searchQuery}
             onChange={handleSearchChange}
-            className="search-bar"
+            className="form-control mb-3 responsive-input"
           />
 
           <section className="category-re">
-            <div className="container-re">
-              {filteredSubjects.length > 0 ? (
-                filteredSubjects.map((item) => {
-                  const translatedName =
-                    subjectTranslations[item.name]?.[language] || item.name;
-                  const isFavorited = favorites.some((fav) => fav.subjectId === item.subjectId);
+            <div className="container">
+              <div className="row justify-content-center">
+                {filteredSubjects.length > 0 ? (
+                  filteredSubjects.map((item) => {
+                    const translatedName =
+                      subjectTranslations[item.name]?.[language] || item.name;
+                    const isFavorited = favorites.some(
+                      (fav) => fav.subjectId === item.subjectId
+                    );
 
-                  return (
-                    <div className="card" key={item.subjectId}>
-                      <div className="card-content">
-                        <h3>{translatedName}</h3>
+                    return (
+                      <div
+                        className="col-lg-8 col-md-10 col-sm-12 mb-4"
+                        key={item.subjectId}
+                      >
+                        <div className="card h-100 shadow-sm">
+                          <div className="card-body d-flex justify-content-between align-items-center flex-wrap">
+                            <div className="d-flex align-items-center" style={{ maxWidth: "100%" }}>
+                              <h5 className="card-title auto-fit-text">
+                                {translatedName}
+                              </h5>
+                            </div>
+
+
+                            {/* <div className="d-flex flex-wrap gap-2"> */}
+                            <div className="responsive-action-group">
+                              <button
+                                className="btn btn-primary responsive-button"
+                                onClick={() =>
+                                  navigate(`/listChap`, {
+                                    state: { subjectId: item.subjectId },
+                                  })
+                                }
+                              >
+                                {texts.chooseChapter || "Chọn chương"}
+                              </button>
+                              <button
+                                className={`favorite-icon-button ${isFavorited ? "favorited" : ""}`}
+
+                                onClick={() =>
+                                  toggleFavorite(item.subjectId, item.name)
+                                }
+                                disabled={!localStorage.getItem("userId")}
+                                aria-label={
+                                  isFavorited ? "Bỏ yêu thích" : "Thêm yêu thích"
+                                }
+                              >
+                                <i
+                                  className={`fa-heart ${isFavorited ? "fa-solid" : "fa-regular"
+                                    }`}
+                                ></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="card-actions">
-                        <button
-                          className="card-button-list"
-                          onClick={() =>
-                            navigate(`/listChap`, { state: { subjectId: item.subjectId } })
-                          }
-                        >
-                          {texts.chooseChapter || "Chọn chương"}
-                        </button>
-                        <button
-                          className={`favorites-button ${isFavorited ? "favorited" : ""}`}
-                          onClick={() => toggleFavorite(item.subjectId, item.name)}
-                          disabled={!localStorage.getItem("userId")}
-                          aria-label={isFavorited ? "Bỏ yêu thích" : "Thêm yêu thích"}
-                        >
-                          <i
-                            className={`fa-heart ${
-                              isFavorited ? "fa-solid" : "fa-regular"
-                            }`}
-                          ></i>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <p>{texts.noSubjects || "Không tìm thấy môn học nào."}</p>
-              )}
+                    );
+                  })
+                ) : (
+                  <p className="responsive-text">
+                    {texts.noSubjects || "Không tìm thấy môn học nào."}
+                  </p>
+                )}
+              </div>
             </div>
           </section>
         </div>
       </div>
     </div>
+
+
+    // </div >
   );
 }
+{/* <h5 className="card-title mb-2 mb-md-0 flex-grow-1 responsive-text">
+                              {translatedName}
+                            </h5> */}
