@@ -118,7 +118,7 @@ export default function Headers() {
                             <a href="/account">{texts.account}</a>
                           </li>
                           <li>
-                              <a href="#" className="bookmark" onClick={toggleModal}>{texts.favorites || "Yêu thích"}</a>
+                              <button className="bookmark" onClick={toggleModal}>{texts.favorites || "Yêu thích"}</button>
                             </li>
                           <li>
                             <a href="/" onClick={handleLogout}>

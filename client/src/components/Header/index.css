@@ -4,6 +4,17 @@
   box-sizing: border-box;
 }
 
+/* button favourite */
+button.bookmark {
+  border: none;
+  background: #fff;
+}
+
+.modal-overlay .modal-content {
+  background-color: #ccc;
+  z-index: 1000;
+}
+
 /* Nút đóng mở menu */
 .menu-btn {
   display: none;
