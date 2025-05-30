@@ -1,95 +1,136 @@
 /* Style cho container chính */
 .category-result {
-    display: flex; /* Sử dụng Flexbox để căn giữa các phần tử con */
-    justify-content: center; /* Căn giữa theo chiều ngang */
-    align-items: center; /* Căn giữa theo chiều dọc */
-    min-height: 80vh; /*Đảm bảo container chiếm toàn bộ chiều cao của viewport */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
     padding: 20px;
 }
 
 /* Style cho card */
 .result-card {
-    display: flex; /* Sử dụng Flexbox để căn chỉnh hình ảnh và văn bản theo hàng ngang */
-    align-items: center; /* Căn giữa theo chiều dọc */
-    justify-content: center; /* Căn giữa theo chiều ngang */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     background-color: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     width: 100%;
     max-width: 700px;
-    height: 400px;
+    height: auto;
     padding: 20px;
+    flex-wrap: wrap;
 }
 
 /* Style cho hình ảnh */
 .result-img {
-    margin-right: 20px; /* Khoảng cách giữa ảnh và văn bản */
+    margin-right: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* width: 100px; */
 }
-.result-img img{
+
+.result-img img {
     width: 100px;
+    max-width: 25vw;
 }
 
 /* Style cho text */
 .result-text {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Căn giữa văn bản theo chiều dọc */
-    align-items: center; /* Căn giữa văn bản theo chiều ngang */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 /* Style cho tiêu đề */
 .result-text h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 2rem;
     color: #333;
 }
 
 /* Style cho đoạn văn bản */
 .result-text p {
-    font-size: 16px;
+    font-size: 1rem;
     color: #666;
     margin: 5px 0;
 }
 
-/* Style cho liên kết */
-.result-text a {
-    text-decoration: none;
-    color: #008080;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-/* Hiệu ứng hover cho liên kết */
-.result-text a:hover {
-    text-decoration: underline;
-    color: #006666;
-}
-.submit-btn-result{
-    width: auto;
+/* Nút */
+.submit-btn-result {
     padding: 10px 20px;
     background-color: #519fc9;
     color: white;
-    font-size: 16px;
+    font-size: 1rem;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s ease;
-    text-align: center;
     margin-top: 20px;
     display: inline-block;
-    position: relative;
-    
+    transition: background-color 0.3s ease;
 }
+
 .submit-btn-result:hover {
     background-color: #0056b3;
-  }
-  
-  .submit-btn-result:focus {
+}
+
+.submit-btn-result:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.3);
-  }
+}
+
+/* ==================== Responsive Design ==================== */
+
+/* Dưới 768px (tablet và điện thoại lớn) */
+@media (max-width: 768px) {
+    .result-card {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+    }
+
+    .result-img {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .result-img img {
+        width: 120px;
+    }
+
+    .result-text h1 {
+        font-size: 1.5rem;
+    }
+
+    .result-text p {
+        font-size: 0.95rem;
+    }
+
+    .submit-btn-result {
+        font-size: 0.95rem;
+        padding: 8px 16px;
+    }
+}
+
+/* Dưới 480px (điện thoại nhỏ) */
+@media (max-width: 480px) {
+    .result-img img {
+        width: 90px;
+    }
+
+    .result-text h1 {
+        font-size: 1.25rem;
+    }
+
+    .result-text p {
+        font-size: 0.85rem;
+    }
+
+    .submit-btn-result {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+}

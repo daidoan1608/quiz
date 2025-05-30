@@ -101,14 +101,18 @@ const Leaderboard = ({ data = [], currentUserId }) => {
 
   return (
     <Table
-      dataSource={data.slice(0, 10)} // Giới hạn top 10
+      dataSource={data.slice(0, 10)}
       columns={columns}
       rowKey="username"
       pagination={false}
       className="leaderboard-table"
-      locale={{ emptyText: texts.noData}}
-      rowClassName={(record) => (record.userId === currentUserId ? 'highlight-row' : '')}
+      locale={{ emptyText: texts.noData }}
+      rowClassName={(record) =>
+        record.userId === currentUserId ? 'highlight-row' : ''
+      }
+      scroll={{ x: 'max-content' }} // Cho phép cuộn ngang nếu không đủ chỗ
     />
+
   );
 };
 

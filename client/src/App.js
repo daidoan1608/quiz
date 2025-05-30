@@ -63,7 +63,7 @@ function RouterApp() {
           <Route path="/result" element={<Result />} />
           <Route path="/rank" element={<Rank />} />
           <Route path="/favorites" element={<LessonList />} />
-          <Route path="/favoriteslistChap" element={<LessonListChap />} />
+          {/* <Route path="/favoriteslistChap" element={<LessonListChap />} /> */}
         </Route>
       </Routes>
     </Router>
