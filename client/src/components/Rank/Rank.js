@@ -106,8 +106,9 @@ const Rank = () => {
         <div className="user-rank">
           <strong>{texts.noResultMessage}</strong>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 

@@ -3,17 +3,19 @@ import { publicAxios } from "../../api/axiosConfig";
 import { Pagination } from "antd";
 import "./Home.css";
 import { useLanguage } from "../../components/Context/LanguageProvider";
-import subjectTranslations from "../../Languages/subjectTranslations";
+
 
 export default function Home() {
   const [subjects, setSubjects] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
-  const { texts, language } = useLanguage();
+  const { texts } = useLanguage();
+
 
   useEffect(() => {
     getAllSubjects();
   }, []);
+
 
   const getAllSubjects = async () => {
     try {
@@ -24,26 +26,25 @@ export default function Home() {
     }
   };
 
+
   const currentSubjects = subjects.slice(0, 5);
 
-  const elementSubjects = currentSubjects.length > 0 ? (
-  currentSubjects.map((item, index) => {
-    const translatedName =
-      subjectTranslations?.[item.name]?.[language] || item.name;
 
-    return (
+  const elementSubjects = currentSubjects.length > 0 ? (
+    currentSubjects.map((item, index) => (
       <div className="category" key={index}>
         <div className="container">
           <div className="course">
-            <h3>{translatedName}</h3>
+            <h3>{item.name}</h3>
           </div>
         </div>
       </div>
-    );
-  })
-) : (
-  <div className="no-subjects">{texts.noSubjects}</div>
-);
+    ))
+  ) : (
+    <div className="no-subjects">{texts.noSubjects}</div>
+  );
+
+
   return (
     <div>
       <main className="position-relative main-background">
@@ -56,26 +57,50 @@ export default function Home() {
           }}
         >
           <h1
-            className="fw-bold"
+            className="fw-bold "
             style={{
-              position: "absolute",
-              top: "0",
-              left: "2%",
+              position: "relative",
               color: "#336699",
-              fontSize: "4.5rem",
-              textShadow: "0 0 10px rgba(255, 255, 255, 0.8)",
+              left: "2vw", // giữ lệch trái tương đối
+              fontSize: "5vw", // kích thước chữ theo độ rộng màn hình
+              textShadow: "0 0 1vw rgba(255, 255, 255, 0.8)",
+              marginTop: "1rem", // tránh bị dính sát trên
             }}
           >
             {texts.onlineTest}
           </h1>
-          <div className="text-detail" style={{ textAlign: "left", marginTop: "8rem", paddingLeft: "2%" }}>
-            <p>{texts.slogan1}</p>
-            <p>{texts.slogan2}</p>
-            <p>{texts.slogan3}</p>
-            <p>{texts.slogan4}</p>
-          </div>
+
+
+          {/* color: "#336699", text-primary
+           // textAlign: "left",
+              // marginTop: "8rem",
+              // paddingLeft: "2%"*/}
+          <h2
+            className="fw-normal"
+            style={{
+              position: "relative",
+              color: "#336699",
+              fontSize: "clamp(0.6rem, 3.5vw, 2rem)",
+              marginTop: "1rem",
+              lineHeight: 1.3,
+              textAlign: "left",
+              left: "6vw",
+            }}
+          >
+            <span style={{ display: "block" }}>{texts.slogan1}</span>
+            <span style={{ display: "block" }}>{texts.slogan2}</span>
+            <span style={{ display: "block" }}>{texts.slogan3}</span>
+            <span style={{ display: "block" }}>{texts.slogan4}</span>
+          </h2>
+
+
+
+
+
+
         </div>
       </main>
+
 
       <div className="container-fluid mt-5">
         <div className="row">
@@ -89,6 +114,7 @@ export default function Home() {
           </div>
         </div>
 
+
         <div className="row">
           <div className="col-12">
             <h2 className="text-center my-4" style={{ color: "#0088a9" }}>
@@ -100,6 +126,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
