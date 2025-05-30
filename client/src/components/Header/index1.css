@@ -53,3 +53,24 @@
   /* khi hover, border dưới đổi màu trắng */
   cursor: pointer;
 }
+
+/* person */
+.user-dropdown {
+  position: relative;
+}
+
+.user-menu {
+  right: 0;
+  z-index: 999;
+  min-width: 150px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Ẩn các nút riêng lẻ nếu không cần trùng lặp */
+/* @media (min-width: 768px) {
+  .d-md-flex>a:not(:first-child) {
+    display: none !important;
+  }
+} */

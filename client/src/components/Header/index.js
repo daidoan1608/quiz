@@ -20,8 +20,8 @@ export default function Headers() {
 
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   // const [isHovered, setIsHovered] = useState(false);
-
-
+  // person
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
 
   // Mở / Đóng modal, khi mở thì gọi lại loadFavorites từ context nếu cần
@@ -94,18 +94,31 @@ export default function Headers() {
                   </a>
                 </>
               ) : (
-                <div className="position-relative">
-                  <button className="btn btn-light btn-sm border px-2">
+                <div className="position-relative user-dropdown">
+                  <button
+                    className="btn btn-light btn-sm border px-2"
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                  >
                     <i className="fa-regular fa-user"></i>
                   </button>
-                  <ul
-                    className="list-unstyled position-absolute bg-white border p-2 mt-1"
-                    style={{ right: 0, zIndex: 999 }}
-                  >
-                    <li><a href="/account" className="dropdown-item">{texts.account}</a></li>
-                    <li><a href="#" onClick={toggleModal} className="dropdown-item">{texts.favorites || "Yêu thích"}</a></li>
-                    <li><a href="/" onClick={handleLogout} className="dropdown-item text-danger">{texts.logout}</a></li>
-                  </ul>
+
+                  {showUserMenu && (
+                    <ul className="user-menu list-unstyled position-absolute bg-white border p-2 mt-1">
+                      <li>
+                        <a href="/account" className="dropdown-item">{texts.account}</a>
+                      </li>
+                      <li>
+                        <button onClick={toggleModal} className="dropdown-item">
+                          {texts.favorites || "Yêu thích"}
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={handleLogout} className="dropdown-item text-danger">
+                          {texts.logout}
+                        </button>
+                      </li>
+                    </ul>
+                  )}
                 </div>
               )}
             </div>
