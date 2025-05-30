@@ -33,9 +33,6 @@ export default function LessonList() {
                                 <h3>{item.subjectName}</h3>
 
                                 <div className="card-actions">
-                                    <a href="/favoriteslistChap" className="favorites-link-list">
-                                        {texts.chapter}<i className="fa-solid fa-heart"></i>
-                                    </a>
                                     <button
                                         className="card-button remove"
                                         onClick={() => handleRemoveFavorite(item.subjectId)}

@@ -18,10 +18,9 @@ import ListExam from "./components/Exam/ListExam/ListExam";
 import Exam from "./components/Exam/Exam/Exam";
 import Result from "./components/Exam/Result/Result";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
-import Account from "./components/Account/Account";
+import Account from './components/account/account';
 import Rank from "./components/Rank/Rank";
 import LessonList from "./components/favorites/LessonList";
-import LessonListChap from "./components/favorites/LessonListChap";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -63,7 +62,6 @@ function RouterApp() {
           <Route path="/result" element={<Result />} />
           <Route path="/rank" element={<Rank />} />
           <Route path="/favorites" element={<LessonList />} />
-          <Route path="/favoriteslistChap" element={<LessonListChap />} />
         </Route>
       </Routes>
     </Router>

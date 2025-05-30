@@ -1,8 +1,10 @@
 .card-buttons-row {
   display: flex;
   align-items: center;
-  gap: 12px; /* khoảng cách giữa các nút */
-  margin-top: 10px; /* nếu cần khoảng cách so với tiêu đề */
+  gap: 12px;
+  /* khoảng cách giữa các nút */
+  margin-top: 10px;
+  /* nếu cần khoảng cách so với tiêu đề */
 }
 
 .card-button {
@@ -40,14 +42,18 @@
 }
 
 .card-exam {
-  position: relative; /* Để có thể sử dụng vị trí tuyệt đối cho bookmark */
+  position: relative;
+  /* Để có thể sử dụng vị trí tuyệt đối cho bookmark */
 }
 
 .bookmark-button {
   position: absolute;
-  top: 10px; /* Cách phía trên 10px */
-  right: 10px; /* Cách phía phải 10px */
-  z-index: 10; /* Đảm bảo nút bookmark luôn nằm trên các phần tử khác */
+  top: 10px;
+  /* Cách phía trên 10px */
+  right: 10px;
+  /* Cách phía phải 10px */
+  z-index: 10;
+  /* Đảm bảo nút bookmark luôn nằm trên các phần tử khác */
 }
 
 .bookmark-icon {
@@ -200,6 +206,39 @@
 .card-button:hover {
   background-color: #0056b3;
 }
+
+/* Chữ */
+.auto-fit-text {
+  font-size: clamp(0.8rem, 2.5vw, 1.25rem);
+  /* Tự động co giãn */
+  white-space: nowrap;
+  /* Không xuống dòng */
+  overflow: hidden;
+  /* Ẩn phần dư */
+  text-overflow: ellipsis;
+  /* Hiện "..." nếu tràn */
+  display: block;
+  width: 100%;
+}
+
+.responsive-exam-title {
+  font-size: clamp(1rem, 2.5vw, 1.75rem);
+  /* Co giãn theo màn hình */
+  white-space: nowrap;
+  /* Không xuống dòng */
+  overflow: hidden;
+  /* Ẩn chữ tràn */
+  text-overflow: ellipsis;
+  /* Hiện "..." nếu quá dài */
+  margin-bottom: 0.75rem;
+}
+
+.card-button,
+.favorites-button {
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.75rem, 2vw, 1rem);
+}
+
 
 
 
