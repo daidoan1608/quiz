@@ -12,3 +12,10 @@
     justify-content: space-between;
     height: 100%;
   }
+
+  @media (max-width:739px) {
+    .dashboard--content {
+    padding: 4px;
+    display: block;
+  }
+  }

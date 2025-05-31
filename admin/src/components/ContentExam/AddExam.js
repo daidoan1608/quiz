@@ -170,14 +170,14 @@ export default function AddExam() {
       ),
     };
 
-    // try {
-    //   await authAxios.post("/admin/exams", payload);
-    //   alert("Thêm bài thi thành công!");
-    //   navigate("/admin/exams");
-    // } catch (error) {
-    //   console.error("Lỗi khi thêm bài thi:", error);
-    //   alert("Không thể thêm bài thi. Vui lòng thử lại.");
-    // }
+    try {
+      await authAxios.post("/admin/exams", payload);
+      alert("Thêm bài thi thành công!");
+      navigate("/admin/exams");
+    } catch (error) {
+      console.error("Lỗi khi thêm bài thi:", error);
+      alert("Không thể thêm bài thi. Vui lòng thử lại.");
+    }
     console.info("Payload:", payload);
   };
 
