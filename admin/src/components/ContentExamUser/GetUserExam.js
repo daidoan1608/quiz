@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BiCheckCircle } from 'react-icons/bi';
 import { authAxios } from '../../Api/axiosConfig';
-import Pagination from '../Pagination'; // Component phân trang của bạn
-import "../../styles/responsiveTable.css"
+import Pagination from '../Pagination';
+import "../../styles/responsiveTable.css";
 
 export default function GetUserExam() {
     const [userExams, setUserExams] = useState([]);
+    const [userInfoMap, setUserInfoMap] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
     const navigate = useNavigate();
@@ -18,9 +19,35 @@ export default function GetUserExam() {
     const fetchUserExams = async () => {
         try {
             const response = await authAxios.get('/admin/userexams');
-            setUserExams(response.data.data || []);
+            const data = response.data.data || [];
+            setUserExams(data);
+
+            // Lấy tất cả userId duy nhất
+            const uniqueUserIds = [...new Set(data.map(item => item.userExamDto.userId))];
+
+            // Gọi API lấy thông tin user
+            uniqueUserIds.forEach(userId => {
+                fetchUserInfo(userId);
+            });
         } catch (error) {
             console.error('Lỗi khi lấy dữ liệu user exams: ', error);
+        }
+    };
+
+    const fetchUserInfo = async (userId) => {
+        try {
+            const response = await authAxios.get(`/user/${userId}`);
+            const userData = response.data.data; // Truy cập đúng vào "data" trong JSON
+            setUserInfoMap((prev) => ({
+                ...prev,
+                [userId]: userData
+            }));
+        } catch (error) {
+            console.error(`Lỗi khi lấy thông tin user ${userId}: `, error);
+            setUserInfoMap((prev) => ({
+                ...prev,
+                [userId]: { username: 'Không có', fullName: 'Không có' }
+            }));
         }
     };
 
@@ -45,12 +72,16 @@ export default function GetUserExam() {
                         <th>Thời gian kết thúc</th>
                         <th>Điểm</th>
                         <th>User ID</th>
+                        <th>Username</th>
+                        <th>Họ tên</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {currentUserExams.map((item, index) => {
                         const exam = item.userExamDto;
+                        const userInfo = userInfoMap[exam.userId] || {};
+
                         return (
                             <tr key={exam.userExamId || index}>
                                 <td data-label="Môn học">{item.subjectName}</td>
@@ -59,6 +90,8 @@ export default function GetUserExam() {
                                 <td data-label="Thời gian kết thúc">{new Date(exam.endTime).toLocaleString()}</td>
                                 <td data-label="Điểm">{exam.score}</td>
                                 <td data-label="User ID">{exam.userId}</td>
+                                <td data-label="Username">{userInfo.username || 'Đang tải...'}</td>
+                                <td data-label="Họ tên">{userInfo.fullName || 'Đang tải...'}</td>
                                 <td data-label="Action">
                                     <BiCheckCircle
                                         size={24}

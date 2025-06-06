@@ -7,6 +7,7 @@ export default function GetUserExambyId() {
   const { userExamId } = useParams();
   const [examDetail, setExamDetail] = useState(null);
   const [examQuestions, setExamQuestions] = useState([]);
+  const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,10 +20,14 @@ export default function GetUserExambyId() {
       const detail = response.data.data;
       setExamDetail(detail);
 
-      // Gọi API để lấy danh sách câu hỏi dựa vào examId
       const examId = detail.userExamDto.examId;
       const questionResponse = await authAxios.get(`/public/exams/${examId}`);
       setExamQuestions(questionResponse.data.data.questions);
+
+      // Gọi API lấy thông tin người dùng từ userId
+      const userId = detail.userExamDto.userId;
+      const userResponse = await authAxios.get(`/user/${userId}`);
+      setUserInfo(userResponse.data.data);
     } catch (error) {
       console.error('Lỗi khi lấy chi tiết bài thi:', error);
     } finally {
@@ -50,6 +55,8 @@ export default function GetUserExambyId() {
         <p><strong>Thời gian kết thúc:</strong> {new Date(userExamDto.endTime).toLocaleString()}</p>
         <p><strong>Điểm:</strong> {userExamDto.score}</p>
         <p><strong>User ID:</strong> {userExamDto.userId}</p>
+        <p><strong>Username:</strong> {userInfo?.username || 'Đang tải...'}</p>
+        <p><strong>Họ tên:</strong> {userInfo?.fullName || 'Đang tải...'}</p>
       </div>
 
       <div className="question-list-scroll">
