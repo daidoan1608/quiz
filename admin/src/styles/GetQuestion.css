@@ -1,15 +1,19 @@
 /* Truncate text with ellipsis in all table cells */
-.truncated-text {
-    max-width: 150px; /* Adjust the max width as necessary */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-  }
-  
-  .truncated-text:hover {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-  }
+@media (min-width:739px) {
+  .truncated-text {
+      max-width: 150px; /* Adjust the max width as necessary */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+    
+    .truncated-text:hover {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
+}
+
+
   

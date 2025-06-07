@@ -1,4 +1,12 @@
+  @media (max-width:739px) {
+    .content-container .content-list {
+      display: block;
+    }
 
+    .content-list .content-block {
+      width: 100%;
+    }
+  }
   
   .content-container {
     padding: 0px;

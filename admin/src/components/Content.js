@@ -22,6 +22,8 @@ import AddUser from './ContentUser/AddUser';
 import GetUser from './ContentUser/GetUser';
 import UpdateUser from './ContentUser/UpdateUser';
 import ImportInterface from './Import/ImportInterface';
+import GetUserExam from './ContentExamUser/GetUserExam';
+import GetUserExambyId from './ContentExamUser/GetUserExambyId';
 
 export default function Content() {
   return (
@@ -54,6 +56,10 @@ export default function Content() {
           <Route path='/chapter/questions' element={<GetQuestion />} />
           <Route path='/admin/questions' element={<AddQuestion />} />
           <Route path='/admin/questions/:questionId' element={<UpdateQuestion />} />
+
+          <Route path='/admin/userexams'element={<GetUserExam />} />
+          <Route path="/userexam/:userExamId" element={<GetUserExambyId />} />
+
         </Routes>
         </div>
         <div/>

@@ -1,0 +1,59 @@
+/* Mặc định: hiển thị table như bình thường */
+.responsive-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.responsive-table th,
+.responsive-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Trên mobile: hiển thị dạng block */
+@media (max-width: 739px) {
+  .heading-content {
+    text-align: center;
+  }
+
+  .dashboard .menu {
+    display: none;
+  }
+
+  .responsive-table thead {
+    display: none;
+  }
+
+  .responsive-table, 
+  .responsive-table tbody, 
+  .responsive-table tr, 
+  .responsive-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .responsive-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 6px;
+  }
+
+  .responsive-table td {
+    position: relative;
+    padding-left: 48%;
+    border: none;
+    border-bottom: 1px solid #eee;
+    overflow: hidden;
+  }
+
+  .responsive-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+}

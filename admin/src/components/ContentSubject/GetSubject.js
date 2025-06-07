@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from '../Pagination'; // Đường dẫn tùy theo dự án của bạn
 import { authAxios } from '../../Api/axiosConfig';
 import { BiEdit, BiTrash, BiCheckCircle, BiPlus } from 'react-icons/bi';
+import '../../styles/responsiveTable.css'
 
 export default function GetSubject() {
     const [subjects, setSubjects] = useState([]);
@@ -50,10 +51,10 @@ export default function GetSubject() {
     // Render danh sách môn học
     const elementSubject = currentSubjects.map((item) => (
         <tr key={item.subjectId}>
-            <td>{item.subjectId}</td>
-            <td>{item.name}</td>
-            <td>{item.description}</td>
-            <td>
+            <td data-label="Mã môn học">{item.subjectId}</td>
+            <td data-label="Tên môn học">{item.name}</td>
+            <td data-label="Mô tả">{item.description||"Không có"}</td>
+            <td data-label="Action">
                 <button
                     className="btn btn-danger mx-1"
                     onClick={() => deleteSubject(item.subjectId)}
@@ -77,8 +78,8 @@ export default function GetSubject() {
     ));
 
     return (
-        <div>
-            <h2>Quản lý môn học</h2>
+        <div className='responsive-table'>
+            <h2 className='heading-content'>Quản lý môn học</h2>
             <button
                 className="btn btn-primary mb-3 float-end"
                 onClick={() => navigate('/admin/subjects')}

@@ -3,6 +3,7 @@ import {authAxios} from '../../Api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../Pagination'; // Sử dụng thành phần Pagination đã xây dựng
 import { BiEdit, BiPlus, BiTrash } from 'react-icons/bi';
+import '../../styles/responsiveTable.css'
 
 export default function GetChapter() {
     const [chapters, setChapters] = useState([]);
@@ -44,8 +45,8 @@ export default function GetChapter() {
     const currentChapters = chapters.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
-        <div>
-            <h2>Quản lý Chương</h2>
+        <div className='responsive-table'>
+            <h2 className='heading-content'>Quản lý Chương</h2>
 
             {/* Nút chuyển đến trang thêm chương */}
             <button
@@ -69,11 +70,11 @@ export default function GetChapter() {
                 <tbody>
                     {currentChapters.map((chapter) => (
                         <tr key={chapter.chapterId}>
-                            <td>{chapter.chapterId}</td>
-                            <td>{chapter.name}</td>
-                            <td>{chapter.subjectId}</td>
-                            <td>{chapter.chapterNumber}</td>
-                            <td>
+                            <td data-label="Mã chương">{chapter.chapterId}</td>
+                            <td data-label="Tên chương">{chapter.name}</td>
+                            <td data-label="Mã môn học">{chapter.subjectId}</td>
+                            <td data-label="Chương số">{chapter.chapterNumber}</td>
+                            <td data-label="Action">
                                 <button
                                     className="btn btn-danger mx-1"
                                     onClick={() => deleteChapter(chapter.chapterId)}

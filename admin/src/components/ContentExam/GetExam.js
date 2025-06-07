@@ -3,7 +3,7 @@ import {authAxios} from '../../Api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../Pagination'; // Sử dụng thành phần Pagination đã tạo
 import { BiPlus } from "react-icons/bi"; // Import các icon từ react-icons
-
+import '../../styles/responsiveTable.css'
 
 export default function GetExam() {
     const [exams, setExams] = useState([]); // Lưu danh sách bài thi
@@ -32,17 +32,17 @@ export default function GetExam() {
     // Render dữ liệu ra bảng
     const elementExams = currentExams.map((item, index) => (
         <tr key={index}>
-            <td>{item.subjectId}</td> {/* Mã môn học */}
-            <td>{item.title}</td> {/* Tên đề thi */}
-            <td>{item.description}</td> {/* Mô tả đề thi */}
-            <td>{item.duration} phút</td> {/* Thời gian */}
-            <td>{item.questions.length} câu hỏi</td> {/* Số câu hỏi */}
+            <td data-label="Mã môn học">{item.subjectId}</td> {/* Mã môn học */}
+            <td data-label="Tên đề thi">{item.title}</td> {/* Tên đề thi */}
+            <td data-label="Mô tả"> {item.description||"Không có"}</td> {/* Mô tả đề thi */}
+            <td data-label="Thời gian">{item.duration} phút</td> {/* Thời gian */}
+            <td data-label="Số câu hỏi">{item.questions.length} câu hỏi</td> {/* Số câu hỏi */}
         </tr>
     ));
 
     return (
-        <div>
-            <h2>Quản lý bài thi</h2>
+        <div className='responsive-table'>
+            <h2 className='heading-content'>Quản lý bài thi</h2>
 
             {/* Nút "Thêm bài thi" góc trên bên phải */}
             <button
