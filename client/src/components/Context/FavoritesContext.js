@@ -10,10 +10,11 @@ export const FavoritesProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const userId = user;
+  const userId = localStorage.getItem("userId") || user?._id;
+  const accessToken = localStorage.getItem("accessToken") || user?.accessToken;
 
   useEffect(() => {
-    if (isLoggedIn && userId) {
+    if (accessToken && userId) {
       loadFavorites();
     } else {
       setFavorites([]);
