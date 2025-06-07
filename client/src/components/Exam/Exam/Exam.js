@@ -159,49 +159,51 @@ export default function Exam() {
 
   return (
     <>
-      <div className="category-center">
-        <div className="table-left">
-          <div className="info">
-            <p>
-              <span>{texts.subjectExam}:</span> {subjectName}
-            </p>
-            <p>
-              <span>{texts.topic}:</span> {title}
-            </p>
-            <p>
-              <span>{texts.question}:</span> {questions.length}
-            </p>
-            <p>
-              <span>{texts.time}:</span> {duration} Phút
-            </p>
+      <div class="scroll-wrapper">
+        <div className="category-center">
+          <div className="table-left">
+            <div className="info">
+              <p>
+                <span>{texts.subjectExam}:</span> {subjectName}
+              </p>
+              <p>
+                <span>{texts.topic}:</span> {title}
+              </p>
+              <p>
+                <span>{texts.question}:</span> {questions.length}
+              </p>
+              <p>
+                <span>{texts.time}:</span> {duration} Phút
+              </p>
+            </div>
+            <div className="timer">
+              <h2>{texts.conutDown}</h2>
+              <span>{`${minutes.toString().padStart(2, "0")}:${seconds
+                .toString()
+                .padStart(2, "0")}`}</span>
+            </div>
           </div>
-          <div className="timer">
-            <h2>{texts.conutDown}</h2>
-            <span>{`${minutes.toString().padStart(2, "0")}:${seconds
-              .toString()
-              .padStart(2, "0")}`}</span>
-          </div>
-        </div>
-        <div className="table-right">
-          <div className="answer-sheet">
-            <p>
-              <span>{texts.table}</span>
-            </p>
-            {[...Array(questions.length)].map((_, idx) => (
-              <div
-                key={idx}
-                className={`number ${
-                  selectedAnswers[idx] !== undefined ? "selected" : ""
-                }`}
-                onClick={() => scrollToQuestion(idx)}
-                style={{ cursor: "pointer" }}
-              >
-                {idx + 1}
-              </div>
-            ))}
+          <div className="table-right">
+            <div className="answer-sheet">
+              <p>
+                <span>{texts.table}</span>
+              </p>
+              {[...Array(questions.length)].map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`number ${selectedAnswers[idx] !== undefined ? "selected" : ""
+                    }`}
+                  onClick={() => scrollToQuestion(idx)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {idx + 1}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
+      {/* <div className="main-layout"> */}
       <div className="category-end">
         {questions.map((item, questionIndex) => (
           <div
@@ -245,6 +247,7 @@ export default function Exam() {
           {texts.submit}
         </button>
       </div>
+      {/* </div> */}
     </>
   );
 }

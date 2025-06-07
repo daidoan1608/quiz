@@ -91,3 +91,61 @@
     text-decoration: none;
 
 }
+
+/* Mặc định (máy tính lớn) */
+.card-content-list h3 {
+    font-size: 1.2rem;
+}
+
+.card-button.remove {
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+/* Máy tính bảng (iPad) */
+@media (max-width: 1024px) {
+    .card-content-list h3 {
+        font-size: 1.1rem;
+    }
+
+    .card-button.remove {
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .favorites-link-list {
+        border-width: 1.5px;
+    }
+}
+
+/* Điện thoại lớn */
+@media (max-width: 768px) {
+    .card-content-list h3 {
+        font-size: 1rem;
+    }
+
+    .card-button.remove {
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+
+    .favorites-link-list {
+        border-width: 1.2px;
+    }
+}
+
+/* Điện thoại nhỏ */
+@media (max-width: 480px) {
+    .card-content-list h3 {
+        font-size: 0.9rem;
+    }
+
+    .card-button.remove {
+        padding: 3px 6px;
+        border-radius: 3px;
+    }
+
+    .favorites-link-list {
+        border-width: 1px;
+    }
+}

@@ -95,3 +95,98 @@
 .favorites-button.favorited i {
   color: red;
 }
+
+/* //////////// */
+/* Mặc định ẩn sidebar trên mobile */
+.sidebar-custom {
+  z-index: 1050;
+  /* cao hơn content */
+}
+
+/* Trên mobile: sidebar dạng overlay */
+@media (max-width: 767.98px) {
+  .sidebar-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 80%;
+    height: 100vh;
+    background: #ffffff;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .sidebar-custom.show-sidebar {
+    transform: translateX(0%);
+  }
+}
+
+/* Chữ */
+.auto-fit-text {
+  font-size: clamp(0.8rem, 2.5vw, 1.25rem);
+  /* Tự động co giãn */
+  white-space: nowrap;
+  /* Không xuống dòng */
+  overflow: hidden;
+  /* Ẩn phần dư */
+  text-overflow: ellipsis;
+  /* Hiện "..." nếu tràn */
+  display: block;
+  width: 100%;
+}
+
+/* favorite*/
+.favorite-icon-button {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: #dc3545;
+  /* Màu đỏ giống Bootstrap danger */
+  font-size: 1.2rem;
+}
+
+.favorite-icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.favorite-icon-button .fa-heart {
+  pointer-events: none;
+}
+
+.favorite-icon-button.favorited {
+  color: #dc3545;
+}
+
+.favorite-icon-button:not(.favorited) {
+  color: #dc3545;
+  /* hoặc xám nếu bạn muốn trạng thái chưa thích */
+}
+
+/* ... */
+.responsive-action-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.responsive-action-group>* {
+  flex-shrink: 0;
+  /* không cho co nhỏ hơn nội dung */
+  white-space: nowrap;
+  /* tránh xuống dòng chữ */
+  min-width: 0;
+  /* giúp co lại đúng */
+}
+
+.auto-fit-text {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
