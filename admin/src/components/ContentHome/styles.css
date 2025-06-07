@@ -1,5 +1,6 @@
-  @media (max-width:739px) {
-    .content-container .content-list {
+  @media (max-width: 1024px) {
+    .content-container .content-list,
+    .chart-container {
       display: block;
     }
 

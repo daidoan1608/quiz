@@ -11,7 +11,7 @@
 }
 
 /* Trên mobile: hiển thị dạng block */
-@media (max-width: 739px) {
+@media (max-width: 1024px) {
   .heading-content {
     text-align: center;
   }
@@ -42,7 +42,7 @@
 
   .responsive-table td {
     position: relative;
-    padding-left: 48%;
+    padding-left: 50%;
     border: none;
     border-bottom: 1px solid #eee;
     overflow: hidden;
