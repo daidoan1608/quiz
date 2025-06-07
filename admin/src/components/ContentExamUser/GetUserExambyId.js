@@ -68,9 +68,10 @@ export default function GetUserExambyId() {
               {question.answers.map((ans) => {
                 const isUserAnswer = ans.optionId === userAnswerId;
                 const isCorrect = ans.isCorrect;
+
                 let className = 'answer-option';
-                if (isUserAnswer && isCorrect) className += ' correct';
-                else if (isUserAnswer && !isCorrect) className += ' incorrect';
+                if (isCorrect) className += ' correct'; // luôn tô xanh đáp án đúng
+                if (isUserAnswer && !isCorrect) className += ' incorrect'; // tô đỏ đáp án sai user chọn
 
                 return (
                   <div key={ans.optionId} className={className}>

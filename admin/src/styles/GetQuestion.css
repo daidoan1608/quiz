@@ -1,5 +1,5 @@
 /* Truncate text with ellipsis in all table cells */
-@media (min-width:739px) {
+@media (min-width: 1024px) {
   .truncated-text {
       max-width: 150px; /* Adjust the max width as necessary */
       white-space: nowrap;
