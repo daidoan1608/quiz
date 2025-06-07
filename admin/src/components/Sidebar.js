@@ -4,6 +4,7 @@ import {
   BiLogOut,
   BiMessage,
   BiSolidReport,
+  BiBookOpen,
   BiStats,
   BiTask,
   BiUser,
@@ -39,6 +40,10 @@ export default function Sidebar() {
         <NavLink to="/home" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
           <BiHome className="icon" />
           <span>Home</span>
+        </NavLink>
+        <NavLink to="/admin/userexams" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
+          <BiBookOpen className="icon" />
+          <span>Quản lý bài thi user</span>
         </NavLink>
         <NavLink to="/admin/users" className={({ isActive }) => `item ${isActive ? 'active' : ''}`}>
           <BiUser className="icon" />

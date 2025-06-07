@@ -3,6 +3,7 @@ import { authAxios } from "../../Api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/Pagination";
 import { BiTrash, BiEdit, BiPlus } from "react-icons/bi"; // Import các icon từ react-icons
+import "../../styles/responsiveTable.css"
 
 export default function GetUser() {
   const [users, setUsers] = useState([]);
@@ -58,8 +59,8 @@ export default function GetUser() {
   }, []);
 
   return (
-    <div>
-      <h2>Quản lý User</h2>
+    <div className="responsive-table">
+      <h2 className="heading-content">Quản lý User</h2>
 
       {/* Nút chuyển đến trang thêm người dùng */}
 
@@ -85,12 +86,12 @@ export default function GetUser() {
         <tbody>
           {currentUsers.map((user, index) => (
             <tr key={index}>
-              <td>{user.userId}</td>
-              <td>{user.username}</td>
-              <td>{user.fullName}</td>
-              <td>{user.email}</td>
-              <td>{user.role}</td>
-              <td>
+              <td data-label="Mã tài khoản">{user.userId}</td>
+              <td data-label="Tên tài khoản">{user.username}</td>
+              <td data-label="Họ và tên">{user.fullName}</td>
+              <td data-label="Email">{user.email}</td>
+              <td data-label="Role">{user.role}</td>
+              <td data-label="Action">
                 <button
                   className="btn btn-success mx-1"
                   onClick={() => updateUser(user.userId)}

@@ -4,6 +4,7 @@ import Pagination from "../Pagination"; // Sử dụng thành phần Pagination
 import { BiEdit, BiTrash, BiPlus } from "react-icons/bi";
 import { CiImport } from "react-icons/ci";
 import "../../styles/GetQuestion.css";
+import "../../styles/responsiveTable.css"
 
 export default function GetQuestion() {
   const [questions, setQuestions] = useState([]);
@@ -43,7 +44,7 @@ export default function GetQuestion() {
 
   const renderAnswers = (answers) => {
     const columns = answers.map((answer, index) => (
-      <td key={index} className="truncated-text">
+      <td data-label={`Đáp án ${String.fromCharCode(65 + index)}`} key={index} className="truncated-text">
         {answer.content}
       </td>
     ));
@@ -64,18 +65,18 @@ export default function GetQuestion() {
 
   const elementQuestion = currentQuestions.map((item) => (
     <tr key={item.questionId}>
-      <td className="truncated-text">{item.questionId}</td>
-      <td className="truncated-text" title={item.content}>
+      <td data-label="Mã câu hỏi" className="truncated-text">{item.questionId}</td>
+      <td data-label="Nội dung" className="truncated-text" titel={item.content}>
         {item.content}
       </td>
-      <td className="truncated-text">{item.difficulty}</td>
-      <td className="truncated-text">{item.chapterName}</td>
+      <td data-label="Mức độ" className="truncated-text">{item.difficulty}</td>
+      <td data-label="Tên chương" className="truncated-text">{item.chapterName}</td>
       {renderAnswers(item.answers)}
-      <td className="truncated-text">
+      <td data-label="Đáp án đúng" className="truncated-text">
         {item.answers.find((answer) => answer.isCorrect)?.content ||
           "No correct answer"}
       </td>
-      <td>
+      <td data-label="Action">
         <button
           className="btn btn-danger mx-1"
           onClick={() => handleDelete(item.questionId)}
@@ -95,9 +96,9 @@ export default function GetQuestion() {
   ));
 
   return (
-    <div>
+    <div className="responsive-table">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2>Quản lý câu hỏi</h2>
+        <h2 className="heading-content">Quản lý câu hỏi</h2>
         <div>
           <button
             className="btn btn-primary me-3"
@@ -126,7 +127,7 @@ export default function GetQuestion() {
             <th>Đáp án C</th>
             <th>Đáp án D</th>
             <th>Đáp án đúng</th>
-            <th>Thao tác</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>{elementQuestion}</tbody>
