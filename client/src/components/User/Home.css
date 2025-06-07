@@ -1,9 +1,11 @@
 /* Background chính */
 .main-background {
-  background-image: url('/public/bgimage.avif'); /* Đảm bảo bạn đã đặt ảnh đúng ở public/bgimg.avif */
+  background-image: url('/public/bgimage.avif');
+  /* Đảm bảo bạn đã đặt ảnh đúng ở public/bgimg.avif */
   background-size: contain;
   background-position: right;
-  height: 500px; /* Chiều cao có thể điều chỉnh tùy ảnh */
+  height: 500px;
+  /* Chiều cao có thể điều chỉnh tùy ảnh */
   position: relative;
   background-repeat: no-repeat;
 }
@@ -32,7 +34,7 @@
   padding: 2rem;
   background-color: #f9f9f9;
   color: #333;
-  
+
 }
 
 .container-fluid h2 {
@@ -75,14 +77,14 @@
   font-style: italic;
 }
 
-.content-intro{
+.content-intro {
   background-color: #bcddef;
   border-radius: 8px;
 }
 
 
 
-.text-detail>p{
+.text-detail>p {
   font-size: 2.5rem;
   font-style: italic;
 }
