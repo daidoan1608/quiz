@@ -23,7 +23,7 @@ public class ExamController {
     @Operation(summary = "Tạo bài thi")
     public ResponseEntity<ApiResponse<ExamDto>> createExam(@RequestBody ExamRequest examRequest) {
         try {
-            ExamDto createdExam = examService.createExam(examRequest.getExamDto(), examRequest.getNumberOfQuestion());
+            ExamDto createdExam = examService.createExam(examRequest);
             return ResponseEntity.ok(ApiResponse.success("Exam created successfully", createdExam));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to create exam", List.of(e.getMessage())));

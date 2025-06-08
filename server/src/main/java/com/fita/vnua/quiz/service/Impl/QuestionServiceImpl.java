@@ -15,10 +15,13 @@ import com.fita.vnua.quiz.utils.ExcelHelper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,6 +65,28 @@ public class QuestionServiceImpl implements QuestionService {
         return questions.stream()
                 .map(question -> modelMapper.map(question, QuestionDto.class))
                 .toList();
+    }
+
+    @Override
+    public List<QuestionDto> getQuestionsBySubjectAndDifficulty(Long subjectId, int number, String difficulty) {
+        // Lấy câu hỏi từ repository
+        List<Question> questions = questionRepository.findQuestionsBySubjectAndDifficulty(subjectId, difficulty, number);
+
+        // Chuyển đổi từ Entity sang DTO
+        return questions.stream()
+                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<QuestionDto> getQuestionsByChapter(Long chapterId, int number) {
+        // Lấy câu hỏi từ repository
+        List<Question> questions = questionRepository.findQuestionsByChapter(chapterId, number);
+
+        // Chuyển đổi từ Entity sang DTO
+        return questions.stream()
+                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -207,14 +232,48 @@ public class QuestionServiceImpl implements QuestionService {
     public Map<String, Object> totalQuestionBySubject(Long subjectId) {
         List<Chapter> chapters = chapterRepository.findBySubject(subjectId);
         int totalQuestion = 0, totalMedium = 0, totalEasy = 0, totalHard = 0;
-        Map<String, Integer> tolalQuestionByChapter = new java.util.HashMap<>(Map.of());
+        Map<Long, Map<String, Object>> totalQuestionByChapter = new HashMap<>();
+
         for (Chapter chapter : chapters) {
-            tolalQuestionByChapter.put(chapter.getName(), (int) questionRepository.countByChapter(chapter));
-            totalQuestion += questionRepository.countByChapter(chapter);
-            totalMedium += (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.MEDIUM);
-            totalEasy += (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.EASY);
-            totalHard += (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.HARD);
+            // Kiểm tra xem có chapterId đã tồn tại trong totalQuestionByChapter chưa
+            if (!totalQuestionByChapter.containsKey(chapter.getChapterId())) {
+                totalQuestionByChapter.put(chapter.getChapterId(), new HashMap<>());
+            }
+
+            // Đặt tổng số câu hỏi cho chapter
+            Map<String, Object> chapterDetails = totalQuestionByChapter.get(chapter.getChapterId());
+
+            // Thêm tên chương vào Map
+            chapterDetails.put("chapterName", chapter.getName());  // Thêm tên chương
+
+            int chapterQuestionCount = (int) questionRepository.countByChapter(chapter);
+            chapterDetails.put("totalQuestions", chapterQuestionCount);
+
+            // Cập nhật tổng số câu hỏi
+            totalQuestion += chapterQuestionCount;
+
+            // Cập nhật tổng số câu theo độ khó
+            int mediumCount = (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.MEDIUM);
+            int easyCount = (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.EASY);
+            int hardCount = (int) questionRepository.countByChapterAndDifficulty(chapter, Question.Difficulty.HARD);
+
+            totalMedium += mediumCount;
+            totalEasy += easyCount;
+            totalHard += hardCount;
+
+            // Lưu số lượng câu hỏi theo độ khó vào Map
+            chapterDetails.put("medium", mediumCount);
+            chapterDetails.put("easy", easyCount);
+            chapterDetails.put("hard", hardCount);
         }
-        return Map.of("totalQuestion", totalQuestion, "totalMedium", totalMedium, "totalEasy", totalEasy, "totalHard", totalHard, "totalQuestionByChapter", tolalQuestionByChapter);
+
+        // Trả về dữ liệu tổng hợp
+        return Map.of(
+                "totalQuestion", totalQuestion,
+                "totalMedium", totalMedium,
+                "totalEasy", totalEasy,
+                "totalHard", totalHard,
+                "totalQuestionByChapter", totalQuestionByChapter
+        );
     }
 }

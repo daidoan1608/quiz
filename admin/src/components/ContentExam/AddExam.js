@@ -41,7 +41,8 @@ export default function AddExam() {
 
   const handleDifficultyChange = (difficulty, value) => {
     if (value < 0 || value > maxQuestions[difficulty]) return; // Giới hạn giá trị nhập
-    if (!isTotalSelected && !isChapterSelected) { // Chỉ cho phép nếu chưa chọn tổng số câu hoặc chương
+    if (!isTotalSelected && !isChapterSelected) {
+      // Chỉ cho phép nếu chưa chọn tổng số câu hoặc chương
       switch (difficulty) {
         case "easy":
           setEasyQuestions(value);
@@ -57,7 +58,6 @@ export default function AddExam() {
       }
     }
   };
-  
 
   const handleChapterChange = (chapterName, value) => {
     if (isTotalSelected || isDifficultySelected) return; // Bỏ qua nếu tổng hoặc độ khó đã được chọn
@@ -75,6 +75,7 @@ export default function AddExam() {
 
   // Tính tổng số câu đã chọn
   const totalSelectedQuestions =
+    totalQuestions +
     easyQuestions +
     mediumQuestions +
     hardQuestions +
@@ -88,7 +89,7 @@ export default function AddExam() {
 
   const fetchCategories = async () => {
     try {
-      const response = await authAxios.get("/public/categories")
+      const response = await authAxios.get("/public/categories");
       setCategories(response.data.data[0] || []);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách khoa:", error);
@@ -101,14 +102,24 @@ export default function AddExam() {
         `/admin/questions/total-questions/${subjectId}`
       );
       console.log("Giới hạn câu hỏi:", res.data.data);
+
+      // Cập nhật maxQuestions với dữ liệu từ API
       setMaxQuestions(res.data.data);
-      const chapterData = Object.entries(res.data.data.totalQuestionByChapter).map(
-        ([name, count]) => ({
-          chapterName: name,
-          totalQuestions: count,
-          selectedQuestions: 0,
-        })
-      );
+
+      // Duyệt qua totalQuestionByChapter và tạo dữ liệu cho từng chapter
+      const chapterData = Object.entries(
+        res.data.data.totalQuestionByChapter
+      ).map(([chapterId, chapterData]) => ({
+        chapterId: chapterId, // ID của chương
+        chapterName: chapterData.chapterName,
+        totalQuestions: chapterData.totalQuestions, // Tổng số câu hỏi
+        medium: chapterData.medium, // Số câu trung bình
+        hard: chapterData.hard, // Số câu khó
+        easy: chapterData.easy, // Số câu dễ
+        selectedQuestions: 0, // Ban đầu số câu đã chọn là 0
+      }));
+
+      // Cập nhật chapterQuestions với dữ liệu mới
       setChapterQuestions(chapterData);
     } catch (error) {
       console.error("Lỗi khi lấy giới hạn câu hỏi:", error);
@@ -159,17 +170,22 @@ export default function AddExam() {
       createdBy: userId,
     };
 
+    const totalQuestionByChapter = chapterQuestions.reduce((map, chapter) => {
+      if (chapter.selectedQuestions > 0) {
+        map[chapter.chapterId] = chapter.selectedQuestions;
+      }
+      return map;
+    }, {});
+
     const payload = {
       examDto,
       totalQuestions: parseInt(totalQuestions, 10) || null,
       easyQuestions,
       mediumQuestions,
       hardQuestions,
-      chapterQuestions: chapterQuestions.filter(
-        (chapter) => chapter.selectedQuestions > 0
-      ),
+      totalQuestionByChapter,
     };
-
+    console.info("Payload:", payload);
     try {
       await authAxios.post("/admin/exams", payload);
       alert("Thêm bài thi thành công!");
@@ -178,7 +194,6 @@ export default function AddExam() {
       console.error("Lỗi khi thêm bài thi:", error);
       alert("Không thể thêm bài thi. Vui lòng thử lại.");
     }
-    console.info("Payload:", payload);
   };
 
   return (
