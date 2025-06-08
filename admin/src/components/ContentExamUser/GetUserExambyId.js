@@ -45,7 +45,7 @@ export default function GetUserExambyId() {
   };
 
   return (
-    <div className="container mt-4">
+    <div>
       <h2 className="mb-3">Chi tiết bài thi người dùng</h2>
 
       <div className="mb-4">

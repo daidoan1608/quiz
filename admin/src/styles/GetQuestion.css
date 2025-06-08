@@ -1,11 +1,12 @@
 /* Truncate text with ellipsis in all table cells */
 @media (min-width: 1024px) {
   .truncated-text {
-      max-width: 80px; /* Adjust the max width as necessary */
+      max-width: 76px; /* Adjust the max width as necessary */
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
+      word-break: break-word;
     }
     
     .truncated-text:hover {

@@ -4,6 +4,7 @@ import { BiCheckCircle } from 'react-icons/bi';
 import { authAxios } from '../../Api/axiosConfig';
 import Pagination from '../Pagination';
 import "../../styles/responsiveTable.css";
+import "../../styles/GetQuestion.css"
 
 export default function GetUserExam() {
     const [userExams, setUserExams] = useState([]);
@@ -60,7 +61,7 @@ export default function GetUserExam() {
     const currentUserExams = userExams.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
-        <div className="container mt-4 responsive-table">
+        <div className="responsive-table">
             <h2 className="mb-4 heading-content">Quản lý bài thi người dùng</h2>
 
             <table className="table table-bordered">
@@ -84,15 +85,15 @@ export default function GetUserExam() {
 
                         return (
                             <tr key={exam.userExamId || index}>
-                                <td data-label="Môn học">{item.subjectName}</td>
-                                <td data-label="Đề thi">{item.title}</td>
-                                <td data-label="Thời gian bắt đầu">{new Date(exam.startTime).toLocaleString()}</td>
-                                <td data-label="Thời gian kết thúc">{new Date(exam.endTime).toLocaleString()}</td>
-                                <td data-label="Điểm">{exam.score}</td>
-                                <td data-label="User ID">{exam.userId}</td>
-                                <td data-label="Username">{userInfo.username || 'Đang tải...'}</td>
-                                <td data-label="Họ tên">{userInfo.fullName || 'Đang tải...'}</td>
-                                <td data-label="Action">
+                                <td className='truncated-text' data-label="Môn học">{item.subjectName}</td>
+                                <td className='truncated-text' data-label="Đề thi">{item.title}</td>
+                                <td className='truncated-text' data-label="Thời gian bắt đầu">{new Date(exam.startTime).toLocaleString()}</td>
+                                <td className='truncated-text' data-label="Thời gian kết thúc">{new Date(exam.endTime).toLocaleString()}</td>
+                                <td className='truncated-text' data-label="Điểm">{exam.score}</td>
+                                <td className='truncated-text' data-label="User ID">{exam.userId}</td>
+                                <td className='truncated-text' data-label="Username">{userInfo.username || 'Đang tải...'}</td>
+                                <td className='truncated-text' data-label="Họ tên">{userInfo.fullName || 'Đang tải...'}</td>
+                                <td className='truncated-text' data-label="Action">
                                     <BiCheckCircle
                                         size={24}
                                         color="green"
