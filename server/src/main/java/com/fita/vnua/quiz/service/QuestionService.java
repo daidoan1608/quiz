@@ -21,6 +21,10 @@ public interface QuestionService {
 
     List<QuestionDto> getQuestionsBySubjectAndNumber(Long subjectId, int number);
 
+    List<QuestionDto> getQuestionsBySubjectAndDifficulty(Long subjectId, int number, String difficulty);
+
+    List<QuestionDto> getQuestionsByChapter(Long chapterId, int number );
+
     List<QuestionDto> getQuestionsByExamId(Long examId);
 
     QuestionDto create(QuestionDto questionDto);

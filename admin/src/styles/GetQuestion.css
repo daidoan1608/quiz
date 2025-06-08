@@ -6,6 +6,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
+      max-width: 76px; /* Adjust the max width as necessary */
     }
     
     .truncated-text:hover {

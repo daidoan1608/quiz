@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.ExamDto;
+import com.fita.vnua.quiz.model.dto.request.ExamRequest;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface ExamService {
     ExamDto getExamById(Long id);
 
 
-    ExamDto createExam(ExamDto examDto, int numberOfQuestions);
+    ExamDto createExam(ExamRequest examRequest);
 
     ExamDto updateExam(Long id, ExamDto examDto);
 
