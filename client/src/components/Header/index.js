@@ -10,6 +10,7 @@ import { message } from "antd";
 
 export default function Headers() {
   const { isLoggedIn, logout } = useAuth();
+  const {fullName} = useAuth();
   const { language, toggleLanguage, texts } = useLanguage();
 
 
@@ -121,6 +122,9 @@ export default function Headers() {
                   )}
                 </div>
               )}
+                  <span className="d-block text-center mb-1" style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
+                    {fullName || "Người dùng"}
+                  </span>
             </div>
 
 
@@ -177,6 +181,7 @@ export default function Headers() {
                       >
                         {texts.logout}
                       </button>
+
                     </>
                   )}
                 </div>
