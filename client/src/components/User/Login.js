@@ -33,17 +33,19 @@ function Login() {
         password: values.password,
       });
 
-      const { accessToken, refreshToken, userId } = response.data.data;
+      const { accessToken, refreshToken, userId, fullName } = response.data.data;
 
       if (values.remember) {
         localStorage.setItem("savedUsername", values.username);
         localStorage.setItem("savedPassword", values.password);
+        localStorage.setItem("fullName", fullName);
       } else {
         localStorage.removeItem("savedUsername");
         localStorage.removeItem("savedPassword");
+        localStorage.removeItem("fullName");
       }
 
-      login(accessToken, refreshToken, userId);
+      login(accessToken, refreshToken, userId, fullName);
       navigate("/");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại!";

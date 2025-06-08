@@ -60,7 +60,7 @@ export default function GetUserExam() {
     const currentUserExams = userExams.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
-        <div className="container mt-4 responsive-table">
+        <div className="responsive-table">
             <h2 className="mb-4 heading-content">Quản lý bài thi người dùng</h2>
 
             <table className="table table-bordered">
