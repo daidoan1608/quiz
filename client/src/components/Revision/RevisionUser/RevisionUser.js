@@ -5,6 +5,7 @@ import subjectTranslations from "../../../Languages/subjectTranslations";
 import Sidebar from "../../User/SideBar";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { publicAxios } from "../../../api/axiosConfig";
+import { Row, Col, Pagination } from "antd";
 import "./RevisionUser.css";
 
 export default function RevisionUser() {
@@ -15,14 +16,11 @@ export default function RevisionUser() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { texts, language } = useLanguage();
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-
-  // Hàm toggle sidebar cho màn hình nhỏ
-  // const toggleSidebar = () => {
-  //   setIsSidebarOpen((prev) => !prev);
-  // };
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
 
   useEffect(() => {
     const getAllSubjects = async () => {
@@ -35,23 +33,22 @@ export default function RevisionUser() {
         setFilteredSubjects([]);
       }
     };
-
     getAllSubjects();
   }, []);
 
   useEffect(() => {
-    // Bộ lọc dựa vào danh mục hoặc tìm kiếm
+    let filtered = subjects;
+
     if (selectedCategory) {
-      setFilteredSubjects(subjects.filter((subj) => subj.categoryId === selectedCategory));
+      filtered = filtered.filter((subj) => subj.categoryId === selectedCategory);
     } else if (searchQuery.trim()) {
-      setFilteredSubjects(
-        subjects.filter((subject) =>
-          subject.name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+      filtered = filtered.filter((subject) =>
+        subject.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-    } else {
-      setFilteredSubjects(subjects);
     }
+
+    setFilteredSubjects(filtered);
+    setCurrentPage(1); // Reset về trang đầu sau khi lọc
   }, [selectedCategory, searchQuery, subjects]);
 
   const handleSelectCategory = (categoryId) => {
@@ -64,11 +61,16 @@ export default function RevisionUser() {
     setSelectedCategory(null);
   };
 
+  // Phân trang
+  const paginatedSubjects = filteredSubjects.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
-    // <div>
     <div className="container-fluid px-2 px-sm-3 px-md-4">
       <div className="row">
-        {/* Nút mở sidebar - chỉ hiện trên mobile */}
+        {/* Nút mở sidebar - mobile */}
         <div className="col-12 d-lg-none">
           <button
             className="btn btn-outline-secondary mb-3 responsive-button"
@@ -78,7 +80,7 @@ export default function RevisionUser() {
           </button>
         </div>
 
-        {/* Overlay đen khi mở sidebar mobile */}
+        {/* Overlay đen - mobile */}
         {sidebarOpen && (
           <div
             className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-lg-none"
@@ -87,10 +89,11 @@ export default function RevisionUser() {
           ></div>
         )}
 
-        {/* Sidebar kiểu off-canvas trên mobile */}
+        {/* Sidebar - mobile */}
         <div
-          className={`position-fixed top-0 start-0 bg-light h-100 p-3 shadow d-lg-none ${sidebarOpen ? "d-block" : "d-none"
-            }`}
+          className={`position-fixed top-0 start-0 bg-light h-100 p-3 shadow d-lg-none ${
+            sidebarOpen ? "d-block" : "d-none"
+          }`}
           style={{ width: "80%", maxWidth: "300px", zIndex: 1050 }}
         >
           <button
@@ -106,7 +109,7 @@ export default function RevisionUser() {
           />
         </div>
 
-        {/* Sidebar cố định trên desktop */}
+        {/* Sidebar - desktop */}
         <div className="col-lg-3 d-none d-lg-block">
           <div className="bg-light p-3 h-100">
             <Sidebar
@@ -117,7 +120,7 @@ export default function RevisionUser() {
           </div>
         </div>
 
-        {/* Content chiếm phần còn lại */}
+        {/* Nội dung môn học */}
         <div className="col-lg-9 col-md-8 col-12">
           <input
             type="text"
@@ -129,9 +132,9 @@ export default function RevisionUser() {
 
           <section className="category-re">
             <div className="container">
-              <div className="row justify-content-center">
-                {filteredSubjects.length > 0 ? (
-                  filteredSubjects.map((item) => {
+              <Row gutter={[16, 16]} justify="center"> 
+                {paginatedSubjects.length > 0 ? (
+                  paginatedSubjects.map((item) => {
                     const translatedName =
                       subjectTranslations[item.name]?.[language] || item.name;
                     const isFavorited = favorites.some(
@@ -139,20 +142,12 @@ export default function RevisionUser() {
                     );
 
                     return (
-                      <div
-                        className="col-lg-8 col-md-10 col-sm-12 mb-4"
-                        key={item.subjectId}
-                      >
+                      <Col xs={24} sm={24} md={12} lg={12} key={item.subjectId}> 
                         <div className="card h-100 shadow-sm">
                           <div className="card-body d-flex justify-content-between align-items-center flex-wrap">
-                            <div className="d-flex align-items-center" style={{ maxWidth: "100%" }}>
-                              <h5 className="card-title auto-fit-text">
-                                {translatedName}
-                              </h5>
-                            </div>
-
-
-                            {/* <div className="d-flex flex-wrap gap-2"> */}
+                            <h5 className="card-title auto-fit-text">
+                              {translatedName}
+                            </h5>
                             <div className="responsive-action-group">
                               <button
                                 className="btn btn-primary responsive-button"
@@ -165,8 +160,9 @@ export default function RevisionUser() {
                                 {texts.chooseChapter || "Chọn chương"}
                               </button>
                               <button
-                                className={`favorite-icon-button ${isFavorited ? "favorited" : ""}`}
-
+                                className={`favorite-icon-button ${
+                                  isFavorited ? "favorited" : ""
+                                }`}
                                 onClick={() =>
                                   toggleFavorite(item.subjectId, item.name)
                                 }
@@ -176,14 +172,15 @@ export default function RevisionUser() {
                                 }
                               >
                                 <i
-                                  className={`fa-heart ${isFavorited ? "fa-solid" : "fa-regular"
-                                    }`}
+                                  className={`fa-heart ${
+                                    isFavorited ? "fa-solid" : "fa-regular"
+                                  }`}
                                 ></i>
                               </button>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </Col>
                     );
                   })
                 ) : (
@@ -191,17 +188,24 @@ export default function RevisionUser() {
                     {texts.noSubjects || "Không tìm thấy môn học nào."}
                   </p>
                 )}
-              </div>
+              </Row>
+
+              {/* Pagination */}
+              {filteredSubjects.length > pageSize && (
+                <div className="d-flex justify-content-center mt-4">
+                  <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={filteredSubjects.length}
+                    onChange={(page) => setCurrentPage(page)}
+                    showSizeChanger={false}
+                  />
+                </div>
+              )}
             </div>
           </section>
         </div>
       </div>
     </div>
-
-
-    // </div >
   );
 }
-{/* <h5 className="card-title mb-2 mb-md-0 flex-grow-1 responsive-text">
-                              {translatedName}
-                            </h5> */}
