@@ -28,7 +28,7 @@ const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
 
   return (
     <div className="container-fluid">
-      <div className="d-flex flex-column flex-lg-row min-vh-100">
+      <div className="d-flex flex-column flex-lg-row min-vh-lg-100">
         {/* Sidebar */}
         <div
           className="flex-shrink-0 sidebar-container"
@@ -73,9 +73,10 @@ const Sidebar = ({ selectedCategory, onSelectCategory, onSearchChange }) => {
         </div>
 
         {/* Nội dung chính */}
-        <div className="flex-grow-1 p-3">
-          {/* Nội dung chính ở đây */}
-        </div>
+        {/* <div className="flex-grow-1 p-3"> */}
+        {/* <div className="p-3">
+         
+        </div> */}
       </div>
     </div>
 

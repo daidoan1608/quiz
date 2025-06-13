@@ -120,3 +120,10 @@
     font-size: clamp(0.85rem, 1.8vw, 1rem);
     padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.75rem, 2vw, 1rem);
 }
+
+/* thêm vh-lg-100 */
+@media (min-width: 992px) {
+    .min-vh-lg-100 {
+        min-height: 100vh;
+    }
+}

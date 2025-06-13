@@ -20,6 +20,7 @@ export default function ChooseExam() {
 
   const { favorites, toggleFavorite } = useFavorites();
 
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
@@ -85,6 +86,7 @@ export default function ChooseExam() {
           </button>
         </div>
 
+
         {/* Sidebar overlay - mobile */}
         {sidebarOpen && (
           <div
@@ -94,7 +96,6 @@ export default function ChooseExam() {
           ></div>
         )}
 
-        {/* Sidebar off-canvas - mobile */}
         <div
           className={`position-fixed top-0 start-0 bg-light h-100 p-3 shadow d-lg-none ${sidebarOpen ? "d-block" : "d-none"}`}
           style={{ width: "80%", maxWidth: "300px", zIndex: 1050 }}
@@ -113,7 +114,9 @@ export default function ChooseExam() {
         </div>
 
         {/* Sidebar - desktop */}
-        <div className="col-lg-3 d-none d-lg-block">
+        <div className="col-lg-3 col-md-12 d-none d-lg-block">
+          {/*         <div className="col-lg-3 d-none d-lg-block">
+ */}
           <div className="bg-light p-3 h-100">
             <Sidebar
               selectedCategory={selectedCategory}
@@ -124,7 +127,9 @@ export default function ChooseExam() {
         </div>
 
         {/* Main content */}
-        <div className="col-lg-9 col-md-8 col-12">
+        <div className="col-lg-9 col-md-12">
+          {/*         <div className="col-lg-9 col-md-8 col-12">
+ */}
           <input
             type="text"
             placeholder={texts.placeholder || "Tìm kiếm môn học..."}
@@ -161,9 +166,8 @@ export default function ChooseExam() {
                                 {texts.chooseTopic || "Chọn đề"}
                               </button>
                               <button
-                                className={`favorites-button ${
-                                  isFavorited(item.subjectId) ? "favorited" : ""
-                                }`}
+                                className={`favorites-button ${isFavorited(item.subjectId) ? "favorited" : ""
+                                  }`}
                                 onClick={() =>
                                   toggleFavorite(item.subjectId, item.name)
                                 }
@@ -175,11 +179,10 @@ export default function ChooseExam() {
                                 }
                               >
                                 <i
-                                  className={`fa-heart ${
-                                    isFavorited(item.subjectId)
-                                      ? "fa-solid"
-                                      : "fa-regular"
-                                  }`}
+                                  className={`fa-heart ${isFavorited(item.subjectId)
+                                    ? "fa-solid"
+                                    : "fa-regular"
+                                    }`}
                                 ></i>
                               </button>
                             </div>
