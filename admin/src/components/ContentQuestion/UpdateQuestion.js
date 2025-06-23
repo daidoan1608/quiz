@@ -1,126 +1,138 @@
-import React, { useEffect, useState } from 'react';
-import {authAxios} from '../../Api/axiosConfig';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { authAxios } from "../../Api/axiosConfig";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function UpdateQuestion() {
-    const { questionId } = useParams(); // Lấy questionId từ URL
-    const [question, setQuestion] = useState(null); // Dữ liệu câu hỏi
-    const navigate = useNavigate();
+  const { questionId } = useParams(); // Lấy questionId từ URL
+  const [question, setQuestion] = useState(null); // Dữ liệu câu hỏi
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        // Lấy dữ liệu câu hỏi
-        const fetchQuestion = async () => {
-            try {
-                const response = await authAxios.get(`/admin/questions/${questionId}`);
-                setQuestion(response.data);
-            } catch (error) {
-                console.error('Error fetching question:', error);
-                alert('Không thể tải câu hỏi!');
-            }
-        };
-
-        fetchQuestion();
-    }, [questionId]);
-
-    const handleInputChange = (field, value) => {
-        setQuestion({ ...question, [field]: value });
+  useEffect(() => {
+    // Lấy dữ liệu câu hỏi
+    const fetchQuestion = async () => {
+      try {
+        const response = await authAxios.get(`/admin/questions/${questionId}`);
+        setQuestion(response.data.data);
+      } catch (error) {
+        console.error("Error fetching question:", error);
+        alert("Không thể tải câu hỏi!");
+      }
     };
 
-    const handleAnswerChange = (index, field, value) => {
-        const updatedAnswers = [...question.answers];
-        updatedAnswers[index][field] = value;
-        setQuestion({ ...question, answers: updatedAnswers });
-    };
+    fetchQuestion();
+  }, [questionId]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await authAxios.patch(`/admin/questions/${questionId}`, question);
-            alert('Cập nhật câu hỏi thành công!');
-            navigate('/chapter/questions'); // Chuyển hướng về trang danh sách câu hỏi
-        } catch (error) {
-            console.error('Error updating question:', error);
-            alert('Không thể cập nhật câu hỏi!');
-        }
-    };
+  const handleInputChange = (field, value) => {
+    setQuestion({ ...question, [field]: value });
+  };
 
-    const handleCancel = () => {
-        navigate('/chapter/questions'); // Quay lại trang danh sách câu hỏi
-    };
+  const handleAnswerChange = (index, field, value) => {
+    const updatedAnswers = [...question.answers];
+    updatedAnswers[index][field] = value;
+    setQuestion({ ...question, answers: updatedAnswers });
+  };
 
-    if (!question) {
-        return <div>Loading...</div>;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await authAxios.patch(`/admin/questions/${questionId}`, question);
+      alert("Cập nhật câu hỏi thành công!");
+      navigate("/chapter/questions"); // Chuyển hướng về trang danh sách câu hỏi
+    } catch (error) {
+      console.error("Error updating question:", error);
+      alert("Không thể cập nhật câu hỏi!");
     }
+  };
 
-    return (
-        <div>
-            <h2>Cập Nhật Câu Hỏi</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                    <label htmlFor="content" className="form-label">Nội dung câu hỏi</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="content"
-                        value={question.content}
-                        onChange={(e) => handleInputChange('content', e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="difficulty" className="form-label">Mức độ</label>
-                    <select
-                        className="form-control"
-                        id="difficulty"
-                        value={question.difficulty}
-                        onChange={(e) => handleInputChange('difficulty', e.target.value)}
-                        required
-                    >
-                        <option value="">Chọn mức độ</option>
-                        <option value="EASY">Dễ</option>
-                        <option value="MEDIUM">Trung bình</option>
-                        <option value="HARD">Khó</option>
-                    </select>
-                </div>
-                {question.answers.map((answer, index) => (
-                    <div key={answer.optionId} className="mb-3">
-                        <label className="form-label">Đáp án {String.fromCharCode(65 + index)}</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            value={answer.content}
-                            onChange={(e) => handleAnswerChange(index, 'content', e.target.value)}
-                            required
-                        />
-                        <div className="form-check">
-                            <input
-                                type="radio"
-                                className="form-check-input"
-                                name="isCorrect"
-                                onChange={() => {
-                                    // Đặt tất cả isCorrect thành false, chỉ đáp án hiện tại thành true
-                                    const updatedAnswers = question.answers.map((ans, i) => ({
-                                        ...ans,
-                                        isCorrect: i === index,
-                                    }));
-                                    setQuestion({ ...question, answers: updatedAnswers });
-                                }}
-                                checked={answer.isCorrect}
-                                required
-                            />
-                            <label className="form-check-label">Đáp án đúng</label>
-                        </div>
-                    </div>
-                ))}
-                <div className="d-flex justify-content-start gap-2">
-                    <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-                        Hủy
-                    </button>
-                    <button type="submit" className="btn btn-primary">
-                        Cập Nhật
-                    </button>
-                </div>
-            </form>
+  const handleCancel = () => {
+    navigate("/chapter/questions"); // Quay lại trang danh sách câu hỏi
+  };
+
+  if (!question) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <h2>Cập Nhật Câu Hỏi</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="content" className="form-label">
+            Nội dung câu hỏi
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="content"
+            value={question.content}
+            onChange={(e) => handleInputChange("content", e.target.value)}
+            required
+          />
         </div>
-    );
+        <div className="mb-3">
+          <label htmlFor="difficulty" className="form-label">
+            Mức độ
+          </label>
+          <select
+            className="form-control"
+            id="difficulty"
+            value={question.difficulty}
+            onChange={(e) => handleInputChange("difficulty", e.target.value)}
+            required
+          >
+            <option value="">Chọn mức độ</option>
+            <option value="EASY">Dễ</option>
+            <option value="MEDIUM">Trung bình</option>
+            <option value="HARD">Khó</option>
+          </select>
+        </div>
+        {question.answers.map((answer, index) => (
+          <div key={answer.optionId} className="mb-3">
+            <label className="form-label">
+              Đáp án {String.fromCharCode(65 + index)}
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              value={answer.content}
+              onChange={(e) =>
+                handleAnswerChange(index, "content", e.target.value)
+              }
+              required
+            />
+            <div className="form-check">
+              <input
+                type="radio"
+                className="form-check-input"
+                name="isCorrect"
+                onChange={() => {
+                  // Đặt tất cả isCorrect thành false, chỉ đáp án hiện tại thành true
+                  const updatedAnswers = question.answers.map((ans, i) => ({
+                    ...ans,
+                    isCorrect: i === index,
+                  }));
+                  setQuestion({ ...question, answers: updatedAnswers });
+                }}
+                checked={answer.isCorrect}
+                required
+              />
+              <label className="form-check-label">Đáp án đúng</label>
+            </div>
+          </div>
+        ))}
+        <div className="d-flex justify-content-start gap-2">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleCancel}
+          >
+            Hủy
+          </button>
+          <button type="submit" className="btn btn-primary">
+            Cập Nhật
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }

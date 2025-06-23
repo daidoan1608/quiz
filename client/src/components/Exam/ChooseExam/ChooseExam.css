@@ -92,7 +92,6 @@
 .container-re {
   width: 100%;
   /* Đảm bảo chiếm toàn bộ chiều rộng */
-  max-width: 600px;
   /* Giới hạn chiều rộng của container */
   margin: 0 auto;
   /* Căn giữa */
