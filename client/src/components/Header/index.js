@@ -254,6 +254,7 @@ export default function Headers() {
             {texts.rank}
           </a>
         </div>
+
       </header>
 
       {/* Modal hiển thị danh sách môn học yêu thích */}

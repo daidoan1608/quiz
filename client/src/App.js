@@ -18,7 +18,7 @@ import ListExam from "./components/Exam/ListExam/ListExam";
 import Exam from "./components/Exam/Exam/Exam";
 import Result from "./components/Exam/Result/Result";
 import DetailExam from "./components/Exam/DetailExam/DetailExam";
-import Account from "./components/Account/Account";
+import Account from "./components/Account/account";
 import Rank from "./components/Rank/Rank";
 import LessonList from "./components/favorites/LessonList";
 

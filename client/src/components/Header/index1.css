@@ -5,7 +5,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6); /* nền mờ đậm hơn */
+  background: rgba(0, 0, 0, 0.6);
+  /* nền mờ đậm hơn */
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -65,12 +66,13 @@
   transition: background-color 0.2s ease;
   cursor: default;
 }
+
 /* .modal-content ul li:hover {
   background-color: #f9f9f9;
 } */
 
 /* Tên môn học */
-.modal-content ul li > div:first-child {
+.modal-content ul li>div:first-child {
   font-weight: 600;
   font-size: 1.05rem;
   max-width: 65%;
@@ -105,10 +107,12 @@
   background-color: #e74c3c !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
 }
+
 .modal-content .btn-review:hover {
   background-color: #2980b9 !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
 }
+
 .modal-content .btn-mocktest:hover {
   background-color: #27ae60 !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
@@ -120,11 +124,13 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3) !important;
   outline: none !important;
 }
+
 .modal-content .btn-review:focus {
   background-color: #1c5980 !important;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3) !important;
   outline: none !important;
 }
+
 .modal-content .btn-mocktest:focus {
   background-color: #1f8c4a !important;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3) !important;
@@ -133,7 +139,7 @@
 
 
 /* Nút đóng modal to, rộng full */
-.modal-content > button {
+.modal-content>button {
   margin-top: 15px;
   background-color: #0080ff;
   color: white;
@@ -147,11 +153,13 @@
   border: none;
   cursor: pointer;
 }
-.modal-content > button:hover,
-.modal-content > button:focus {
+
+.modal-content>button:hover,
+.modal-content>button:focus {
   background-color: #2c3e50;
   box-shadow: 0 5px 15px rgb(0 0 0 / 0.3);
 }
+
 .logo-img {
   height: auto;
   max-height: 40px;
@@ -189,7 +197,7 @@
   color: black;
   /* màu chữ mặc định */
   text-decoration: none;
-  font-size: clamp(10px, 2vw, 18px);
+  /* font-size: clamp(0.75rem, 2vw, 1.5rem); */
   /* thay đổi kích thước chữ theo màn hình */
   transition: color 0.3s ease, border-color 0.3s ease;
   border-bottom: 2px solid transparent;
@@ -198,6 +206,9 @@
   /* tạo khoảng cách cho border */
 }
 
+.nav-links-headers2 .nav-link {
+  font-size: clamp(0.75rem, 2vw, 1.2rem) !important;
+}
 
 
 

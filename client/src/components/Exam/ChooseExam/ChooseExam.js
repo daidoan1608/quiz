@@ -97,9 +97,8 @@ export default function ChooseExam() {
 
         {/* Sidebar kiểu off-canvas trên mobile */}
         <div
-          className={`position-fixed top-0 start-0 bg-light h-100 p-3 shadow d-lg-none ${
-            sidebarOpen ? "d-block" : "d-none"
-          }`}
+          className={`position-fixed top-0 start-0 bg-light h-100 p-3 shadow d-lg-none ${sidebarOpen ? "d-block" : "d-none"
+            }`}
           style={{ width: "80%", maxWidth: "300px", zIndex: 1050 }}
         >
           <button
@@ -116,7 +115,7 @@ export default function ChooseExam() {
         </div>
 
         {/* Sidebar cố định trên desktop */}
-        <div className="col-lg-3 d-none d-lg-block">
+        <div className="col-lg-3 col-md-12 d-none d-lg-block">
           <div className="bg-light p-3 h-100">
             <Sidebar
               selectedCategory={selectedCategory}
@@ -127,7 +126,7 @@ export default function ChooseExam() {
         </div>
 
         {/* Content chiếm phần còn lại */}
-        <div className="col-lg-9 col-md-8 col-12">
+        <div className="col-lg-9 col-md-12">
           <input
             type="text"
             placeholder={texts.placeholde || "Tìm kiếm môn học..."}
@@ -146,7 +145,7 @@ export default function ChooseExam() {
 
                     return (
                       <Col xs={24} sm={24} md={12} lg={12} key={item.subjectId}>
-                        <div className="card-exam h-100">
+                        <div className="card-exam h-100 shadow-sm">
                           <div className="card-img-exam">
                             <div className="card-img">
                               <img alt="Hình bài thi" src="/exam.png" />
@@ -164,9 +163,8 @@ export default function ChooseExam() {
                                 {texts.chooseTopic || "Chọn đề"}
                               </button>
                               <button
-                                className={`favorites-button ${
-                                  isFavorited(item.subjectId) ? "favorited" : ""
-                                }`}
+                                className={`favorites-button ${isFavorited(item.subjectId) ? "favorited" : ""
+                                  }`}
                                 onClick={() =>
                                   toggleFavorite(item.subjectId, item.name)
                                 }
@@ -178,11 +176,10 @@ export default function ChooseExam() {
                                 }
                               >
                                 <i
-                                  className={`fa-heart ${
-                                    isFavorited(item.subjectId)
-                                      ? "fa-solid"
-                                      : "fa-regular"
-                                  }`}
+                                  className={`fa-heart ${isFavorited(item.subjectId)
+                                    ? "fa-solid"
+                                    : "fa-regular"
+                                    }`}
                                 ></i>
                               </button>
                             </div>

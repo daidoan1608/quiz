@@ -41,10 +41,10 @@
   /* Đảm bảo chiếm toàn bộ chiều rộng */
 }
 
-.card-exam {
+/* .card-exam {
   position: relative;
-  /* Để có thể sử dụng vị trí tuyệt đối cho bookmark */
-}
+
+} */
 
 .bookmark-button {
   position: absolute;
@@ -116,6 +116,7 @@
   max-width: 100%;
   /* Giới hạn chiều rộng tối đa của card */
   margin-bottom: 2rem;
+  position: relative;
 }
 
 .card-exam:hover {

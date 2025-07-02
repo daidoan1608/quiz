@@ -94,9 +94,8 @@ export default function RevisionUser() {
 
         {/* Sidebar kiểu off-canvas trên mobile */}
         <div
-          className={`position-fixed top-0 start-0 bg-light h-100 p-3 shadow d-lg-none ${
-            sidebarOpen ? "d-block" : "d-none"
-          }`}
+          className={`position-fixed top-0 start-0 bg-light h-100 p-3 shadow d-lg-none ${sidebarOpen ? "d-block" : "d-none"
+            }`}
           style={{ width: "80%", maxWidth: "300px", zIndex: 1050 }}
         >
           <button
@@ -113,7 +112,7 @@ export default function RevisionUser() {
         </div>
 
         {/* Sidebar cố định trên desktop */}
-        <div className="col-lg-3 d-none d-lg-block">
+        <div className="col-lg-3 col-md-12 d-none d-lg-block">
           <div className="bg-light p-3 h-100">
             <Sidebar
               selectedCategory={selectedCategory}
@@ -124,7 +123,7 @@ export default function RevisionUser() {
         </div>
 
         {/* Content chiếm phần còn lại */}
-        <div className="col-lg-9 col-md-8 col-12">
+        <div className="col-lg-9 col-md-12">
           <input
             type="text"
             placeholder={texts.placeholder || "Tìm kiếm môn học..."}
@@ -145,7 +144,7 @@ export default function RevisionUser() {
                     );
 
                     return (
-                      <Col xs={24} sm={24} md={12} lg={12} key={item.subjectId}> 
+                      <Col xs={24} sm={24} md={12} lg={12} key={item.subjectId}>
                         <div className="card h-100 shadow-sm">
                           <div className="card-body d-flex justify-content-between align-items-center flex-wrap">
                             <h5 className="card-title auto-fit-text">
@@ -163,9 +162,8 @@ export default function RevisionUser() {
                                 {texts.chooseChapter || "Chọn chương"}
                               </button>
                               <button
-                                className={`favorite-icon-button ${
-                                  isFavorited ? "favorited" : ""
-                                }`}
+                                className={`favorite-icon-button ${isFavorited ? "favorited" : ""
+                                  }`}
                                 onClick={() =>
                                   toggleFavorite(item.subjectId, item.name)
                                 }
@@ -175,9 +173,8 @@ export default function RevisionUser() {
                                 }
                               >
                                 <i
-                                  className={`fa-heart ${
-                                    isFavorited ? "fa-solid" : "fa-regular"
-                                  }`}
+                                  className={`fa-heart ${isFavorited ? "fa-solid" : "fa-regular"
+                                    }`}
                                 ></i>
                               </button>
                             </div>
@@ -191,7 +188,7 @@ export default function RevisionUser() {
                     {texts.noSubjects || "Không tìm thấy môn học nào."}
                   </p>
                 )}
-             </Row>
+              </Row>
 
               {/* Pagination */}
               {filteredSubjects.length > pageSize && (
