@@ -55,11 +55,12 @@ export default function Headers() {
       <header className="header" style={{ marginTop: "10px" }}>
         <div className="container py-2">
           <div className="d-flex align-items-center justify-content-between w-100">
+            {/* Logo */}
             <div className="d-flex align-items-center flex-shrink-0">
               <img src="logoschool.png" alt="FITA logo" className="logo-img" />
               <img src="slogan-vi.png" alt="Slogan" className="logo-img ms-2" />
             </div>
-
+            {/* */}
             <div className="d-none d-md-flex flex-column align-items-center">
               <span
                 className="text-center mt-1"
@@ -67,6 +68,7 @@ export default function Headers() {
               >
                 {fullName}
               </span>
+
               <div className="d-flex align-items-center gap-2">
                 <button
                   onClick={toggleLanguage}
@@ -74,6 +76,7 @@ export default function Headers() {
                 >
                   {language === "vi" ? "English" : "Tiếng Việt"}
                 </button>
+
                 {!isLoggedIn ? (
                   <>
                     <a
@@ -128,7 +131,7 @@ export default function Headers() {
               </div>
             </div>
 
-            {/* Nút chức năng trên màn hình nhỏ (dropdown) */}
+            {/* Nút chức năng trên màn hình nhỏ */}
             <div className="d-md-none position-relative">
               <button
                 className="btn btn-sm no-border-btn"

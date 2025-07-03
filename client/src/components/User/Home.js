@@ -60,21 +60,15 @@ export default function Home() {
             className="fw-bold "
             style={{
               position: "relative",
-              color: "#336699",
-              left: "2vw", // giữ lệch trái tương đối
-              fontSize: "5vw", // kích thước chữ theo độ rộng màn hình
+              left: "2vw",
+              fontSize: "5vw",
               textShadow: "0 0 1vw rgba(255, 255, 255, 0.8)",
-              marginTop: "1rem", // tránh bị dính sát trên
+              marginTop: "1rem",
             }}
           >
             {texts.onlineTest}
           </h1>
 
-
-          {/* color: "#336699", text-primary
-           // textAlign: "left",
-              // marginTop: "8rem",
-              // paddingLeft: "2%"*/}
           <h2
             className="fw-normal"
             style={{
@@ -92,16 +86,10 @@ export default function Home() {
             <span style={{ display: "block" }}>{texts.slogan3}</span>
             <span style={{ display: "block" }}>{texts.slogan4}</span>
           </h2>
-
-
-
-
-
-
         </div>
       </main>
 
-
+      {/* Giới thiệu */}
       <div className="container-fluid mt-5">
         <div className="row">
           <div className="col-12 content-intro">
@@ -114,7 +102,7 @@ export default function Home() {
           </div>
         </div>
 
-
+        {/* Môn Học */}
         <div className="row">
           <div className="col-12">
             <h2 className="text-center my-4" style={{ color: "#0088a9" }}>

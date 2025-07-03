@@ -139,13 +139,21 @@ export default function ChooseExam() {
             <div className="container-re">
               <Row gutter={[16, 16]}>
                 {paginatedSubjects.length > 0 ? (
-                  paginatedSubjects.map((item) => {
+                  paginatedSubjects.map((item, index) => {
                     const translatedName =
                       subjectTranslations[item.name]?.[language] || item.name;
 
+                    const isLast = index === paginatedSubjects.length - 1;
+                    const isOdd = paginatedSubjects.length % 2 === 1;
+
                     return (
-                      <Col xs={24} sm={24} md={12} lg={12} key={item.subjectId}>
-                        <div className="card-exam h-100 shadow-sm">
+
+                      <Col xs={24} sm={24} md={isOdd && isLast ? 24 : 12}
+                        lg={isOdd && isLast ? 24 : 12}
+                        key={item.subjectId}>
+                        <div className="card-exam h-100 shadow-sm" >
+                          {/* <div className="card-body d-flex justify-content-between align-items-center flex-wrap"> */}
+
                           <div className="card-img-exam">
                             <div className="card-img">
                               <img alt="Hình bài thi" src="/exam.png" />
@@ -184,6 +192,7 @@ export default function ChooseExam() {
                               </button>
                             </div>
                           </div>
+                          {/* </div> */}
                         </div>
                       </Col>
                     );

@@ -15,19 +15,20 @@
   text-align: left;
   font-weight: bold;
   font-size: 4rem;
-  color: #336699;
+  color: #519fc9 !important;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   margin-left: 3%;
 }
 
-.main-background p {
+/* .main-background p {
   text-align: left;
   font-size: 1.8rem;
   color: #0088a9;
+  color: #333;
   margin-left: 3%;
   margin-top: 1rem;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
+} */
 
 /* Giới thiệu */
 .container-fluid {
