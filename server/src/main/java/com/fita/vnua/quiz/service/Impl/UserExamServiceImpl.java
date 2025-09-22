@@ -144,6 +144,18 @@ public class UserExamServiceImpl implements UserExamService {
         return getUserExamResponses(userExams);
     }
 
+    @Override
+    public List<UserExamResponse> getExamsByUserAndSubject(UUID userId, Long subjectId) {
+        List<UserExam> userExams = userExamRepository.findUserExamsByUserIdAndSubjectId(userId, subjectId);
+        return getUserExamResponses(userExams);
+    }
+
+    @Override
+    public List<UserExamResponse> getLast7ExamsByUser(UUID userId) {
+        List<UserExam> userExams = userExamRepository.findLast7ExamsByUser(userId);
+        return getUserExamResponses(userExams);
+    }
+
     private List<UserExamResponse> getUserExamResponses(List<UserExam> userExams) {
         List<UserExamResponse> userExamResponses = new ArrayList<>();
         for (UserExam userExam : userExams) {

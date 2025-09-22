@@ -10,4 +10,5 @@ public class ChapterDto {
     private String name;
     private Integer ChapterNumber;
     private Long subjectId;
+    private Long countQuestion;
 }

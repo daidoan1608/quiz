@@ -5,6 +5,7 @@ import './Rank.css';
 import { useLanguage } from '../Context/LanguageProvider';
 import { useAuth } from '../Context/AuthProvider';
 import subjectTranslations from '../../Languages/subjectTranslations';
+import { authAxios , publicAxios } from '../../api/axiosConfig';
 
 const translateSubject = (subject, language = 'vi') => {
   return subjectTranslations[subject]?.[language] || subjectTranslations[subject]?.vi || 'Không rõ';
@@ -34,7 +35,7 @@ const Rank = () => {
 
   const fetchLeaderboardData = async (subject = 'Tất cả') => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/public/summaries');
+      const response = await publicAxios.get('/public/summaries');
       if (!response.ok) throw new Error('Lỗi khi lấy dữ liệu bảng xếp hạng');
       const result = await response.json();
       let filtered = result.data || [];

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +26,33 @@ public class SubjectController {
             List<SubjectDto> subjects = subjectService.getAllSubject();
             if (subjects.isEmpty()) {
                 return ResponseEntity.status(404).body(ApiResponse.error("No subject found", List.of("No subjects available")));
+            }
+            return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch subjects", List.of(e.getMessage())));
+        }
+    }
+
+    @GetMapping("user/subjects")
+    @Operation(summary = "Lấy các môn học mà user đã làm bài thi")
+    public ResponseEntity<ApiResponse<List<SubjectDto>>> getSubjectsByUser(
+            @RequestParam UUID userId
+    ) {
+        List<SubjectDto> subjects = subjectService.getSubjectsByUser(userId);
+        if (subjects.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(ApiResponse.error("Không tìm thấy môn học nào", List.of("User chưa có bài thi")));
+        }
+        return ResponseEntity.ok(ApiResponse.success("Fetched successfully", subjects));
+    }
+
+    @GetMapping("public/subjects/category/{categoryId}")
+    @Operation(summary = "Lấy danh sách môn học theo Id danh mục")
+    public ResponseEntity<ApiResponse<List<SubjectDto>>> getSubjectByCategoryId(@PathVariable("categoryId") Long categoryId) {
+        try {
+            List<SubjectDto> subjects = subjectService.getSubjectsByCategoryId(categoryId);
+            if (subjects.isEmpty()) {
+                return ResponseEntity.status(404).body(ApiResponse.error("No subject found", List.of("No subjects found for the given category")));
             }
             return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
         } catch (Exception e) {
