@@ -3,7 +3,9 @@ package com.fita.vnua.quiz.service.impl;
 import com.fita.vnua.quiz.model.dto.ChapterDto;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
+import com.fita.vnua.quiz.model.entity.Category;
 import com.fita.vnua.quiz.model.entity.Subject;
+import com.fita.vnua.quiz.repository.CategoryRepository;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.SubjectService;
@@ -13,17 +15,30 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class SubjectServiceImpl implements SubjectService {
     private final SubjectRepository subjectRepository;
     private final ChapterRepository chapterRepository;
+    private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
 
     @Override
     public List<SubjectDto> getAllSubject() {
         List<SubjectDto> subjects = subjectRepository.findAll().stream().map(subject -> modelMapper.map(subject, SubjectDto.class)).toList();
+        for (SubjectDto subject : subjects) {
+            List<ChapterDto> chapterDtos = chapterRepository.findBySubject(subject.getSubjectId()).stream().map(chapter -> modelMapper.map(chapter, ChapterDto.class)).toList();
+            subject.setChapters(chapterDtos);
+        }
+        return subjects;
+    }
+
+    @Override
+    public List<SubjectDto> getSubjectsByCategoryId(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId).get();
+        List<SubjectDto> subjects = subjectRepository.findSubjectsByCategory(category).stream().map(subject -> modelMapper.map(subject, SubjectDto.class)).toList();
         for (SubjectDto subject : subjects) {
             List<ChapterDto> chapterDtos = chapterRepository.findBySubject(subject.getSubjectId()).stream().map(chapter -> modelMapper.map(chapter, ChapterDto.class)).toList();
             subject.setChapters(chapterDtos);
@@ -63,5 +78,11 @@ public class SubjectServiceImpl implements SubjectService {
         return Response.builder()
                 .responseMessage("Subject deleted successfully")
                 .responseCode("200 OK").build();
+    }
+
+    @Override
+    public List<SubjectDto> getSubjectsByUser(UUID userId) {
+        List<Subject> subjects = subjectRepository.findSubjectsWithUserExams(userId);
+        return subjects.stream().map(subject -> modelMapper.map(subject, SubjectDto.class)).toList();
     }
 }

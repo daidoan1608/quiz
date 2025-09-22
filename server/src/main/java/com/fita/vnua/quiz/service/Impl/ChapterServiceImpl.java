@@ -4,6 +4,7 @@ import com.fita.vnua.quiz.model.dto.ChapterDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.repository.ChapterRepository;
+import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.service.ChapterService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,21 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChapterServiceImpl implements ChapterService {
     private final ChapterRepository chapterRepository;
+    private final QuestionRepository questionRepository;
     private final ModelMapper modelMapper;
 
     @Override
     public List<ChapterDto> getChapterBySubject(Long subjectId) {
-        return chapterRepository.findBySubject(subjectId).stream().map(chapter -> modelMapper.map(chapter, ChapterDto.class)).toList();
+        return chapterRepository.findBySubject(subjectId)
+                .stream()
+                .map(chapter -> {
+                    ChapterDto dto = modelMapper.map(chapter, ChapterDto.class);
+                    // Đếm số câu hỏi theo chapterId
+                    long count = questionRepository.countByChapter(chapter);
+                    dto.setCountQuestion(count);
+                    return dto;
+                })
+                .toList();
     }
 
     @Override

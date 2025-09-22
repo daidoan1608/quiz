@@ -1,9 +1,12 @@
 package com.fita.vnua.quiz.service;
 
+import com.fita.vnua.quiz.model.dto.response.ApiResponse;
+import org.apache.poi.ss.formula.functions.T;
+
 public interface OtpService {
-    String generateOtp(String email);
+    ApiResponse<Void> generateOtp(String email);
 
-    String verifyOtp(String email, String otp);
+    ApiResponse<String> verifyOtp(String email, String otp);
 
-    String resetPassword(String resetToken, String newPassword);
+    ApiResponse<Void> resetPassword(String resetToken, String newPassword);
 }

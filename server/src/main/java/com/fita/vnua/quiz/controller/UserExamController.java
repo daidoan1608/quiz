@@ -52,6 +52,39 @@ public class UserExamController {
         }
     }
 
+    @GetMapping("user/userexams/subjectanduser")
+    @Operation(summary = "Lấy bài thi của người dùng theo userId và subjectId")
+    public ResponseEntity<ApiResponse<List<UserExamResponse>>> getUserExamByUserIdAndSubjectId(
+            @Parameter(description = "User ID", required = true) @RequestParam("userId") UUID userId,
+            @Parameter(description = "Subject ID", required = true) @RequestParam("subjectId") Long subjectId
+    ) {
+        try {
+            List<UserExamResponse> userExams = userExamService.getExamsByUserAndSubject(userId, subjectId);
+            if (userExams.isEmpty()) {
+                return ResponseEntity.status(404).body(ApiResponse.error("No user exams found", List.of("No user exams found for the given user ID and subject ID")));
+            }
+            return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch user exams", List.of(e.getMessage())));
+        }
+    }
+
+    @GetMapping("user/userexams/last7exam")
+    @Operation(summary = "Lấy 7 bài thi gần nhất của người dùng theo userId")
+    public ResponseEntity<ApiResponse<List<UserExamResponse>>> getLast7UserExamsByUserId(
+            @Parameter(description = "User ID", required = true) @RequestParam("userId") UUID userId
+    ) {
+        try {
+            List<UserExamResponse> userExams = userExamService.getLast7ExamsByUser(userId);
+            if (userExams.isEmpty()) {
+                return ResponseEntity.status(404).body(ApiResponse.error("No user exams found", List.of("No user exams found for the given user ID")));
+            }
+            return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch user exams", List.of(e.getMessage())));
+        }
+    }
+
     @GetMapping("user/userexams/{userExamId}")
     @Operation(summary = "Lấy bài thi của người dùng theo ID")
     public ResponseEntity<ApiResponse<UserExamResponse>> getUserExamById(@PathVariable("userExamId") Long userExamId) {

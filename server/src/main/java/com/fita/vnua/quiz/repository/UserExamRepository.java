@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,4 +48,32 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
         Long getTotalDurationSeconds();
         String getSubjects();
     }
+
+    @Query(value = """
+    SELECT 
+        ue.*
+    FROM user_exam ue
+    JOIN exam e ON ue.exam_id = e.exam_id
+    JOIN subject s ON e.subject_id = s.subject_id
+    WHERE ue.user_id = :userId
+      AND e.subject_id = :subjectId
+    ORDER BY ue.start_time DESC
+    """, nativeQuery = true)
+    List<UserExam> findUserExamsByUserIdAndSubjectId(
+            @Param("userId") UUID userId,
+            @Param("subjectId") Long subjectId
+    );
+
+    @Query(value = """
+    SELECT 
+        ue.*
+    FROM user_exam ue
+    JOIN exam e ON ue.exam_id = e.exam_id
+    JOIN subject s ON e.subject_id = s.subject_id
+    WHERE ue.user_id = :userId
+    ORDER BY ue.end_time DESC
+    LIMIT 7
+    """, nativeQuery = true)
+    List<UserExam> findLast7ExamsByUser(@Param("userId") UUID userId);
+
 }

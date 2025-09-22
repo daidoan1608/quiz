@@ -36,7 +36,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("number") int number);
 
     // Lấy ngẫu nhiên số lượng câu hỏi theo subjectId
-    @Query(value = "SELECT q.* FROM Question q " +
+    @Query(value = "SELECT q.* FROM question q " +
             "JOIN Chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.subject_id = :subjectId " +
             "ORDER BY RAND() LIMIT :number", nativeQuery = true)
@@ -44,7 +44,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("subjectId") Long subjectId,
             @Param("number") int number);
 
-    @Query(value = "SELECT q.* FROM Question q JOIN Exam_Question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId", nativeQuery = true)
+    @Query(value = "SELECT q.* FROM question q JOIN exam_question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId", nativeQuery = true)
     List<Question> findQuestionsByExamId(Long examId);
 
     long countByDifficulty(Question.Difficulty difficulty);

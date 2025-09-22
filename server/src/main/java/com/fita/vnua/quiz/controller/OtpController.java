@@ -22,35 +22,40 @@ public class OtpController {
 
     @PostMapping("/send")
     @Operation(summary = "Gửi mã OTP đến email")
-    public ResponseEntity<ApiResponse<String>> sendOtp(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
-        try {
-            String otp = otpService.generateOtp(forgotPasswordRequest.getEmail());
-            return ResponseEntity.ok(ApiResponse.success("OTP sent successfully", otp));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to send OTP", List.of(e.getMessage())));
+    public ResponseEntity<ApiResponse<Void>> sendOtp(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        ApiResponse<Void> response = otpService.generateOtp(forgotPasswordRequest.getEmail());
+        if ("success".equals(response.getStatus())) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
         }
     }
+
 
     @PostMapping("/verify")
     @Operation(summary = "Xác thực mã OTP")
     public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest) {
-        try {
-            String verificationResult = otpService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
-            return ResponseEntity.ok(ApiResponse.success("OTP verified successfully", verificationResult));
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(ApiResponse.error("Failed to verify OTP", List.of(e.getMessage())));
+        ApiResponse<String> response = otpService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
+
+        if ("success".equals(response.getStatus())) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
         }
     }
+
 
     // Đặt lại mật khẩu
     @PostMapping("/reset")
     @Operation(summary = "Đặt lại mật khẩu")
-    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody TokenAndNewPasswordRequest tokenAndNewPasswordRequest) {
-        try {
-            String resetResult = otpService.resetPassword(tokenAndNewPasswordRequest.getResetToken(), tokenAndNewPasswordRequest.getNewPassword());
-            return ResponseEntity.ok(ApiResponse.success("Password reset successfully", resetResult));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to reset password", List.of(e.getMessage())));
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody TokenAndNewPasswordRequest tokenAndNewPasswordRequest) {
+        ApiResponse<Void> response = otpService.resetPassword(tokenAndNewPasswordRequest.getResetToken(), tokenAndNewPasswordRequest.getNewPassword());
+
+        if ("success".equals(response.getStatus())) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
         }
     }
+
 }
