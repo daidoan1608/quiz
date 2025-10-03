@@ -105,4 +105,13 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserByUsername(String username) {
         return userRepository.findByUsername(username).map(user -> modelMapper.map(user, UserDto.class)).orElse(null);
     }
+
+    @Override
+    public boolean updateAvatar(UUID userId, String avatarUrl) {
+        var existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        existingUser.setAvatarUrl(avatarUrl);
+        userRepository.save(existingUser);
+        return true;
+    }
 }

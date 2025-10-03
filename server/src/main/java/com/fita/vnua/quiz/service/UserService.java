@@ -24,4 +24,6 @@ public interface UserService {
     boolean isEmailExisted(String email);
 
     UserDto getUserByUsername(String username);
+
+    boolean updateAvatar(UUID userId, String avatarUrl);
 }

@@ -15,4 +15,5 @@ public class UserDto {
     private String fullName;
     private String email;
     private User.Role role;
+    private String avatarUrl;
 }

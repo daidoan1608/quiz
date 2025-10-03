@@ -6,11 +6,14 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.dto.response.TokenRefreshResponse;
 import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.security.JwtTokenUtil;
 import com.fita.vnua.quiz.service.AuthService;
 import com.fita.vnua.quiz.service.UserService;
+import com.fita.vnua.quiz.service.impl.GoogleIdTokenVerifierService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController

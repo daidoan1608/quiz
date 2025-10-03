@@ -1,15 +1,11 @@
 package com.fita.vnua.quiz.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchConnectionDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.security.AuthProvider;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;

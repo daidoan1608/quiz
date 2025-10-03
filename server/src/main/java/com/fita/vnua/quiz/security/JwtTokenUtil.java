@@ -35,6 +35,10 @@ public class JwtTokenUtil {
                 .compact();
     }
 
+    public String generateToken(String username) {
+        return generateToken(new HashMap<>(), username);
+    }
+
     public Boolean validateToken(String token,  UserDetails userDetails) {
         try {
             final String username = getUsernameFromToken(token);

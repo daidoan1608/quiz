@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/mod/**").hasAnyRole("ADMIN", "MOD")
                         // User and above
                         .requestMatchers("/api/v1/user/**").hasAnyRole("ADMIN", "MOD", "USER") // Moderator or admin endpoints
+
+                        .requestMatchers("/avatars/**").permitAll() // Cho phép truy cập công khai vào các tài nguyên avatar
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
