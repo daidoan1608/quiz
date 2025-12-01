@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -84,7 +85,7 @@ public class SubjectController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to create subject", List.of(e.getMessage())));
         }
     }
-
+    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'UPDATE') or hasRole('ADMIN')")
     @PatchMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Cập nhật môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> updateSubject(@PathVariable("subjectId") Long subjectId, @RequestBody SubjectDto subjectDto) {
@@ -95,7 +96,7 @@ public class SubjectController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to update subject", List.of(e.getMessage())));
         }
     }
-
+    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'DELETE')")
     @DeleteMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Xóa môn học (admin)")
     public ResponseEntity<ApiResponse<Object>> deleteSubject(@PathVariable("subjectId") Long subjectId) {

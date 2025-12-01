@@ -11,6 +11,7 @@ import java.util.UUID;
 public class UserExamSummaryDto {
     private UUID userId;
     private String username;
+    private String avatarUrl;
     private Long attemptCount;
     private Double avgScore;
     private Double totalScore;

@@ -12,5 +12,6 @@ import java.util.UUID;
 public class FavoriteDto {
     private UUID userId;
     private Long subjectId;
+    private Long categoryId;
     private String subjectName;
 }

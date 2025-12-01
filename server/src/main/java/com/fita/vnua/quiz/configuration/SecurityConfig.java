@@ -1,11 +1,14 @@
 package com.fita.vnua.quiz.configuration;
 
+import com.fita.vnua.quiz.security.CustomPermissionEvaluator;
 import com.fita.vnua.quiz.security.JwtAccessDeniedHandler;
 import com.fita.vnua.quiz.security.JwtAuthenticationEntryPoint;
 import com.fita.vnua.quiz.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -38,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/otp/**").permitAll()  // Public OTP endpoints
                         .requestMatchers("/api/v1/public/**").permitAll()
                         // Admin-only endpoints
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN" , "MOD")
                         // Mod and Admin endpoints
                         .requestMatchers("/api/v1/mod/**").hasAnyRole("ADMIN", "MOD")
                         // User and above
@@ -69,5 +72,12 @@ public class SecurityConfig {
             AuthenticationConfiguration authenticationConfiguration
     ) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public MethodSecurityExpressionHandler expressionHandler(CustomPermissionEvaluator customPermissionEvaluator) {
+        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setPermissionEvaluator(customPermissionEvaluator);
+        return expressionHandler;
     }
 }

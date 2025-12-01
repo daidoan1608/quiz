@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -60,7 +61,7 @@ public class ChapterController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch chapter", List.of(e.getMessage())));
         }
     }
-
+    @PreAuthorize("hasPermission(#newChapter.subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/chapters")
     @Operation(summary = "Tạo chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> createChapter(@RequestBody ChapterDto chapterDto) {
@@ -71,7 +72,7 @@ public class ChapterController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to create chapter", List.of(e.getMessage())));
         }
     }
-
+    @PreAuthorize("hasPermission(#chapterId, 'Chapter', 'UPDATE')")
     @PatchMapping("admin/chapters/{chapterId}")
     @Operation(summary = "Cập nhật chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> updateChapter(@PathVariable("chapterId") Long chapterId, @RequestBody ChapterDto chapterDto) {
@@ -82,7 +83,7 @@ public class ChapterController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to update chapter", List.of(e.getMessage())));
         }
     }
-
+    @PreAuthorize("hasPermission(#chapterId, 'Chapter', 'DELETE')")
     @DeleteMapping("admin/chapters/{chapterId}")
     @Operation(summary = "Xóa chương (admin)")
     public ResponseEntity<ApiResponse<Object>> deleteChapter(@PathVariable("chapterId") Long chapterId) {

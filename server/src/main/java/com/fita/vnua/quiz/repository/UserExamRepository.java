@@ -26,6 +26,7 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
         SELECT 
             u.user_id as userId,
             u.username as username,
+            u.avatar_url as avatarUrl,
             COUNT(ue.user_exam_id) as attemptCount,
             AVG(ue.score) as avgScore,
             SUM(ue.score) as totalScore,
@@ -42,6 +43,7 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
     public interface UserExamSummaryProjection {
         byte[] getUserId();
         String getUsername();
+        String getAvatarUrl();
         Long getAttemptCount();
         Double getAvgScore();
         Double getTotalScore();

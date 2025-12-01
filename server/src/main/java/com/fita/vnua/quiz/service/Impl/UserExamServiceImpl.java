@@ -45,6 +45,7 @@ public class UserExamServiceImpl implements UserExamService {
             UserExamSummaryDto dto = new UserExamSummaryDto();
             dto.setUserId(bytesToUUID(proj.getUserId()));
             dto.setUsername(proj.getUsername());
+            dto.setAvatarUrl(proj.getAvatarUrl());
             dto.setAttemptCount(proj.getAttemptCount());
             dto.setAvgScore(proj.getAvgScore());
             dto.setTotalScore(proj.getTotalScore());

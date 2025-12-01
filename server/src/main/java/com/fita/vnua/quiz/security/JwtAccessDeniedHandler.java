@@ -17,7 +17,6 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
             throws IOException, ServletException {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-
         response.getWriter().write("{\"message\": \"Không có quyền truy cập tài nguyên - " + accessDeniedException.getMessage() + "\"}");
     }
 }

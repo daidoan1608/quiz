@@ -5,6 +5,7 @@ import com.fita.vnua.quiz.model.dto.FavoriteDto;
 import com.fita.vnua.quiz.model.entity.Favorite;
 import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.repository.CategoryRepository;
 import com.fita.vnua.quiz.repository.FavoriteRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
@@ -22,6 +23,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public FavoriteDto create(FavoriteDto favoriteDto) {
@@ -58,7 +60,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     public FavoriteDto delete(FavoriteDto favoriteDto) {
         UUID userId = favoriteDto.getUserId();
-        Long subjectId = favoriteDto.getSubjectId();  // chú ý kiểu Long
+        Long subjectId = favoriteDto.getSubjectId();
 
         FavoriteId favoriteId = new FavoriteId();
         favoriteId.setUserId(userId);
@@ -78,7 +80,6 @@ public class FavoriteServiceImpl implements FavoriteService {
         // Tạo User dummy để tìm
         User user = new User();
         user.setUserId(userID);
-
         List<Favorite> favorites = favoriteRepository.findFavoriteByUser(user);
 
         return favorites.stream().map(fav -> {
@@ -86,6 +87,7 @@ public class FavoriteServiceImpl implements FavoriteService {
             dto.setUserId(fav.getUser().getUserId());
             dto.setSubjectId(fav.getSubject().getSubjectId());
             dto.setSubjectName(fav.getSubject().getName());
+            dto.setCategoryId(fav.getSubject().getCategory().getCategoryId());
             return dto;
         }).toList();
     }
