@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {authAxios} from '../../Api/axiosConfig';
+import {authAxios} from '../../api/axiosConfig';
 
 export default function UpdateChapter() {
     const { chapterId } = useParams(); // Lấy chapterId từ URL

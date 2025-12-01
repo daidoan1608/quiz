@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { authAxios, publicAxios } from "../../Api/axiosConfig";
+import { authAxios, publicAxios } from "../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 
 const ImportInterface = () => {

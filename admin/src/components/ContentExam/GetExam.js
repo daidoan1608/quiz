@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {authAxios} from '../../Api/axiosConfig';
+import {authAxios} from '../../api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
-import Pagination from '../Pagination'; // Sử dụng thành phần Pagination đã tạo
+import Pagination from '../common/Pagination';
 import { BiPlus } from "react-icons/bi"; // Import các icon từ react-icons
 import '../../styles/responsiveTable.css'
 

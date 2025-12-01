@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {authAxios} from '../../Api/axiosConfig';
+import {authAxios} from '../../api/axiosConfig';
 
 export default function UpdateSubject() {
     const { subjectId } = useParams();

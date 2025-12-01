@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { authAxios } from "../../Api/axiosConfig";
+import { authAxios } from "../../api/axiosConfig";
 
 export default function QuestionSelection() {
   const [numberOfQuestions, setNumberOfQuestions] = useState("");

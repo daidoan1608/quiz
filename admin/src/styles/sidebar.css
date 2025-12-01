@@ -1,8 +1,9 @@
 /* Sidebar container */
 .menu {
   width: 240px;
-  background-color: #f4f4f9;
-  transition: width 0.3s ease;
+  /* SỬ DỤNG BIẾN THEME */
+  background-color: var(--color-background-card); /* Hoặc --color-sidebar-bg */
+  transition: width 0.3s ease, background-color 0.3s ease; /* Thêm transition cho background */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -21,10 +22,11 @@
 
 /* Icon toggle menu */
 .menu-toggle-icon {
-  font-size: 24px; /* to hơn */
+  font-size: 24px;
   min-width: 28px;
   text-align: center;
-  color: #27374d;
+  /* SỬ DỤNG BIẾN THEME */
+  color: var(--color-text-primary);
   cursor: pointer;
 }
 
@@ -43,18 +45,20 @@
   padding: 10px 20px;
   text-decoration: none;
   font-weight: 500;
-  color: #27374d;
+  /* SỬ DỤNG BIẾN THEME */
+  color: var(--color-text-primary);
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .item:hover {
-  background-color: #e6e8ec;
+  /* SỬ DỤNG BIẾN THEME */
+  background-color: var(--color-sidebar-hover);
 }
 
 /* Icon trong item */
 .item .icon {
-  font-size: 24px; /* tăng size */
+  font-size: 24px;
   min-width: 28px;
   text-align: center;
 }
@@ -79,15 +83,31 @@
   pointer-events: none;
 }
 
+/* Active item */
+.item.active {
+  /* SỬ DỤNG BIẾN THEME */
+  background-color: var(--color-sidebar-active);
+  color: var(--color-primary); /* Màu nổi bật cho item đang chọn */
+}
+
+.item.active:hover {
+  /* SỬ DỤNG BIẾN THEME */
+  background-color: var(
+    --color-sidebar-active
+  ); /* Giữ nguyên hoặc tối hơn một chút */
+}
+
 /* Logout item */
 .logout {
   margin-top: auto;
-  color: #d9534f;
+  /* SỬ DỤNG BIẾN THEME */
+  color: var(--color-danger); /* Màu lỗi/nguy hiểm */
 }
 
 .logout:hover {
-  background-color: #f8d7da;
-  color: #c82333;
+  /* SỬ DỤNG BIẾN THEME */
+  background-color: var(--color-danger); /* Nền hover là màu nguy hiểm */
+  color: var(--color-background-main); /* Chữ chuyển sang màu sáng/nền */
   cursor: pointer;
 }
 
@@ -108,13 +128,4 @@
     margin-left: 0;
     pointer-events: none;
   }
-}
-
-.item.active {
-  background-color: #d6e4ff; /* Màu nền khác */
-  color: #1e40af; /* Màu chữ xanh đậm */
-}
-
-.item.active:hover {
-  background-color: #c7dbff; /* Hover cho active mượt hơn */
 }

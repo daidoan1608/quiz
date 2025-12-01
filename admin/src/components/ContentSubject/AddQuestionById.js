@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {authAxios} from '../../Api/axiosConfig';
+import {authAxios} from '../../api/axiosConfig';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function AddQuestionById() {

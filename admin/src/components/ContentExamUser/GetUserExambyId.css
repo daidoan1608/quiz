@@ -1,34 +1,59 @@
+/* ========================================================= */
+/* CÁC LỰA CHỌN ĐÁP ÁN (ANSWER OPTIONS) */
+/* ========================================================= */
 .answer-option {
-  padding: 8px;
-  margin-bottom: 6px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+    padding: 8px;
+    margin-bottom: 6px;
+    /* Viền mặc định */
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    /* Đảm bảo màu chữ chính xác khi không có class correct/incorrect */
+    color: var(--color-text-primary); 
+    /* Nền mặc định (nếu cần) */
+    background-color: var(--color-background-card); 
+    transition: background-color 0.3s;
 }
 
-/* Đáp án đúng: xanh */
+/* Đáp án đúng (khi hiển thị kết quả): Màu Xanh */
 .answer-option.correct {
-  background-color: #d4edda;
-  border-color: #28a745;
-  color: #155724;
+    /* Nền: Pha trộn màu thành công với nền card */
+    background-color: color-mix(in srgb, var(--color-success) 20%, var(--color-background-card)); 
+    /* Viền: Màu thành công */
+    border-color: var(--color-success);
+    /* Chữ: Màu chữ đậm hơn (hoặc chữ chính) */
+    color: var(--color-text-primary); 
+    /* Hoặc sử dụng màu chữ phụ để tương phản nếu nền đậm */
+    /* color: var(--color-text-secondary); */
 }
 
-/* Đáp án sai do user chọn: đỏ */
+/* Đáp án sai do user chọn: Màu Đỏ */
 .answer-option.incorrect {
-  background-color: #f8d7da;
-  border-color: #dc3545;
-  color: #721c24;
+    /* Nền: Pha trộn màu nguy hiểm với nền card */
+    background-color: color-mix(in srgb, var(--color-danger) 20%, var(--color-background-card)); 
+    /* Viền: Màu nguy hiểm */
+    border-color: var(--color-danger);
+    /* Chữ: Màu chữ chính/đậm */
+    color: var(--color-text-primary);
 }
 
-/* Khối câu hỏi */
+/* ========================================================= */
+/* KHỐI CÂU HỎI & DANH SÁCH CUỘN */
+/* ========================================================= */
+
 .question-block {
-  background-color: #f9f9f9;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #e0e0e0;
+    /* Nền của khối câu hỏi (Hơi khác nền main để nổi bật) */
+    background-color: var(--color-background-card); 
+    padding: 12px;
+    border-radius: 6px;
+    /* Viền nhẹ nhàng */
+    border: 1px solid var(--color-border);
+    /* Màu chữ chính */
+    color: var(--color-text-primary);
 }
 
 /* Cuộn danh sách câu hỏi */
 .question-list-scroll {
-  max-height: 500px;
-  overflow-y: auto;
+    max-height: 500px;
+    overflow-y: auto;
+    /* Thanh cuộn có thể cần tùy chỉnh thêm cho Dark Mode tùy trình duyệt */
 }

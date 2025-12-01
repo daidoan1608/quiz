@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { authAxios } from "../../Api/axiosConfig";
+import { authAxios } from "../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 
 export default function AddChapter() {

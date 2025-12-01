@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { authAxios } from "../../Api/axiosConfig";
+import { authAxios } from "../../api/axiosConfig";
 import { useParams, useNavigate } from "react-router-dom";
-import Pagination from "../Pagination"; // Thành phần phân trang
+import Pagination from '../common/Pagination';
 import { BiEdit, BiTrash, BiCheckCircle, BiPlus } from "react-icons/bi";
 
 export default function ChooseChapter() {

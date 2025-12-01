@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Pagination from "../Pagination"; // Đường dẫn tuỳ theo dự án
-import { authAxios } from "../../Api/axiosConfig";
+import Pagination from '../common/Pagination';
+import { authAxios } from "../../api/axiosConfig";
 import { BiEdit, BiTrash, BiCheckCircle, BiPlus } from "react-icons/bi";
 import "../../styles/responsiveTable.css";
 
@@ -31,9 +31,9 @@ export default function GetCategory() {
     try {
       await authAxios.delete(`/admin/categories/${categoryId}`);
       setCategories((prev) => prev.filter((c) => c.categoryId !== categoryId));
-      alert("Thể loại đã được xóa thành công!");
+      alert("Khoa đã được xóa thành công!");
     } catch (error) {
-      alert("Không thể xóa thể loại!");
+      alert("Không thể xóa khoa!");
     }
   };
 
@@ -77,7 +77,7 @@ export default function GetCategory() {
 
   return (
     <div className="responsive-table">
-      <h2 className="heading-content">Quản lý thể loại</h2>
+      <h2 className="heading-content">Quản lý khoa</h2>
       <button
         className="btn btn-primary mb-3 float-end"
         onClick={() => navigate("/categories/add")}

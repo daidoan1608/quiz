@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {authAxios} from '../../Api/axiosConfig';
+import {authAxios} from '../../api/axiosConfig';
 import StatisticsChart from '../StatisticsChart';
 import './styles.css';
 

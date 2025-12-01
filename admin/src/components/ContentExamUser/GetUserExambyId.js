@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { authAxios } from '../../Api/axiosConfig';
+import { authAxios } from '../../api/axiosConfig';
 import './GetUserExambyId.css';
 
 export default function GetUserExambyId() {
@@ -35,7 +35,7 @@ export default function GetUserExambyId() {
     }
   };
 
-  if (loading) return <div>Đang tải dữ liệu...</div>;
+  if (loading) return <div>Loading ...</div>;
   if (!examDetail) return <div>Không tìm thấy dữ liệu bài thi.</div>;
 
   const { subjectName, title, userExamDto, userAnswerDtos } = examDetail;

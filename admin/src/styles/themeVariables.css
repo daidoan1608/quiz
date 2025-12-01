@@ -1,0 +1,54 @@
+/*
+ * Định nghĩa các biến màu chung cho toàn bộ ứng dụng.
+ * Sử dụng tên biến ngữ nghĩa (semantic names) thay vì tên màu cụ thể (ví dụ: primary, text, background)
+ */
+
+/* ========================================================= */
+/* 1. CHẾ ĐỘ SÁNG (LIGHT MODE) - Áp dụng cho :root (mặc định) */
+/* ========================================================= */
+:root {
+  /* Nền và Màu chính */
+  --color-background-main: #f4f5f7; /* Nền chính của trang */
+  --color-background-card: #ffffff; /* Nền của các ô/card */
+  --color-primary: #007bff; /* Màu chủ đạo (ví dụ: nút bấm, liên kết) */
+  --color-secondary: #6c757d; /* Màu phụ */
+  --color-success: #28a745; /* Màu thành công */
+  --color-danger: #dc3545; /* Màu lỗi/nguy hiểm */
+
+  /* Màu chữ */
+  --color-text-primary: #1a1a1a; /* Chữ chính (đen đậm) */
+  --color-text-secondary: #666666; /* Chữ phụ (xám) */
+
+  /* Sidebar/Thanh điều hướng */
+  --color-sidebar-bg: #ffffff; /* Nền Sidebar */
+  --color-sidebar-hover: #f1f1f1; /* Hover item */
+  --color-sidebar-active: #e9ecef; /* Active item */
+
+  /* Đường viền */
+  --color-border: #dee2e6; /* Viền chia cách */
+}
+
+/* ========================================================= */
+/* 2. CHẾ ĐỘ TỐI (DARK MODE) - Áp dụng khi body có class 'dark' */
+/* ========================================================= */
+body.dark {
+  /* Nền và Màu chính */
+  --color-background-main: #121212; /* Nền chính tối */
+  --color-background-card: #1e1e1e; /* Nền card tối hơn */
+  --color-primary: #58a6ff; /* Màu chủ đạo (thường sáng hơn để nổi bật trên nền tối) */
+  --color-secondary: #999999;
+  --color-success: #4cd137;
+  --color-danger: #ff6b6b;
+
+  /* Màu chữ */
+  --color-text-primary: #e0e0e0; /* Chữ chính (trắng nhạt) */
+  --color-text-secondary: #b0b0b0; /* Chữ phụ */
+
+  /* Sidebar/Thanh điều hướng */
+  --color-sidebar-bg: #1e1e1e;
+  --color-sidebar-hover: #2d2d2d;
+  --color-sidebar-active: #3c3c3c;
+
+  /* Đường viền */
+  --color-border: #333333; /* Viền tối và mờ hơn */
+}

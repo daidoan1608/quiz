@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { authAxios } from "../../Api/axiosConfig";
-import Pagination from "../Pagination"; // Sử dụng thành phần Pagination
+import { authAxios } from "../../api/axiosConfig";
+import Pagination from '../common/Pagination';
 import { BiEdit, BiTrash, BiPlus } from "react-icons/bi";
 import { CiImport } from "react-icons/ci";
 import "../../styles/GetQuestion.css";

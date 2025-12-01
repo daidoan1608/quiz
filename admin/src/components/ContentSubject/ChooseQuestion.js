@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { authAxios } from "../../Api/axiosConfig";
+import { authAxios } from "../../api/axiosConfig";
 import { useParams, useNavigate } from "react-router-dom";
-import Pagination from "../Pagination"; // Import thành phần Pagination
+import Pagination from '../common/Pagination';
 import { BiEdit, BiTrash, BiPlus } from "react-icons/bi";
 
 export default function ChooseQuestion() {

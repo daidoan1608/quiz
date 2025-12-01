@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { publicAxios } from "../Api/axiosConfig";
-import { message } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import '../styles/Login.css';
-import { useAuth } from './Context/AuthProvider';
+import React, { useState } from "react";
+import { publicAxios } from "../api/axiosConfig";
+import { message } from "antd";
+import { useNavigate } from "react-router-dom";
+import "../styles/Login.css";
+import { useAuth } from "../context/AuthProvider";
 
 function Login() {
   const { login } = useAuth(); // Lấy hàm login từ context
@@ -19,8 +19,8 @@ function Login() {
       });
 
       const { accessToken, refreshToken, userId } = response.data.data;
-      if(response.data.data.role !== 'ADMIN') {
-        message.error('Bạn không có quyền truy cập!');
+      if (response.data.data.role !== "ADMIN") {
+        message.error("Bạn không có quyền truy cập!");
         return;
       }
       login(accessToken, refreshToken, userId);
@@ -35,24 +35,26 @@ function Login() {
 
   return (
     <div className="login-page">
-    <div className="login-container">
-      <h2 className="login-header">Đăng nhập</h2>
-      <input
-        className="login-input"
-        type="text"
-        placeholder="Tên đăng nhập"
-        value={username}
-        onChange={(e) => setUserName(e.target.value)}
-      />
-      <input
-        className="login-input"
-        type="password"
-        placeholder="Mật khẩu"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button className="login-button" onClick={handleLogin}>Đăng nhập</button>
-    </div>
+      <div className="login-container">
+        <h2 className="login-header">Đăng nhập</h2>
+        <input
+          className="login-input"
+          type="text"
+          placeholder="Tên đăng nhập"
+          value={username}
+          onChange={(e) => setUserName(e.target.value)}
+        />
+        <input
+          className="login-input"
+          type="password"
+          placeholder="Mật khẩu"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button className="login-button" onClick={handleLogin}>
+          Đăng nhập
+        </button>
+      </div>
     </div>
   );
 }

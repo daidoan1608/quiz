@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BarChart,
   Bar,
@@ -9,9 +8,8 @@ import {
   Legend,
   PieChart,
   Pie,
+  ResponsiveContainer,
 } from "recharts";
-
-import "../styles/statisticsChart.css";
 
 export default function StatisticsChart({ statistics }) {
   const barData = [
@@ -22,36 +20,72 @@ export default function StatisticsChart({ statistics }) {
   ];
 
   const pieData = [
-    { name: "MEDIUM", value: statistics.questionCountByMedium, fill: "#82ca9d" },
-    { name: "EASY", value: statistics.questionCountByEasy, fill: "#ffc658" },
-    { name: "HARD", value: statistics.questionCountByHard, fill: "#ff7f7f" },
+    {
+      name: "MEDIUM",
+      value: statistics.questionCountByMedium,
+      fill: "var(--color-success)",
+    },
+    {
+      name: "EASY",
+      value: statistics.questionCountByEasy,
+      fill: "var(--color-primary)",
+    },
+    {
+      name: "HARD",
+      value: statistics.questionCountByHard,
+      fill: "var(--color-danger)",
+    },
   ];
 
   return (
-    <div className="chart-container">
-      <BarChart width={600} height={300} data={barData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="value" fill="#4c79ff" />
-      </BarChart>
-
-      <PieChart width={400} height={300}>
-        <Pie
-          data={pieData}
-          className="chart-mobile"
-          dataKey="value"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          outerRadius={100}
-          label
-        />
-        <Tooltip />
-        <Legend />
-      </PieChart>
+    <div className="chart-wrapper">
+      <div className="chart-card">
+        {" "}
+        {/* Container cho Bar Chart */}
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={barData} className="bar-chart-theme">
+            <CartesianGrid strokeDasharray="3 3" className="chart-grid" />
+            <XAxis dataKey="name" stroke="var(--color-text-primary)" />
+            <YAxis stroke="var(--color-text-primary)" />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--color-background-card)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-primary)",
+              }}
+            />
+            <Legend wrapperStyle={{ color: "var(--color-text-primary)" }} />
+            <Bar
+              dataKey="value"
+              fill="var(--color-primary)"
+              className="chart-bar-primary"
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="chart-card">
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart className="pie-chart-theme">
+            <Pie
+              data={pieData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              label
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--color-background-card)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-primary)",
+              }}
+            />
+            <Legend wrapperStyle={{ color: "var(--color-text-primary)" }} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

@@ -1,56 +1,68 @@
-  @media (max-width: 1024px) {
-    .content-container .content-list,
-    .chart-container {
-      display: block;
-    }
+/* ========================================================= */
+/* CONTENT BLOCKS (Thẻ thống kê/thông tin) */
+/* ========================================================= */
 
-    .content-list .content-block {
-      width: 100%;
-    }
+@media (max-width: 1024px) {
+  .content-container .content-list,
+  .chart-container {
+    display: block;
   }
-  
-  .content-container {
-    padding: 0px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 5000px; /* Giới hạn chiều rộng */
-    margin: 0px; /* Căn giữa màn hình */
+
+  .content-list .content-block {
+    width: 100%;
+    margin-bottom: 15px; /* Thêm khoảng cách giữa các block trên mobile */
   }
-  
-  .content-list {
-    display: flex; /* Kích hoạt flexbox */
-    justify-content: space-between; /* Tạo khoảng cách đều giữa các cột */
-    align-items: center; /* Căn giữa theo chiều dọc */
-    padding: 0;
-    margin: 0;
-    list-style-type: none; /* Xóa dấu chấm đầu dòng */
-  }
-  
-  .content-block {
-    background-color: #e0e0e0; /* Màu xám sáng */
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center; /* Căn giữa nội dung */
-    width: 30%; /* Chiều rộng mỗi cột */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, background-color 0.2s;
-  }
-  
-  .content-block:hover {
-    background-color: #d6d6d6; /* Màu xám đậm hơn khi hover */
-    transform: translateY(-5px); /* Nhấc khối lên khi hover */
-  }
-  
-  .content-number {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333; /* Màu chữ đậm */
-    margin: 0;
-  }
-  
-  .content-description {
-    font-size: 14px;
-    color: #666; /* Màu chữ nhạt */
-    margin: 10px 0 0;
-  }
-  
+}
+
+.content-container {
+  padding: 0px;
+  /* Sử dụng background-card làm nền nếu container có thể nhìn thấy được */
+  background-color: var(--color-background-main);
+  border-radius: 10px;
+  /* Giữ shadow mặc định hoặc tùy chỉnh cho Dark Mode nếu cần */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 5000px;
+  margin: 0px;
+}
+
+.content-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+.content-block {
+  /* Thay #e0e0e0 bằng biến nền card (sáng hơn nền main) */
+  background-color: var(--color-background-card);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 30%;
+  /* Giữ shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.content-block:hover {
+  /* Thay #d6d6d6 bằng biến nền hover (sidebar-hover hoặc sidebar-active) */
+  background-color: var(--color-sidebar-hover);
+  transform: translateY(-5px);
+}
+
+.content-number {
+  font-size: 24px;
+  font-weight: bold;
+  /* Thay #333 bằng biến màu chữ chính */
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.content-description {
+  font-size: 14px;
+  /* Thay #666 bằng biến màu chữ phụ */
+  color: var(--color-text-secondary);
+  margin: 10px 0 0;
+}

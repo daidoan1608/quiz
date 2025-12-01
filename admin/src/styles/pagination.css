@@ -1,42 +1,59 @@
+/*
+ * Các quy tắc CSS cho Pagination đã được cập nhật để sử dụng biến màu CSS.
+ * Điều này đảm bảo thanh phân trang sẽ hiển thị đúng màu trong cả chế độ Sáng và Tối.
+ */
+
 .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px 0;
-    gap: 5px; /* Khoảng cách giữa các nút */
-  }
-  
-  .pagination .btn {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f8f9fa; /* Màu nền mặc định */
-    color: #333; /* Màu chữ mặc định */
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease; /* Hiệu ứng khi hover */
-  }
-  
-  .pagination .btn:hover {
-    background-color: #e9ecef; /* Màu nền khi hover */
-    border-color: #bbb;
-  }
-  
-  .pagination .btn-primary {
-    background-color: #007bff; /* Màu xanh cho nút được chọn */
-    color: #fff;
-    border-color: #007bff;
-  }
-  
-  .pagination .btn-primary:hover {
-    background-color: #0056b3; /* Màu xanh đậm khi hover */
-    border-color: #004085;
-  }
-  
-  .pagination .btn:disabled {
-    background-color: #e9ecef; /* Màu nền cho nút bị vô hiệu */
-    color: #6c757d; /* Màu chữ xám nhạt */
-    cursor: not-allowed; /* Biểu tượng không cho nhấn */
-    border-color: #ddd;
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  gap: 5px;
+}
+
+.pagination .btn {
+  padding: 8px 12px;
+  /* Sử dụng biến cho viền */
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  /* Sử dụng biến nền card (hoặc nền phụ) làm màu nền mặc định */
+  background-color: var(--color-background-card);
+  /* Sử dụng biến màu chữ chính */
+  color: var(--color-text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination .btn:hover {
+  /* Sử dụng biến sidebar active hoặc hover làm màu nền khi hover */
+  background-color: var(--color-sidebar-hover);
+  /* Viền cũng nên mờ hơn một chút, hoặc sử dụng màu border */
+  border-color: var(--color-border);
+}
+
+.pagination .btn-primary {
+  /* Sử dụng biến màu chủ đạo cho nút được chọn */
+  background-color: var(--color-primary);
+  /* Màu chữ trắng/tương phản trên nền primary. Sử dụng màu nền card là lựa chọn an toàn. */
+  color: var(--color-background-card);
+  /* Viền cũng là màu chủ đạo */
+  border-color: var(--color-primary);
+}
+
+.pagination .btn-primary:hover {
+  /* Tạo màu đậm hơn một chút cho hiệu ứng hover trên nút primary */
+  /* Ở đây ta dùng hàm color-mix để tạo màu đậm hơn 10% */
+  background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+  border-color: color-mix(in srgb, var(--color-primary) 80%, black);
+}
+
+.pagination .btn:disabled {
+  /* Sử dụng màu nền khi hover/active (xám hơn) cho nút bị vô hiệu */
+  background-color: var(--color-sidebar-active);
+  /* Sử dụng biến màu chữ phụ (xám) */
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+  /* Viền mặc định */
+  border-color: var(--color-border);
+}
