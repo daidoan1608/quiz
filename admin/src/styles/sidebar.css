@@ -1,9 +1,8 @@
-/* Sidebar container */
 .menu {
   width: 240px;
-  /* SỬ DỤNG BIẾN THEME */
-  background-color: var(--color-background-card); /* Hoặc --color-sidebar-bg */
-  transition: width 0.3s ease, background-color 0.3s ease; /* Thêm transition cho background */
+
+  background-color: var(--color-background-card);
+  transition: width 0.3s ease, background-color 0.3s ease;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -13,24 +12,21 @@
   width: 60px;
 }
 
-/* Header chứa icon toggle */
 .menu-header {
   display: flex;
   align-items: center;
   padding: 10px 20px;
 }
 
-/* Icon toggle menu */
 .menu-toggle-icon {
   font-size: 24px;
   min-width: 28px;
   text-align: center;
-  /* SỬ DỤNG BIẾN THEME */
+
   color: var(--color-text-primary);
   cursor: pointer;
 }
 
-/* Danh sách các mục menu */
 .menu--list {
   display: flex;
   flex-direction: column;
@@ -38,32 +34,28 @@
   padding: 10px 0;
 }
 
-/* Mỗi item */
 .item {
   display: flex;
   align-items: center;
   padding: 10px 20px;
   text-decoration: none;
   font-weight: 500;
-  /* SỬ DỤNG BIẾN THEME */
+
   color: var(--color-text-primary);
   border-radius: 8px;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .item:hover {
-  /* SỬ DỤNG BIẾN THEME */
   background-color: var(--color-sidebar-hover);
 }
 
-/* Icon trong item */
 .item .icon {
   font-size: 24px;
   min-width: 28px;
   text-align: center;
 }
 
-/* Chữ đi kèm icon */
 .item span,
 .menu-header span {
   margin-left: 12px;
@@ -74,7 +66,6 @@
   white-space: nowrap;
 }
 
-/* Khi thu gọn */
 .menu.collapsed .item span,
 .menu.collapsed .menu-header span {
   max-width: 0;
@@ -83,35 +74,27 @@
   pointer-events: none;
 }
 
-/* Active item */
 .item.active {
-  /* SỬ DỤNG BIẾN THEME */
   background-color: var(--color-sidebar-active);
-  color: var(--color-primary); /* Màu nổi bật cho item đang chọn */
+  color: var(--color-primary);
 }
 
 .item.active:hover {
-  /* SỬ DỤNG BIẾN THEME */
-  background-color: var(
-    --color-sidebar-active
-  ); /* Giữ nguyên hoặc tối hơn một chút */
+  background-color: var(--color-sidebar-active);
 }
 
-/* Logout item */
 .logout {
   margin-top: auto;
-  /* SỬ DỤNG BIẾN THEME */
-  color: var(--color-danger); /* Màu lỗi/nguy hiểm */
+
+  color: var(--color-danger);
 }
 
 .logout:hover {
-  /* SỬ DỤNG BIẾN THEME */
-  background-color: var(--color-danger); /* Nền hover là màu nguy hiểm */
-  color: var(--color-background-main); /* Chữ chuyển sang màu sáng/nền */
+  background-color: var(--color-danger);
+  color: var(--color-background-main);
   cursor: pointer;
 }
 
-/* ✅ Responsive: tự thu gọn dưới 768px */
 @media (max-width: 768px) {
   .menu {
     width: 60px;

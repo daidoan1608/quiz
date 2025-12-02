@@ -9,7 +9,7 @@ export default function GetUserExam() {
   const [userExams, setUserExams] = useState([]);
   const [userInfoMap, setUserInfoMap] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(8);
+  const [itemsPerPage] = useState(7);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function GetUserExam() {
   const currentUserExams = userExams.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    
+
     <div className="responsive-table">
       <h2 className="mb-4 heading-content">Quản lý bài thi người dùng</h2>
 
@@ -86,7 +86,7 @@ export default function GetUserExam() {
             const userInfo = userInfoMap[exam.userId] || {};
 
             return (
-              <tr key={exam.userExamId || index}>
+              <tr key={exam.userExamId || index} className="truncated-text">
                 <td data-label="Môn học" className="truncated-text">{item.subjectName}</td>
                 <td data-label="Đề thi">{item.title}</td>
                 <td data-label="Thời gian bắt đầu">

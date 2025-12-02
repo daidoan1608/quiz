@@ -14,14 +14,18 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
     private final UserSubjectPermissionRepository permissionRepository;
     private final ChapterRepository chapterRepository;
     private final ExamRepository examRepository;
-    // ... Khai báo các Repository khác (Question, Answer)
+    private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
 
     public CustomPermissionEvaluator(UserSubjectPermissionRepository permissionRepository,
                                      ChapterRepository chapterRepository,
-                                     ExamRepository examRepository /* ... */) {
+                                     ExamRepository examRepository, QuestionRepository questionRepository,
+                                     AnswerRepository answerRepository) {
         this.permissionRepository = permissionRepository;
         this.chapterRepository = chapterRepository;
         this.examRepository = examRepository;
+        this.questionRepository = questionRepository;
+        this.answerRepository = answerRepository;
     }
 
     @Override
@@ -69,13 +73,10 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
         return switch (targetType.toUpperCase()) {
             case "SUBJECT" -> id;
-            case "CHAPTER" -> chapterRepository.findById(id)
-                    .map(c -> c.getSubject().getSubjectId())
-                    .orElse(null);
-            case "EXAM" -> examRepository.findById(id)
-                    .map(e -> e.getSubject().getSubjectId())
-                    .orElse(null);
-            // Thêm các case khác: QUESTION, ANSWER...
+            case "CHAPTER" -> chapterRepository.findSubjectIdByChapterId(id).orElse(null);
+            case "EXAM" -> examRepository.findSubjectIdByExamId(id).orElse(null);
+            case "QUESTION" -> questionRepository.findSubjectIdByQuestionId(id).orElse(null);
+            case "ANSWER" -> answerRepository.findSubjectIdByAnswerId(id).orElse(null);
             default -> null;
         };
     }

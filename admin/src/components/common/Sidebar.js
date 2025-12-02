@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   BiHome,
-  BiLogOut,
   BiMessage,
   BiBookOpen,
   BiStats,
@@ -11,24 +10,12 @@ import {
   BiQuestionMark,
 } from "react-icons/bi";
 import { PiExam } from "react-icons/pi";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "../../styles/sidebar.css";
-import { useAuth } from "../../context/AuthProvider";
-import { useTheme } from "../../hooks/useTheme";
-import { BsSun, BsMoon } from "react-icons/bs";
+
 
 export default function Sidebar() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  // Lấy theme và toggleTheme
-  const { theme, toggleTheme } = useTheme();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -54,7 +41,7 @@ export default function Sidebar() {
           className={({ isActive }) => `item ${isActive ? "active" : ""}`}
         >
           <BiBookOpen className="icon" />
-          <span>Quản lý bài thi user</span>
+          <span>Quản lý bài thi</span>
         </NavLink>
 
         <NavLink
@@ -62,7 +49,7 @@ export default function Sidebar() {
           className={({ isActive }) => `item ${isActive ? "active" : ""}`}
         >
           <BiUser className="icon" />
-          <span>Quản lý user</span>
+          <span>Quản lý người dùng</span>
         </NavLink>
 
         <NavLink
@@ -70,7 +57,7 @@ export default function Sidebar() {
           className={({ isActive }) => `item ${isActive ? "active" : ""}`}
         >
           <PiExam className="icon" />
-          <span>Quản lý bài thi</span>
+          <span>Quản lý đề thi</span>
         </NavLink>
 
         <NavLink

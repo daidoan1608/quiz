@@ -1,129 +1,112 @@
-/*
- * Các quy tắc CSS cho Header đã được cập nhật để sử dụng biến màu CSS.
- * Điều này đảm bảo Header, Search Box, và Notification Icon sẽ thay đổi
- * màu sắc phù hợp với chế độ sáng hoặc tối của ứng dụng.
- */
-
-.content{
-    width: 100%;
-    height: 100%;
+.content {
+  width: 100%;
+  height: 100%;
 }
 
-/* Định dạng cho phần header */
 .content--header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 30px;
-    /* Thay #4c79ff bằng biến màu chủ đạo */
-    background-color: var(--color-primary); 
-    /* Giữ nguyên màu chữ trắng (light mode) hoặc tương phản trên nền primary */
-    color: var(--color-text-primary); 
-    border-radius: 8px;
-    margin-bottom: 20px;
-    /* Sử dụng box-shadow dựa trên nền tối hay sáng sẽ phức tạp hơn. Giữ nguyên shadow mặc định. */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+
+  background-color: var(--color-primary);
+
+  color: var(--color-text-primary);
+  border-radius: 8px;
+  margin: 10px 20px 20px 5px;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Tiêu đề chính của header */
 .header--title {
-    font-size: 28px;
-    font-weight: bold;
-    margin: 0;
-    /* Đảm bảo tiêu đề trong header dùng màu chữ tương phản, thường là màu nền card hoặc màu trắng nếu nền primary là đậm */
-    color: var(--color-background-card); 
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+
+  color: var(--color-background-card);
 }
- 
-/* Phần các biểu tượng thông báo và tìm kiếm */
+
 .header--activity {
-    display: flex;
-    align-items: center;
-    gap: 20px; 
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
- 
-/* Box tìm kiếm */
+
 .search-box {
-    display: flex;
-    align-items: center;
-    /* Thay #ffffff bằng biến nền card */
-    background-color: var(--color-background-card); 
-    border-radius: 25px;
-    padding: 8px 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+
+  background-color: var(--color-background-card);
+  border-radius: 25px;
+  padding: 8px 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
- 
+
 .search-box input {
-    border: none;
-    outline: none;
-    padding: 8px;
-    font-size: 16px;
-    width: 200px;
-    border-radius: 25px;
-    /* Đảm bảo màu chữ input dùng màu chữ chính và màu nền input dùng nền card */
-    background-color: var(--color-background-card);
-    color: var(--color-text-primary);
+  border: none;
+  outline: none;
+  padding: 8px;
+  font-size: 16px;
+  width: 200px;
+  border-radius: 25px;
+
+  background-color: var(--color-background-card);
+  color: var(--color-text-primary);
 }
- 
+
 .search-box .icon {
-    font-size: 20px;
-    /* Thay #4c79ff bằng biến màu primary */
-    color: var(--color-primary); 
-    cursor: pointer;
-    margin-left: 10px;
+  font-size: 20px;
+
+  color: var(--color-primary);
+  cursor: pointer;
+  margin-left: 10px;
 }
- 
-/* Phần thông báo */
+
 .notify {
-    display: flex;
-    align-items: center;
-    position: relative;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
- 
+
 .notify .icon {
-    font-size: 28px;
-    /* Màu icon thông báo nên là màu nền card (trắng/xám nhạt) để nổi bật trên nền primary */
-    color: var(--color-background-card); 
-    cursor: pointer;
+  font-size: 28px;
+
+  color: var(--color-background-card);
+  cursor: pointer;
 }
- 
-/* Hiệu ứng khi hover trên icon thông báo */
+
 .notify .icon:hover {
-    /* Thay #ffe600 bằng màu chữ phụ hoặc màu nổi bật */
-    color: var(--color-text-secondary); 
+  color: var(--color-text-secondary);
 }
- 
-/* Thêm một thông báo đỏ nhỏ nếu có thông báo mới */
+
 .notify::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    /* Thay red bằng biến màu danger */
-    background-color: var(--color-danger); 
-    border-radius: 50%;
-    width: 8px;
-    height: 8px;
-    display: block;
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  background-color: var(--color-danger);
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  display: block;
 }
- 
-/* Định dạng cho avatar */
+
 .avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
- 
+
 .avatar-img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    /* Màu viền avatar nên là màu nền card để tương phản với nền primary */
-    border: 2px solid var(--color-background-card); 
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+
+  border: 2px solid var(--color-background-card);
 }
- 
-/* Hiệu ứng khi hover trên avatar */
+
 .avatar:hover .avatar-img {
-    /* Thay #ffe600 bằng màu primary hoặc màu text secondary cho hiệu ứng hover nổi bật */
-    border: 2px solid var(--color-text-secondary); 
+  border: 2px solid var(--color-text-secondary);
 }

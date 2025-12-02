@@ -198,7 +198,10 @@ export default function UpdateUser() {
     };
 
     try {
-      await authAxios.post("/update/permissions/mod", permissionPayload);
+      await authAxios.post(
+        `/admin/permissions/subject-assignment`,
+        permissionPayload
+      );
       alert(
         isEditing ? "Cập nhật quyền thành công!" : "Thêm quyền thành công!"
       );

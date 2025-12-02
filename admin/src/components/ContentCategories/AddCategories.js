@@ -29,11 +29,11 @@ export default function AddCategory() {
 
   return (
     <div>
-      <h2>Thêm thể loại</h2>
+      <h2>Thêm khoa</h2>
       <form onSubmit={addCategory}>
-        {/* Tên thể loại */}
+        {/* Tên khoa */}
         <div className="form-group mb-3">
-          <label>Tên thể loại:</label>
+          <label>Tên khoa</label>
           <input
             type="text"
             className="form-control"
@@ -47,7 +47,7 @@ export default function AddCategory() {
 
         {/* Mô tả thể loại */}
         <div className="form-group mb-3">
-          <label>Mô tả:</label>
+          <label>Mô tả</label>
           <textarea
             className="form-control"
             value={newCategory.categoryDescription}

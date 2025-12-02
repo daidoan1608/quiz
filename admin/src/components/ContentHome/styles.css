@@ -38,6 +38,7 @@
   /* Thay #e0e0e0 bằng biến nền card (sáng hơn nền main) */
   background-color: var(--color-background-card);
   padding: 20px;
+  margin: 5px;
   border-radius: 10px;
   text-align: center;
   width: 30%;

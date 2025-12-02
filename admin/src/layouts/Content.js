@@ -6,7 +6,6 @@ import GetChapter from "../components/ContentChapter/GetChapter";
 import UpdateChapter from "../components/ContentChapter/UpdateChapter";
 import AddExam from "../components/ContentExam/AddExam";
 import GetExam from "../components/ContentExam/GetExam";
-import { ContentHeader } from "../components/common/ContentHeader";
 import ContentHome from "../components/ContentHome/ContentHome";
 import AddQuestion from "../components/ContentQuestion/AddQuestion";
 import GetQuestion from "../components/ContentQuestion/GetQuestion";
@@ -31,7 +30,6 @@ export default function Content() {
   return (
     <>
       <div className="content">
-        <ContentHeader />
         <Routes>
           <Route path="/import" element={<ImportInterface />} />
 

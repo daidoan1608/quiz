@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { authAxios } from "../../api/axiosConfig";
-import Pagination from '../common/Pagination';
+import Pagination from "../common/Pagination";
 import { BiEdit, BiTrash, BiPlus } from "react-icons/bi";
 import { CiImport } from "react-icons/ci";
 import "../../styles/GetQuestion.css";
-import "../../styles/responsiveTable.css"
+import "../../styles/responsiveTable.css";
 
 export default function GetQuestion() {
   const [questions, setQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const [itemsPerPage] = useState(10); // Số câu hỏi mỗi trang
+  const [itemsPerPage] = useState(7); // Số câu hỏi mỗi trang
 
   useEffect(() => {
     getAllQuestions();
@@ -44,7 +44,11 @@ export default function GetQuestion() {
 
   const renderAnswers = (answers) => {
     const columns = answers.map((answer, index) => (
-      <td data-label={`Đáp án ${String.fromCharCode(65 + index)}`} key={index} className="truncated-text">
+      <td
+        data-label={`Đáp án ${String.fromCharCode(65 + index)}`}
+        key={index}
+        className="truncated-text"
+      >
         {answer.content}
       </td>
     ));
@@ -65,12 +69,18 @@ export default function GetQuestion() {
 
   const elementQuestion = currentQuestions.map((item) => (
     <tr key={item.questionId}>
-      <td data-label="Mã câu hỏi" className="truncated-text">{item.questionId}</td>
+      <td data-label="Mã câu hỏi" className="truncated-text">
+        {item.questionId}
+      </td>
       <td data-label="Nội dung" className="truncated-text" titel={item.content}>
         {item.content}
       </td>
-      <td data-label="Mức độ" className="truncated-text">{item.difficulty}</td>
-      <td data-label="Tên chương" className="truncated-text">{item.chapterName}</td>
+      <td data-label="Mức độ" className="truncated-text">
+        {item.difficulty}
+      </td>
+      <td data-label="Tên chương" className="truncated-text">
+        {item.chapterName}
+      </td>
       {renderAnswers(item.answers)}
       <td data-label="Đáp án đúng" className="truncated-text">
         {item.answers.find((answer) => answer.isCorrect)?.content ||
@@ -97,23 +107,21 @@ export default function GetQuestion() {
 
   return (
     <div className="responsive-table">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2 className="heading-content">Quản lý câu hỏi</h2>
-        <div>
-          <button
-            className="btn btn-primary me-3"
-            onClick={() => (window.location.href = "/admin/questions")}
-          >
-            <BiPlus />
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => (window.location.href = "/import")}
-          >
-            <CiImport />
-            Import
-          </button>
-        </div>
+      <h2 className="heading-content">Quản lý câu hỏi</h2>
+      <div>
+        <button
+          className="btn btn-primary mb-3 float-end"
+          onClick={() => (window.location.href = "/admin/questions")}
+        >
+          <BiPlus />
+        </button>
+        <button
+          className="btn btn-primary mb-3 float-end mx-2"
+          onClick={() => (window.location.href = "/import")}
+        >
+          <CiImport />
+          Import
+        </button>
       </div>
       <table className="table table-bordered">
         <thead>

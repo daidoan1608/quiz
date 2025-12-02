@@ -23,10 +23,12 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (accessToken, refreshToken, userId) => {
+  const login = (accessToken, refreshToken, userId, role, username) => {
     localStorage.setItem("accessToken", accessToken);
     sessionStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("userId", userId);
+    localStorage.setItem("role", role);
+    localStorage.setItem("username", username);
     setIsLoggedIn(true);
     setUser(userId);
     message.success("Đăng nhập thành công!");
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");
     localStorage.removeItem("userId");
+    localStorage.removeItem("role");
     setIsLoggedIn(false);
     setUser(null);
     message.success("Đăng xuất thành công!");

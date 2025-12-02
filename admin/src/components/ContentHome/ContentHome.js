@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import {authAxios} from '../../api/axiosConfig';
-import StatisticsChart from '../StatisticsChart';
-import './styles.css';
+import React, { useEffect, useState } from "react";
+import { authAxios } from "../../api/axiosConfig";
+import StatisticsChart from "../StatisticsChart";
+import "./styles.css";
 
 export default function ContentHome() {
   const [statistics, setStatistics] = useState({
@@ -14,11 +14,11 @@ export default function ContentHome() {
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
-        const response = await authAxios.get('/admin/statistics');
-        setStatistics(response.data.data); // Cập nhật dữ liệu thống kê
+        const response = await authAxios.get("/admin/statistics");
+        setStatistics(response.data.data);
       } catch (error) {
-        console.error('Error fetching statistics:', error);
-        alert('Không thể tải dữ liệu thống kê!');
+        console.error("Error fetching statistics:", error);
+        alert("Không thể tải dữ liệu thống kê!");
       }
     };
 
@@ -28,7 +28,7 @@ export default function ContentHome() {
   return (
     <div className="content-container">
       <ul className="content-list">
-      <li className="content-block">
+        <li className="content-block">
           <h3 className="content-number">{statistics.totalSubjects}</h3>
           <p className="content-description">Số môn học</p>
         </li>

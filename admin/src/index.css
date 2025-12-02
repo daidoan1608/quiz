@@ -5,15 +5,12 @@
   font-family: "Montserrat", sans-serif;
 }
 
-/* Trong src/index.css hoặc src/App.css */
 @import "./styles/themeVariables.css";
 
-/* Cấu hình chung cho Body */
 body {
-  /* Áp dụng biến màu nền và chữ chính cho Body */
   background-color: var(--color-background-main);
   color: var(--color-text-primary);
-  transition: background-color 0.3s, color 0.3s; /* Hiệu ứng chuyển màu mượt mà */
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /*
@@ -22,19 +19,15 @@ body {
  * khi chuyển đổi giữa chế độ sáng và tối (ví dụ: khi thêm class 'dark' vào <body>).
  */
 
-.management-table, 
-.responsive-table, 
-.table, /* Áp dụng cho class .table cơ bản của Bootstrap */
+.management-table,
+.responsive-table,
+.table,
 .table-bordered {
-  /* Áp dụng cho class .table-bordered của Bootstrap */
-  background-color: var(
-    --color-background-card
-  ) !important; /* Dùng !important nếu cần thiết */
+  background-color: var(--color-background-card) !important;
   color: var(--color-text-primary);
   border-color: var(--color-border);
 }
 
-/* Quan trọng: Cần đảm bảo các ô (td) cũng có màu nền chính xác */
 .management-table td,
 .responsive-table td,
 .table td,
@@ -44,12 +37,11 @@ body {
   border-color: var(--color-border);
 }
 
-/* Ghi đè tiêu đề bảng */
 .management-table th,
 .responsive-table th,
 .table th,
 .table-bordered th {
-  background-color: var(--color-sidebar-active); /* Nền cho tiêu đề cột */
+  background-color: var(--color-sidebar-active);
   color: var(--color-text-primary);
   border-color: var(--color-border);
 }
@@ -57,14 +49,13 @@ body {
 .management-table th,
 .management-table td {
   padding: 12px 15px;
-  /* Sử dụng biến cho đường viền */
+
   border: 1px solid var(--color-border);
 }
 
-/* Định dạng nút hành động */
 .action-btn {
   background: none;
-  /* Sử dụng biến cho viền nút */
+
   border: 2px solid var(--color-border);
   border-radius: 1px;
   cursor: pointer;
@@ -77,87 +68,63 @@ body {
   transition: background-color 0.3s ease;
 }
 
-/* Nút chỉnh sửa */
 .edit-btn {
-  /* Sử dụng màu thành công (success) cho nút chỉnh sửa */
   color: var(--color-success);
 }
 
 .edit-btn:hover {
-  /* Thay vì màu cứng, sử dụng màu thành công với độ trong suốt */
   background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
 }
 
-/* Nút xóa */
 .delete-btn {
-  /* Sử dụng màu nguy hiểm (danger) cho nút xóa */
   color: var(--color-danger);
 }
 
 .delete-btn:hover {
-  /* Thay vì màu cứng, sử dụng màu nguy hiểm với độ trong suốt */
   background-color: color-mix(in srgb, var(--color-danger) 10%, transparent);
 }
 
-/* Biểu tượng */
 .action-btn .icon {
   font-size: 20px;
 }
 
-/* ========================================================= */
-/* CÁC QUY TẮC GHI ĐÈ CHO BỘ LỌC VÀ NÚT TRONG DARK MODE */
-/* ========================================================= */
-
-/* Ghi đè màu nền và màu chữ cho label bộ lọc */
 .filter-role label {
-  color: var(--color-text-primary); /* Màu chữ chính */
+  color: var(--color-text-primary);
 }
 
-/* Ghi đè màu sắc cho dropdown select (Bộ lọc Role) */
 .filter-role .form-select {
-  /* Nền của select */
   background-color: var(--color-background-card);
-  /* Màu chữ */
+
   color: var(--color-text-primary);
-  /* Viền */
+
   border-color: var(--color-border);
 }
 
-/* Đảm bảo các option bên trong cũng đổi màu khi Dark Mode */
 .filter-role .form-select option {
   background-color: var(--color-background-card);
   color: var(--color-text-primary);
 }
 
-/* --- Nút Thêm User --- */
-
-/* Nút chính (btn-primary) */
 .add-btn.btn-primary {
-  /* Màu nền */
   background-color: var(--color-primary);
-  /* Màu chữ (thường là màu nền card để tương phản) */
+
   color: var(--color-background-card);
-  /* Viền */
+
   border-color: var(--color-primary);
 }
 
-/* Hiệu ứng hover/active của nút chính */
 .add-btn.btn-primary:hover,
 .add-btn.btn-primary:active,
 .add-btn.btn-primary:focus {
-  /* Sử dụng color-mix để tạo màu đậm hơn khi hover/active */
   background-color: color-mix(in srgb, var(--color-primary) 90%, black);
   border-color: color-mix(in srgb, var(--color-primary) 80%, black);
   color: var(--color-background-card);
 }
 
-/* --- Nút Action trong bảng (BiEdit, BiTrash) --- */
-
-/* Ghi đè màu cho nút Success (Edit) */
 .btn-success {
   background-color: var(--color-success);
   border-color: var(--color-success);
-  color: var(--color-background-card); /* Màu icon/chữ trắng để nổi bật */
+  color: var(--color-background-card);
 }
 .btn-success:hover {
   background-color: color-mix(in srgb, var(--color-success) 90%, black);
@@ -165,11 +132,10 @@ body {
   color: var(--color-background-card);
 }
 
-/* Ghi đè màu cho nút Danger (Delete) */
 .btn-danger {
   background-color: var(--color-danger);
   border-color: var(--color-danger);
-  color: var(--color-background-card); /* Màu icon/chữ trắng để nổi bật */
+  color: var(--color-background-card);
 }
 .btn-danger:hover {
   background-color: color-mix(in srgb, var(--color-danger) 90%, black);
@@ -177,11 +143,6 @@ body {
   color: var(--color-background-card);
 }
 
-/* ========================================================= */
-/* QUY TẮC CHUNG CHO INPUT & SELECT */
-/* ========================================================= */
-
-/* Áp dụng cho cả thẻ <input> (text, number, email, v.v.) và <select> */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -196,45 +157,34 @@ form-label,
 .form-control,
 .form-control:disabled,
 .form-control option {
-  /* Nền của input/select */
   background-color: var(--color-background-card);
-  /* Màu chữ nhập vào */
+
   color: var(--color-text-primary);
-  /* Màu viền */
+
   border: 1px solid var(--color-border);
   transition: all 0.2s ease-in-out;
 }
 
-/* Hiệu ứng focus/hover */
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="number"]:focus,
 textarea:focus,
 .form-select:focus {
-  /* Tắt box-shadow mặc định của Bootstrap khi focus (nếu cần) */
   box-shadow: 0 0 0 0.25rem
     color-mix(in srgb, var(--color-primary) 25%, transparent);
-  /* Viền khi focus dùng màu chủ đạo */
+
   border-color: var(--color-primary);
 }
 
-/* ========================================================= */
-/* OPTIONS (Dropdown items) */
-/* ========================================================= */
-
-/* Đảm bảo các options trong thẻ <select> cũng dùng màu nền và chữ của theme */
 .form-select option {
-  /* Nền của option */
   background-color: var(--color-background-card);
-  /* Màu chữ của option */
+
   color: var(--color-text-primary);
 }
 
-/* Ghi đè màu của Bootstrap cho các input bị vô hiệu hóa (disabled) */
 input:disabled,
 .form-select:disabled {
-  /* Nền màu xám hơn cho trạng thái disabled */
   background-color: var(--color-sidebar-active);
-  /* Màu chữ xám nhẹ */
+
   color: var(--color-text-secondary);
 }

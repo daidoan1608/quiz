@@ -2,13 +2,12 @@
   height: auto;
   width: 100%;
   display: flex;
-  align-items: center; /* Căn giữa theo chiều dọc */
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  height: 100vh; /* Chiều cao toàn màn hình */
-  background: linear-gradient(135deg, #4c79ff, #5dc1b9); /* Nền đẹp */
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #4c79ff, #5dc1b9);
 }
 
-/* Container của login */
 .login-container {
   width: 350px;
   padding: 20px;
@@ -19,7 +18,6 @@
   animation: fadeIn 0.5s ease;
 }
 
-/* Tiêu đề */
 .login-header {
   margin-bottom: 20px;
   font-size: 24px;
@@ -27,7 +25,6 @@
   font-weight: bold;
 }
 
-/* Input */
 .login-input {
   width: 100%;
   padding: 10px;
@@ -39,14 +36,12 @@
   transition: border-color 0.3s;
 }
 
-/* Hover & Focus */
 .login-input:focus {
   outline: none;
   border-color: #4c79ff;
   box-shadow: 0 0 5px rgba(76, 121, 255, 0.5);
 }
 
-/* Nút đăng nhập */
 .login-button {
   width: 100%;
   padding: 10px;
@@ -68,7 +63,6 @@
   background: #324db0;
 }
 
-/* Hiệu ứng động */
 @keyframes fadeIn {
   from {
     opacity: 0;

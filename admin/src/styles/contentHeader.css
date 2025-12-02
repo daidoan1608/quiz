@@ -36,3 +36,15 @@
   background-color: var(--color-sidebar-hover);
   color: var(--color-primary);
 }
+
+.username {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  margin-right: 10px;
+  align-self: center;
+}

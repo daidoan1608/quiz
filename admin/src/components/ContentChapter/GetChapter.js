@@ -8,7 +8,7 @@ import '../../styles/responsiveTable.css'
 export default function GetChapter() {
     const [chapters, setChapters] = useState([]);
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-    const [itemsPerPage] = useState(5); // Số mục trên mỗi trang
+    const [itemsPerPage] = useState(7); // Số mục trên mỗi trang
     const navigate = useNavigate();
 
     // Lấy danh sách chương
@@ -53,7 +53,7 @@ export default function GetChapter() {
                 className="btn btn-primary mb-3 float-end"
                 onClick={() => navigate('/admin/add/chapter')}
             >
-            <BiPlus />  
+            <BiPlus />
             </button>
 
             {/* Bảng danh sách chương */}
@@ -79,7 +79,7 @@ export default function GetChapter() {
                                     className="btn btn-danger mx-1"
                                     onClick={() => deleteChapter(chapter.chapterId)}
                                 >
-                                <BiTrash    />  
+                                <BiTrash    />
                                 </button>
                                 <button
                                     className="btn btn-success mx-1"

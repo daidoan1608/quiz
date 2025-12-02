@@ -18,12 +18,12 @@ function Login() {
         password,
       });
 
-      const { accessToken, refreshToken, userId } = response.data.data;
-      if (response.data.data.role !== "ADMIN") {
+      const { accessToken, refreshToken, userId, role } = response.data.data;
+      if (response.data.data.role === "USER") {
         message.error("Bạn không có quyền truy cập!");
         return;
       }
-      login(accessToken, refreshToken, userId);
+      login(accessToken, refreshToken, userId, role, username);
       navigate("/home");
     } catch (error) {
       const errorMessage =

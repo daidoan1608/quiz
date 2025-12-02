@@ -8,7 +8,7 @@ import '../../styles/responsiveTable.css'
 export default function GetSubject() {
     const [subjects, setSubjects] = useState([]);
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-    const [itemsPerPage] = useState(5); // Số mục trên mỗi trang
+    const [itemsPerPage] = useState(7); // Số mục trên mỗi trang
     const navigate = useNavigate();
 
     // Lấy tất cả môn học

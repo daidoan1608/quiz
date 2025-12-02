@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query("SELECT q FROM Question q WHERE q.chapter.chapterId = :chapterId")
@@ -48,6 +49,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     List<Question> findQuestionsByExamId(Long examId);
 
     long countByDifficulty(Question.Difficulty difficulty);
+
+    @Query("SELECT q.chapter.subject.subjectId FROM Question q WHERE q.questionId = :questionId")
+    Optional<Long> findSubjectIdByQuestionId(@Param("questionId") Long questionId);
 
     int countByChapter(Chapter chapter);
 

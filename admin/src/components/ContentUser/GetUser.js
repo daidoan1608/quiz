@@ -8,12 +8,18 @@ import "../../styles/responsiveTable.css";
 export default function GetUser() {
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRole, setSelectedRole] = useState("all"); // State mới cho role được chọn, mặc định là "all"
-  const pageSize = 5; // Số lượng người dùng mỗi trang
+  const [selectedRole, setSelectedRole] = useState("all");
+  const pageSize = 7;
   const navigate = useNavigate();
 
-  // Hàm lấy danh sách người dùng
+  const currentUserRole = localStorage.getItem("role");
+
+  // Kiểm tra xem người dùng hiện tại có phải là MOD không
+  const isMod = currentUserRole === "MOD";
+
+  // Hàm lấy danh sách người dùng (Không thay đổi)
   const fetchUsers = async () => {
+    // ... (logic fetchUsers không thay đổi)
     try {
       const response = await authAxios.get("/admin/users");
       setUsers(response.data.data);
@@ -23,8 +29,14 @@ export default function GetUser() {
     }
   };
 
-  // Hàm xóa người dùng
+  // Hàm xóa người dùng (Thêm kiểm tra isMod)
   const deleteUser = async (userId, userName) => {
+    // 🔴 THAY ĐỔI Ở ĐÂY: Không cho phép MOD xóa
+    if (isMod) {
+      alert("Bạn không có quyền thực hiện hành động này.");
+      return;
+    }
+
     if (window.confirm(`Bạn có chắc chắn muốn xóa người dùng ${userName} ?`)) {
       try {
         await authAxios.delete(`/admin/delete/users/${userId}`);
@@ -42,50 +54,46 @@ export default function GetUser() {
     }
   };
 
-  // Hàm cập nhật người dùng
+  // Hàm cập nhật người dùng (Thêm kiểm tra isMod)
   const updateUser = (userId) => {
+    // 🔴 THAY ĐỔI Ở ĐÂY: Không cho phép MOD chỉnh sửa
+    if (isMod) {
+      alert("Bạn không có quyền thực hiện hành động này.");
+      return;
+    }
     navigate(`/update/users/${userId}`);
   };
 
-  // Lấy danh sách người dùng khi component được render
+  // Lấy danh sách người dùng khi component được render (Không thay đổi)
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Hàm xử lý khi role được chọn thay đổi
+  // Các hàm lọc và phân trang khác không thay đổi...
   const handleRoleChange = (event) => {
     setSelectedRole(event.target.value);
-    setCurrentPage(1); // Reset về trang 1 khi thay đổi bộ lọc
+    setCurrentPage(1);
   };
 
-  // Lọc danh sách người dùng dựa trên role được chọn
   const filteredUsers =
     selectedRole === "all"
       ? users
       : users.filter((user) => user.role === selectedRole);
 
-  // Tính toán người dùng cho trang hiện tại
   const startIndex = (currentPage - 1) * pageSize;
   const currentUsers = filteredUsers.slice(startIndex, startIndex + pageSize);
 
-  // Tính tổng số trang
   const totalPages = Math.ceil(filteredUsers.length / pageSize);
 
-  // Hàm thay đổi trang
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  // Lấy danh sách các role duy nhất để tạo option cho bộ lọc
-  // Bạn cần thay thế bằng danh sách role thực tế trong ứng dụng của mình nếu cần
-  const availableRoles = ["all", "ADMIN", "USER", "MOD"]; // Ví dụ các role có thể có
-  // Hoặc bạn có thể tự động lấy từ dữ liệu nếu cấu trúc data cho phép:
-  // const uniqueRoles = [...new Set(users.map(user => user.role))];
-  // const availableRoles = ["all", ...uniqueRoles];
+  const availableRoles = ["all", "ADMIN", "USER", "MOD"];
 
   return (
     <div className="responsive-table">
-      <h2 className="heading-content">Quản lý User</h2>
+      <h2 className="heading-content">Quản lý người dùng</h2>
 
       <div className="d-flex justify-content-between mb-3 align-items-center">
         {/* Bộ lọc Role */}
@@ -109,8 +117,17 @@ export default function GetUser() {
 
         {/* Nút chuyển đến trang thêm người dùng */}
         <button
-          className="btn add-btn btn-primary"
-          onClick={() => navigate(`/admin/add/user`)}
+          className={`btn add-btn btn-primary ${isMod ? "disabled" : ""}`} // 🔴 THAY ĐỔI Ở ĐÂY: Thêm class 'disabled'
+          onClick={() => {
+            // 🔴 THAY ĐỔI Ở ĐÂY: Kiểm tra MOD trước khi điều hướng
+            if (!isMod) {
+              navigate(`/admin/add/user`);
+            } else {
+              alert("Bạn không có quyền thêm người dùng.");
+            }
+          }}
+          disabled={isMod} // Vô hiệu hóa nút
+          title={isMod ? "Bạn không có quyền thêm user" : "Thêm User mới"} // Thêm tooltip
         >
           <BiPlus className="icon" /> Thêm User
         </button>
@@ -132,21 +149,28 @@ export default function GetUser() {
           {currentUsers.length > 0 ? (
             currentUsers.map((user, index) => (
               <tr key={index}>
-                <td data-label="Mã tài khoản">{user.userId}</td>
+                <td data-label="Mã tài khoản" className="truncated-text">
+                  {user.userId}
+                </td>
                 <td data-label="Tên tài khoản">{user.username}</td>
                 <td data-label="Họ và tên">{user.fullName}</td>
                 <td data-label="Email">{user.email}</td>
                 <td data-label="Role">{user.role}</td>
                 <td data-label="Action">
+                  {/* 🔴 THAY ĐỔI Ở ĐÂY: Vô hiệu hóa nút Sửa và Xóa nếu là MOD */}
                   <button
                     className="btn btn-success mx-1"
                     onClick={() => updateUser(user.userId)}
+                    disabled={isMod} // Vô hiệu hóa
+                    title={isMod ? "Không có quyền sửa" : "Sửa User"} // Tooltip
                   >
                     <BiEdit className="icon" />
                   </button>
                   <button
                     className="btn btn-danger mx-1"
                     onClick={() => deleteUser(user.userId, user.username)}
+                    disabled={isMod} // Vô hiệu hóa
+                    title={isMod ? "Không có quyền xóa" : "Xóa User"} // Tooltip
                   >
                     <BiTrash className="icon" />
                   </button>

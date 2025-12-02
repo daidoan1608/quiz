@@ -8,7 +8,7 @@ import '../../styles/responsiveTable.css'
 export default function GetExam() {
     const [exams, setExams] = useState([]); // Lưu danh sách bài thi
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-    const [itemsPerPage] = useState(5); // Số bài thi hiển thị trên mỗi trang
+    const [itemsPerPage] = useState(7);
     const navigate = useNavigate();
 
     useEffect(() => {

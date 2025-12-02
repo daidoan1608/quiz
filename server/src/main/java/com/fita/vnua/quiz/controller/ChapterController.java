@@ -61,7 +61,7 @@ public class ChapterController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch chapter", List.of(e.getMessage())));
         }
     }
-    @PreAuthorize("hasPermission(#newChapter.subjectId, 'Subject', 'CREATE')")
+    @PreAuthorize("hasPermission(#chapterDto.subjectId, 'Subject', 'CREATE') or hasRole('ADMIN')")
     @PostMapping("admin/chapters")
     @Operation(summary = "Tạo chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> createChapter(@RequestBody ChapterDto chapterDto) {
