@@ -33,7 +33,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> { /* Nếu bạn đã cấu hình WebMvcConfigurer, không cần cấu hình thêm ở đây */ })
+                .cors(cors -> {
+                })
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
@@ -41,7 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/otp/**").permitAll()  // Public OTP endpoints
                         .requestMatchers("/api/v1/public/**").permitAll()
                         // Admin-only endpoints
-                        .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN" , "MOD")
+                        .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "MOD")
                         // Mod and Admin endpoints
                         .requestMatchers("/api/v1/mod/**").hasAnyRole("ADMIN", "MOD")
                         // User and above

@@ -17,6 +17,8 @@ public class AdminInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         String adminUsername = "admin";
         String adminPassword = "admin";
+        String fullName = "Quản trị viên Hệ thống";
+        String gmail = "admin@gmail.com";
         User.Role adminRole = User.Role.ADMIN;
 
         if (userRepository.findByUsername(adminUsername).isEmpty()) {
@@ -24,6 +26,8 @@ public class AdminInitializer implements CommandLineRunner {
             admin.setUsername(adminUsername);
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setRole(adminRole);
+            admin.setEmail(gmail);
+            admin.setFullName(fullName);
             userRepository.save(admin);
             System.out.println("Admin account created successfully!");
         } else {

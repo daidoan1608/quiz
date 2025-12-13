@@ -16,7 +16,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
-@Tag(name="Subject API", description = "API thực hiện các chức năng liên quan đến môn học")
+@Tag(name = "Subject API", description = "API thực hiện các chức năng liên quan đến môn học")
 public class SubjectController {
     private final SubjectService subjectService;
 
@@ -26,7 +26,7 @@ public class SubjectController {
         try {
             List<SubjectDto> subjects = subjectService.getAllSubject();
             if (subjects.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No subject found", List.of("No subjects available")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No subject found", List.of("No subjects available")));
             }
             return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
         } catch (Exception e) {
@@ -41,7 +41,7 @@ public class SubjectController {
     ) {
         List<SubjectDto> subjects = subjectService.getSubjectsByUser(userId);
         if (subjects.isEmpty()) {
-            return ResponseEntity.status(404)
+            return ResponseEntity.status(204)
                     .body(ApiResponse.error("Không tìm thấy môn học nào", List.of("User chưa có bài thi")));
         }
         return ResponseEntity.ok(ApiResponse.success("Fetched successfully", subjects));
@@ -53,7 +53,7 @@ public class SubjectController {
         try {
             List<SubjectDto> subjects = subjectService.getSubjectsByCategoryId(categoryId);
             if (subjects.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No subject found", List.of("No subjects found for the given category")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No subject found", List.of("No subjects found for the given category")));
             }
             return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
         } catch (Exception e) {
@@ -67,7 +67,7 @@ public class SubjectController {
         try {
             SubjectDto subject = subjectService.getSubjectById(subjectId);
             if (subject == null) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No subject found", List.of("No subject found for the given ID")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No subject found", List.of("No subject found for the given ID")));
             }
             return ResponseEntity.ok(ApiResponse.success("Subject fetched successfully", subject));
         } catch (Exception e) {
@@ -85,6 +85,7 @@ public class SubjectController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to create subject", List.of(e.getMessage())));
         }
     }
+
     @PreAuthorize("hasPermission(#subjectId, 'Subject', 'UPDATE') or hasRole('ADMIN')")
     @PatchMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Cập nhật môn học (admin)")
@@ -96,6 +97,7 @@ public class SubjectController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to update subject", List.of(e.getMessage())));
         }
     }
+
     @PreAuthorize("hasPermission(#subjectId, 'Subject', 'DELETE')")
     @DeleteMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Xóa môn học (admin)")

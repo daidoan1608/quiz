@@ -36,7 +36,7 @@ public class ExamController {
         try {
             List<ExamDto> exams = examService.getAllExams();
             if (exams.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No exams found", List.of("No exams available")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No exams found", List.of("No exams available")));
             }
             return ResponseEntity.ok(ApiResponse.success("All exams fetched successfully", exams));
         } catch (Exception e) {
@@ -50,7 +50,7 @@ public class ExamController {
         try {
             List<ExamDto> exams = examService.getExamsBySubjectId(subjectId);
             if (exams.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No exams found for this subject", List.of("No exams available for this subject")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No exams found for this subject", List.of("No exams available for this subject")));
             }
             return ResponseEntity.ok(ApiResponse.success("Exams fetched successfully", exams));
         } catch (Exception e) {
@@ -64,7 +64,7 @@ public class ExamController {
         try {
             ExamDto exam = examService.getExamById(examId);
             if (exam == null) {
-                return ResponseEntity.status(404).body(ApiResponse.error("Exam not found", List.of("No exam found with the given ID")));
+                return ResponseEntity.status(204).body(ApiResponse.error("Exam not found", List.of("No exam found with the given ID")));
             }
             return ResponseEntity.ok(ApiResponse.success("Exam fetched successfully", exam));
         } catch (Exception e) {

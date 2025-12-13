@@ -16,7 +16,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
-@Tag(name="Chapter API", description = "API cho các chức năng liên quan đến chương")
+@Tag(name = "Chapter API", description = "API cho các chức năng liên quan đến chương")
 public class ChapterController {
     private final ChapterService chapterService;
 
@@ -40,7 +40,7 @@ public class ChapterController {
         try {
             List<ChapterDto> chapters = chapterService.getAllChapter();
             if (chapters.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No chapter found", List.of("No chapters available")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No chapter found", List.of("No chapters available")));
             }
             return ResponseEntity.ok(ApiResponse.success("All chapters fetched successfully", chapters));
         } catch (Exception e) {
@@ -54,13 +54,14 @@ public class ChapterController {
         try {
             Optional<ChapterDto> chapter = chapterService.getChapterById(chapterId);
             if (chapter.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("Chapter not found", List.of("No chapter found for the given ID")));
+                return ResponseEntity.status(204).body(ApiResponse.error("Chapter not found", List.of("No chapter found for the given ID")));
             }
             return ResponseEntity.ok(ApiResponse.success("Chapter fetched successfully", chapter));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch chapter", List.of(e.getMessage())));
         }
     }
+
     @PreAuthorize("hasPermission(#chapterDto.subjectId, 'Subject', 'CREATE') or hasRole('ADMIN')")
     @PostMapping("admin/chapters")
     @Operation(summary = "Tạo chương (admin)")
@@ -72,6 +73,7 @@ public class ChapterController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to create chapter", List.of(e.getMessage())));
         }
     }
+
     @PreAuthorize("hasPermission(#chapterId, 'Chapter', 'UPDATE')")
     @PatchMapping("admin/chapters/{chapterId}")
     @Operation(summary = "Cập nhật chương (admin)")
@@ -83,6 +85,7 @@ public class ChapterController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to update chapter", List.of(e.getMessage())));
         }
     }
+
     @PreAuthorize("hasPermission(#chapterId, 'Chapter', 'DELETE')")
     @DeleteMapping("admin/chapters/{chapterId}")
     @Operation(summary = "Xóa chương (admin)")

@@ -30,7 +30,7 @@ public class UserExamController {
         try {
             List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries();
             if (summaries.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No summaries found", List.of("No user exam summaries available")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No summaries found", List.of("No user exam summaries available")));
             }
             return ResponseEntity.ok(ApiResponse.success("Summaries fetched successfully", summaries));
         } catch (Exception e) {
@@ -44,7 +44,7 @@ public class UserExamController {
         try {
             List<UserExamResponse> userExams = userExamService.getAllUserExams();
             if (userExams.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No user exams found", List.of("No user exams available")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No user exams found", List.of("No user exams available")));
             }
             return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
         } catch (Exception e) {
@@ -61,7 +61,7 @@ public class UserExamController {
         try {
             List<UserExamResponse> userExams = userExamService.getExamsByUserAndSubject(userId, subjectId);
             if (userExams.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No user exams found", List.of("No user exams found for the given user ID and subject ID")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No user exams found", List.of("No user exams found for the given user ID and subject ID")));
             }
             return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public class UserExamController {
         try {
             List<UserExamResponse> userExams = userExamService.getLast7ExamsByUser(userId);
             if (userExams.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No user exams found", List.of("No user exams found for the given user ID")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No user exams found", List.of("No user exams found for the given user ID")));
             }
             return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
         } catch (Exception e) {
@@ -91,7 +91,7 @@ public class UserExamController {
         try {
             UserExamResponse userExam = userExamService.getUserExamById(userExamId);
             if (userExam == null) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No user exam found", List.of("No user exam found for the given ID")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No user exam found", List.of("No user exam found for the given ID")));
             }
             return ResponseEntity.ok(ApiResponse.success("User exam fetched successfully", userExam));
         } catch (Exception e) {

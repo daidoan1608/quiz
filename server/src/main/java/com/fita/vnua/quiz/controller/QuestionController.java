@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
-@Tag(name="Question API", description = "API cho các chức năng liên quan đến câu hỏi")
+@Tag(name = "Question API", description = "API cho các chức năng liên quan đến câu hỏi")
 public class QuestionController {
     private final QuestionService questionService;
 
@@ -51,7 +51,7 @@ public class QuestionController {
         try {
             List<QuestionDto> questions = questionService.getQuestionsBySubject(subjectId);
             if (questions.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No question found", List.of("No questions found for the given subject")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No question found", List.of("No questions found for the given subject")));
             }
             return ResponseEntity.ok(ApiResponse.success("Questions fetched successfully", questions));
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class QuestionController {
         try {
             List<QuestionDto> questions = questionService.getQuestionsByChapterId(chapterId);
             if (questions.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No question found", List.of("No questions found for the given chapter")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No question found", List.of("No questions found for the given chapter")));
             }
             return ResponseEntity.ok(ApiResponse.success("Questions fetched successfully", questions));
         } catch (Exception e) {
@@ -79,7 +79,7 @@ public class QuestionController {
         try {
             List<QuestionDto> questions = questionService.getAllQuestion();
             if (questions.isEmpty()) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No question found", List.of("No questions available")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No question found", List.of("No questions available")));
             }
             return ResponseEntity.ok(ApiResponse.success("All questions fetched successfully", questions));
         } catch (Exception e) {
@@ -93,7 +93,7 @@ public class QuestionController {
         try {
             QuestionDto question = questionService.getQuestionById(questionId).orElse(null);
             if (question == null) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No question found", List.of("No question found for the given ID")));
+                return ResponseEntity.status(204).body(ApiResponse.error("No question found", List.of("No question found for the given ID")));
             }
             return ResponseEntity.ok(ApiResponse.success("Question fetched successfully", question));
         } catch (Exception e) {
