@@ -6,14 +6,13 @@ import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.RefreshTokenRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
-
 import com.fita.vnua.quiz.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -25,52 +24,22 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
 
-    public AuthResponse createAuthResponse(OAuth2User oAuth2User) {
-        // Lấy thông tin người dùng từ OAuth2User
-        String username = oAuth2User.getAttribute("name");
-        String email = oAuth2User.getAttribute("email");
+    @Value("${jwt.refresh-token-expiration}")
+    private Long refreshTokenExpiration;
 
-        // Kiểm tra nếu người dùng đã có trong hệ thống, nếu chưa thì tạo mới
-        User user = userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    User newUser = new User();
-                    newUser.setUsername(username);
-                    newUser.setEmail(email);
-                    newUser.setFullName(username);  // Thêm fullName từ OAuth2User
-                    return userRepository.save(newUser);
-                });
-
-        // Tạo AccessToken và RefreshToken
-        String accessToken = generateAccessToken(user);
-        String refreshToken = generateRefreshToken(user);
-
-        // Trả về AuthResponse
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .tokenType("Bearer")
-                .userId(user.getUserId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole())
-                .build();
-    }
-
+    /**
+     * Hàm 1: Chỉ lấy thông tin User để trả về cho Client hiển thị (Avatar, Name...)
+     * AccessToken và RefreshToken trong object này sẽ để NULL (vì đã gửi qua Cookie)
+     */
+    @Override
     public AuthResponse createAuthResponse(UserDetails userDetails) {
-        // Tạo AccessToken và RefreshToken
-        String accessToken = generateAccessToken(userDetails);
-        String refreshToken = generateRefreshToken(userDetails);
-
-        // Lấy thông tin người dùng từ database
         User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userDetails.getUsername()));
 
-        // Xây dựng AuthResponse
         return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .tokenType("Bearer")
+                .accessToken(null)  // Không gửi token ở body
+                .refreshToken(null) // Không gửi token ở body
+                .tokenType(null)
                 .userId(user.getUserId())
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -80,9 +49,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    @Value("${jwt.refresh-token-expiration}")
-    private Long refreshTokenExpiration;
-
+    /**
+     * Hàm 2: Tạo chuỗi JWT Access Token
+     */
+    @Override
     public String generateAccessToken(UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -94,18 +64,20 @@ public class AuthServiceImpl implements AuthService {
         return jwtTokenUtil.generateToken(claims, userDetails.getUsername());
     }
 
-    public Boolean validateAccessToken(String token, UserDetails userDetails) {
-        return jwtTokenUtil.validateToken(token, userDetails);
-    }
-
+    /**
+     * Hàm 3: Tạo Refresh Token (Lưu DB + Trả về chuỗi UUID)
+     */
+    @Override
+    @Transactional
     public String generateRefreshToken(UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        String tokenId = UUID.randomUUID().toString();
+        // (Option) Xóa các token cũ nếu muốn mỗi user chỉ có 1 session
+        // refreshTokenRepository.deleteByUser(user);
 
         RefreshToken refreshToken = RefreshToken.builder()
-                .token(UUID.fromString(tokenId))
+                .token(UUID.randomUUID())
                 .user(user)
                 .expiryDate(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .revoked(false)
@@ -113,34 +85,45 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenRepository.save(refreshToken);
 
-        return tokenId;
+        return refreshToken.getToken().toString();
     }
 
+    /**
+     * Hàm 4: Refresh Access Token (Check UUID trong DB -> Tạo JWT mới)
+     */
+    @Override
     public String refreshAccessToken(UUID refreshTokenId) {
         RefreshToken refreshToken = refreshTokenRepository.findByTokenAndRevoked(refreshTokenId, false)
                 .orElseThrow(() -> new RuntimeException("Refresh token không tồn tại hoặc đã bị thu hồi"));
 
         if (refreshToken.getExpiryDate().before(new Date())) {
-            refreshTokenRepository.delete(refreshToken);
+            refreshTokenRepository.delete(refreshToken); // Xóa token hết hạn
             throw new RuntimeException("Refresh token đã hết hạn");
         }
 
         User user = refreshToken.getUser();
+
+        // Tạo lại UserDetails đơn giản để truyền vào hàm generateAccessToken
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
-                user.getPassword(),
-                Collections.singletonList(
-                        new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name())
-                )
+                user.getPassword() != null ? user.getPassword() : "",
+                Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
 
         return generateAccessToken(userDetails);
     }
 
+    /**
+     * Hàm 5: Revoke (Logout)
+     */
+    @Override
     public void revokeRefreshToken(UUID tokenId) {
-        RefreshToken refreshToken = refreshTokenRepository.findById(tokenId)
-                .orElseThrow(() -> new RuntimeException("Refresh token không tồn tại"));
-        refreshToken.setRevoked(true);
-        refreshTokenRepository.save(refreshToken);
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenAndRevoked(tokenId, false)
+                .orElse(null);
+
+        if (refreshToken != null) {
+            refreshToken.setRevoked(true);
+            refreshTokenRepository.save(refreshToken);
+        }
     }
 }

@@ -1,37 +1,40 @@
-import React, { createContext, useState, useEffect } from 'react';
+// context/ThemeContext.js
+import React, { createContext, useContext, useState } from 'react';
+import { ConfigProvider, theme } from 'antd';
 
-// Tên key lưu trong Local Storage
-const THEME_STORAGE_KEY = 'quiz_admin_theme';
+const ThemeContext = createContext();
 
-// 1. Tạo Context Object
-// Đây là đối tượng Context mà hook useTheme sẽ sử dụng
-export const ThemeContext = createContext(null);
-
-// 2. Tạo Theme Provider Component (Quản lý State và Logic)
 export const ThemeProvider = ({ children }) => {
-  // Lấy theme đã lưu hoặc mặc định là 'light'
-  const initialTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
-  const [theme, setTheme] = useState(initialTheme);
+  // 1. Lấy trạng thái từ localStorage (nếu có)
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    return localStorage.getItem('appTheme') || 'light';
+  });
 
-  // Hàm chuyển đổi theme
+  // 2. Hàm chuyển đổi
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    setCurrentTheme((prev) => {
+      const newTheme = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('appTheme', newTheme); // Lưu vào localStorage
+      return newTheme;
+    });
   };
 
-  // 3. Effect để lưu trạng thái và áp dụng class CSS
-  useEffect(() => {
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-    document.body.className = theme; 
-  }, [theme]);
-
-  const themeContextValue = {
-    theme,           // Trạng thái theme hiện tại ('light' hoặc 'dark')
-    toggleTheme,     // Hàm để chuyển đổi theme
-  };
+  // 3. Cấu hình Antd
+  const { defaultAlgorithm, darkAlgorithm } = theme;
 
   return (
-    <ThemeContext.Provider value={themeContextValue}>
-      {children}
+    <ThemeContext.Provider value={{ theme: currentTheme, toggleTheme }}>
+      <ConfigProvider
+        theme={{
+          // Tự động chuyển thuật toán màu của Antd
+          algorithm: currentTheme === 'dark' ? darkAlgorithm : defaultAlgorithm,
+        }}
+      >
+        {children}
+      </ConfigProvider>
     </ThemeContext.Provider>
   );
 };
+
+// Export hook để dùng ở các component con
+export const useTheme = () => useContext(ThemeContext);

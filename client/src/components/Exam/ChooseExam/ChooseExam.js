@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./ChooseExam.css";
-import Sidebar from "../../User/SideBar";
+import Sidebar from "../../User/FilterSidebar";
 import { useLanguage } from "../../Context/LanguageProvider";
 import subjectTranslations from "../../../Languages/subjectTranslations";
 import { useFavorites } from "../../Context/FavoritesContext"; // Thêm import useFavorites

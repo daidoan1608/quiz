@@ -21,9 +21,9 @@ import DetailExam from "./components/Exam/DetailExam/DetailExam";
 import Account from "./components/Account/Account";
 import Rank from "./components/Rank/Rank";
 import LessonList from "./components/favorites/LessonList";
-
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import Notifications from "./components/pages/Notifications";
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 function App() {
   return (
@@ -81,6 +81,7 @@ function RouterApp() {
               </ProtectedRoute>
             }
           />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/revision" element={<RevisionUser />} />
           <Route path="/chooseExams" element={<ChooseExam />} />
           <Route path="/listChap" element={<RevisionListChap />} />

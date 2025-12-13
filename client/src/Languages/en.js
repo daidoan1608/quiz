@@ -4,7 +4,7 @@ const en = {
   account: "Account",
   logout: "Logout",
   home: "HOME",
-  revision: "REVISION",
+  revision: "REVISIONS",
   exams: "EXAMS",
   rank: "RANKING",
   onlineTest: "ONLINE QUIZ",

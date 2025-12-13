@@ -17,8 +17,8 @@ function Login() {
     const savedUsername = localStorage.getItem("savedUsername");
     const savedPassword = localStorage.getItem("savedPassword");
     if (savedUsername && savedPassword) {
-      form.setFieldsValue({ 
-        username: savedUsername, 
+      form.setFieldsValue({
+        username: savedUsername,
         password: savedPassword,
         remember: true });
       setRemember(true);
@@ -33,19 +33,21 @@ function Login() {
         password: values.password,
       });
 
-      const { accessToken, refreshToken, userId, fullName } = response.data.data;
+      const { accessToken, refreshToken, userId, fullName, avatarUrl } = response.data.data;
 
       if (values.remember) {
         localStorage.setItem("savedUsername", values.username);
         localStorage.setItem("savedPassword", values.password);
         localStorage.setItem("fullName", fullName);
+        localStorage.setItem("avatarUrl", avatarUrl);
       } else {
         localStorage.removeItem("savedUsername");
         localStorage.removeItem("savedPassword");
         localStorage.removeItem("fullName");
+        localStorage.removeItem("avatarUrl");
       }
 
-      login(accessToken, refreshToken, userId, fullName);
+      login(accessToken, refreshToken, userId, fullName, avatarUrl);
       navigate("/");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại!";

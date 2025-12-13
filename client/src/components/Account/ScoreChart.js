@@ -7,9 +7,8 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
-  Label
+  Label,
 } from "recharts";
-import './ScoreChart.css'
 
 const ScoreChart = ({ data }) => {
   const formattedData = data.map((exam, index) => ({
@@ -23,7 +22,7 @@ const ScoreChart = ({ data }) => {
         <LineChart data={formattedData}>
           <CartesianGrid stroke="#ccc" />
           <XAxis dataKey="name">
-            <Label className="xAxisLabel"/>
+            <Label className="xAxisLabel" />
           </XAxis>
           <YAxis domain={[0, 10]}>
             <Label

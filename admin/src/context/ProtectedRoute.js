@@ -4,12 +4,9 @@ import { useAuth } from "../context/AuthProvider";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn } = useAuth();
-
   if (!isLoggedIn) {
-    // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
     return <Navigate to="/login" />;
   }
-
   return children;
 };
 

@@ -5,7 +5,7 @@ const vi = {
   logout: "Đăng xuất",
   home: "TRANG CHỦ",
   revision: "ÔN TẬP",
-  exams: "BÀI THI",
+  exams: "KIỂM TRA",
   rank: "XẾP HẠNG",
   onlineTest: "TRẮC NGHIỆM ONLINE",
   slogan1: "Rèn luyện mỗi ngày, tự tin đạt điểm cao",

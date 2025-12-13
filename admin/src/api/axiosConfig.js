@@ -1,102 +1,82 @@
-import axios from 'axios';
+import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api/v1/";
+// 1. SỬA QUAN TRỌNG: Lấy URL động từ biến môi trường
+// Nếu không tìm thấy biến môi trường thì mới fallback về localhost (để phòng hờ)
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api/v1/";
 
-// Tạo instance axios với config mặc định
-const authAxios = axios.create({
+// 2. Cấu hình chung
+const config = {
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-});
+  withCredentials: true, // QUAN TRỌNG: Để trình duyệt gửi Cookie
+};
 
-const publicAxios = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const authAxios = axios.create(config);
+const publicAxios = axios.create(config);
 
-// Biến để theo dõi trạng thái refresh token
 let isRefreshing = false;
 let failedQueue = [];
 
-const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
+const processQueue = (error) => {
+  failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else {
-      prom.resolve(token);
+      prom.resolve();
     }
   });
   failedQueue = [];
 };
 
-// Hàm refresh token
-const refreshToken = async () => {
-  try {
-    const refreshToken = sessionStorage.getItem("refreshToken");
-    const response = await publicAxios.post("/auth/refresh", { refreshToken });
-    
-    const { accessToken } = response.data.data;
-    localStorage.setItem("accessToken", accessToken);
-    
-    return accessToken;
-  } catch (error) {
-    localStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
-    window.location.href = "/login";
-    return Promise.reject(error);
-  }
-};
-
-// Interceptor cho request - tự động thêm token vào header
-authAxios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Interceptor cho response - tự động refresh token khi gặp lỗi 401/403
+// 3. Response Interceptor
 authAxios.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Mẹo nhỏ: Bạn có thể return response.data ở đây để code trong component gọn hơn
+    // Nhưng nếu giữ nguyên response thì component phải gọi res.data
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
-    // Tránh lặp vô hạn
     if (originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // Kiểm tra nếu lỗi 401 hoặc 403
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    // Kiểm tra cả 401 (Unauthorized) và 403 (Forbidden)
+    // Vì đôi khi Spring Security trả 403 khi Token hết hạn hoặc không hợp lệ
+    if (
+      error.response &&
+      (error.response.status === 401 || error.response.status === 403)
+    ) {
       if (isRefreshing) {
-        // Nếu đang refresh token, thêm request vào hàng đợi
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then(token => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+          .then(() => {
             return authAxios(originalRequest);
           })
-          .catch(err => Promise.reject(err));
+          .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const newToken = await refreshToken();
-        processQueue(null, newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        return authAxios(originalRequest); // Gọi lại request ban đầu với token mới
+        // Gọi API Refresh (Cookie tự bay theo)
+        await publicAxios.post("/auth/refresh");
+
+        processQueue(null);
+        return authAxios(originalRequest);
       } catch (refreshError) {
-        processQueue(refreshError, null);
+        processQueue(refreshError);
+
+        // --- XỬ LÝ LOGOUT KHI REFRESH THẤT BẠI ---
+        // Bạn nên dispatch 1 action Redux/Context để clear user info
+        // Hoặc redirect cứng về trang login
+        window.location.href = "/login";
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

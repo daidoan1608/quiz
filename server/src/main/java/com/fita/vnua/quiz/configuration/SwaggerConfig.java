@@ -6,9 +6,11 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@Profile("dev")
 public class SwaggerConfig implements WebMvcConfigurer {
 
     // Swagger Config để hỗ trợ Bearer Token
@@ -16,7 +18,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                .title("VNUA Quiz API")
+                        .title("VNUA Quiz API")
                         .version("1.0")
                         .description("API documentation for VNUA Quiz application"))
                 .components(new io.swagger.v3.oas.models.Components()

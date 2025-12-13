@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoggedIn(true);
     setUser(userId);
     message.success("Đăng nhập thành công!");
-    navigate("/home");
+    navigate("/");
   };
 
   const logout = () => {

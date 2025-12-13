@@ -1,0 +1,42 @@
+/* * Container chung cho toàn bộ trang quản lý.
+ * Đảm bảo padding nhất quán.
+ */
+.managementPageContainer {
+  padding: 0px;
+  min-height: 100%;
+}
+
+/* * 1. Phần Tiêu đề và Nút chức năng (Header/Action Bar).
+ * Sử dụng Flexbox để căn chỉnh tiêu đề và nút trên cùng một dòng.
+ */
+.managementHeader {
+  display: flex;
+  justify-content: space-between;
+  /* Căn chỉnh theo chiều dọc */
+  align-items: center;
+  /* Khoảng cách với phần bộ lọc/bảng bên dưới */
+  margin-bottom: 0px;
+}
+
+/* * Tiêu đề của trang.
+ * Đảm bảo không bị lề mặc định của thẻ h2.
+ */
+.pageTitle {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+/* * 2. Phần Bộ lọc và Tìm kiếm (Filters/Search).
+ * Class cho Card chứa bộ lọc.
+ */
+.managementFilters {
+  margin-bottom: 0px;
+}
+
+/* * 4. Phần Phân trang (Pagination) - Chỉ cần thiết nếu render Pagination độc lập.
+ */
+.managementPagination {
+  text-align: right;
+  margin-top: 16px;
+}
