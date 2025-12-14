@@ -38,7 +38,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     // Lấy ngẫu nhiên số lượng câu hỏi theo subjectId
     @Query(value = "SELECT q.* FROM question q " +
-            "JOIN Chapter c ON q.chapter_id = c.chapter_id " +
+            "JOIN chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.subject_id = :subjectId " +
             "ORDER BY RAND() LIMIT :number", nativeQuery = true)
     List<Question> findRandomQuestionsBySubject(

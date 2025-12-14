@@ -28,7 +28,6 @@ public class ChapterServiceImpl implements ChapterService {
                 .stream()
                 .map(chapter -> {
                     ChapterDto dto = modelMapper.map(chapter, ChapterDto.class);
-                    // Đếm số câu hỏi theo chapterId
                     long count = questionRepository.countByChapter(chapter);
                     dto.setCountQuestion(count);
                     return dto;

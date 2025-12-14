@@ -12,5 +12,9 @@ public class SubjectDto {
     private Long categoryId;
     private String name;
     private String description;
+    private long totalChapters;
+    private long totalExams;
+    private long totalQuestions;
     private List<ChapterDto> chapters;
+    private List<ExamInfo> exams;
 }

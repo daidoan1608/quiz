@@ -9,13 +9,27 @@ import lombok.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+//    private static final List<String> EXCLUDE_URLS = List.of(
+//            "/swagger-ui/**",
+//            "/v3/api-docs/**",
+//            "/api/v1/auth/**",
+//            "/api/v1/otp/**",
+//            "/api/v1/public/**",
+//            "/avatars/**"
+//    );
+//
+//    private final List<AntPathRequestMatcher> exclusionMatchers = EXCLUDE_URLS.stream()
+//            .map(AntPathRequestMatcher::new)
+//            .toList();
 
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService userDetailsService;
@@ -70,20 +84,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (CustomApiException ex) {
-            // Trường hợp token hết hạn hoặc không hợp lệ, bạn có 2 lựa chọn:
-
-            // Lựa chọn A (Hiện tại của bạn): Trả về lỗi ngay lập tức
-            // response.setStatus(ex.getStatus().value());
-            // response.setContentType("application/json");
-            // response.getWriter().write("{\"message\": \"" + ex.getMessage() + "\"}");
-            // return; // Dừng filter chain
-
-            // Lựa chọn B (Khuyên dùng): Bỏ qua lỗi, coi như người dùng chưa đăng nhập (Anonymous)
-            // SecurityContextHolder.clearContext();
-            // Lý do: Đôi khi cookie hết hạn nhưng user đang truy cập trang public, không nên chặn họ.
-            // Nếu họ truy cập trang private, SecurityConfig sẽ chặn sau.
-
-            // Ở đây tôi giữ theo logic cũ của bạn (Lựa chọn A) nhưng log ra console để debug
+//            // Trường hợp token hết hạn hoặc không hợp lệ, bạn có 2 lựa chọn:
+//
+//            // Lựa chọn A (Hiện tại của bạn): Trả về lỗi ngay lập tức
+//            // response.setStatus(ex.getStatus().value());
+//            // response.setContentType("application/json");
+//            // response.getWriter().write("{\"message\": \"" + ex.getMessage() + "\"}");
+//            // return; // Dừng filter chain
+//
+//            // Lựa chọn B (Khuyên dùng): Bỏ qua lỗi, coi như người dùng chưa đăng nhập (Anonymous)
+//            // SecurityContextHolder.clearContext();
+//            // Lý do: Đôi khi cookie hết hạn nhưng user đang truy cập trang public, không nên chặn họ.
+//            // Nếu họ truy cập trang private, SecurityConfig sẽ chặn sau.
+//
+//            // Ở đây tôi giữ theo logic cũ của bạn (Lựa chọn A) nhưng log ra console để debug
             System.out.println("JWT Filter Error: " + ex.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
@@ -97,4 +111,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+//    @Override
+//    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
+//        // Trả về TRUE nếu request khớp với bất kỳ đường dẫn nào trong danh sách loại trừ
+//        // Khi TRUE, doFilterInternal sẽ KHÔNG được chạy.
+//        return exclusionMatchers.stream().anyMatch(matcher -> matcher.matches(request));
+//    }
+
 }

@@ -13,3 +13,4 @@ target/
 
 # Database
 mysql.init/
+excel_import_data_test/

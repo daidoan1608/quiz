@@ -1,0 +1,387 @@
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { authAxios } from "../../../api/axiosConfig";
+import { useLanguage } from "../../../context/LanguageProvider";
+
+export default function ResultExam() {
+  // --- STATE ---
+  const [examData, setExamData] = useState(null);
+  const [userAnswers, setUserAnswers] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // --- HOOKS ---
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Giả định location.state chứa: examId, userExamId, correctAnswers, totalQuestions
+  const { examId, userExamId, correctAnswers, totalQuestions } =
+    location.state || {};
+  const { texts } = useLanguage();
+
+  // --- 1. FETCH DỮ LIỆU ---
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [examResponse, userAnswersResponse] = await Promise.all([
+          authAxios.get(`public/exams/${examId}`),
+          authAxios.get(`user/userexams/${userExamId}`),
+        ]);
+        setExamData(examResponse.data.data);
+        setUserAnswers(userAnswersResponse.data.data);
+      } catch (error) {
+        console.error("Fetch Data Error:", error.response || error);
+        setError(error.message || "Lỗi khi tải dữ liệu kết quả.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (examId && userExamId) {
+      fetchData();
+    } else {
+      setError("Thiếu thông tin bài kiểm tra.");
+      setLoading(false);
+    }
+  }, [examId, userExamId]);
+
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center bg-background-light dark:bg-background-dark">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex h-screen items-center justify-center text-red-500 bg-background-light dark:bg-background-dark">
+        {error}
+      </div>
+    );
+
+  // --- 2. TÍNH TOÁN CHỈ SỐ ---
+  if (!examData || !userAnswers || !userAnswers.userExamDto) {
+    return (
+      <div className="flex h-screen items-center justify-center text-red-500">
+        Lỗi: Không tìm thấy dữ liệu bài thi chi tiết.
+      </div>
+    );
+  }
+
+  // Dữ liệu cơ bản
+  const rawScore = userAnswers.userExamDto.score || 0; // Điểm số trên thang 100
+  const calculatedTotal = totalQuestions || 1; // Tổng số câu hỏi
+  const calculatedCorrect = correctAnswers || 0; // Số câu trả lời đúng (từ location.state)
+
+  // Số câu đã làm = số câu trả lời được lưu trong userAnswerDtos
+  const answeredQuestions = userAnswers.userAnswerDtos?.length || 0;
+
+  // Số câu Bỏ qua (Skipped)
+  const skippedAnswers = calculatedTotal - answeredQuestions;
+
+  // Số câu Sai
+  const wrongAnswers = answeredQuestions - calculatedCorrect;
+
+  // Tỷ lệ Chính xác (Chỉ trên số câu ĐÃ LÀM)
+  const answeredTotal = answeredQuestions || 1; // Tránh chia cho 0
+  const accuracyOnAnswered =
+    Math.round((calculatedCorrect / answeredTotal) * 100) || 0;
+
+  // Tính toán Tỷ lệ % trên TỔNG SỐ CÂU (cho Biểu đồ tròn)
+  const totalForPercentage = calculatedTotal || 100; // Đảm bảo không chia cho 0 hoặc dùng 100
+  const correctPercentageOnTotal =
+    Math.round((calculatedCorrect / totalForPercentage) * 100) || 0;
+  const wrongPercentageOnTotal =
+    Math.round((wrongAnswers / totalForPercentage) * 100) || 0;
+  // Bỏ qua = 100 - Đúng - Sai
+  const skippedPercentageOnTotal =
+    100 - correctPercentageOnTotal - wrongPercentageOnTotal;
+
+  // Tính toán SVG Chart (Chu vi ~ 100)
+  // Các giá trị này dùng làm strokeDasharray
+  const correctStroke = correctPercentageOnTotal;
+  const wrongStroke = wrongPercentageOnTotal;
+  const skippedStroke = skippedPercentageOnTotal;
+
+  // --- RENDER ---
+  return (
+    <div className="relative flex min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-gray-200">
+      {/* MAIN CONTENT */}
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="flex flex-col gap-8">
+          {/* 1. Header Kết quả */}
+          <div className="flex flex-wrap justify-between gap-4 items-center">
+            <div className="flex flex-col gap-2">
+              <p className="text-gray-900 dark:text-white text-3xl md:text-4xl font-black tracking-[-0.033em]">
+                Kết quả: {examData.title}
+              </p>
+              <p className="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
+                {rawScore >= 50
+                  ? "Chúc mừng! Bạn đã hoàn thành bài kiểm tra."
+                  : "Kết quả chưa tốt, hãy cố gắng hơn lần sau nhé!"}
+              </p>
+            </div>
+          </div>
+
+          {/* 2. Thống kê nhanh (Grid 3 cột) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800">
+              <p className="text-gray-800 dark:text-gray-300 text-base font-medium leading-normal">
+                Điểm số
+              </p>
+              <p className="text-gray-900 dark:text-white tracking-light text-3xl font-bold leading-tight">
+                {typeof rawScore === "number" ? rawScore.toFixed(1) : rawScore}/100
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800">
+              <p className="text-gray-800 dark:text-gray-300 text-base font-medium leading-normal">
+                Tỷ lệ chính xác
+              </p>
+              <p className="text-gray-900 dark:text-white tracking-light text-3xl font-bold leading-tight">
+                {accuracyOnAnswered}%
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800">
+              <p className="text-gray-800 dark:text-gray-300 text-base font-medium leading-normal">
+                Trạng thái
+              </p>
+              <p
+                className={`tracking-light text-3xl font-bold leading-tight ${
+                  rawScore >= 50
+                    ? "text-green-600 dark:text-green-500"
+                    : "text-red-600 dark:text-red-500"
+                }`}
+              >
+                {rawScore >= 50 ? "Đạt" : "Chưa đạt"}
+              </p>
+            </div>
+          </div>
+
+          {/* 3. Phân tích hiệu suất (Biểu đồ tròn) */}
+          <div className="flex flex-col gap-6">
+            <h2 className="text-gray-900 dark:text-white text-2xl font-bold leading-tight tracking-[-0.015em]">
+              Phân tích hiệu suất
+            </h2>
+            <div className="grid grid-cols-1 gap-6">
+              <div className="flex flex-col gap-4 rounded-xl p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800">
+                <p className="text-gray-800 dark:text-gray-300 text-base font-medium leading-normal">
+                  Tỷ lệ câu trả lời (trên tổng số câu)
+                </p>
+                <div className="flex items-center gap-6">
+                  {/* SVG Chart  */}
+                  <div className="relative size-32">
+                    <svg className="size-full" viewBox="0 0 36 36">
+                      {/* Nền (Màu xám/đỏ nhạt cho phần còn lại) */}
+                      <circle
+                        className="stroke-current text-gray-200 dark:text-gray-700"
+                        cx="18" cy="18" fill="none" r="15.9154943092" strokeWidth="3"
+                      ></circle>
+
+                      {/* 1. Phần Bỏ qua (Xám) - Bắt đầu từ 0 */}
+                      <circle
+                        className="stroke-current text-gray-400/50 transition-all duration-1000 ease-out"
+                        cx="18" cy="18" fill="none" r="15.9154943092" strokeWidth="3"
+                        strokeDasharray={`${skippedStroke}, 100`}
+                        strokeDashoffset={0}
+                      ></circle>
+
+                      {/* 2. Phần Sai (Đỏ) - Bắt đầu sau phần Bỏ qua */}
+                      <circle
+                        className="stroke-current text-red-500 transition-all duration-1000 ease-out"
+                        cx="18" cy="18" fill="none" r="15.9154943092" strokeWidth="3"
+                        strokeDasharray={`${wrongStroke}, 100`}
+                        strokeDashoffset={-skippedStroke}
+                      ></circle>
+
+                      {/* 3. Phần Đúng (Xanh) - Bắt đầu sau phần Sai */}
+                      <circle
+                        className="stroke-current text-green-500 transition-all duration-1000 ease-out"
+                        cx="18" cy="18" fill="none" r="15.9154943092" strokeWidth="3"
+                        strokeDasharray={`${correctStroke}, 100`}
+                        strokeDashoffset={-(skippedStroke + wrongStroke)}
+                      ></circle>
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {calculatedCorrect}
+                      </span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        /{calculatedTotal} câu
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Chú thích */}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="size-3 rounded-full bg-green-500"></div>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {calculatedCorrect} Đúng ({correctPercentageOnTotal}%)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="size-3 rounded-full bg-red-500"></div>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {wrongAnswers} Sai ({wrongPercentageOnTotal}%)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="size-3 rounded-full bg-gray-400/50"></div>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {skippedAnswers} Bỏ qua ({skippedPercentageOnTotal}%)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Action Buttons */}
+          <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <button
+              disabled
+              className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-primary text-white text-sm font-semibold opacity-50 cursor-not-allowed"
+            >
+              <span className="material-symbols-outlined text-base">
+                school
+              </span>
+              Ôn tập câu sai (Sắp ra mắt)
+            </button>
+            {/* Nút Làm lại bài kiểm tra */}
+            <button
+              onClick={() => {
+                const newStartTime = new Date().toISOString();
+                navigate("/taketheexam", {
+                  state: {
+                    examId: examId,
+                    startTime: newStartTime,
+                  },
+                });
+              }}
+              className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="material-symbols-outlined text-base">
+                refresh
+              </span>
+              Làm lại bài kiểm tra
+            </button>
+            <button
+              onClick={() => {
+                if (examData && examData.subjectId) {
+                  navigate("/list-exam", {
+                    state: { subjectId: examData.subjectId },
+                  });
+                } else {
+                  navigate("/chooseExam");
+                }
+              }}
+              className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="material-symbols-outlined text-base">
+                list_alt
+              </span>
+              Quay về danh sách
+            </button>
+          </div>
+
+          {/* 5. Chi tiết câu trả lời */}
+          <div className="flex flex-col gap-6">
+            <h2 className="text-gray-900 dark:text-white text-2xl font-bold leading-tight tracking-[-0.015em]">
+              Chi tiết câu trả lời
+            </h2>
+            <div className="flex flex-col gap-4">
+              {examData.questions.map((question, index) => {
+                const userAnswerObj = userAnswers.userAnswerDtos?.find(
+                  (u) => u.questionId === question.questionId
+                );
+                const userAnswerId = userAnswerObj?.answerId;
+
+                const correctAnswer = question.answers.find((a) => a.isCorrect);
+                const userSelectedAnswer = question.answers.find(
+                  (a) => (a.optionId || a.answerId) === userAnswerId
+                );
+
+                // Xác định trạng thái
+                const isSkipped = !userAnswerObj;
+                const isCorrect = !isSkipped && correctAnswer && (userSelectedAnswer === correctAnswer);
+
+                return (
+                  <div
+                    key={question.questionId}
+                    className="rounded-xl p-5 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800"
+                  >
+                    <div className="flex flex-col gap-4">
+                      {/* Tiêu đề câu hỏi & Badge */}
+                      <div className="flex justify-between items-start gap-4">
+                        <p className="text-gray-800 dark:text-gray-200 font-semibold">
+                          Câu {index + 1}: {question.content}
+                        </p>
+                        <div
+                          className={`flex items-center gap-2 text-sm font-medium px-3 py-1 rounded-full shrink-0
+                            ${
+                                isSkipped
+                                ? "text-gray-600 bg-gray-100 dark:bg-gray-700/50"
+                                : isCorrect
+                                ? "text-green-600 dark:text-green-500 bg-green-100 dark:bg-green-900/50"
+                                : "text-red-600 dark:text-red-500 bg-red-100 dark:bg-red-900/50"
+                            }`}
+                        >
+                          <span className="material-symbols-outlined !text-base">
+                            {isSkipped ? "radio_button_unchecked" : isCorrect ? "check_circle" : "cancel"}
+                          </span>
+                          <span>{isSkipped ? "Bỏ qua" : isCorrect ? "Đúng" : "Sai"}</span>
+                        </div>
+                      </div>
+
+                      {/* Grid Đáp án (2 cột) */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-2">
+                        {/* Cột 1: Đáp án của bạn */}
+                        <div
+                          className={`flex flex-col gap-1 p-3 rounded-lg border relative
+                            ${
+                                isSkipped
+                                ? "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600"
+                                : isCorrect
+                                ? "bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800"
+                                : "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800"
+                            }`}
+                        >
+                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            Đáp án của bạn
+                          </span>
+                          <span
+                            className={`font-semibold ${
+                                isSkipped
+                                ? "text-gray-600 dark:text-gray-300"
+                                : isCorrect
+                                ? "text-gray-800 dark:text-gray-200"
+                                : "text-red-800 dark:text-red-300"
+                            }`}
+                          >
+                            {userSelectedAnswer
+                              ? userSelectedAnswer.content
+                              : "Chưa chọn đáp án"}
+                          </span>
+                        </div>
+
+                        {/* Cột 2: Đáp án đúng (Luôn hiện) */}
+                        <div className="flex flex-col gap-1 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 relative">
+                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            Đáp án đúng
+                          </span>
+                          <span className="font-semibold text-gray-800 dark:text-gray-200">
+                            {correctAnswer?.content}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

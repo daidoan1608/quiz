@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from "../Context/LanguageProvider";
+import { useLanguage } from "../../context/LanguageProvider";
 
 const Footer = () => {
   const { texts } = useLanguage();
@@ -32,6 +32,7 @@ const Footer = () => {
                 QuizVNUA
               </h2>
             </div>
+            {/* Đã thêm dark:text-gray-400 */}
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs">
               Nền tảng ôn tập và kiểm tra trắc nghiệm trực tuyến chất lượng cao
               dành cho sinh viên VNUA.
@@ -42,7 +43,8 @@ const Footer = () => {
                 href="https://www.facebook.com/groups/ITHUA"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-600 transition-colors !no-underline"
+                // Đã thêm dark:text-gray-400
+                className="text-gray-400 dark:text-gray-400 hover:text-blue-600 transition-colors !no-underline"
               >
                 <svg
                   className="h-6 w-6"
@@ -62,13 +64,14 @@ const Footer = () => {
 
           {/* --- CỘT 2: DANH MỤC (3/12) --- */}
           <div className="lg:col-span-3 lg:pl-8">
-            {/* mt-1.5: Đẩy xuống để thẳng hàng mắt với chữ QuizVNUA ở cột 1 */}
+            {/* Đã thêm dark:text-white */}
             <h3 className="mt-1.5 text-sm font-bold tracking-wider uppercase text-gray-900 dark:text-white mb-4 h-6 flex items-center">
               {texts.menu || "Danh mục"}
             </h3>
             <ul className="space-y-3">
               <li>
                 <a
+                  // Đã thêm dark:text-gray-400
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
                   href="/"
                 >
@@ -77,6 +80,7 @@ const Footer = () => {
               </li>
               <li>
                 <a
+                  // Đã thêm dark:text-gray-400
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
                   href="/revision"
                 >
@@ -85,6 +89,7 @@ const Footer = () => {
               </li>
               <li>
                 <a
+                  // Đã thêm dark:text-gray-400
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
                   href="/chooseExams"
                 >
@@ -96,7 +101,7 @@ const Footer = () => {
 
           {/* --- CỘT 3: THÔNG TIN LIÊN HỆ (5/12) --- */}
           <div className="lg:col-span-5">
-            {/* mt-1.5: Đẩy xuống tương tự cột 2 */}
+            {/* Đã thêm dark:text-white */}
             <h3 className="mt-1.5 text-sm font-bold tracking-wider uppercase text-gray-900 dark:text-white mb-4 h-6 flex items-center">
               {texts.contact || "Thông tin liên hệ"}
             </h3>
@@ -122,6 +127,7 @@ const Footer = () => {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
+                {/* Đã thêm dark:text-gray-400 cho text và dark:text-white cho font-semibold */}
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
                     {texts.address || "Địa chỉ"}:{" "}
@@ -145,6 +151,7 @@ const Footer = () => {
                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                   />
                 </svg>
+                {/* Đã thêm dark:text-gray-400 cho text và dark:text-white cho font-semibold */}
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
                     {texts.tel || "Hotline"}:{" "}
@@ -168,6 +175,7 @@ const Footer = () => {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
+                {/* Đã thêm dark:text-gray-400 cho text và dark:text-white cho font-semibold */}
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
                     Email:{" "}
@@ -180,7 +188,8 @@ const Footer = () => {
         </div>
 
         {/* --- FOOTER BOTTOM: BẢN QUYỀN --- */}
-        <div className="mt-4 border-t border-gray-200 dark:border-gray-800 text-center md:flex md:justify-between md:items-center md:text-left">
+        <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-800 text-center md:flex md:justify-between md:items-center md:text-left">
+          {/* Đã thêm mt-8 và pt-4 để tạo khoảng cách hợp lý */}
           <p className="text-xs text-gray-400 dark:text-gray-500">
             &copy; {currentYear}{" "}
             {texts.coppy || "QuizVNUA. All rights reserved."}
@@ -188,13 +197,13 @@ const Footer = () => {
           <div className="mt-2 md:mt-0 flex justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
             <a
               href="#"
-              className="hover:text-blue-600 !no-underline transition-colors"
+              className="hover:text-blue-600 !no-underline transition-colors dark:hover:text-blue-400"
             >
               Điều khoản
             </a>
             <a
               href="#"
-              className="hover:text-blue-600 !no-underline transition-colors"
+              className="hover:text-blue-600 !no-underline transition-colors dark:hover:text-blue-400"
             >
               Bảo mật
             </a>

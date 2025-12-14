@@ -2,10 +2,7 @@ import React from 'react';
 
 export default function FavoritesSidebar({ favoriteList }) {
   // Dữ liệu mẫu nếu không truyền props
-  const list = favoriteList || [
-    { id: 1, name: "Hệ điều hành", chapters: 5 },
-    { id: 2, name: "Mạng máy tính", chapters: 6 },
-  ];
+  const list = favoriteList;
 
   return (
         <section className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
@@ -17,10 +14,7 @@ export default function FavoritesSidebar({ favoriteList }) {
                 <div className="flex items-center justify-between gap-2">
                   <div>
                     <p className="text-gray-900 dark:text-white text-sm font-semibold leading-normal truncate max-w-[150px]">
-                      {item.name}
-                    </p>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-normal leading-normal">
-                      {item.chapters} chương
+                      {item.subjectName}
                     </p>
                   </div>
                   <button className="flex items-center justify-center size-8 rounded-full text-red-500 hover:bg-red-500/10 flex-shrink-0 transition-colors">

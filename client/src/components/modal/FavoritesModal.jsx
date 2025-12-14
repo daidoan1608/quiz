@@ -1,6 +1,6 @@
 import React from "react";
-import { useLanguage } from "../Context/LanguageProvider";
-import { useFavorites } from "../Context/FavoritesContext";
+import { useLanguage } from "../../context/LanguageProvider";
+import { useFavorites } from "../../context/FavoritesContext";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 
