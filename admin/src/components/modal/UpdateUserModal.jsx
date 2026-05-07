@@ -92,21 +92,21 @@ const UpdateUserModal = ({ isModalOpen, onCancel, onSuccess, userId }) => {
   // --- HANDLERS ---
   const handleUpdateUser = async (values) => {
     try {
-      await authAxios.patch(`/update/users/${userId}`, values);
+          // Chỉ gửi field role lên API
+          const payload = { role: values.role };
 
-      const hasPermissions = Object.keys(currentModPermissions).length > 0;
-      if (values.role !== "MOD" && hasPermissions) {
-        // Tự động xóa quyền nếu chuyển từ MOD sang role khác và user đó có quyền
-        await authAxios.delete(`/delete/permissions/mod/${userId}`);
-        setCurrentModPermissions({});
-      }
+          await authAxios.patch(`/admin/permissions/user/${userId}/role`, payload);
 
-      message.success("Cập nhật thông tin người dùng thành công!");
-      onSuccess();
-    } catch (error) {
-      message.error(
-        "Lỗi cập nhật: " + (error.response?.data?.message || error.message)
-      );
+          const hasPermissions = Object.keys(currentModPermissions).length > 0;
+          if (values.role !== "MOD" && hasPermissions) {
+            await authAxios.delete(`/delete/permissions/mod/${userId}`);
+            setCurrentModPermissions({});
+          }
+
+          message.success("Cập nhật vai trò thành công!");
+          onSuccess();
+        } catch (error) {
+          message.error("Lỗi cập nhật: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -296,7 +296,7 @@ const UpdateUserModal = ({ isModalOpen, onCancel, onSuccess, userId }) => {
             <Row gutter={24}>
               <Col xs={24} md={12}>
                 <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true }]}>
-                  <Input prefix={<UserOutlined />} />
+                  <Input prefix={<UserOutlined />} disabled/>
                 </Form.Item>
                 <Form.Item label="Email" name="email">
                   <Input prefix={<MailOutlined />} disabled />

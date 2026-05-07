@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.PermissionAssignmentDTO;
+import com.fita.vnua.quiz.model.dto.request.RoleUpdateRequest;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.model.entity.UserSubjectPermission;
 import com.fita.vnua.quiz.repository.SubjectRepository;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -87,5 +89,30 @@ public class AdminPermissionController {
                 ));
 
         return ResponseEntity.ok(groupedPermissions);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/user/{userId}/role")
+    @Operation(summary = "API thay đổi vai trò người dùng")
+    @Transactional
+    public ResponseEntity<?> updateUserRole(
+            @PathVariable UUID userId,
+            @RequestBody RoleUpdateRequest request) { // Sử dụng DTO mới của bạn
+
+        // 1. Tìm user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        // 2. Cập nhật Role trực tiếp từ Enum
+        User.Role newRole = request.getRole();
+        user.setRole(newRole);
+        userRepository.save(user);
+
+        // 3. Nếu hạ cấp về USER, xóa tất cả quyền hạn môn học của Mod
+        if (newRole == User.Role.USER) {
+            permissionRepository.deleteByUserId(userId);
+        }
+
+        return ResponseEntity.ok("Đã cập nhật vai trò thành: " + newRole);
     }
 }

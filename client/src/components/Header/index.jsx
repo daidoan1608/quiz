@@ -156,6 +156,10 @@ export default function Headers() {
                           src={`${BASE_URL_AVATAR}${avatarUrl}`}
                           alt={fullName || "User Avatar"}
                           className="h-full w-full object-cover"
+                          onError={(e) => {
+                            e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; // Cách 1: Thay bằng ảnh mặc định
+                            // Hoặc e.target.style.display = 'none'; // Cách 2: Ẩn ảnh lỗi để hiện placeholder phía dưới
+                          }}
                         />
                       ) : (
                         <span className="text-blue-600 dark:text-blue-300 font-bold text-lg">

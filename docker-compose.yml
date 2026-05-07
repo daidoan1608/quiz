@@ -2,8 +2,8 @@ services:
   backend:
     build: ./server
     restart: always
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080" # Dùng expose thay vì ports để chỉ container nội bộ thấy nhau
     depends_on:
       - db
     environment:
@@ -12,21 +12,18 @@ services:
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=quiz
+
   user:
     build: ./client
     restart: always
-    ports:
-      - "3001:3001"
-    depends_on:
-      - backend
+    expose:
+      - "3001"
 
   admin:
     build: ./admin
     restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+    expose:
+      - "3000"
 
   db:
     image: mysql:8.0
@@ -34,10 +31,24 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: quiz
-    ports:
-      - "3307:3306"
     volumes:
       - ./mysql.init:/docker-entrypoint-initdb.d
       - db-data:/var/lib/mysql
+
+  # THÊM NGINX VÀO ĐÂY
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro # Đọc SSL từ máy thật
+    depends_on:
+      - backend
+      - user
+      - admin
+
 volumes:
   db-data:
