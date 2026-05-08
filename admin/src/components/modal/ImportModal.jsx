@@ -183,7 +183,7 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
       }
       open={isModalOpen}
       onCancel={handleCancel}
-      footer={null} // Tùy chỉnh footer trong Form
+      footer={null}
       width={700}
       centered
       maskClosable={false}
@@ -192,7 +192,12 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
         type="info"
         message="Chức năng này dùng để nhập dữ liệu câu hỏi hàng loạt từ file Excel/CSV. Vui lòng đảm bảo file theo đúng định dạng mẫu."
         action={
-          <Button type="link" icon={<DownloadOutlined />}>
+          <Button
+            type="link"
+            icon={<DownloadOutlined />}
+            href="/templates/mau_import.xlsx"
+            download="mau_nhap_cau_hoi.xlsx"
+          >
             Tải file mẫu
           </Button>
         }
