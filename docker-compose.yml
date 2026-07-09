@@ -12,8 +12,9 @@ services:
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=quiz
-      - JWT_SECRET=${JWT_SECRET:-erSBlNCW8VkOhAPrzH67UjZgnb0rR_oiBkJG4Z2h7e6wX5tDQTO5n1QL2Sy0JeR51tVS1u9W8r4iQ4p4AVZhKA}
-      - MAIL_PASSWORD=${MAIL_PASSWORD:-zkmj wpqw bvdi fozg}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - MAIL_USERNAME=${MAIL_USERNAME:-example@gmail.com}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:?MAIL_PASSWORD is required}
 
   user:
     build: ./client
