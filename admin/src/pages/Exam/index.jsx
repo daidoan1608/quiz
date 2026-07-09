@@ -8,13 +8,15 @@ import {
     message,
     Space,
     Button,
-    Tooltip
+    Tooltip,
+    Popconfirm
 } from "antd";
 import {
     SearchOutlined,
     FileTextOutlined,
     ClockCircleOutlined,
     EyeOutlined, // Import icon Xem
+    DeleteOutlined
 } from "@ant-design/icons";
 
 // --- IMPORT LAYOUT CHUNG ---
@@ -87,6 +89,17 @@ export default function ExamManager() {
         setSelectedExamId(null);
     };
 
+    const handleDeleteExam = async (examId) => {
+        try {
+            await authAxios.delete(`/admin/exams/${examId}`);
+            message.success("Xóa đề thi thành công");
+            getAllExams();
+        } catch (error) {
+            console.error("Error deleting exam: ", error);
+            message.error("Không thể xóa đề thi!");
+        }
+    };
+
     // Cấu hình cột cho bảng
     const columns = [
         {
@@ -134,16 +147,26 @@ export default function ExamManager() {
         // CỘT HÀNH ĐỘNG
         {
             title: "Hành động",
-            width: 120,
+            width: 140,
             fixed: 'right', // Cố định cột hành động khi scroll ngang
             render: (_, record) => (
-        <Space size="middle">
-          {record.sendType !== 'GLOBAL' && (
-            <Tooltip title="Xem người nhận">
-              <Button icon={<EyeOutlined /> } onClick={() => handleViewExam(record.examId)} />
-            </Tooltip>
-          )}
-        </Space>
+                <Space size="middle">
+                    {record.sendType !== 'GLOBAL' && (
+                        <Tooltip title="Xem người nhận">
+                            <Button icon={<EyeOutlined /> } onClick={() => handleViewExam(record.examId)} />
+                        </Tooltip>
+                    )}
+                    <Popconfirm
+                        title="Bạn có chắc chắn muốn xóa đề thi này?"
+                        onConfirm={() => handleDeleteExam(record.examId)}
+                        okText="Có"
+                        cancelText="Không"
+                    >
+                        <Tooltip title="Xóa đề thi">
+                            <Button danger icon={<DeleteOutlined />} />
+                        </Tooltip>
+                    </Popconfirm>
+                </Space>
             ),
         },
     ];

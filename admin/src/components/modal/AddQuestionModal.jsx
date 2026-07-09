@@ -2,14 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { authAxios } from '../../api/axiosConfig';
 import {
   Form, Input, Button, Card, Select,
-  Radio, message, Typography, Divider,
-  Row, Col, Alert, Modal
+  Radio, Checkbox, message, Typography, Divider,
+  Row, Col, Alert, Modal, Upload
 } from 'antd';
 import {
   SaveOutlined,
   QuestionCircleOutlined,
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  UploadOutlined
 } from '@ant-design/icons';
+import { parseMarkdown } from '../../utils/parseMarkdown';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -25,7 +27,59 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
 
   // State loading & UI
   const [loading, setLoading] = useState(false);
-  const [correctAnswerIndex, setCorrectAnswerIndex] = useState(null); // Lưu index đáp án đúng
+  const [questionType, setQuestionType] = useState('SINGLE_CHOICE');
+  const [correctAnswers, setCorrectAnswers] = useState([]); // Lưu các index đáp án đúng
+  const [previewImgUrl, setPreviewImgUrl] = useState('');
+
+  const [imageType, setImageType] = useState('upload'); // 'upload' | 'url'
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const content = Form.useWatch("content", form);
+  const answerA = Form.useWatch("answerA", form);
+  const answerB = Form.useWatch("answerB", form);
+  const answerC = Form.useWatch("answerC", form);
+  const answerD = Form.useWatch("answerD", form);
+
+  useEffect(() => {
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      const timer = setTimeout(() => {
+        window.MathJax.typesetPromise();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [content, answerA, answerB, answerC, answerD]);
+
+  const handleUploadImage = async (options) => {
+    const { file, onSuccess, onError } = options;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      setUploadingImage(true);
+      const response = await authAxios.post("admin/questions/upload-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      const returnedUrl = response.data.data.imageUrl;
+      form.setFieldsValue({ imageUrl: returnedUrl });
+      setPreviewImgUrl(returnedUrl);
+      onSuccess("OK");
+      message.success("Tải ảnh lên thành công!");
+    } catch (err) {
+      console.error(err);
+      onError(err);
+      message.error("Lỗi khi tải ảnh lên!");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const getFullImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const apiRoot = process.env.REACT_APP_API_URL 
+      ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
+      : 'http://localhost:8080';
+    return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
 
   // 1. Fetch Categories
   const fetchCategories = useCallback(async () => {
@@ -46,7 +100,6 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
 
   // 2. Xử lý khi chọn Khoa -> Lọc Môn
   const handleCategoryChange = (categoryId) => {
-    // Reset các trường con
     form.setFieldsValue({ subjectId: null, chapterId: null });
     setSubjects([]);
     setChapters([]);
@@ -59,7 +112,6 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
 
   // 3. Xử lý khi chọn Môn -> Fetch Chương
   const handleSubjectChange = async (subjectId) => {
-    // Reset trường chương
     form.setFieldsValue({ chapterId: null });
     setChapters([]);
 
@@ -80,20 +132,18 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
 
   // 4. Xử lý Submit Form
   const onFinish = async (values) => {
-    // Kiểm tra đã chọn đáp án đúng chưa
-    if (correctAnswerIndex === null) {
-      message.error("Vui lòng chọn một đáp án đúng!");
+    if (correctAnswers.length === 0) {
+      message.error("Vui lòng chọn ít nhất một đáp án đúng!");
       return;
     }
 
     setLoading(true);
     try {
-      // Chuẩn bị mảng answers từ form values
       const formattedAnswers = [
-        { content: values.answerA, isCorrect: correctAnswerIndex === 0 },
-        { content: values.answerB, isCorrect: correctAnswerIndex === 1 },
-        { content: values.answerC, isCorrect: correctAnswerIndex === 2 },
-        { content: values.answerD, isCorrect: correctAnswerIndex === 3 },
+        { content: values.answerA, isCorrect: correctAnswers.includes(0) },
+        { content: values.answerB, isCorrect: correctAnswers.includes(1) },
+        { content: values.answerC, isCorrect: correctAnswers.includes(2) },
+        { content: values.answerD, isCorrect: correctAnswers.includes(3) },
       ];
 
       const newQuestion = {
@@ -101,18 +151,21 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
         difficulty: values.difficulty,
         subjectId: values.subjectId,
         chapterId: values.chapterId,
+        imageUrl: values.imageUrl,
+        questionType: values.questionType,
         answers: formattedAnswers,
       };
 
       await authAxios.post("/admin/questions", newQuestion);
       message.success("Thêm câu hỏi thành công!");
 
-      // Reset state và form sau khi thành công
       form.resetFields();
-      setCorrectAnswerIndex(null);
+      setCorrectAnswers([]);
+      setPreviewImgUrl('');
+      setQuestionType('SINGLE_CHOICE');
       setSubjects([]);
       setChapters([]);
-      onSuccess(); // Đóng modal và làm mới dữ liệu
+      onSuccess();
 
     } catch (error) {
       console.error("Error adding question:", error);
@@ -126,7 +179,9 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
 
   const handleCancel = () => {
       form.resetFields();
-      setCorrectAnswerIndex(null);
+      setCorrectAnswers([]);
+      setPreviewImgUrl('');
+      setQuestionType('SINGLE_CHOICE');
       setSubjects([]);
       setChapters([]);
       onCancel();
@@ -164,7 +219,7 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
         layout="vertical"
         onFinish={onFinish}
         size="large"
-        initialValues={{ difficulty: 'MEDIUM' }}
+        initialValues={{ difficulty: 'MEDIUM', questionType: 'SINGLE_CHOICE' }}
       >
         {/* KHỐI 1: PHÂN LOẠI */}
         <Row gutter={24}>
@@ -226,16 +281,97 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
         </Row>
 
         <Row gutter={24}>
-          <Col xs={24} md={18}>
+          <Col xs={24} md={12}>
             <Form.Item
               label="Nội dung câu hỏi"
               name="content"
               rules={[{ required: true, message: "Nhập nội dung câu hỏi!" }]}
             >
-              <TextArea rows={2} placeholder="Nhập câu hỏi..." />
+              <TextArea rows={3} placeholder="Nhập câu hỏi (hỗ trợ LaTeX)..." />
+            </Form.Item>
+            {content && (
+              <div 
+                style={{ 
+                  marginTop: -12,
+                  marginBottom: 16,
+                  padding: '8px 12px', 
+                  border: '1px dashed #d9d9d9', 
+                  borderRadius: 6, 
+                  background: '#fafafa',
+                  maxHeight: 120,
+                  overflowY: 'auto'
+                }}
+              >
+                <div style={{ color: '#8c8c8c', fontSize: 11, marginBottom: 4 }}>Xem trước nội dung câu hỏi:</div>
+                <div dangerouslySetInnerHTML={{ __html: parseMarkdown(content) }} />
+              </div>
+            )}
+          </Col>
+          <Col xs={24} md={12}>
+            <div style={{ marginBottom: 10 }}>
+              <Text strong>Hình thức đính kèm ảnh: </Text>
+              <Radio.Group value={imageType} onChange={(e) => {
+                setImageType(e.target.value);
+                form.setFieldsValue({ imageUrl: '' });
+                setPreviewImgUrl('');
+              }} buttonStyle="solid" style={{ marginLeft: 10 }}>
+                <Radio.Button value="upload">Upload tệp</Radio.Button>
+                <Radio.Button value="url">Nhập Link ảnh</Radio.Button>
+              </Radio.Group>
+            </div>
+
+            {imageType === 'upload' ? (
+              <Form.Item label="Chọn tệp ảnh minh họa" extra="Chấp nhận tệp .png, .jpg, .jpeg">
+                <Upload
+                  accept="image/*"
+                  customRequest={handleUploadImage}
+                  maxCount={1}
+                  showUploadList={false}
+                >
+                  <Button icon={<UploadOutlined />} loading={uploadingImage} type="dashed" style={{ width: '100%' }}>
+                    {uploadingImage ? 'Đang tải lên...' : 'Chọn ảnh để upload'}
+                  </Button>
+                </Upload>
+                <Form.Item name="imageUrl" noStyle>
+                  <Input type="hidden" />
+                </Form.Item>
+              </Form.Item>
+            ) : (
+              <Form.Item
+                label="Đường dẫn ảnh minh họa (tùy chọn)"
+                name="imageUrl"
+              >
+                <Input 
+                  placeholder="Nhập URL ảnh (ví dụ: /avatars/q_123.png hoặc link internet)" 
+                  onChange={(e) => setPreviewImgUrl(e.target.value)}
+                />
+              </Form.Item>
+            )}
+            {previewImgUrl && (
+              <div style={{ marginTop: 10, textAlign: 'center' }}>
+                <img src={getFullImageUrl(previewImgUrl)} alt="Preview" style={{ maxHeight: 100, maxWidth: '100%', borderRadius: 6, border: '1px solid #d9d9d9' }} />
+              </div>
+            )}
+          </Col>
+        </Row>
+
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Loại câu hỏi"
+              name="questionType"
+              rules={[{ required: true }]}
+            >
+              <Select onChange={(val) => {
+                setQuestionType(val);
+                setCorrectAnswers([]);
+              }}>
+                <Option value="SINGLE_CHOICE">Trắc nghiệm chọn một</Option>
+                <Option value="MULTIPLE_CHOICE">Trắc nghiệm chọn nhiều</Option>
+              </Select>
             </Form.Item>
           </Col>
-          <Col xs={24} md={6}>
+          <Col xs={24} md={12}>
             <Form.Item
               label="Mức độ"
               name="difficulty"
@@ -253,44 +389,132 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
         <Divider orientation="left"><CheckCircleOutlined /> Thiết lập đáp án</Divider>
 
         <Alert
-          message="Nhập 4 đáp án và tích chọn vào ô tròn cạnh đáp án đúng."
+          message={
+            questionType === 'SINGLE_CHOICE'
+              ? "Nhập 4 đáp án và tích chọn vào ô tròn cạnh đáp án đúng."
+              : "Nhập 4 đáp án và tích chọn các ô vuông cạnh các đáp án đúng."
+          }
           type="info"
           showIcon
           style={{ marginBottom: 20 }}
         />
 
         {/* KHỐI 2: ĐÁP ÁN */}
-        <Radio.Group
-          onChange={(e) => setCorrectAnswerIndex(e.target.value)}
-          value={correctAnswerIndex}
-          style={{ width: '100%' }}
-        >
-          {['A', 'B', 'C', 'D'].map((label, index) => (
-            <div key={label} style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-              {/* Nút chọn đúng sai */}
-              <Radio value={index} style={{ marginRight: 16 }}>
-                <Text strong style={{ color: correctAnswerIndex === index ? '#52c41a' : 'inherit' }}>
-                  Đáp án {label} {correctAnswerIndex === index && "(Đúng)"}
-                </Text>
-              </Radio>
+        {questionType === 'SINGLE_CHOICE' ? (
+          <Radio.Group
+            onChange={(e) => setCorrectAnswers([e.target.value])}
+            value={correctAnswers[0]}
+            style={{ width: '100%' }}
+          >
+            {['A', 'B', 'C', 'D'].map((label, index) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 16 }}>
+                <Radio value={index} style={{ marginRight: 16, marginTop: 6 }}>
+                  <Text strong style={{ color: correctAnswers.includes(index) ? '#52c41a' : 'inherit' }}>
+                    Đáp án {label} {correctAnswers.includes(index) && "(Đúng)"}
+                  </Text>
+                </Radio>
 
-              {/* Nội dung đáp án */}
-              <Form.Item
-                name={`answer${label}`}
-                rules={[{ required: true, message: `Nhập đáp án ${label}!` }]}
-                style={{ margin: 0, flex: 1 }}
-              >
-                <Input
-                  placeholder={`Nội dung đáp án ${label}`}
-                  style={{
-                    borderColor: correctAnswerIndex === index ? '#52c41a' : undefined,
-                    backgroundColor: correctAnswerIndex === index ? '#f6ffed' : undefined
-                  }}
-                />
-              </Form.Item>
-            </div>
-          ))}
-        </Radio.Group>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <Form.Item
+                    name={`answer${label}`}
+                    rules={[{ required: true, message: `Nhập đáp án ${label}!` }]}
+                    style={{ margin: 0 }}
+                  >
+                    <TextArea
+                      placeholder={`Nội dung đáp án ${label} (hỗ trợ LaTeX và Markdown, Enter để xuống dòng)`}
+                      autoSize={{ minRows: 1, maxRows: 5 }}
+                      style={{
+                        borderColor: correctAnswers.includes(index) ? '#52c41a' : undefined,
+                        backgroundColor: correctAnswers.includes(index) ? '#f6ffed' : undefined
+                      }}
+                    />
+                  </Form.Item>
+                  {(() => {
+                    const ansVal = label === 'A' ? answerA : label === 'B' ? answerB : label === 'C' ? answerC : answerD;
+                    if (!ansVal) return null;
+                    return (
+                      <div 
+                        style={{ 
+                          marginTop: 4, 
+                          padding: '4px 8px', 
+                          border: '1px dashed #d9d9d9', 
+                          borderRadius: 4, 
+                          background: '#fafafa',
+                          fontSize: 13
+                        }}
+                      >
+                        <span style={{ color: '#8c8c8c', marginRight: 8 }}>Xem trước {label}:</span>
+                        <span dangerouslySetInnerHTML={{ __html: parseMarkdown(ansVal) }} />
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            ))}
+          </Radio.Group>
+        ) : (
+          <div style={{ width: '100%' }}>
+            {['A', 'B', 'C', 'D'].map((label, index) => {
+              const isChecked = correctAnswers.includes(index);
+              return (
+                <div key={label} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 16 }}>
+                  <div style={{ marginRight: 16, width: 120, paddingTop: 6 }}>
+                    <Checkbox
+                      checked={isChecked}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCorrectAnswers([...correctAnswers, index]);
+                        } else {
+                          setCorrectAnswers(correctAnswers.filter(item => item !== index));
+                        }
+                      }}
+                    >
+                      <Text strong style={{ color: isChecked ? '#52c41a' : 'inherit' }}>
+                        Đáp án {label} {isChecked && "(Đúng)"}
+                      </Text>
+                    </Checkbox>
+                  </div>
+
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Form.Item
+                      name={`answer${label}`}
+                      rules={[{ required: true, message: `Nhập đáp án ${label}!` }]}
+                      style={{ margin: 0 }}
+                    >
+                      <TextArea
+                        placeholder={`Nội dung đáp án ${label} (hỗ trợ LaTeX và Markdown, Enter để xuống dòng)`}
+                        autoSize={{ minRows: 1, maxRows: 5 }}
+                        style={{
+                          borderColor: isChecked ? '#52c41a' : undefined,
+                          backgroundColor: isChecked ? '#f6ffed' : undefined
+                        }}
+                      />
+                    </Form.Item>
+                    {(() => {
+                      const ansVal = label === 'A' ? answerA : label === 'B' ? answerB : label === 'C' ? answerC : answerD;
+                      if (!ansVal) return null;
+                      return (
+                        <div 
+                          style={{ 
+                            marginTop: 4, 
+                            padding: '4px 8px', 
+                            border: '1px dashed #d9d9d9', 
+                            borderRadius: 4, 
+                            background: '#fafafa',
+                            fontSize: 13
+                          }}
+                        >
+                          <span style={{ color: '#8c8c8c', marginRight: 8 }}>Xem trước {label}:</span>
+                          <span dangerouslySetInnerHTML={{ __html: parseMarkdown(ansVal) }} />
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </Form>
     </Modal>
   );

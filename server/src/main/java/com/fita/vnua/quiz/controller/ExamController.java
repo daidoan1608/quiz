@@ -71,4 +71,26 @@ public class ExamController {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch exam", List.of(e.getMessage())));
         }
     }
+
+    @PutMapping("admin/exams/{examId}")
+    @Operation(summary = "Cập nhật bài thi")
+    public ResponseEntity<ApiResponse<ExamDto>> updateExam(@PathVariable("examId") Long examId, @RequestBody ExamDto examDto) {
+        try {
+            ExamDto updatedExam = examService.updateExam(examId, examDto);
+            return ResponseEntity.ok(ApiResponse.success("Exam updated successfully", updatedExam));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to update exam", List.of(e.getMessage())));
+        }
+    }
+
+    @DeleteMapping("admin/exams/{examId}")
+    @Operation(summary = "Xóa bài thi")
+    public ResponseEntity<ApiResponse<Void>> deleteExam(@PathVariable("examId") Long examId) {
+        try {
+            examService.deleteExam(examId);
+            return ResponseEntity.ok(ApiResponse.success("Exam deleted successfully", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to delete exam", List.of(e.getMessage())));
+        }
+    }
 }

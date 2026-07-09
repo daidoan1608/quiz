@@ -22,7 +22,7 @@ export default function UserProfileCard({ user, onUploadAvatar, onChangePassword
     // Ghép URL gốc của Backend vào trước đường dẫn tương đối
     backgroundImage: `url("${
       user.avatarUrl
-            ? BASE_URL_AVATAR + user.avatarUrl
+            ? (user.avatarUrl.startsWith("http") ? user.avatarUrl : BASE_URL_AVATAR + user.avatarUrl)
             : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
     }")`
   }}

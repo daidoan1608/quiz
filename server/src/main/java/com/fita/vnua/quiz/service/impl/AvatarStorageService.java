@@ -20,6 +20,9 @@ public class AvatarStorageService {
     @Value("${avatar.default-url}")
     private String defaultUrl;
 
+    @Value("${question.upload-dir:uploads/questions}")
+    private String questionUploadDir;
+
     public Uploaded saveAvatar(UUID userId, MultipartFile file, String oldUrl) throws Exception {
         // Xóa file cũ nếu có (không xóa default)
         if (oldUrl != null && oldUrl.startsWith("/avatars/") && !oldUrl.equals(defaultUrl)) {
@@ -55,6 +58,20 @@ public class AvatarStorageService {
 
     public String getDefaultUrl() {
         return defaultUrl;
+    }
+
+    public Uploaded saveQuestionImage(MultipartFile file) throws Exception {
+        Path folder = Paths.get(questionUploadDir).toAbsolutePath().normalize();
+        Files.createDirectories(folder);
+
+        String ext = getExtension(file.getOriginalFilename());
+        String filename = "q_" + UUID.randomUUID().toString() + ext;
+
+        Path target = folder.resolve(filename);
+        file.transferTo(target.toFile());
+
+        String url = "/questions/" + filename;
+        return new Uploaded(filename, url);
     }
 
     private String getExtension(String name) {

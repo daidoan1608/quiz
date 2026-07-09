@@ -21,6 +21,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import com.fita.vnua.quiz.repository.UserRepository;
+import com.fita.vnua.quiz.service.impl.GoogleIdTokenVerifierService;
+import com.fita.vnua.quiz.security.CustomUserDetailsService;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.HttpHeaders;
+import java.util.Map;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +41,9 @@ public class AuthController {
     private final AuthService authService;
     private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil; // Inject thêm JwtTokenUtil
+    private final UserRepository userRepository;
+    private final GoogleIdTokenVerifierService googleVerifier;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @PostMapping("login")
     @Operation(summary = "API đăng nhập (Trả về HttpOnly Cookie)")
@@ -178,6 +187,74 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500)
                     .body(ApiResponse.error("Registration failed: " + e.getMessage(), List.of(e.getMessage())));
+        }
+    }
+
+    @PostMapping("google")
+    @Operation(summary = "API đăng nhập bằng Google (Nhận Google ID Token, Trả về HttpOnly Cookie)")
+    public ResponseEntity<?> loginWithGoogle(@RequestBody Map<String, String> body) {
+        try {
+            String idToken = body.get("idToken");
+
+            if (!googleVerifier.verify(idToken)) {
+                return ResponseEntity.status(401)
+                        .body(ApiResponse.error("Authentication failed", List.of("Invalid Google ID Token")));
+            }
+
+            String email = googleVerifier.extractEmail(idToken);
+            String name = googleVerifier.extractName(idToken);
+            String picture = googleVerifier.extractPicture(idToken);
+
+            // Tạo username từ email (phần trước @)
+            String generatedUsername = email.split("@")[0];
+
+            // Check user trong DB
+            User user = userRepository.findByEmail(email).orElseGet(() -> {
+                User newUser = new User();
+                newUser.setEmail(email);
+                newUser.setUsername(generatedUsername);
+                newUser.setFullName(name);
+                newUser.setRole(User.Role.USER);
+                newUser.setAuthProvider(User.AuthProvider.GOOGLE);
+                newUser.setPassword(null);
+                newUser.setAvatarUrl(picture);
+                return userRepository.save(newUser);
+            });
+
+            // Update tên hoặc avatar nếu thay đổi
+            boolean needsUpdate = false;
+            if (!user.getFullName().equals(name)) {
+                user.setFullName(name);
+                needsUpdate = true;
+            }
+            if (picture != null && (user.getAvatarUrl() == null || !user.getAvatarUrl().equals(picture))) {
+                user.setAvatarUrl(picture);
+                needsUpdate = true;
+            }
+            if (needsUpdate) {
+                userRepository.save(user);
+            }
+
+            // Sinh Token & Cookie
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getUsername());
+            String accessToken = authService.generateAccessToken(userDetails);
+            String refreshTokenUUID = authService.generateRefreshToken(userDetails);
+
+            ResponseCookie accessCookie = jwtTokenUtil.generateAccessJwtCookie(accessToken);
+            ResponseCookie refreshCookie = jwtTokenUtil.generateRefreshJwtCookie(refreshTokenUUID);
+
+            AuthResponse authResponse = authService.createAuthResponse(userDetails);
+            authResponse.setAccessToken(accessToken);
+            authResponse.setRefreshToken(refreshTokenUUID);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                    .body(ApiResponse.success("Google login successful", authResponse));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("Google Authentication failed: " + e.getMessage(), List.of(e.getMessage())));
         }
     }
 }

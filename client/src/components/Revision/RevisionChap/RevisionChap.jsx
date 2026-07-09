@@ -2,14 +2,34 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../context/LanguageProvider";
+import { message } from "antd";
+import { parseMarkdown } from "../../../utils/parseMarkdown";
+
+
+const getFullImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const apiRoot = process.env.REACT_APP_API_URL 
+    ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
+    : 'http://localhost:8080';
+  return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 export default function RevisionChap1() {
   // --- STATE ---
   const [questionAnswers, setQuestionAnswers] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [confirmedAnswers, setConfirmedAnswers] = useState({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Kích hoạt MathJax để render LaTeX
+  useEffect(() => {
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise();
+    }
+  }, [currentQuestionIndex, questionAnswers]);
 
   // --- HOOKS ---
   const location = useLocation();
@@ -63,10 +83,32 @@ export default function RevisionChap1() {
 
   // 2. Handlers
   const handleAnswerSelect = (questionIndex, answerIndex) => {
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [questionIndex]: answerIndex,
-    }));
+    const q = questionAnswers[questionIndex];
+    if (!q) return;
+    const isMultiple = q.questionType === 'MULTIPLE_CHOICE';
+    
+    if (isMultiple) {
+      if (confirmedAnswers[questionIndex]) return;
+      setSelectedAnswers((prev) => {
+        const currentSelection = prev[questionIndex] || [];
+        let newSelection;
+        if (currentSelection.includes(answerIndex)) {
+          newSelection = currentSelection.filter(idx => idx !== answerIndex);
+        } else {
+          newSelection = [...currentSelection, answerIndex];
+        }
+        return {
+          ...prev,
+          [questionIndex]: newSelection
+        };
+      });
+    } else {
+      if (selectedAnswers[questionIndex] !== undefined) return;
+      setSelectedAnswers((prev) => ({
+        ...prev,
+        [questionIndex]: answerIndex,
+      }));
+    }
   };
 
   const handleNext = () => {
@@ -94,14 +136,38 @@ export default function RevisionChap1() {
 
   // Helper styles
   const getOptionStyle = (qIndex, ansIndex, isCorrect) => {
-    const userSelected = selectedAnswers[qIndex];
-    if (userSelected === undefined)
-      return "border-gray-200 hover:border-primary dark:border-gray-700 dark:hover:border-primary";
-    if (isCorrect)
-      return "border-green-500 bg-green-50 dark:border-green-600 dark:bg-green-900/30";
-    if (userSelected === ansIndex && !isCorrect)
-      return "border-red-500 bg-red-50 dark:border-red-600 dark:bg-red-900/30";
-    return "border-gray-200 opacity-50 dark:border-gray-700";
+    const q = questionAnswers[qIndex];
+    if (!q) return "border-gray-200";
+    const isMultiple = q.questionType === 'MULTIPLE_CHOICE';
+    
+    if (isMultiple) {
+      const isConfirmed = confirmedAnswers[qIndex];
+      const selections = selectedAnswers[qIndex] || [];
+      const isSelected = selections.includes(ansIndex);
+      
+      if (!isConfirmed) {
+        return isSelected 
+          ? "border-primary bg-primary/10 dark:bg-primary/20" 
+          : "border-gray-200 hover:border-primary dark:border-gray-700 dark:hover:border-primary";
+      }
+      
+      if (isCorrect) {
+        return "border-green-500 bg-green-50 dark:border-green-600 dark:bg-green-900/30";
+      }
+      if (isSelected && !isCorrect) {
+        return "border-red-500 bg-red-50 dark:border-red-600 dark:bg-red-900/30";
+      }
+      return "border-gray-200 opacity-50 dark:border-gray-700";
+    } else {
+      const userSelected = selectedAnswers[qIndex];
+      if (userSelected === undefined)
+        return "border-gray-200 hover:border-primary dark:border-gray-700 dark:hover:border-primary";
+      if (isCorrect)
+        return "border-green-500 bg-green-50 dark:border-green-600 dark:bg-green-900/30";
+      if (userSelected === ansIndex && !isCorrect)
+        return "border-red-500 bg-red-50 dark:border-red-600 dark:bg-red-900/30";
+      return "border-gray-200 opacity-50 dark:border-gray-700";
+    }
   };
 
   // --- RENDER LOADING ---
@@ -216,16 +282,29 @@ export default function RevisionChap1() {
                 <div className="flex-shrink-0 size-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold text-sm dark:bg-blue-900/30 dark:text-blue-300">
                   {currentQuestionIndex + 1}
                 </div>
-                <h2 className="text-lg font-bold leading-snug text-[#111418] dark:text-white">
-                  {currentQuestion.content}
-                </h2>
+                <div 
+                   className="text-lg font-bold leading-snug text-[#111418] dark:text-white"
+                   dangerouslySetInnerHTML={{ __html: parseMarkdown(currentQuestion.content) }}
+                 />
               </div>
+
+              {currentQuestion.imageUrl && (
+                <div className="my-4 text-center">
+                  <img 
+                    src={getFullImageUrl(currentQuestion.imageUrl)} 
+                    alt="Minh họa câu hỏi" 
+                    className="max-h-64 max-w-full rounded-lg mx-auto shadow-sm border border-gray-200 dark:border-gray-700" 
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-1 gap-4">
                 {currentQuestion.answers?.map((answer, ansIndex) => {
                   const isCorrect = answer.isCorrect;
-                  const isSelected =
-                    selectedAnswers[currentQuestionIndex] === ansIndex;
+                  const isMultiple = currentQuestion.questionType === 'MULTIPLE_CHOICE';
+                  const isSelected = isMultiple
+                    ? (selectedAnswers[currentQuestionIndex] || []).includes(ansIndex)
+                    : selectedAnswers[currentQuestionIndex] === ansIndex;
                   const containerStyle = getOptionStyle(
                     currentQuestionIndex,
                     ansIndex,
@@ -235,74 +314,137 @@ export default function RevisionChap1() {
                   return (
                     <label
                       key={answer.optionId || ansIndex}
-                      className={`relative flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 hover:shadow-md ${containerStyle}`}
+                      className={`relative flex cursor-pointer items-start rounded-xl border p-4 transition-all duration-200 hover:shadow-md ${containerStyle}`}
                     >
-                      <div className="flex w-full items-center">
+                      <div className="flex w-full items-start">
                         <div
-                          className={`flex items-center justify-center size-6 rounded-full border border-gray-300 mr-4 transition-colors
+                          className={`flex-shrink-0 flex items-center justify-center size-6 rounded-full border border-gray-300 mr-4 mt-0.5 transition-colors
                             ${
                               isSelected ||
-                              (selectedAnswers[currentQuestionIndex] !==
-                                undefined &&
-                                isCorrect)
+                              (((isMultiple ? confirmedAnswers[currentQuestionIndex] === true : selectedAnswers[currentQuestionIndex] !== undefined) && isCorrect))
                                 ? "border-transparent"
                                 : "bg-white"
                             }
                         `}
                         >
-                          {/* Custom Radio Circle Logic */}
-                          {isSelected && !isCorrect && (
-                            <span className="material-symbols-outlined text-red-500 text-xl">
-                              cancel
-                            </span>
-                          )}
-                          {selectedAnswers[currentQuestionIndex] !==
-                            undefined &&
-                            isCorrect && (
-                              <span className="material-symbols-outlined text-green-500 text-xl">
-                                check_circle
-                              </span>
-                            )}
-                          {selectedAnswers[currentQuestionIndex] ===
-                            undefined && (
-                            <div className="size-3 rounded-full bg-gray-200"></div>
-                          )}
+                          {(() => {
+                            if (isMultiple) {
+                              const isConfirmed = confirmedAnswers[currentQuestionIndex];
+                              const selections = selectedAnswers[currentQuestionIndex] || [];
+                              const isSel = selections.includes(ansIndex);
+                              
+                              if (!isConfirmed) {
+                                return isSel ? (
+                                  <span className="material-symbols-outlined text-blue-600 text-xl">
+                                    check_box
+                                  </span>
+                                ) : (
+                                  <span className="material-symbols-outlined text-gray-400 text-xl">
+                                    check_box_outline_blank
+                                  </span>
+                                );
+                              } else {
+                                if (isCorrect) {
+                                  return (
+                                    <span className="material-symbols-outlined text-green-500 text-xl">
+                                      check_circle
+                                    </span>
+                                  );
+                                }
+                                if (isSel && !isCorrect) {
+                                  return (
+                                    <span className="material-symbols-outlined text-red-500 text-xl">
+                                      cancel
+                                    </span>
+                                  );
+                                }
+                                return (
+                                  <span className="material-symbols-outlined text-gray-300 text-xl">
+                                    check_box_outline_blank
+                                  </span>
+                                );
+                              }
+                            } else {
+                              const isConfirmed = selectedAnswers[currentQuestionIndex] !== undefined;
+                              const isSel = selectedAnswers[currentQuestionIndex] === ansIndex;
+                              if (!isConfirmed) {
+                                return <div className="size-3 rounded-full bg-gray-200"></div>;
+                              } else {
+                                if (isCorrect) {
+                                  return (
+                                    <span className="material-symbols-outlined text-green-500 text-xl">
+                                      check_circle
+                                    </span>
+                                  );
+                                }
+                                if (isSel && !isCorrect) {
+                                  return (
+                                    <span className="material-symbols-outlined text-red-500 text-xl">
+                                      cancel
+                                    </span>
+                                  );
+                                }
+                                return <div className="size-3 rounded-full bg-gray-100"></div>;
+                              }
+                            }
+                          })()}
                         </div>
 
-                        {/* Hidden Radio Input for semantic */}
                         <input
-                          type="radio"
+                          type={isMultiple ? 'checkbox' : 'radio'}
                           name={`question-${currentQuestionIndex}`}
                           className="hidden"
                           checked={isSelected}
                           onChange={() =>
                             handleAnswerSelect(currentQuestionIndex, ansIndex)
                           }
-                          disabled={
-                            selectedAnswers[currentQuestionIndex] !== undefined
-                          } // Disable nếu đã chọn
+                          disabled={isMultiple
+                            ? confirmedAnswers[currentQuestionIndex]
+                            : selectedAnswers[currentQuestionIndex] !== undefined
+                          }
                         />
 
                         <span
                           className={`font-medium text-base ${
-                            isSelected && !isCorrect
+                            (isSelected && !isCorrect && (isMultiple ? confirmedAnswers[currentQuestionIndex] === true : true))
                               ? "text-red-700 dark:text-red-300"
                               : ""
                           } ${
                             isCorrect &&
-                            selectedAnswers[currentQuestionIndex] !== undefined
+                            (isMultiple ? confirmedAnswers[currentQuestionIndex] : selectedAnswers[currentQuestionIndex] !== undefined)
                               ? "text-green-700 dark:text-green-300"
                               : "text-gray-700 dark:text-gray-200"
                           }`}
-                        >
-                          {answer.content}
-                        </span>
+                          dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
+                        />
                       </div>
                     </label>
                   );
                 })}
               </div>
             </div>
+
+            {currentQuestion.questionType === 'MULTIPLE_CHOICE' && !confirmedAnswers[currentQuestionIndex] && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => {
+                    const selections = selectedAnswers[currentQuestionIndex] || [];
+                    if (selections.length === 0) {
+                      message.warning("Vui lòng chọn ít nhất một đáp án!");
+                      return;
+                    }
+                    setConfirmedAnswers(prev => ({
+                      ...prev,
+                      [currentQuestionIndex]: true
+                    }));
+                  }}
+                  className="flex h-11 px-8 items-center justify-center gap-2 rounded-lg bg-green-600 font-bold text-white hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
+                >
+                  <span className="material-symbols-outlined text-lg">check_circle</span>
+                  <span>Xác nhận đáp án</span>
+                </button>
+              </div>
+            )}
 
             {/* Navigation Buttons */}
             <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-6 dark:border-gray-700">
@@ -339,8 +481,10 @@ export default function RevisionChap1() {
           Danh sách câu hỏi
         </h3>
         <div className="grid grid-cols-5 gap-2">
-          {questionAnswers.map((_, index) => {
-            const isAnswered = selectedAnswers[index] !== undefined;
+          {questionAnswers.map((item, index) => {
+            const isAnswered = item.questionType === 'MULTIPLE_CHOICE'
+              ? confirmedAnswers[index] === true
+              : selectedAnswers[index] !== undefined;
             const isCurrent = currentQuestionIndex === index;
 
             let btnClass =
@@ -350,7 +494,7 @@ export default function RevisionChap1() {
                 "bg-blue-600 text-white border-blue-600 ring-2 ring-blue-200 dark:ring-blue-900";
             else if (isAnswered)
               btnClass =
-                "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800";
+                "bg-green-500 text-white border-green-500 hover:bg-green-600";
 
             return (
               <button

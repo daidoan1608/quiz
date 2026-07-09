@@ -13,7 +13,9 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
 
     Exam findExamByExamId(Long examId);
 
-    @Query("SELECT e FROM Exam e WHERE e.subject.subjectId = :subjectId")
+    List<Exam> findByDeletedFalse();
+
+    @Query("SELECT e FROM Exam e WHERE e.subject.subjectId = :subjectId AND e.deleted = false")
     List<Exam> findExamsBySubjectId(Long subjectId);
 
     @Query("SELECT e.subject.subjectId FROM Exam e WHERE e.examId = :examId")

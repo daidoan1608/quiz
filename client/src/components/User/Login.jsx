@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { publicAxios } from "../../api/axiosConfig";
 import { useAuth } from "../../context/AuthProvider";
 import { authAxios } from "../../api/axiosConfig";
+import { GoogleLogin } from "@react-oauth/google";
 
 function Login() {
   const [loading, setLoading] = useState(false);
@@ -79,6 +80,22 @@ function Login() {
       navigate("/");
     } catch (error) {
       message.error(`Đăng nhập bằng ${provider} thất bại!`);
+    }
+  };
+
+  const handleGoogleLoginSuccess = async (idToken) => {
+    setLoading(true);
+    try {
+      const response = await publicAxios.post("/auth/google", { idToken });
+      const { accessToken, refreshToken, userId, fullName, avatarUrl } = response.data.data;
+      login(accessToken, refreshToken, userId, fullName, avatarUrl);
+      message.success("Đăng nhập Google thành công!");
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      message.error("Xác thực tài khoản Google thất bại!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -185,12 +202,21 @@ function Login() {
           </div>
 
           <div className="mt-6 flex justify-center gap-4">
-            <Button
-              shape="circle"
-              icon={<GoogleOutlined className="text-xl text-red-500" />}
-              onClick={() => handleOAuthLogin("google")}
-              className="flex items-center justify-center w-12 h-12 border border-gray-300 hover:bg-gray-50 transition-colors"
-            />
+            <div className="flex items-center justify-center w-12 h-12">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  const idToken = credentialResponse.credential;
+                  await handleGoogleLoginSuccess(idToken);
+                }}
+                onError={() => {
+                  message.error("Đăng nhập Google thất bại!");
+                }}
+                useOneTap
+                type="icon"
+                shape="circle"
+                size="large"
+              />
+            </div>
             <Button
               shape="circle"
               icon={<FacebookOutlined className="text-xl text-blue-600" />}

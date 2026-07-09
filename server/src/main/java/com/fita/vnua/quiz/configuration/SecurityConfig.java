@@ -59,7 +59,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/otp/**",
                                 "/api/v1/public/**",
-                                "/avatars/**" // Cho phép xem ảnh
+                                "/avatars/**", // Cho phép xem ảnh
+                                "/questions/**" // Cho phép xem ảnh câu hỏi
                         ).permitAll()
 
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "MOD")

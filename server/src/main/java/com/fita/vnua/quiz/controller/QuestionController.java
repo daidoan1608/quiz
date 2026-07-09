@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fita.vnua.quiz.service.impl.AvatarStorageService;
+
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,7 @@ import java.util.Map;
 @Tag(name = "Question API", description = "API cho các chức năng liên quan đến câu hỏi")
 public class QuestionController {
     private final QuestionService questionService;
+    private final AvatarStorageService avatarStorageService;
 
     @PostMapping("admin/questions/import")
     @Operation(summary = "Import câu hỏi từ file Excel")
@@ -131,6 +134,17 @@ public class QuestionController {
             return ResponseEntity.ok(ApiResponse.success("Question deleted successfully", "Deleted question with id: " + questionId));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to delete question", List.of(e.getMessage())));
+        }
+    }
+
+    @PostMapping("admin/questions/upload-image")
+    @Operation(summary = "Upload ảnh minh họa câu hỏi")
+    public ResponseEntity<ApiResponse<Map<String, String>>> uploadQuestionImage(@RequestParam("file") MultipartFile file) {
+        try {
+            var uploaded = avatarStorageService.saveQuestionImage(file);
+            return ResponseEntity.ok(ApiResponse.success("Upload ảnh thành công", Map.of("imageUrl", uploaded.getUrl())));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to upload image", List.of(e.getMessage())));
         }
     }
 }

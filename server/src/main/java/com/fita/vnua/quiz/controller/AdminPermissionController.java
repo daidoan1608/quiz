@@ -35,6 +35,7 @@ public class AdminPermissionController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/subject-assignment")
+    @Transactional
     @Operation(summary = "API cập nhập quyền cho mod")
     public ResponseEntity<String> assignSubjectPermissions(@RequestBody PermissionAssignmentDTO assignment) {
 

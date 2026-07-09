@@ -35,6 +35,9 @@ public class Exam {
     @CreationTimestamp
     private LocalDate createdTime;
 
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
     @OneToMany(mappedBy = "exam")
     private List<ExamQuestion> examQuestions;
 }

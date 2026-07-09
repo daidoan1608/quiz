@@ -153,7 +153,7 @@ export default function Headers() {
                     <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden">
                       {avatarUrl ? (
                         <img
-                          src={`${BASE_URL_AVATAR}${avatarUrl}`}
+                          src={avatarUrl.startsWith("http") ? avatarUrl : `${BASE_URL_AVATAR}${avatarUrl}`}
                           alt={fullName || "User Avatar"}
                           className="h-full w-full object-cover"
                           onError={(e) => {

@@ -43,7 +43,7 @@ public class ExcelHelper {
 
                 // Lấy đáp án đúng ký tự ở cột 6 (index 6)
                 Cell correctCell = currentRow.getCell(6, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                String correctOption = correctCell != null ? formatter.formatCellValue(correctCell).trim() : "";
+                String correctOption = correctCell != null ? formatter.formatCellValue(correctCell).trim().toUpperCase() : "";
 
                 String[] options = {"A", "B", "C", "D"};
 
@@ -54,9 +54,18 @@ public class ExcelHelper {
 
                     AnswerDto answerDto = new AnswerDto();
                     answerDto.setContent(answerContent);
-                    answerDto.setIsCorrect(options[i].equalsIgnoreCase(correctOption));
+                    answerDto.setIsCorrect(correctOption.contains(options[i]));
                     answers.add(answerDto);
                 }
+
+                // Lấy imageUrl ở cột 7 (index 7 - optional)
+                Cell imgCell = currentRow.getCell(7, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                questionDto.setImageUrl(imgCell != null ? formatter.formatCellValue(imgCell).trim() : null);
+
+                // Lấy questionType ở cột 8 (index 8 - optional)
+                Cell typeCell = currentRow.getCell(8, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                String typeVal = typeCell != null ? formatter.formatCellValue(typeCell).trim().toUpperCase() : "SINGLE_CHOICE";
+                questionDto.setQuestionType(typeVal);
 
                 questionDto.setAnswers(answers);
                 questionList.add(questionDto);

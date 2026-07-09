@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
@@ -15,7 +16,9 @@ import java.util.Date;
 @Service
 public class GoogleIdTokenVerifierService {
     private static final String GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs";
-    private static final String CLIENT_ID = "995894234177-g23jtl5nkhpj0qon3b7q4kngbjvgb38g.apps.googleusercontent.com";
+
+    @Value("${google.client.id}")
+    private String clientId;
 
     public boolean verify(String idToken) {
         try {
@@ -35,7 +38,7 @@ public class GoogleIdTokenVerifierService {
             if (!signedJWT.verify(verifier)) return false;
 
             // verify audience = client id
-            if (!signedJWT.getJWTClaimsSet().getAudience().contains(CLIENT_ID)) return false;
+            if (!signedJWT.getJWTClaimsSet().getAudience().contains(clientId)) return false;
 
             // verify expiry
             if (signedJWT.getJWTClaimsSet().getExpirationTime().before(new Date())) return false;
@@ -52,5 +55,9 @@ public class GoogleIdTokenVerifierService {
 
     public String extractName(String idToken) throws Exception {
         return SignedJWT.parse(idToken).getJWTClaimsSet().getStringClaim("name");
+    }
+
+    public String extractPicture(String idToken) throws Exception {
+        return SignedJWT.parse(idToken).getJWTClaimsSet().getStringClaim("picture");
     }
 }

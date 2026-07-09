@@ -13,5 +13,7 @@ public class QuestionDto {
     private String difficulty; // Mức độ khó của câu hỏi
     private Long chapterId;   // ID của chương
     private String chapterName; // Tên chương (có thể là thông tin bổ sung)
+    private String imageUrl;    // Đường dẫn hình ảnh minh họa
+    private String questionType; // Loại câu hỏi: SINGLE_CHOICE, MULTIPLE_CHOICE, FILL_IN_THE_BLANK
     private List<AnswerDto> answers; // Danh sách đáp án cho câu hỏi này
 }

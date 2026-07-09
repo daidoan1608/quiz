@@ -56,4 +56,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     int countByChapter(Chapter chapter);
 
     long countByChapterAndDifficulty(Chapter chapter, Question.Difficulty difficulty);
+
+    @Query("SELECT q.chapter.chapterId, q.difficulty, COUNT(q) " +
+           "FROM Question q " +
+           "WHERE q.chapter.subject.subjectId = :subjectId " +
+           "GROUP BY q.chapter.chapterId, q.difficulty")
+    List<Object[]> countQuestionsBySubjectGroupedByChapterAndDifficulty(@Param("subjectId") Long subjectId);
 }

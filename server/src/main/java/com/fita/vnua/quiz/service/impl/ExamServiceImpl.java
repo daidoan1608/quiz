@@ -30,6 +30,8 @@ public class ExamServiceImpl implements ExamService {
     private final ExamQuestionRepository examQuestionRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final UserAnswerRepository userAnswerRepository;
+    private final UserExamRepository userExamRepository;
 
     protected List<ExamDto> mapExamsToExamDtos(List<Exam> exams) {
         List<ExamDto> examDtos = new ArrayList<>();
@@ -50,7 +52,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamDto> getAllExams() {
-        List<Exam> exams = examRepository.findAll();
+        List<Exam> exams = examRepository.findByDeletedFalse();
         return mapExamsToExamDtos(exams);
     }
 
@@ -273,12 +275,39 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public ExamDto updateExam(Long id, ExamDto examDto) {
-        return null;
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + id));
+        exam.setTitle(examDto.getTitle());
+        exam.setDescription(examDto.getDescription());
+        exam.setDuration(examDto.getDuration());
+        if (examDto.getSubjectId() != null) {
+            Subject subject = subjectRepository.findById(examDto.getSubjectId())
+                    .orElseThrow(() -> new RuntimeException("Subject not found with id: " + examDto.getSubjectId()));
+            exam.setSubject(subject);
+        }
+        Exam updatedExam = examRepository.save(exam);
+
+        ExamDto resultDto = new ExamDto();
+        resultDto.setExamId(updatedExam.getExamId());
+        resultDto.setTitle(updatedExam.getTitle());
+        resultDto.setDescription(updatedExam.getDescription());
+        resultDto.setDuration(updatedExam.getDuration());
+        resultDto.setSubjectId(updatedExam.getSubject().getSubjectId());
+        resultDto.setCreatedBy(updatedExam.getCreatedBy().getUserId());
+        resultDto.setCreatedDate(String.valueOf(updatedExam.getCreatedTime()));
+        resultDto.setQuestions(questionService.getQuestionsByExamId(updatedExam.getExamId()));
+        return resultDto;
     }
 
     @Override
+    @Transactional
     public void deleteExam(Long id) {
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + id));
 
+        exam.setDeleted(true);
+        examRepository.save(exam);
     }
 }

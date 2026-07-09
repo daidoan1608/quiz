@@ -44,11 +44,15 @@ const ExamViewModal = ({ isModalOpen, onCancel, examId }) => {
         if (isModalOpen && examId) {
             fetchExamData();
         } else {
-            // Reset state khi Modal đóng
-            setExamDetail(null);
             setQuestions([]);
         }
     }, [isModalOpen, examId, fetchExamData]);
+
+    useEffect(() => {
+        if (window.MathJax && window.MathJax.typesetPromise && !loading && questions.length > 0) {
+            window.MathJax.typesetPromise();
+        }
+    }, [questions, loading]);
 
 
     // --- RENDER ANSWERS (Chỉ hiển thị nội dung, không có style đúng/sai) ---

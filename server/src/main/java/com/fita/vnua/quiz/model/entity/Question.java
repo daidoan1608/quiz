@@ -13,11 +13,18 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long questionId;
 
-    @Column(nullable = false,length = 500)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Enumerated(EnumType.STRING)
     private Difficulty difficulty; // Enum: EASY, MEDIUM, HARD
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "question_type")
+    private QuestionType questionType = QuestionType.SINGLE_CHOICE;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id", nullable = false)
@@ -28,6 +35,10 @@ public class Question {
 
     public enum Difficulty {
         EASY, MEDIUM, HARD
+    }
+
+    public enum QuestionType {
+        SINGLE_CHOICE, MULTIPLE_CHOICE, FILL_IN_THE_BLANK
     }
 }
 

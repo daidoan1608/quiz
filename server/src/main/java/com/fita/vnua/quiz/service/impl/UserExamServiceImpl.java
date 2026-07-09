@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -86,21 +87,49 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     @Override
+    @Transactional
     public UserExamDto createUserExam(UserExamRequest userExamRequest) {
         UserExamDto userExamDto = userExamRequest.getUserExamDto();
         List<UserAnswerDto> userAnswerDtos = userExamRequest.getUserAnswerDtos();
 
-        User user = userRepository.findById(userExamDto.getUserId()).orElse(null);
-        Exam exam = examRepository.findById(userExamDto.getExamId()).orElse(null);
+        User user = userRepository.findById(userExamDto.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userExamDto.getUserId()));
+        Exam exam = examRepository.findById(userExamDto.getExamId())
+                .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + userExamDto.getExamId()));
+
+        // Tự động tính điểm ở Backend
+        float score = 0;
+        int correctAnswersCount = 0;
+        List<Question> questions = questionRepository.findQuestionsByExamId(exam.getExamId());
+        int totalExamQuestions = questions.size();
+
+        if (totalExamQuestions > 0) {
+            Map<Long, Long> userAnswersMap = userAnswerDtos.stream()
+                    .filter(ua -> ua.getQuestionId() != null && ua.getAnswerId() != null)
+                    .collect(Collectors.toMap(UserAnswerDto::getQuestionId, UserAnswerDto::getAnswerId, (a, b) -> a));
+
+            for (Question q : questions) {
+                Long chosenAnswerId = userAnswersMap.get(q.getQuestionId());
+                if (chosenAnswerId != null) {
+                    boolean isCorrect = q.getAnswers().stream()
+                            .filter(Answer::getIsCorrect)
+                            .anyMatch(ans -> ans.getOptionId().equals(chosenAnswerId));
+                    if (isCorrect) {
+                        correctAnswersCount++;
+                    }
+                }
+            }
+            score = ((float) correctAnswersCount / totalExamQuestions) * 100;
+        }
 
         UserExam userExam = new UserExam();
         userExam.setStartTime(userExamDto.getStartTime());
         userExam.setEndTime(userExamDto.getEndTime());
-        userExam.setScore(userExamDto.getScore());
+        userExam.setScore(score);
         userExam.setUser(user);
         userExam.setExam(exam);
 
-        UserExam savedUserExam = userExamRepository.save(modelMapper.map(userExamDto, UserExam.class));
+        UserExam savedUserExam = userExamRepository.save(userExam);
 
         for (UserAnswerDto userAnswerDto : userAnswerDtos) {
             // Kiểm tra các trường quan trọng trước khi thao tác

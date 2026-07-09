@@ -162,7 +162,7 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
     name: "file",
     multiple: false,
     maxCount: 1,
-    accept: ".xlsx,.xls,.csv",
+    accept: ".xlsx,.xls,.csv,.zip",
     fileList: selectedFile ? [selectedFile] : [], // Kiểm soát file list thủ công
     beforeUpload: (file) => {
       setSelectedFile(file);
@@ -190,7 +190,11 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
     >
       <Alert
         type="info"
-        message="Chức năng này dùng để nhập dữ liệu câu hỏi hàng loạt từ file Excel/CSV. Vui lòng đảm bảo file theo đúng định dạng mẫu."
+        message={
+          <div>
+            Chức năng này dùng để nhập dữ liệu câu hỏi hàng loạt từ file Excel/CSV hoặc <b>file ZIP</b> chứa cả file Excel và thư mục ảnh minh họa (ví dụ thư mục <code>images/</code> trong ZIP).
+          </div>
+        }
         action={
           <Button
             type="link"
@@ -305,7 +309,7 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
               Kéo thả file vào đây hoặc nhấn để chọn file
             </p>
             <p className="ant-upload-hint">
-              Hỗ trợ file *.xlsx, *.xls, *.csv (chỉ 1 file duy nhất)
+              Hỗ trợ file *.xlsx, *.xls, *.csv, *.zip (Tải lên file Excel đơn lẻ hoặc file ZIP chứa Excel + folder ảnh)
             </p>
           </Dragger>
         </Form.Item>

@@ -2,6 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authAxios } from "../../../api/axiosConfig";
 import { useLanguage } from "../../../context/LanguageProvider";
+import { parseMarkdown } from "../../../utils/parseMarkdown";
+
+
+const getFullImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const apiRoot = process.env.REACT_APP_API_URL 
+    ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
+    : 'http://localhost:8080';
+  return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 export default function ResultExam() {
     // --- STATE ---
@@ -42,6 +53,12 @@ export default function ResultExam() {
             setLoading(false);
         }
     }, [examId, userExamId]);
+
+    useEffect(() => {
+        if (window.MathJax && window.MathJax.typesetPromise && examData) {
+            window.MathJax.typesetPromise();
+        }
+    }, [examData]);
 
     if (loading) return <div className="flex h-screen items-center justify-center">Đang tải kết quả...</div>;
     if (error) return <div className="flex h-screen items-center justify-center text-red-500">{error}</div>;
@@ -259,11 +276,23 @@ export default function ResultExam() {
                                     <div key={question.questionId} className="rounded-xl p-5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                                         <div className="flex flex-col gap-4">
 
-                                            {/* Tiêu đề câu hỏi & Badge Đúng/Sai/Bỏ qua */}
+                                            {/* Tiêu đề câu hỏi & Badge Badge Đúng/Sai/Bỏ qua */}
                                             <div className="flex justify-between items-start gap-4">
-                                                <p className="text-gray-800 dark:text-gray-200 font-semibold">
-                                                    Câu {index + 1}: {question.content}
-                                                </p>
+                                                <div className="text-gray-800 dark:text-gray-200 font-semibold flex flex-col gap-2">
+                                                    <div className="flex gap-2 flex-wrap">
+                                                        <span className="shrink-0">Câu {index + 1}:</span>
+                                                        <div dangerouslySetInnerHTML={{ __html: parseMarkdown(question.content) }} />
+                                                    </div>
+                                                    {question.imageUrl && (
+                                                        <div className="my-2">
+                                                            <img 
+                                                                src={getFullImageUrl(question.imageUrl)} 
+                                                                alt="Minh họa câu hỏi" 
+                                                                className="max-h-48 max-w-full rounded-lg shadow-xs border border-gray-200 dark:border-gray-700" 
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <div className={`flex items-center gap-2 text-sm font-medium px-3 py-1 rounded-full shrink-0
                                                     ${isSkipped
                                                         ? "text-gray-600 bg-gray-100 dark:bg-gray-700/50 dark:text-gray-400"
@@ -290,18 +319,20 @@ export default function ResultExam() {
                                                     }`}
                                                 >
                                                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Đáp án của bạn</span>
-                                                    <span className={`font-semibold ${isSkipped ? "text-gray-600 dark:text-gray-300" : isCorrect ? "text-green-800 dark:text-green-300" : "text-red-800 dark:text-red-300"}`}>
-                                                        {userSelectedAnswer ? userSelectedAnswer.content : "Chưa chọn"}
-                                                    </span>
+                                                    <span 
+                                                        className={`font-semibold ${isSkipped ? "text-gray-600 dark:text-gray-300" : isCorrect ? "text-green-800 dark:text-green-300" : "text-red-800 dark:text-red-300"}`}
+                                                        dangerouslySetInnerHTML={{ __html: userSelectedAnswer ? parseMarkdown(userSelectedAnswer.content) : "Chưa chọn" }}
+                                                    />
                                                 </div>
 
                                                 {/* Cột: Đáp án đúng (Chỉ hiện khi user SAI hoặc BỎ QUA) */}
                                                 {(!isCorrect || isSkipped) && (
                                                     <div className="flex flex-col gap-1 p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 relative">
                                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Đáp án đúng</span>
-                                                        <span className="font-semibold text-gray-800 dark:text-gray-200">
-                                                            {correctAnswer?.content}
-                                                        </span>
+                                                        <span 
+                                                            className="font-semibold text-gray-800 dark:text-gray-200"
+                                                            dangerouslySetInnerHTML={{ __html: parseMarkdown(correctAnswer?.content) }}
+                                                        />
                                                     </div>
                                                 )}
                                             </div>

@@ -7,6 +7,8 @@ import {
   QuestionCircleOutlined, SearchOutlined, ReloadOutlined
 } from "@ant-design/icons";
 import { authAxios } from "../../api/axiosConfig";
+import { parseMarkdown } from "../../utils/parseMarkdown";
+
 
 const { Title, Text } = Typography;
 
@@ -54,17 +56,36 @@ export default function ChapterQuestionModal({ isModalOpen, onCancel, chapterId 
     }
   }, [chapterId, isModalOpen, fetchQuestions, fetchChapterInfo]);
 
+  useEffect(() => {
+    if (window.MathJax && window.MathJax.typesetPromise && !loading && questions.length > 0) {
+      window.MathJax.typesetPromise();
+    }
+  }, [questions, loading, searchText]);
 
   // --- CÁC HÀM RENDER/LỌC GIỮ NGUYÊN ---
   const renderAnswerCell = (answers, index) => {
     const answer = answers && answers[index];
     if (!answer) return <Text type="secondary">-</Text>;
-    const color = answer.isCorrect ? "success" : "default";
+    const isCorrect = answer.isCorrect;
     return (
-      <Tooltip title={answer.content}>
-        <Text type={color} style={{ width: 150 }} ellipsis>
-          {answer.content}
-        </Text>
+      <Tooltip
+        title={
+          <div
+            style={{ maxWidth: 300 }}
+            dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
+          />
+        }
+        overlayStyle={{ maxWidth: 320 }}
+      >
+        <div
+          style={{
+            maxWidth: 150,
+            overflow: 'hidden',
+            color: isCorrect ? '#52c41a' : undefined,
+            fontWeight: isCorrect ? 'bold' : undefined,
+          }}
+          dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
+        />
       </Tooltip>
     );
   };
@@ -86,10 +107,27 @@ export default function ChapterQuestionModal({ isModalOpen, onCancel, chapterId 
       title: "Nội dung câu hỏi",
       dataIndex: "content",
       key: "content",
-      width: 250,
+      width: 260,
       render: (text) => (
-        <Tooltip title={text}>
-          <Text style={{ width: 230 }} ellipsis strong>{text}</Text>
+        <Tooltip
+          title={
+            <div
+              style={{ maxWidth: 450, maxHeight: 300, overflowY: 'auto' }}
+              dangerouslySetInnerHTML={{ __html: parseMarkdown(text) }}
+            />
+          }
+          overlayStyle={{ maxWidth: 480 }}
+        >
+          <div
+            style={{
+              maxWidth: 240,
+              maxHeight: 80,
+              overflow: 'hidden',
+              fontWeight: 'bold',
+              cursor: 'help',
+            }}
+            dangerouslySetInnerHTML={{ __html: parseMarkdown(text) }}
+          />
         </Tooltip>
       ),
     },

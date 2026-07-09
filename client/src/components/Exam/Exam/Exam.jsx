@@ -1,7 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { authAxios } from "../../../api/axiosConfig";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "../../../context/LanguageProvider";
+import { parseMarkdown } from "../../../utils/parseMarkdown";
+
+
+const getFullImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const apiRoot = process.env.REACT_APP_API_URL 
+    ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
+    : 'http://localhost:8080';
+  return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 export default function Exam() {
   // --- STATE QUẢN LÝ DỮ LIỆU ---
@@ -16,6 +27,15 @@ export default function Exam() {
   const [subjectName, setSubjectName] = useState("");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // Index câu hỏi hiện tại
   const [isLoading, setIsLoading] = useState(true);
+
+  // --- REFS ---
+  const endTimeRef = useRef(null);
+  const handleSubmitRef = useRef(null);
+  const timerStartedRef = useRef(false);
+
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
 
   // --- HOOKS ---
   const navigate = useNavigate();
@@ -102,6 +122,10 @@ export default function Exam() {
         setSubjectName(data.subjectName);
         setTitle(data.title);
         setDuration(data.duration);
+        
+        const targetEndTime = Date.now() + data.duration * 60 * 1000;
+        endTimeRef.current = targetEndTime;
+        
         setTimeLeft(data.duration * 60);
         setQuestions(data.questions);
       } catch (error) {
@@ -117,14 +141,29 @@ export default function Exam() {
 
   // --- 3. ĐẾM NGƯỢC THỜI GIAN ---
   useEffect(() => {
-    if (timeLeft === null) return;
-    if (timeLeft === 0) {
-      handleSubmit();
-      return;
-    }
-    const timerId = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    if (timeLeft === null || !endTimeRef.current || timerStartedRef.current) return;
+
+    timerStartedRef.current = true;
+    const timerId = setInterval(() => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((endTimeRef.current - now) / 1000));
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(timerId);
+        handleSubmitRef.current();
+      }
+    }, 1000);
+
     return () => clearInterval(timerId);
-  }, [timeLeft, handleSubmit]);
+  }, [timeLeft]);
+
+  // --- KÍCH HOẠT MATHJAX ĐỂ DỊCH LATEX ---
+  useEffect(() => {
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise();
+    }
+  }, [currentQuestionIndex, questions]);
 
   // --- 4. CÁC HÀM XỬ LÝ SỰ KIỆN ---
   const handleAnswerSelect = (answerIndex) => {
@@ -231,9 +270,20 @@ export default function Exam() {
               <h3 className="text-xl font-bold leading-tight text-left pb-2 text-primary">
                 Câu {currentQuestionIndex + 1}
               </h3>
-              <p className="text-base font-normal leading-relaxed pb-6 pt-1 text-gray-800 dark:text-gray-200">
-                {currentQuestion?.content}
-              </p>
+              <div 
+                className="text-base font-normal leading-relaxed pb-6 pt-1 text-gray-800 dark:text-gray-200"
+                dangerouslySetInnerHTML={{ __html: parseMarkdown(currentQuestion?.content) }}
+              />
+
+              {currentQuestion?.imageUrl && (
+                <div className="my-4 text-center">
+                  <img 
+                    src={getFullImageUrl(currentQuestion.imageUrl)} 
+                    alt="Minh họa câu hỏi" 
+                    className="max-h-64 max-w-full rounded-lg mx-auto shadow-sm border border-gray-200 dark:border-gray-700" 
+                  />
+                </div>
+              )}
 
               {/* Answers Options */}
               <div className="space-y-4">
@@ -243,7 +293,7 @@ export default function Exam() {
                   return (
                     <label
                       key={answer.optionId || index}
-                      className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
+                      className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
                         ${
                           isSelected
                             ? "border-primary bg-primary/10 dark:bg-primary/20"
@@ -254,7 +304,7 @@ export default function Exam() {
                       <input
                         type="radio"
                         name={`question-${currentQuestionIndex}`}
-                        className="h-5 w-5 border-gray-300 text-primary focus:ring-primary"
+                        className="h-5 w-5 mt-0.5 border-gray-300 text-primary focus:ring-primary flex-shrink-0"
                         checked={isSelected}
                         onChange={() => handleAnswerSelect(index)}
                       />
@@ -262,9 +312,8 @@ export default function Exam() {
                         className={`ml-4 text-base font-medium ${
                           isSelected ? "text-primary dark:text-white" : ""
                         }`}
-                      >
-                        {answer.content}
-                      </span>
+                        dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
+                      />
                     </label>
                   );
                 })}
