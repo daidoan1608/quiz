@@ -16,8 +16,9 @@ export default function Headers() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  const { theme, toggleTheme } = useTheme();
-  const isDarkMode = theme === 'dark';
+  const { mode, setMode, colorTheme, setColorTheme } = useTheme();
+  const isDarkMode = mode === 'dark';
+  const toggleTheme = () => setMode(isDarkMode ? 'light' : 'dark');
 
   // Đóng menu khi click ra ngoài
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function Headers() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white/90 dark:bg-[#1C2A36]/90 backdrop-blur-md border-b border-gray-200 dark:border-white/10 shadow-sm transition-all duration-300">
+      <header className="sticky top-0 z-50 w-full bg-white/90 dark:bg-surface-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-white/10 shadow-sm transition-all duration-300">
         <div className="max-w-screen-2xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* LOGO (Không đổi) */}
@@ -171,7 +172,7 @@ export default function Headers() {
 
                   {/* --- POP-UP MENU (Dropdown cho người dùng Đã Đăng nhập) --- */}
                   {showUserMenu && (
-                    <div className="absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-[#1C2A36] p-2 shadow-2xl ring-1 ring-black/5 dark:ring-white/10 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-surface-dark p-2 shadow-2xl ring-1 ring-black/5 dark:ring-white/10 animate-in fade-in zoom-in-95 duration-200">
                       <div className="flex flex-col">
                         {/* 1. Tài khoản */}
                         <div
@@ -213,21 +214,73 @@ export default function Headers() {
                           </div>
                         </div>
 
-                        {/* 4. Dark Mode (Giữ trong Menu Pop-up) */}
-                        <div className="flex items-center justify-between gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-gray-100 dark:hover:bg-white/10">
-                          <div className="flex items-center gap-4">
-                            <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">dark_mode</span>
-                            <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">Chế độ tối</p>
+                        {/* 4. Giao diện & Đổi tông màu */}
+                        <div className="flex flex-col gap-3 rounded-lg px-4 py-3 bg-gray-50/50 dark:bg-black/20 border border-gray-100 dark:border-white/5 my-1">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg">
+                                {isDarkMode ? "dark_mode" : "light_mode"}
+                              </span>
+                              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                Giao diện
+                              </p>
+                            </div>
+                            <div className="flex gap-1 bg-gray-200 dark:bg-gray-700 p-0.5 rounded-lg">
+                              <button
+                                onClick={() => setMode("light")}
+                                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
+                                  !isDarkMode
+                                    ? "bg-white text-gray-900 shadow-sm"
+                                    : "text-gray-500 hover:text-gray-300"
+                                }`}
+                              >
+                                Sáng
+                              </button>
+                              <button
+                                onClick={() => setMode("dark")}
+                                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
+                                  isDarkMode
+                                    ? "bg-gray-800 text-white shadow-sm"
+                                    : "text-gray-500 hover:text-gray-900"
+                                }`}
+                              >
+                                Tối
+                              </button>
+                            </div>
                           </div>
-                          <label className="relative flex h-[26px] w-[44px] cursor-pointer items-center rounded-full bg-gray-200 dark:bg-gray-700 p-0.5 has-[:checked]:bg-blue-600 transition-colors">
-                            <input
-                              type="checkbox"
-                              className="peer sr-only"
-                              checked={isDarkMode}
-                              onChange={toggleTheme}
-                            />
-                            <div className="h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out peer-checked:translate-x-[18px]"></div>
-                          </label>
+
+                          <div className="h-px bg-gray-200/60 dark:bg-gray-700/60 my-1"></div>
+
+                          <div className="flex flex-col gap-2">
+                            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Tông màu chủ đạo
+                            </p>
+                            <div className="flex items-center justify-between gap-1 mt-1">
+                              {[
+                                { name: "blue", color: "bg-blue-500", label: "Cơ bản" },
+                                { name: "emerald", color: "bg-emerald-500", label: "Lá" },
+                                { name: "cyberpunk", color: "bg-pink-500", label: "Neon" },
+                                { name: "sunset", color: "bg-orange-500", label: "Nắng" },
+                                { name: "slate", color: "bg-indigo-500", label: "Đá" },
+                              ].map((themeOpt) => (
+                                <button
+                                  key={themeOpt.name}
+                                  onClick={() => setColorTheme(themeOpt.name)}
+                                  title={themeOpt.label}
+                                  className={`relative group flex size-7 items-center justify-center rounded-full border-2 transition-all hover:scale-110 active:scale-95 ${
+                                    colorTheme === themeOpt.name
+                                      ? "border-gray-900 dark:border-white scale-105"
+                                      : "border-transparent"
+                                  }`}
+                                >
+                                  <span className={`size-5 rounded-full ${themeOpt.color} shadow-inner`}></span>
+                                  {colorTheme === themeOpt.name && (
+                                    <span className="absolute text-white text-[10px] font-black leading-none">✓</span>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         </div>
 
                         <div className="my-2 h-px bg-gray-200 dark:bg-white/10"></div>
@@ -319,21 +372,64 @@ export default function Headers() {
                 </div>
               </div>
 
-              {/* Thêm Dark Mode vào Mobile Menu (Luôn hiện trên Mobile Menu) */}
-              <div className="flex items-center justify-between gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-gray-100 dark:hover:bg-white/10">
-                  <div className="flex items-center gap-4">
-                      <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">dark_mode</span>
-                      <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">Chế độ tối</p>
+              {/* Đa Theme trên Mobile */}
+              <div className="flex flex-col gap-3 rounded-xl px-4 py-3 bg-gray-50/50 dark:bg-black/20 border border-gray-100 dark:border-gray-700/50 mx-4 my-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
+                      {isDarkMode ? "dark_mode" : "light_mode"}
+                    </span>
+                    <p className="text-base font-medium text-gray-800 dark:text-gray-200">Giao diện</p>
                   </div>
-                  <label className="relative flex h-[26px] w-[44px] cursor-pointer items-center rounded-full bg-gray-200 dark:bg-gray-700 p-0.5 has-[:checked]:bg-blue-600 transition-colors">
-                      <input
-                          type="checkbox"
-                          className="peer sr-only"
-                          checked={isDarkMode}
-                          onChange={toggleTheme}
-                      />
-                      <div className="h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out peer-checked:translate-x-[18px]"></div>
-                  </label>
+                  <div className="flex gap-1 bg-gray-200 dark:bg-gray-700 p-0.5 rounded-lg">
+                    <button
+                      onClick={() => setMode("light")}
+                      className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                        !isDarkMode ? "bg-white text-gray-900 shadow-sm" : "text-gray-400"
+                      }`}
+                    >
+                      Sáng
+                    </button>
+                    <button
+                      onClick={() => setMode("dark")}
+                      className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                        isDarkMode ? "bg-gray-800 text-white shadow-sm" : "text-gray-500"
+                      }`}
+                    >
+                      Tối
+                    </button>
+                  </div>
+                </div>
+
+                <div className="h-px bg-gray-200 dark:bg-gray-700/50 my-1"></div>
+
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Màu sắc chủ đạo</p>
+                  <div className="flex items-center justify-between gap-1 mt-1">
+                    {[
+                      { name: "blue", color: "bg-blue-500", label: "Cơ bản" },
+                      { name: "emerald", color: "bg-emerald-500", label: "Lá" },
+                      { name: "cyberpunk", color: "bg-pink-500", label: "Neon" },
+                      { name: "sunset", color: "bg-orange-500", label: "Nắng" },
+                      { name: "slate", color: "bg-indigo-500", label: "Đá" },
+                    ].map((themeOpt) => (
+                      <button
+                        key={themeOpt.name}
+                        onClick={() => setColorTheme(themeOpt.name)}
+                        className={`relative flex size-8 items-center justify-center rounded-full border-2 transition-all ${
+                          colorTheme === themeOpt.name
+                            ? "border-gray-900 dark:border-white scale-105"
+                            : "border-transparent"
+                        }`}
+                      >
+                        <span className={`size-6 rounded-full ${themeOpt.color} shadow-inner`}></span>
+                        {colorTheme === themeOpt.name && (
+                          <span className="absolute text-white text-xs font-black">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
             </div>

@@ -22,12 +22,7 @@ export default function Home() {
     }
   };
 
-  // Helper chọn icon ngẫu nhiên hoặc theo logic cho môn học
-  const getSubjectIcon = (index) => {
-    const icons = ["calculate", "science", "biotech", "menu_book", "language"];
-    // Trong trường hợp này mình dùng SVG, nên sẽ map index ra icon tương ứng ở dưới render
-    return index % 3;
-  };
+
 
   // --- DỮ LIỆU TEAM (MỚI) ---
   const teamMembers = [
@@ -77,44 +72,52 @@ export default function Home() {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-300">
-      <main className="flex flex-1 justify-center py-5 sm:py-8 lg:py-12">
-        <div className="flex flex-col w-full max-w-screen-xl px-4 sm:px-6 lg:px-8 gap-10">
+      <main className="flex flex-1 justify-center py-6 sm:py-8 lg:py-12">
+        <div className="flex flex-col w-full max-w-screen-xl px-4 sm:px-6 lg:px-8 gap-12">
           {/* --- SECTION 1: HERO / BANNER --- */}
-          <section className="@container">
-            <div className="@[480px]:p-4">
-              <div
-                className="flex min-h-[400px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 @[480px]:rounded-xl items-center justify-center p-4 relative overflow-hidden"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url("https://images.unsplash.com/photo-1497633762265-9d179a990aa6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80")',
-                }}
-              >
-                <div className="flex flex-col gap-2 text-center z-10">
-                  <h1 className="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl drop-shadow-lg">
-                    {texts.onlineTest || "Chinh phục mọi kỳ thi"}
-                  </h1>
-                  <h2 className="text-white/90 text-sm font-normal leading-normal @[480px]:text-base max-w-2xl mx-auto">
-                    {texts.slogan1 ||
-                      "Nền tảng ôn tập và kiểm tra thử hàng đầu giúp bạn đạt điểm số cao nhất."}
-                  </h2>
-                  <h2 className="text-white/90 text-sm font-normal leading-normal @[480px]:text-base max-w-2xl mx-auto">
-                    {texts.slogan2 ||
-                      "Nền tảng ôn tập và kiểm tra thử hàng đầu giúp bạn đạt điểm số cao nhất."}
-                  </h2>
-                  <h2 className="text-white/90 text-sm font-normal leading-normal @[480px]:text-base max-w-2xl mx-auto">
-                    {texts.slogan3 ||
-                      "Nền tảng ôn tập và kiểm tra thử hàng đầu giúp bạn đạt điểm số cao nhất."}
-                  </h2>
-                  <h2 className="text-white/90 text-sm font-normal leading-normal @[480px]:text-base max-w-2xl mx-auto">
-                    {texts.slogan4 ||
-                      "Nền tảng ôn tập và kiểm tra thử hàng đầu giúp bạn đạt điểm số cao nhất."}
-                  </h2>
-                </div>
+          <section className="relative overflow-hidden rounded-2xl bg-gradient-to-tr from-blue-600/5 via-primary/10 to-indigo-500/5 dark:from-surface-dark dark:via-primary/5 dark:to-surface-dark border border-gray-200/50 dark:border-white/5 py-12 px-6 sm:px-12 flex flex-col lg:flex-row items-center gap-10 shadow-sm">
+            {/* Glowing background highlights */}
+            <div className="absolute top-0 left-1/4 w-72 h-72 bg-primary/20 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+            <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-blue-400/10 dark:bg-indigo-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+            
+            <div className="flex-1 flex flex-col gap-5 text-center lg:text-left">
+              <span className="inline-flex w-fit mx-auto lg:mx-0 items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                ✨ Học tập thông minh cùng AI
+              </span>
+              <h1 className="text-gray-900 dark:text-white text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+                {texts.onlineTest || "Chinh phục mọi kỳ thi"}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg max-w-xl leading-relaxed">
+                {texts.slogan1 ||
+                  "Nền tảng ôn tập và kiểm tra thử hàng đầu giúp bạn đạt điểm số cao nhất."}
+              </p>
+              
+              <div className="flex flex-wrap gap-3 justify-center lg:justify-start mt-2">
+                <button 
+                  onClick={() => navigate("/exam")}
+                  className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
+                >
+                  Bắt đầu thi thử
+                </button>
+                <button 
+                  onClick={() => navigate("/revision")}
+                  className="px-6 py-3 rounded-xl bg-white dark:bg-gray-800 text-gray-700 dark:text-white font-bold text-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition active:scale-95 cursor-pointer"
+                >
+                  Ôn tập lý thuyết
+                </button>
+              </div>
+            </div>
 
-                <div className="flex flex-col min-w-40 w-full max-w-[480px] z-10 justify-center h-16">
-                  {/* Truyền userRank vào để mèo biết đường "nịnh" hoặc "khịa" */}
-                  <CatMascot />
+            <div className="w-full lg:w-96 flex justify-center z-10">
+              <div className="w-full max-w-[400px] bg-white/70 dark:bg-surface-dark/70 backdrop-blur-md border border-white/30 dark:border-white/5 shadow-xl rounded-2xl p-6 flex flex-col gap-4">
+                <div className="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700/50 pb-3">
+                  <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">🐱</div>
+                  <div className="text-left">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">Mèo Mascot AI</h3>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">Trợ lý ôn thi dễ thương</p>
+                  </div>
                 </div>
+                <CatMascot />
               </div>
             </div>
           </section>
@@ -228,24 +231,25 @@ export default function Home() {
 
               {/* SECTION 3: DANH SÁCH MÔN HỌC (Dynamic Data) */}
               <section>
-                <div className="flex items-center justify-between px-2 pb-4 pt-2">
-                  <h2 className="text-[22px] font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:text-white">
+                <div className="flex items-center justify-between px-2 pb-5 pt-2">
+                  <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                     {texts.subjectsTitle || "Ôn tập trắc nghiệm"}
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {subjects.length > 0 ? (
                     subjects.slice(0, 6).map((item, index) => (
                       <div
                         key={index}
-                        className="flex flex-col gap-3 rounded-xl p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer group"
+                        onClick={() => navigate(`/list-chapter`, { state: { subjectId: item.subjectId } })}
+                        className="flex flex-col gap-4 rounded-2xl p-6 bg-white dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700/50 hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 dark:hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
                       >
-                        <div className="h-full flex items-center justify-center size-12 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 group-hover:scale-110 transition-transform duration-300">
+                        <div className="flex items-center justify-center size-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                           {/* Logic chọn Icon giả lập */}
                           {index % 3 === 0 && (
                             <svg
-                              className="w-7 h-7"
+                              className="w-6 h-6"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -260,7 +264,7 @@ export default function Home() {
                           )}
                           {index % 3 === 1 && (
                             <svg
-                              className="w-7 h-7"
+                              className="w-6 h-6"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -275,7 +279,7 @@ export default function Home() {
                           )}
                           {index % 3 === 2 && (
                             <svg
-                              className="w-7 h-7"
+                              className="w-6 h-6"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -289,18 +293,18 @@ export default function Home() {
                             </svg>
                           )}
                         </div>
-                        <div className="flex flex-col">
-                          <h3 className="min-h-[3.5rem] flex-1 font-bold text-gray-900 dark:text-white text-lg">
+                        <div className="flex flex-col flex-1">
+                          <h3 className="font-bold text-gray-900 dark:text-white text-lg group-hover:text-primary transition-colors leading-snug mb-1">
                             {item.name}
                           </h3>
-                          <p className="mt-auto text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {item.totalQuestions} câu hỏi
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                            {item.totalQuestions} câu hỏi ôn tập
                           </p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="col-span-full py-10 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-xl">
+                    <div className="col-span-full py-12 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
                       {texts.noSubjects || "Chưa có môn học nào."}
                     </div>
                   )}
@@ -402,22 +406,22 @@ export default function Home() {
               {teamMembers.map((member, index) => (
                 <div
                   key={index}
-                  className="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  className="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200/60 dark:border-gray-700/50 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
                   {/* Decorative Gradient Background for Avatar */}
-                  <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-t-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
-
+                  <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary/20 to-primary/5 rounded-t-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+ 
                   <div className="relative flex flex-col items-center">
                     {/* Avatar */}
                     <div className="relative mb-4">
-                      <div className="w-24 h-24 rounded-full p-1 bg-white dark:bg-gray-800 ring-2 ring-blue-100 dark:ring-blue-900">
+                      <div className="w-24 h-24 rounded-full p-1 bg-white dark:bg-gray-800 ring-2 ring-primary/20 dark:ring-primary/40">
                         <img
                           src={member.avatar}
                           alt={member.name}
                           className="w-full h-full rounded-full object-cover"
                         />
                       </div>
-                      <div className="absolute bottom-0 right-0 bg-blue-600 text-white p-1.5 rounded-full border-2 border-white dark:border-gray-800">
+                      <div className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full border-2 border-white dark:border-gray-800">
                         <svg
                           className="w-3 h-3"
                           fill="none"
@@ -433,21 +437,21 @@ export default function Home() {
                         </svg>
                       </div>
                     </div>
-
+ 
                     {/* Info */}
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
                       {member.name}
                     </h3>
-                    <p className="text-blue-600 font-medium text-sm mb-3 uppercase tracking-wider">
+                    <p className="text-primary font-medium text-sm mb-3 uppercase tracking-wider">
                       {member.role}
                     </p>
                     <p className="text-gray-500 dark:text-gray-400 text-sm text-center italic">
                       "{member.quote}"
                     </p>
-
+ 
                     {/* Social Links (Demo) */}
                     <div className="flex gap-3 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-                      <button className="text-gray-400 hover:text-blue-600 transition-colors">
+                      <button className="text-gray-400 hover:text-primary transition-colors cursor-pointer">
                         <svg
                           className="w-5 h-5"
                           fill="currentColor"
@@ -456,7 +460,7 @@ export default function Home() {
                           <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
                         </svg>
                       </button>
-                      <button className="text-gray-400 hover:text-blue-800 transition-colors">
+                      <button className="text-gray-400 hover:text-primary/80 transition-colors cursor-pointer">
                         <svg
                           className="w-5 h-5"
                           fill="currentColor"

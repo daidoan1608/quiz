@@ -5,9 +5,24 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#137fec",
-        "background-light": "#f6f7f8",
-        "background-dark": "#101922",
+        primary: {
+          light: "rgb(var(--primary-light))",
+          DEFAULT: "rgb(var(--primary-color))",
+          dark: "rgb(var(--primary-hover))",
+        },
+        blue: {
+          50: "rgb(var(--primary-light))",
+          100: "rgb(var(--primary-light))",
+          500: "rgb(var(--primary-color))",
+          600: "rgb(var(--primary-color))",
+          700: "rgb(var(--primary-hover))",
+        },
+        "background-light": "rgb(var(--bg-page))",
+        "background-dark": "rgb(var(--bg-page))",
+        "surface-dark": "rgb(var(--bg-card))",
+        gray: {
+          800: "rgb(var(--bg-card))",
+        }
       },
       fontFamily: {
         display: ["Lexend", "sans-serif"],

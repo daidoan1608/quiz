@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 const Layout = () => {
   return (
     // THAY ĐỔI ĐÃ ÁP DỤNG Ở ĐÂY:
-    <div className="layout min-h-screen bg-white dark:bg-gray-800 transition-colors duration-300">
+    <div className="layout min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 transition-colors duration-300">
       <Headers />
       <div className="main-content">
         <Outlet />
