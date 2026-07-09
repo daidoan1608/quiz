@@ -75,7 +75,7 @@ export default function RevisionUser() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-300">
+    <div className="w-full bg-background-light dark:bg-background-dark transition-colors duration-300">
       <main className="w-full max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Nút Mobile Sidebar Toggle */}
         <div className="lg:hidden mb-4">
@@ -124,7 +124,7 @@ export default function RevisionUser() {
           </aside>
 
           {/* 2. CENTER CONTENT (Subjects) - 6 cột */}
-          <div className="col-span-12 lg:col-span-6 flex flex-col gap-6 min-h-[calc(100vh-200px)]">
+          <div className="col-span-12 lg:col-span-6 flex flex-col gap-6">
             {/* Header & Search */}
             <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h2 className="text-gray-900 dark:text-white text-xl font-bold">
@@ -142,7 +142,7 @@ export default function RevisionUser() {
                     setSearchQuery(e.target.value);
                     setSelectedCategory(null);
                   }}
-                  className="w-full h-10 pl-10 pr-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-blue-600 text-sm"
+                  className="w-full h-10 pl-10 pr-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm shadow-sm transition-all"
                 />
               </div>
             </section>
@@ -157,10 +157,10 @@ export default function RevisionUser() {
                   return (
                     <div
                       key={item.subjectId}
-                      className="flex flex-col rounded-xl bg-white dark:bg-gray-800/50 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-blue-400 transition-all duration-300 group"
+                      className="flex flex-col rounded-2xl bg-white dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700/50 shadow-sm hover:shadow-xl hover:shadow-primary/5 dark:hover:shadow-primary/10 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 group"
                     >
                       <div
-                        className="w-full h-32 bg-center bg-no-repeat bg-cover rounded-t-xl relative overflow-hidden"
+                        className="w-full h-32 bg-center bg-no-repeat bg-cover rounded-t-2xl relative overflow-hidden"
                         style={{
                           backgroundImage: `url('${getCoverImage(index)}')`,
                         }}
@@ -169,7 +169,7 @@ export default function RevisionUser() {
                       </div>
                       <div className="flex flex-col flex-1 justify-between p-4 gap-3">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="text-gray-900 dark:text-white text-base font-bold line-clamp-2">
+                          <h3 className="text-gray-900 dark:text-white text-base font-bold line-clamp-2 group-hover:text-primary transition-colors leading-snug">
                             {item.name}
                           </h3>
                           <button
@@ -177,7 +177,7 @@ export default function RevisionUser() {
                               toggleFavorite(item.subjectId, item.name)
                             }
                             disabled={!localStorage.getItem("userId")}
-                            className={`flex items-center justify-center size-8 rounded-full flex-shrink-0 transition-colors ${
+                            className={`flex items-center justify-center size-8 rounded-full flex-shrink-0 transition-colors cursor-pointer ${
                               isFavorited
                                 ? "text-red-500 bg-red-50 dark:bg-red-500/10"
                                 : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -201,7 +201,7 @@ export default function RevisionUser() {
                               state: { subjectId: item.subjectId },
                             })
                           }
-                          className="w-full rounded-lg h-9 bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-colors"
+                          className="w-full rounded-xl h-9 bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-colors cursor-pointer shadow-sm hover:shadow-md hover:shadow-primary/10"
                         >
                           Chọn chương
                         </button>

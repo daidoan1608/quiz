@@ -7,11 +7,11 @@ import { useTheme } from "../../context/ThemeProvider";
 
 const BASE_URL_AVATAR = process.env.REACT_APP_AVATAR_URL;
 export default function Headers() {
-  const { isLoggedIn, logout, fullName } = useAuth();
+  const { isLoggedIn, logout, fullName, avatarUrl } = useAuth();
   const { language, toggleLanguage, texts } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
-  const avatarUrl = localStorage.getItem("avatarUrl");
+  const currentAvatarUrl = avatarUrl || localStorage.getItem("avatarUrl");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -152,9 +152,9 @@ export default function Headers() {
                     type="button"
                   >
                     <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden">
-                      {avatarUrl ? (
+                      {currentAvatarUrl ? (
                         <img
-                          src={avatarUrl.startsWith("http") ? avatarUrl : `${BASE_URL_AVATAR}${avatarUrl}`}
+                          src={currentAvatarUrl.startsWith("http") ? currentAvatarUrl : `${BASE_URL_AVATAR || ""}${currentAvatarUrl}`}
                           alt={fullName || "User Avatar"}
                           className="h-full w-full object-cover"
                           onError={(e) => {

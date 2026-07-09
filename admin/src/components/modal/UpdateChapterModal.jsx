@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   Form, Input, Button, Modal,
   InputNumber, message, Typography,
-  Divider, Space, Skeleton
+  Divider, Skeleton
 } from "antd";
 import {
   SaveOutlined,
@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons";
 import { authAxios } from "../../api/axiosConfig"; // Điều chỉnh đường dẫn nếu cần
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const UpdateChapterModal = ({ isModalOpen, onCancel, onSuccess, chapterId }) => {
   const [form] = Form.useForm();

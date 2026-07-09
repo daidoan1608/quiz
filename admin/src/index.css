@@ -1,191 +1,329 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --admin-bg: #f6f8fb;
+  --admin-surface: rgba(255, 255, 255, 0.86);
+  --admin-surface-solid: #ffffff;
+  --admin-border: #e6eaf0;
+  --admin-text: #111827;
+  --admin-muted: #6b7280;
+  --admin-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+  --admin-shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --admin-radius: 18px;
+}
+
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Montserrat", sans-serif;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
 
 body {
-  background-color: var(--color-background-main);
-  color: var(--color-text-primary);
-  transition: background-color 0.3s, color 0.3s;
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(19, 127, 236, 0.09), transparent 32rem),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.07), transparent 30rem),
+    var(--admin-bg);
+  color: var(--admin-text);
+  transition: background-color 0.25s ease, color 0.25s ease;
+  -webkit-font-smoothing: antialiased;
 }
 
-/*
- * index.css đã được cập nhật để sử dụng các biến màu CSS.
- * Điều này cho phép bảng và các nút hành động tự động thay đổi màu sắc
- * khi chuyển đổi giữa chế độ sáng và tối (ví dụ: khi thêm class 'dark' vào <body>).
- */
+body:has(.ant-layout .ant-layout-sider-dark),
+body.dark {
+  --admin-bg: #0b1120;
+  --admin-surface: rgba(15, 23, 42, 0.86);
+  --admin-surface-solid: #111827;
+  --admin-border: rgba(148, 163, 184, 0.18);
+  --admin-text: #e5e7eb;
+  --admin-muted: #9ca3af;
+  --admin-shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
+  --admin-shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
 
+::selection {
+  background: rgba(19, 127, 236, 0.18);
+}
+
+/* App shell */
+.admin-shell {
+  min-height: 100vh;
+  background: transparent !important;
+}
+
+.admin-sidebar {
+  border-right: 1px solid var(--admin-border);
+  background: var(--admin-surface) !important;
+  backdrop-filter: blur(18px);
+  box-shadow: 8px 0 30px rgba(15, 23, 42, 0.035);
+}
+
+.admin-sidebar-logo {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  background: linear-gradient(135deg, #137fec, #10b981);
+  box-shadow: 0 10px 24px rgba(19, 127, 236, 0.28);
+}
+
+.admin-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.admin-brand-title {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.admin-brand-subtitle {
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-main-layout {
+  background: transparent !important;
+}
+
+.admin-topbar {
+  height: 72px !important;
+  padding: 0 !important;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--admin-surface) !important;
+  border-bottom: 1px solid var(--admin-border);
+  backdrop-filter: blur(18px);
+}
+
+.admin-content {
+  margin: 22px;
+}
+
+.admin-content-card {
+  min-height: calc(100vh - 116px);
+  padding: 24px;
+  color: var(--admin-text);
+}
+
+.admin-header-inner {
+  height: 100%;
+  padding: 0 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-header-title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.admin-header-kicker {
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-header-name {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* Ant Design normalization */
+.ant-layout,
+.ant-layout-content {
+  background: transparent !important;
+}
+
+.ant-card,
+.ant-modal-content,
+.ant-drawer-content {
+  border-radius: var(--admin-radius) !important;
+  border: 1px solid var(--admin-border) !important;
+  box-shadow: var(--admin-shadow-soft) !important;
+}
+
+.ant-card-head {
+  border-bottom: 1px solid var(--admin-border) !important;
+  font-weight: 700 !important;
+}
+
+.ant-table-wrapper .ant-table,
+.ant-table-container,
+.ant-table-thead > tr > th {
+  border-radius: 14px !important;
+}
+
+.ant-table-thead > tr > th {
+  font-size: 12px;
+  font-weight: 800 !important;
+  color: var(--admin-muted) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom-color: var(--admin-border) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(19, 127, 236, 0.045) !important;
+}
+
+.ant-btn {
+  border-radius: 12px !important;
+  font-weight: 700;
+  box-shadow: none !important;
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker,
+.ant-upload-drag {
+  border-radius: 12px !important;
+}
+
+.ant-menu {
+  padding: 10px !important;
+  background: transparent !important;
+  border-inline-end: 0 !important;
+}
+
+.ant-menu-item {
+  height: 44px !important;
+  line-height: 44px !important;
+  border-radius: 13px !important;
+  margin: 4px 0 !important;
+  font-weight: 650;
+}
+
+.ant-menu-item-selected {
+  box-shadow: inset 0 0 0 1px rgba(19, 127, 236, 0.16);
+}
+
+.ant-tag {
+  border-radius: 999px;
+  font-weight: 700;
+  padding-inline: 10px;
+}
+
+.c-shadow,
+.modern-card {
+  border-radius: var(--admin-radius) !important;
+  border: 1px solid var(--admin-border) !important;
+  box-shadow: var(--admin-shadow-soft) !important;
+}
+
+/* Compatibility with older bootstrap-like classes */
 .management-table,
 .responsive-table,
 .table,
 .table-bordered {
-  background-color: var(--color-background-card) !important;
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
+  width: 100%;
+  background-color: var(--admin-surface-solid) !important;
+  color: var(--admin-text);
+  border-color: var(--admin-border);
+  border-radius: 14px;
+  overflow: hidden;
 }
 
+.management-table th,
 .management-table td,
+.responsive-table th,
 .responsive-table td,
+.table th,
 .table td,
+.table-bordered th,
 .table-bordered td {
-  background-color: var(--color-background-card);
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
+  padding: 14px 16px;
+  border-color: var(--admin-border) !important;
 }
 
 .management-table th,
 .responsive-table th,
 .table th,
 .table-bordered th {
-  background-color: var(--color-sidebar-active);
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
-}
-
-.management-table th,
-.management-table td {
-  padding: 12px 15px;
-
-  border: 1px solid var(--color-border);
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .action-btn {
-  background: none;
-
-  border: 2px solid var(--color-border);
-  border-radius: 1px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: transparent;
   cursor: pointer;
-  margin: 0 5px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  border-radius: 50%;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
 }
 
-.edit-btn {
-  color: var(--color-success);
+.action-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(19, 127, 236, 0.08);
 }
 
-.edit-btn:hover {
-  background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
-}
-
-.delete-btn {
-  color: var(--color-danger);
-}
-
-.delete-btn:hover {
-  background-color: color-mix(in srgb, var(--color-danger) 10%, transparent);
-}
-
-.action-btn .icon {
-  font-size: 20px;
-}
-
-.filter-role label {
-  color: var(--color-text-primary);
-}
-
-.filter-role .form-select {
-  background-color: var(--color-background-card);
-
-  color: var(--color-text-primary);
-
-  border-color: var(--color-border);
-}
-
-.filter-role .form-select option {
-  background-color: var(--color-background-card);
-  color: var(--color-text-primary);
-}
-
-.add-btn.btn-primary {
-  background-color: var(--color-primary);
-
-  color: var(--color-background-card);
-
-  border-color: var(--color-primary);
-}
-
-.add-btn.btn-primary:hover,
-.add-btn.btn-primary:active,
-.add-btn.btn-primary:focus {
-  background-color: color-mix(in srgb, var(--color-primary) 90%, black);
-  border-color: color-mix(in srgb, var(--color-primary) 80%, black);
-  color: var(--color-background-card);
-}
-
-.btn-success {
-  background-color: var(--color-success);
-  border-color: var(--color-success);
-  color: var(--color-background-card);
-}
-.btn-success:hover {
-  background-color: color-mix(in srgb, var(--color-success) 90%, black);
-  border-color: color-mix(in srgb, var(--color-success) 80%, black);
-  color: var(--color-background-card);
-}
-
-.btn-danger {
-  background-color: var(--color-danger);
-  border-color: var(--color-danger);
-  color: var(--color-background-card);
-}
-.btn-danger:hover {
-  background-color: color-mix(in srgb, var(--color-danger) 90%, black);
-  border-color: color-mix(in srgb, var(--color-danger) 80%, black);
-  color: var(--color-background-card);
-}
-
-input[type="email"],
-input[type="password"],
-textarea,
-input:disabled,
-form-label,
-.form-label:disabled,
-.form-select,
-.form-select:disabled,
-.form-select option,
-.form-control,
-.form-control:disabled,
-.form-control option {
-  background-color: var(--color-background-card);
-
-  color: var(--color-text-primary);
-
-  border: 1px solid var(--color-border);
-  transition: all 0.2s ease-in-out;
-}
-
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="number"]:focus,
-textarea:focus,
-.form-select:focus {
-  box-shadow: 0 0 0 0.25rem
-    color-mix(in srgb, var(--color-primary) 25%, transparent);
-
-  border-color: var(--color-primary);
-}
-
-.form-select option {
-  background-color: var(--color-background-card);
-
-  color: var(--color-text-primary);
-}
-
-input:disabled,
-.form-select:disabled {
-  background-color: var(--color-sidebar-active);
-
-  color: var(--color-text-secondary);
-}
+.edit-btn { color: #10b981; }
+.delete-btn { color: #ef4444; }
 
 .bg-cards {
-  background-color: var(--color-background-card);
+  background-color: var(--admin-surface-solid);
+}
+
+@media (max-width: 768px) {
+  .admin-content {
+    margin: 12px;
+  }
+
+  .admin-content-card {
+    padding: 16px;
+  }
+
+  .admin-header-name {
+    font-size: 16px;
+  }
 }

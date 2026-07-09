@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/user/favorites")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Tag(name="Favorite API", description = "API cho các chức năng liên quan đến môn học yêu thích")
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
 
-    @PostMapping
+    @PostMapping("/favorites")
     @Operation(summary = "Thêm môn học yêu thích")
     public ResponseEntity<ApiResponse<FavoriteDto>> createFavorite(@RequestBody FavoriteDto favoriteDto) {
         try {
@@ -31,7 +31,7 @@ public class FavoriteController {
         }
     }
 
-    @DeleteMapping
+    @DeleteMapping("/favorites")
     @Operation(summary = "Xóa môn học yêu thích")
     public ResponseEntity<ApiResponse<FavoriteDto>> deleteFavorite(@RequestBody FavoriteDto favoriteDto) {
         try {
@@ -42,7 +42,7 @@ public class FavoriteController {
         }
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}/favorites")
     @Operation(summary = "Lấy danh sách môn học yêu thích theo userId")
     public ResponseEntity<ApiResponse<List<FavoriteDto>>> getFavoritesByUserId(@PathVariable UUID userId) {
         try {
@@ -56,3 +56,5 @@ public class FavoriteController {
         }
     }
 }
+
+

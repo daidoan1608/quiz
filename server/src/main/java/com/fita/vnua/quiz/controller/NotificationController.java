@@ -26,7 +26,7 @@ public class NotificationController {
      * API đánh dấu một thông báo là ĐÃ ĐỌC.
      * User bấm vào thông báo nào thì gọi API này với ID của thông báo đó.
      */
-    @PutMapping("/{id}/read")
+    @PatchMapping("/{id}")
     public ResponseEntity<String> markAsRead(
             @PathVariable Long id,
             @AuthenticationPrincipal User currentUser) {
@@ -39,9 +39,10 @@ public class NotificationController {
      * API: Đánh dấu TẤT CẢ là đã đọc
      * PUT /api/notifications/read-all
      */
-    @PutMapping("/read-all")
+    @PatchMapping
     public ResponseEntity<String> markAllAsRead(@AuthenticationPrincipal User currentUser) {
         notificationService.markAllAsRead(currentUser.getUserId());
         return ResponseEntity.ok("Đã đánh dấu tất cả là đã đọc");
     }
 }
+

@@ -117,7 +117,7 @@ export default function Rank() {
   };
 
   return (
-    <div className="flex h-full grow flex-col bg-background-light dark:bg-background-dark min-h-screen font-display transition-colors duration-300">
+    <div className="flex flex-col bg-background-light dark:bg-background-dark font-display transition-colors duration-300">
       <div className="w-full max-w-screen-2xl mx-auto px-4 py-8">
         <div className="flex flex-col gap-8">
           {/* Header Trang */}
@@ -222,7 +222,7 @@ export default function Rank() {
 
             {/* DANH SÁCH XẾP HẠNG */}
             <main className="lg:col-span-8 xl:col-span-9">
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm min-h-[400px]">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
                 <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
                   <div className="col-span-2 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-2">
                     Hạng

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { authAxios } from "../../api/axiosConfig";
 import {
     Table,
@@ -25,8 +24,6 @@ import ChapterQuestionModal from '../../components/modal/ChapterQuestionModal'; 
 const { Title, Text } = Typography;
 
 const ChapterListModal = ({ isModalOpen, onCancel, subjectId, subjectName }) => {
-    const navigate = useNavigate();
-
     const [chapters, setChapters] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState(""); // Thêm state tìm kiếm

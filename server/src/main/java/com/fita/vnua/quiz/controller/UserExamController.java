@@ -24,7 +24,7 @@ import java.util.UUID;
 public class UserExamController {
     private final UserExamService userExamService;
 
-    @GetMapping("public/summaries")
+    @GetMapping("public/user-exam-summaries")
     @Operation(summary = "Thống kê điểm thi của người dùng")
     public ResponseEntity<ApiResponse<List<UserExamSummaryDto>>> getUserExamSummaries() {
         try {
@@ -38,7 +38,7 @@ public class UserExamController {
         }
     }
 
-    @GetMapping("admin/userexams")
+    @GetMapping("admin/user-exams")
     @Operation(summary = "Lấy danh sách bài thi của tất cả người dùng")
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getAllUserExams() {
         try {
@@ -52,7 +52,7 @@ public class UserExamController {
         }
     }
 
-    @GetMapping("user/userexams/subjectanduser")
+    @GetMapping("user-exams")
     @Operation(summary = "Lấy bài thi của người dùng theo userId và subjectId")
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getUserExamByUserIdAndSubjectId(
             @Parameter(description = "User ID", required = true) @RequestParam("userId") UUID userId,
@@ -69,10 +69,10 @@ public class UserExamController {
         }
     }
 
-    @GetMapping("user/userexams/last7exam")
+    @GetMapping("users/{userId}/user-exams/recent")
     @Operation(summary = "Lấy 7 bài thi gần nhất của người dùng theo userId")
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getLast7UserExamsByUserId(
-            @Parameter(description = "User ID", required = true) @RequestParam("userId") UUID userId
+            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
     ) {
         try {
             List<UserExamResponse> userExams = userExamService.getLast7ExamsByUser(userId);
@@ -85,7 +85,7 @@ public class UserExamController {
         }
     }
 
-    @GetMapping("user/userexams/{userExamId}")
+    @GetMapping("user-exams/{userExamId}")
     @Operation(summary = "Lấy bài thi của người dùng theo ID")
     public ResponseEntity<ApiResponse<UserExamResponse>> getUserExamById(@PathVariable("userExamId") Long userExamId) {
         try {
@@ -99,7 +99,7 @@ public class UserExamController {
         }
     }
 
-    @GetMapping("user/userexams/count/{userId}")
+    @GetMapping("users/{userId}/user-exams/count")
     @Operation(summary = "Lấy số lượng bài thi của người dùng theo userId")
     public ResponseEntity<ApiResponse<List<Map<Long, Object>>>> getExamAttemptsByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
@@ -112,7 +112,7 @@ public class UserExamController {
         }
     }
 
-    @PostMapping("user/userexams")
+    @PostMapping("user-exams")
     @Operation(summary = "Tạo bài thi cho người dùng")
     public ResponseEntity<ApiResponse<UserExamDto>> createUserExam(@RequestBody UserExamRequest userExamRequest) {
         try {
@@ -126,7 +126,7 @@ public class UserExamController {
         }
     }
 
-    @GetMapping("user/userexams/user/{userId}")
+    @GetMapping("users/{userId}/user-exams")
     @Operation(summary = "Lấy bài thi của người dùng theo userId")
     public ResponseEntity<ApiResponse<?>> getUserExamByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
@@ -142,3 +142,5 @@ public class UserExamController {
         }
     }
 }
+
+

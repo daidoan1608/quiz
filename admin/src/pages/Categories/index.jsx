@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { authAxios } from "../../api/axiosConfig";
 import {
     Table,
@@ -16,7 +15,6 @@ import {
     AppstoreOutlined,
     SearchOutlined,
     UnorderedListOutlined,
-    ReloadOutlined,
 } from "@ant-design/icons";
 
 // --- IMPORT LAYOUT CHUNG ---
@@ -31,8 +29,6 @@ export default function CategoryManager() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState("");
-    const navigate = useNavigate();
-
     // --- STATES QUẢN LÝ MODAL ---
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);

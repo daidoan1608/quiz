@@ -23,7 +23,7 @@ public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    @PostMapping("user/change-password/{userId}")
+    @PatchMapping("users/{userId}/password")
     @Operation(summary = "API đổi mật khẩu")
     public ResponseEntity<ApiResponse<Object>> changePassword(@PathVariable("userId") UUID userId,
                                                               @RequestBody ChangePasswordRequest request) {
@@ -73,7 +73,7 @@ public class UserController {
     }
 
     // Lấy người dùng theo userId (admin)
-    @GetMapping("user/{userId}")
+    @GetMapping({"users/{userId}", "user/{userId}"})
     @Operation(summary = "Lấy ra người dùng theo ID", description = "This API fetches a user by their ID")
     public ResponseEntity<ApiResponse<UserDto>> getUserById(
             @Parameter(description  = "User ID", required = true) @PathVariable("userId") UUID userId) {
@@ -89,7 +89,7 @@ public class UserController {
     }
 
     // Tạo người dùng mới (admin)
-    @PostMapping("admin/add/users")
+    @PostMapping("admin/users")
     @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
     public ResponseEntity<ApiResponse<UserDto>> createUser(@RequestBody UserDto userDto) {
         try {
@@ -105,7 +105,7 @@ public class UserController {
     }
 
     // Cập nhật thông tin người dùng (admin)
-    @PatchMapping("update/users/{userId}")
+    @PatchMapping("admin/users/{userId}")
     @Operation(summary = "Cập nhập thông tin người dùng", description = "This API update info user")
     public ResponseEntity<ApiResponse<UserDto>> updateUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
@@ -119,7 +119,7 @@ public class UserController {
     }
 
     // Xóa người dùng (admin)
-    @DeleteMapping("admin/delete/users/{userId}")
+    @DeleteMapping("admin/users/{userId}")
     @Operation(summary = "Xóa người dùng", description = "This API deletes a user")
     public ResponseEntity<ApiResponse<Object>> deleteUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId) {
@@ -131,3 +131,5 @@ public class UserController {
         }
     }
 }
+
+

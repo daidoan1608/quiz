@@ -1,4 +1,4 @@
-import React, {useState ,useEffect} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Form, Input, Select, message ,Spin} from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { authAxios } from "../../api/axiosConfig"; // Cần đảm bảo import đúng đường dẫn
@@ -11,7 +11,7 @@ const [subjects, setSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
   // --- LOGIC XỬ LÝ GỬI THÔNG BÁO ---
 
-  const fetchSubjects = async () => {
+  const fetchSubjects = useCallback(async () => {
     setLoadingSubjects(true);
     try {
       // **GIẢ ĐỊNH**: API endpoint của bạn trả về danh sách môn học
@@ -24,30 +24,30 @@ const [subjects, setSubjects] = useState([]);
     } finally {
       setLoadingSubjects(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (isModalOpen && notificationType === 'SUBJECT' && subjects.length === 0) {
       fetchSubjects();
     }
-  }, [isModalOpen, notificationType]);
+  }, [isModalOpen, notificationType, subjects.length, fetchSubjects]);
 
   const handleCreate = async (values) => {
     try {
-      let endpoint = '/admin/notifications'; // Cần điều chỉnh base endpoint nếu cần, tôi sẽ dùng endpoint của API để request
+      let endpoint = '/admin';
       let payload = { title: values.title, message: values.message };
 
       if (values.type === 'GLOBAL') {
-        endpoint += '/global';
+        endpoint += '/global-notification-campaigns';
       } else if (values.type === 'PERSONAL') {
-        endpoint += '/personal';
+        endpoint += '/personal-notification-campaigns';
         payload.userId = values.targetId;
       } else if (values.type === 'SUBJECT') {
-        endpoint += '/subject';
+        endpoint += '/subject-notification-campaigns';
         payload.subjectId = values.targetId;
         payload.subjectName = "Thông báo môn học"; // Đã được định nghĩa trong component gốc
       } else if (values.type === 'BATCH') {
-        endpoint += '/batch';
+        endpoint += '/batch-notification-campaigns';
         payload.userIds = values.targetId.split(',').map(id => id.trim());
       }
 

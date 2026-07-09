@@ -1,23 +1,47 @@
 import axios from "axios";
+import { message } from "antd";
 
-// 1. SỬA QUAN TRỌNG: Lấy URL động từ biến môi trường
-// Nếu không tìm thấy biến môi trường thì mới fallback về localhost (để phòng hờ)
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api/v1/";
 
-// 2. Cấu hình chung
 const config = {
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // QUAN TRỌNG: Để trình duyệt gửi Cookie
+  withCredentials: true,
 };
 
 const authAxios = axios.create(config);
 const publicAxios = axios.create(config);
 
+const getApiErrorMessage = (error, fallback = "Có lỗi xảy ra, vui lòng thử lại!") => {
+  const responseData = error?.response?.data;
+  if (responseData?.message) return responseData.message;
+  if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
+    return responseData.errors[0];
+  }
+  if (typeof responseData === "string") return responseData;
+  return error?.message || fallback;
+};
+
 let isRefreshing = false;
 let failedQueue = [];
+
+const clearAuthStorage = () => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("role");
+  localStorage.removeItem("username");
+  sessionStorage.removeItem("refreshToken");
+};
+
+const redirectToLoginOnce = () => {
+  clearAuthStorage();
+
+  if (window.location.pathname !== "/login") {
+    window.location.replace("/login");
+  }
+};
 
 const processQueue = (error) => {
   failedQueue.forEach((prom) => {
@@ -30,61 +54,64 @@ const processQueue = (error) => {
   failedQueue = [];
 };
 
-// 3. Response Interceptor
+authAxios.interceptors.request.use((requestConfig) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    requestConfig.headers.Authorization = `Bearer ${token}`;
+  }
+  return requestConfig;
+});
+
 authAxios.interceptors.response.use(
-  (response) => {
-    // Mẹo nhỏ: Bạn có thể return response.data ở đây để code trong component gọn hơn
-    // Nhưng nếu giữ nguyên response thì component phải gọi res.data
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (originalRequest._retry) {
+    if (!originalRequest || originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // Kiểm tra cả 401 (Unauthorized) và 403 (Forbidden)
-    // Vì đôi khi Spring Security trả 403 khi Token hết hạn hoặc không hợp lệ
-    if (
-      error.response &&
-      (error.response.status === 401 || error.response.status === 403)
-    ) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => {
-            return authAxios(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Gọi API Refresh (Cookie tự bay theo)
-        await publicAxios.post("/auth/refresh");
-
-        processQueue(null);
-        return authAxios(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError);
-
-        // --- XỬ LÝ LOGOUT KHI REFRESH THẤT BẠI ---
-        // Bạn nên dispatch 1 action Redux/Context để clear user info
-        // Hoặc redirect cứng về trang login
-        window.location.href = "/login";
-
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+    const status = error.response?.status;
+    if (status === 403) {
+      message.error(getApiErrorMessage(error, "Bạn không có quyền thực hiện thao tác này!"));
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    if (status !== 401) {
+      return Promise.reject(error);
+    }
+
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      })
+        .then(() => authAxios(originalRequest))
+        .catch((err) => Promise.reject(err));
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      const refreshToken = sessionStorage.getItem("refreshToken");
+      const response = await publicAxios.post("/auth/refresh", refreshToken ? { refreshToken } : undefined);
+      const newAccessToken = response.data?.data?.accessToken || response.data?.accessToken;
+
+      if (newAccessToken) {
+        localStorage.setItem("accessToken", newAccessToken);
+      }
+
+      processQueue(null);
+      return authAxios(originalRequest);
+    } catch (refreshError) {
+      processQueue(refreshError);
+      message.error(getApiErrorMessage(refreshError, "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!"));
+      redirectToLoginOnce();
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
   }
 );
 
-export { authAxios, publicAxios };
+export { authAxios, publicAxios, clearAuthStorage, getApiErrorMessage };

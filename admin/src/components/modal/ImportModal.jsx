@@ -3,7 +3,7 @@ import { authAxios, publicAxios } from "../../api/axiosConfig"; // Giữ lại p
 import {
   Form, Select, Button, Modal,
   Typography, message, Divider,
-  Upload, Row, Col, notification, Alert, Space
+  Upload, Row, Col, notification, Alert
 } from "antd";
 import {
   CloudUploadOutlined,
@@ -11,7 +11,7 @@ import {
   ImportOutlined,
 } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 const { Dragger } = Upload;
 

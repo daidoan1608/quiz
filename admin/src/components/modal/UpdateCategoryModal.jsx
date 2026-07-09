@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Form, Input, Button, Modal,
-  Typography, message, Divider, Space, Skeleton
+  Typography, message, Divider, Skeleton
 } from "antd";
 import {
   SaveOutlined, EditOutlined

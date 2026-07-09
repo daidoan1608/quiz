@@ -1,4 +1,5 @@
 import axios from "axios";
+import { message } from "antd";
 
 // 1. Dùng process.env vì là Create React App
 const BASE_URL =
@@ -15,6 +16,16 @@ const config = {
 
 const authAxios = axios.create(config);
 const publicAxios = axios.create(config);
+
+const getApiErrorMessage = (error, fallback = "Có lỗi xảy ra, vui lòng thử lại!") => {
+  const responseData = error?.response?.data;
+  if (responseData?.message) return responseData.message;
+  if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
+    return responseData.errors[0];
+  }
+  if (typeof responseData === "string") return responseData;
+  return error?.message || fallback;
+};
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -41,15 +52,19 @@ authAxios.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (originalRequest._retry) {
+    if (!originalRequest || originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // Kiểm tra lỗi 401 hoặc 403
-    if (
-      error.response &&
-      (error.response.status === 401 || error.response.status === 403)
-    ) {
+    const status = error.response?.status;
+
+    if (status === 403) {
+      message.error(getApiErrorMessage(error, "Bạn không có quyền thực hiện thao tác này!"));
+      return Promise.reject(error);
+    }
+
+    // Kiểm tra lỗi 401 để refresh phiên đăng nhập
+    if (status === 401) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -76,7 +91,7 @@ authAxios.interceptors.response.use(
         processQueue(refreshError);
 
         // Xử lý khi refresh thất bại (Token hết hạn)
-        // Redirect về trang login
+        message.error(getApiErrorMessage(refreshError, "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!"));
         window.location.href = "/login";
 
         return Promise.reject(refreshError);
@@ -89,4 +104,4 @@ authAxios.interceptors.response.use(
   }
 );
 
-export { authAxios, publicAxios };
+export { authAxios, publicAxios, getApiErrorMessage };

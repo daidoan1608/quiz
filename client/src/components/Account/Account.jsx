@@ -14,7 +14,7 @@ const Account = () => {
   const [loading, setLoading] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
-  const { logout, updateAvatar } = useAuth();
+  const { logout, updateAvatar, avatarUrl } = useAuth();
   const navigate = useNavigate();
   const { texts } = useLanguage();
 
@@ -33,8 +33,14 @@ const Account = () => {
         authAxios.get(`user/userexams/user/${userId}`),
       ]);
 
-      // Xử lý dữ liệu User
-      setUser(userResponse.data.data);
+      // Xử lý dữ liệu User và đồng bộ avatar từ localStorage/AuthContext nếu API chưa trả về avatar
+      const userData = userResponse.data.data || {};
+      const storedAvatarUrl = localStorage.getItem("avatarUrl");
+      const syncedAvatarUrl = userData.avatarUrl || avatarUrl || storedAvatarUrl || "";
+      setUser({
+        ...userData,
+        avatarUrl: syncedAvatarUrl,
+      });
 
       // Xử lý dữ liệu Exams
       const examData = examsResponse.data.data || [];
@@ -105,7 +111,7 @@ const Account = () => {
       );
 
       // Lấy URL ảnh mới từ response (cấu trúc tùy thuộc API của bạn trả về)
-      const newAvatarUrl = response.data.avatarUrl;
+      const newAvatarUrl = response.data.avatarUrl || response.data.data?.avatarUrl || response.data.data || "";
 
       // Cập nhật State User ngay lập tức để giao diện hiển thị ảnh mới
       setUser((prevUser) => ({
@@ -114,8 +120,9 @@ const Account = () => {
       }));
 
       // Cập nhật lại localStorage nếu cần thiết để đồng bộ Header
-      localStorage.setItem("avatarUrl", newAvatarUrl);
-updateAvatar(newAvatarUrl);
+      if (newAvatarUrl) {
+        updateAvatar(newAvatarUrl);
+      }
       message.success(texts.uploadAvatarSuccess || "Tải lên avatar thành công!");
     } catch (error) {
       console.error(error);
@@ -157,7 +164,8 @@ updateAvatar(newAvatarUrl);
         {/* SIDEBAR (Profile Card) - Chiếm 3 cột */}
         <aside className="md:col-span-4 lg:col-span-3">
           <UserProfileCard
-            user={user}
+             user={user}
+             avatarUrl={avatarUrl}
             onUploadAvatar={handleUploadAvatar}
             onChangePasswordClick={() => setShowChangePassword(true)}
             onLogout={logout}

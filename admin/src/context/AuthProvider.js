@@ -1,6 +1,7 @@
 import { message } from "antd";
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { clearAuthStorage } from "../api/axiosConfig";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -24,29 +25,39 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (accessToken, refreshToken, userId, role, username) => {
-    localStorage.setItem("accessToken", accessToken);
-    sessionStorage.setItem("refreshToken", refreshToken);
+    if (accessToken) localStorage.setItem("accessToken", accessToken);
+    if (refreshToken) sessionStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("userId", userId);
     localStorage.setItem("role", role);
     localStorage.setItem("username", username);
     setIsLoggedIn(true);
     setUser(userId);
-    message.success("Đăng nhập thành công!");
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
-  const logout = () => {
-    localStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("role");
+  const logout = async () => {
+    try {
+      const { publicAxios } = await import("../api/axiosConfig");
+      await publicAxios.post("/auth/logout");
+    } catch (error) {
+      // Vẫn xóa session phía client nếu server logout thất bại hoặc token đã hết hạn.
+    } finally {
+      clearAuthStorage();
+      setIsLoggedIn(false);
+      setUser(null);
+      message.success("Đăng xuất thành công!");
+      navigate("/login", { replace: true });
+    }
+  };
+
+  const clearSession = () => {
+    clearAuthStorage();
     setIsLoggedIn(false);
     setUser(null);
-    message.success("Đăng xuất thành công!");
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, user }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, clearSession, user }}>
       {loading ? <div>Loading...</div> : children}
     </AuthContext.Provider>
   );

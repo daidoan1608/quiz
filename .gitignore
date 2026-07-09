@@ -14,3 +14,6 @@ target/
 # Database
 mysql.init/
 excel_import_data_test/
+
+# Local planning notes
+MAINTENANCE_PLAN.md

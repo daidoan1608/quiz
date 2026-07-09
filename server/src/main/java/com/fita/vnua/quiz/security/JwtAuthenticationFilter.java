@@ -1,6 +1,8 @@
 package com.fita.vnua.quiz.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fita.vnua.quiz.exception.CustomApiException;
+import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -102,7 +104,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("{\"message\": \"" + ex.getMessage() + "\"}");
+            ApiResponse<Object> body = ApiResponse.error(
+                    "Phiên đăng nhập không hợp lệ hoặc đã hết hạn",
+                    List.of(ex.getMessage())
+            );
+            response.getWriter().write(new ObjectMapper().writeValueAsString(body));
             return;
         } catch (Exception e) {
             // Log các lỗi khác nếu có

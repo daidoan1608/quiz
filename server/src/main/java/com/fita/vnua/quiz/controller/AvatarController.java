@@ -22,10 +22,11 @@ public class AvatarController {
     private final UserService userService;
 
     @Operation(summary = "API thay/thêm avatar")
-    @PostMapping("/avatar/{userId}")
+    @PutMapping("/avatar")
     public Map<String, String> uploadAvatar(
-            @PathVariable("userId") UUID userId,
+            @AuthenticationPrincipal User currentUser,
             @RequestParam("file") MultipartFile file) throws Exception {
+        UUID userId = currentUser.getUserId();
         System.out.println("=== Upload avatar ===");
         System.out.println("userId = " + userId);
         System.out.println("file = " + file.getOriginalFilename());
@@ -49,3 +50,5 @@ public class AvatarController {
         return Map.of("avatarUrl", url);
     }
 }
+
+

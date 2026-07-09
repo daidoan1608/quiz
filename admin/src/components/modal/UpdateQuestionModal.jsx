@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Form, Input, Button, Modal, Select, Radio, Checkbox, Alert, Upload,
-  message, Typography, Divider, Skeleton, Row, Col, Space,
+  message, Typography, Divider, Skeleton, Row, Col,
 } from "antd";
 import {
   SaveOutlined, EditOutlined, CheckCircleOutlined, UploadOutlined
@@ -72,7 +72,7 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
   const getFullImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    const apiRoot = process.env.REACT_APP_API_URL 
+    const apiRoot = process.env.REACT_APP_API_URL
       ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
       : 'http://localhost:8080';
     return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
@@ -213,13 +213,13 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                 <TextArea rows={3} placeholder="Nhập câu hỏi (hỗ trợ LaTeX)..." />
               </Form.Item>
               {content && (
-                <div 
-                  style={{ 
+                <div
+                  style={{
                     marginTop: -12,
                     marginBottom: 16,
-                    padding: '8px 12px', 
-                    border: '1px dashed #d9d9d9', 
-                    borderRadius: 6, 
+                    padding: '8px 12px',
+                    border: '1px dashed #d9d9d9',
+                    borderRadius: 6,
                     background: '#fafafa',
                     maxHeight: 120,
                     overflowY: 'auto'
@@ -264,8 +264,8 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                   label="Đường dẫn ảnh minh họa (tùy chọn)"
                   name="imageUrl"
                 >
-                  <Input 
-                    placeholder="Nhập URL ảnh (ví dụ: /avatars/q_123.png hoặc link internet)" 
+                  <Input
+                    placeholder="Nhập URL ảnh (ví dụ: /avatars/q_123.png hoặc link internet)"
                     onChange={(e) => setPreviewImgUrl(e.target.value)}
                   />
                 </Form.Item>
@@ -358,12 +358,12 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                     const ansVal = index === 0 ? answer_0 : index === 1 ? answer_1 : index === 2 ? answer_2 : answer_3;
                     if (!ansVal) return null;
                     return (
-                      <div 
-                        style={{ 
-                          marginTop: 4, 
-                          padding: '4px 8px', 
-                          border: '1px dashed #d9d9d9', 
-                          borderRadius: 4, 
+                      <div
+                        style={{
+                          marginTop: 4,
+                          padding: '4px 8px',
+                          border: '1px dashed #d9d9d9',
+                          borderRadius: 4,
                           background: '#fafafa',
                           fontSize: 13
                         }}
@@ -419,12 +419,12 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                         const ansVal = index === 0 ? answer_0 : index === 1 ? answer_1 : index === 2 ? answer_2 : answer_3;
                         if (!ansVal) return null;
                         return (
-                          <div 
-                            style={{ 
-                              marginTop: 4, 
-                              padding: '4px 8px', 
-                              border: '1px dashed #d9d9d9', 
-                              borderRadius: 4, 
+                          <div
+                            style={{
+                              marginTop: 4,
+                              padding: '4px 8px',
+                              border: '1px dashed #d9d9d9',
+                              borderRadius: 4,
                               background: '#fafafa',
                               fontSize: 13
                             }}

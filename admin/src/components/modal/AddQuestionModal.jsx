@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { authAxios } from '../../api/axiosConfig';
 import {
-  Form, Input, Button, Card, Select,
+  Form, Input, Button, Select,
   Radio, Checkbox, message, Typography, Divider,
   Row, Col, Alert, Modal, Upload
 } from 'antd';
@@ -75,7 +75,7 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const getFullImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    const apiRoot = process.env.REACT_APP_API_URL 
+    const apiRoot = process.env.REACT_APP_API_URL
       ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
       : 'http://localhost:8080';
     return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
@@ -290,13 +290,13 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
               <TextArea rows={3} placeholder="Nhập câu hỏi (hỗ trợ LaTeX)..." />
             </Form.Item>
             {content && (
-              <div 
-                style={{ 
+              <div
+                style={{
                   marginTop: -12,
                   marginBottom: 16,
-                  padding: '8px 12px', 
-                  border: '1px dashed #d9d9d9', 
-                  borderRadius: 6, 
+                  padding: '8px 12px',
+                  border: '1px dashed #d9d9d9',
+                  borderRadius: 6,
                   background: '#fafafa',
                   maxHeight: 120,
                   overflowY: 'auto'
@@ -341,8 +341,8 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
                 label="Đường dẫn ảnh minh họa (tùy chọn)"
                 name="imageUrl"
               >
-                <Input 
-                  placeholder="Nhập URL ảnh (ví dụ: /avatars/q_123.png hoặc link internet)" 
+                <Input
+                  placeholder="Nhập URL ảnh (ví dụ: /avatars/q_123.png hoặc link internet)"
                   onChange={(e) => setPreviewImgUrl(e.target.value)}
                 />
               </Form.Item>
@@ -433,12 +433,12 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
                     const ansVal = label === 'A' ? answerA : label === 'B' ? answerB : label === 'C' ? answerC : answerD;
                     if (!ansVal) return null;
                     return (
-                      <div 
-                        style={{ 
-                          marginTop: 4, 
-                          padding: '4px 8px', 
-                          border: '1px dashed #d9d9d9', 
-                          borderRadius: 4, 
+                      <div
+                        style={{
+                          marginTop: 4,
+                          padding: '4px 8px',
+                          border: '1px dashed #d9d9d9',
+                          borderRadius: 4,
                           background: '#fafafa',
                           fontSize: 13
                         }}
@@ -494,12 +494,12 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
                       const ansVal = label === 'A' ? answerA : label === 'B' ? answerB : label === 'C' ? answerC : answerD;
                       if (!ansVal) return null;
                       return (
-                        <div 
-                          style={{ 
-                            marginTop: 4, 
-                            padding: '4px 8px', 
-                            border: '1px dashed #d9d9d9', 
-                            borderRadius: 4, 
+                        <div
+                          style={{
+                            marginTop: 4,
+                            padding: '4px 8px',
+                            border: '1px dashed #d9d9d9',
+                            borderRadius: 4,
                             background: '#fafafa',
                             fontSize: 13
                           }}

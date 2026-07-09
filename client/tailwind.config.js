@@ -20,9 +20,7 @@ module.exports = {
         "background-light": "rgb(var(--bg-page))",
         "background-dark": "rgb(var(--bg-page))",
         "surface-dark": "rgb(var(--bg-card))",
-        gray: {
-          800: "rgb(var(--bg-card))",
-        }
+        "surface": "rgb(var(--bg-card))",
       },
       fontFamily: {
         display: ["Lexend", "sans-serif"],

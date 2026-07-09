@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Modal, Spin, Table, Input, Typography, Space, message, theme, Button, Tag,
+    Modal, Spin, Table, Input, Typography, Space, message, theme, Button,
 } from 'antd';
 import {
     BookOutlined, SearchOutlined, ReloadOutlined,

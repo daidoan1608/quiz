@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   Form, Input, Button, Modal,
   Typography, message, Divider,
-  Space, Skeleton
+  Skeleton
 } from 'antd';
 import {
   SaveOutlined,

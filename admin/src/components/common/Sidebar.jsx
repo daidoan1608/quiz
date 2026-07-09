@@ -1,44 +1,49 @@
 import React, { useState } from "react";
-import { Layout, Menu, Button, theme } from "antd";
+import { Layout, Menu, Button } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
-// Import icon menu chuẩn của Antd hoặc dùng icon cũ của bạn
 import {
-  MenuFoldOutlined, MenuUnfoldOutlined, FileTextOutlined, AppstoreOutlined,
-  BookOutlined, MessageOutlined,
-  // Thêm các icon mới của Ant Design
-  HomeOutlined, ReadOutlined, UserOutlined, TableOutlined, QuestionCircleOutlined
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  FileTextOutlined,
+  AppstoreOutlined,
+  BookOutlined,
+  MessageOutlined,
+  HomeOutlined,
+  ReadOutlined,
+  UserOutlined,
+  TableOutlined,
+  QuestionCircleOutlined,
 } from "@ant-design/icons";
 
 const { Sider } = Layout;
+
+const items = [
+  { key: "/", icon: <HomeOutlined />, label: "Dashboard" },
+  { key: "/notifications", icon: <MessageOutlined />, label: "Thông báo" },
+  { key: "/userexams", icon: <ReadOutlined />, label: "Bài thi" },
+  { key: "/users", icon: <UserOutlined />, label: "Người dùng" },
+  { key: "/exams", icon: <FileTextOutlined />, label: "Đề thi" },
+  { key: "/categories", icon: <AppstoreOutlined />, label: "Khoa" },
+  { key: "/subjects", icon: <TableOutlined />, label: "Môn học" },
+  { key: "/chapters", icon: <BookOutlined />, label: "Chương" },
+  { key: "/questions", icon: <QuestionCircleOutlined />, label: "Câu hỏi" },
+];
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = theme.useToken();
-
-const items = [
-  { key: "/", icon: <HomeOutlined />, label: "Home" }, // Đã thay đổi
-  { key: "/notifications", icon: <MessageOutlined />, label: "Quản lý thông báo" },
-  { key: "/userexams", icon: <ReadOutlined />, label: "Quản lý bài thi" }, // Đã thay đổi
-  { key: "/users", icon: <UserOutlined />, label: "Quản lý người dùng" }, // Đã thay đổi
-  { key: "/exams", icon: <FileTextOutlined />, label: "Quản lý đề thi" },
-  { key: "/categories", icon: <AppstoreOutlined />, label: "Quản lý khoa" },
-  { key: "/subjects", icon: <TableOutlined />, label: "Quản lý môn học" }, // Đã thay đổi
-  { key: "/chapters", icon: <BookOutlined />, label: "Quản lý chương" },
-  { key: "/questions", icon: <QuestionCircleOutlined />, label: "Quản lý câu hỏi" }, // Đã thay đổi
-];
 
   return (
     <Sider
       collapsible
       collapsed={collapsed}
-      onCollapse={(value) => setCollapsed(value)}
+      onCollapse={setCollapsed}
       trigger={null}
       theme="light"
-      width={250}
+      width={270}
+      className="admin-sidebar"
       style={{
-        borderRight: `1px solid ${token.colorBorderSecondary}`,
         height: "100vh",
         position: "sticky",
         top: 0,
@@ -46,44 +51,22 @@ const items = [
         overflow: "auto",
       }}
     >
-      {/* 2. Khu vực Header của Sidebar (Chứa Logo + Nút Toggle) */}
-      <div
-        style={{
-          height: 64, // Chiều cao chuẩn header
-          display: "flex",
-          alignItems: "center",
-          justifyContent: collapsed ? "center" : "space-between", // Căn chỉnh linh hoạt
-          padding: "0 16px",
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-          marginBottom: 16
-        }}
-      >
-        {/* Tên ứng dụng (Ẩn khi thu nhỏ) */}
+      <div className="admin-sidebar-logo">
         {!collapsed && (
-          <span
-            style={{
-              fontWeight: "bold",
-              fontSize: 25,
-              color: token.colorPrimary,
-              whiteSpace: "nowrap",
-              overflow: "hidden"
-            }}
-          >
-            VNUA Quiz
-          </span>
+          <div className="admin-brand">
+            <div className="admin-brand-mark">Q</div>
+            <div className="admin-brand-text">
+              <span className="admin-brand-title">VNUA Quiz</span>
+              <span className="admin-brand-subtitle">Admin Panel</span>
+            </div>
+          </div>
         )}
 
-        {/* Nút Toggle tự chế */}
         <Button
           type="text"
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={() => setCollapsed(!collapsed)}
-          style={{
-            fontSize: "20px",
-            width: 32,
-            height: 32,
-            color: token.colorText,
-          }}
+          style={{ width: 38, height: 38 }}
         />
       </div>
 
@@ -93,7 +76,6 @@ const items = [
         selectedKeys={[location.pathname]}
         onClick={({ key }) => navigate(key)}
         items={items}
-        style={{ borderRight: 0 , fontSize: 16}}
       />
     </Sider>
   );

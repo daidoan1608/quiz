@@ -1,27 +1,16 @@
 import React, { useState } from "react";
 import { publicAxios } from "../api/axiosConfig";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
-import {
-  Form,
-  Input,
-  Button,
-  Card,
-  Typography,
-  message,
-  theme,
-} from "antd";
+import { Form, Input, Button, Card, Typography, message, theme } from "antd";
 import { UserOutlined, LockOutlined, LoginOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
 function Login() {
   const { login } = useAuth();
-  const navigate = useNavigate();
-  const { token } = theme.useToken(); // Lấy token màu sắc
+  const { token } = theme.useToken();
   const [loading, setLoading] = useState(false);
 
-  // Xử lý đăng nhập
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -32,19 +21,15 @@ function Login() {
 
       const { accessToken, refreshToken, userId, role } = response.data.data;
 
-      // Kiểm tra quyền (Logic cũ của bạn)
       if (role === "USER") {
         message.error("Bạn không có quyền truy cập trang quản trị!");
         return;
       }
 
-      message.success("Đăng nhập thành công!");
       login(accessToken, refreshToken, userId, role, values.username);
-      navigate("/");
+      message.success("Đăng nhập thành công!");
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        "Đăng nhập thất bại. Vui lòng kiểm tra lại!";
+      const errorMessage = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại!";
       message.error(errorMessage);
     } finally {
       setLoading(false);
@@ -54,75 +39,59 @@ function Login() {
   return (
     <div
       style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: token.colorBgLayout, // Màu nền tự động đổi theo theme (Xám nhạt / Đen)
-        backgroundImage:
-          "linear-gradient(135deg, rgba(24,144,255,0.1) 0%, rgba(24,144,255,0) 100%)", // Hiệu ứng nền nhẹ
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+        background:
+          "radial-gradient(circle at top left, rgba(19,127,236,.16), transparent 34rem), radial-gradient(circle at bottom right, rgba(16,185,129,.13), transparent 28rem), var(--admin-bg)",
       }}
     >
       <Card
         bordered={false}
         style={{
-          width: 400,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)", // Đổ bóng nhẹ
-          borderRadius: token.borderRadiusLG,
+          width: "100%",
+          maxWidth: 430,
+          borderRadius: 24,
+          boxShadow: "var(--admin-shadow)",
+          background: token.colorBgContainer,
         }}
       >
-        {/* Logo / Header */}
         <div style={{ textAlign: "center", marginBottom: 30 }}>
-          <img
-            src="/image.png"
-            alt="Logo"
-            style={{ height: 60, marginBottom: 16 }}
-          />
-          <Title level={3} style={{ color: token.colorPrimary, margin: 0 }}>
-            VNUA Manager
+          <div
+            style={{
+              width: 68,
+              height: 68,
+              borderRadius: 22,
+              display: "grid",
+              placeItems: "center",
+              margin: "0 auto 18px",
+              color: "#fff",
+              fontSize: 28,
+              fontWeight: 800,
+              background: `linear-gradient(135deg, ${token.colorPrimary}, #10b981)`,
+              boxShadow: "0 18px 40px rgba(19,127,236,.24)",
+            }}
+          >
+            Q
+          </div>
+          <Title level={2} style={{ margin: 0, letterSpacing: "-0.04em" }}>
+            VNUA Quiz
           </Title>
           <Text type="secondary">Đăng nhập hệ thống quản trị</Text>
         </div>
 
-        {/* Form Đăng nhập */}
-        <Form
-          name="login_form"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          size="large"
-          layout="vertical"
-        >
-          <Form.Item
-            name="username"
-            rules={[
-              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
-            ]}
-          >
-            <Input
-              prefix={<UserOutlined className="site-form-item-icon" />}
-              placeholder="Tên đăng nhập"
-            />
+        <Form name="login_form" onFinish={onFinish} size="large" layout="vertical" requiredMark={false}>
+          <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập!" }]}>
+            <Input prefix={<UserOutlined />} placeholder="Nhập tên đăng nhập" />
           </Form.Item>
 
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-          >
-            <Input.Password
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              placeholder="Mật khẩu"
-            />
+          <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}>
+            <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
           </Form.Item>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="login-form-button"
-              block
-              loading={loading}
-              icon={<LoginOutlined />}
-            >
+          <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>
+            <Button type="primary" htmlType="submit" block loading={loading} icon={<LoginOutlined />} style={{ height: 44 }}>
               Đăng nhập
             </Button>
           </Form.Item>

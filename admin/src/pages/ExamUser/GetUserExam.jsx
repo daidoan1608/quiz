@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAxios } from "../../api/axiosConfig";
 import {
@@ -43,33 +43,19 @@ export default function GetUserExam() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 7, total: 0 });
   const navigate = useNavigate();
 
-  // Thêm hàm handleReload để đồng bộ với Layout
-  const handleReload = () => {
-    // Luôn tải lại từ trang 1 khi nhấn nút Tải lại
-    fetchData(1);
-  };
-
-  useEffect(() => {
-    fetchData(1);
-  }, []);
-
-  const fetchData = async (page = pagination.current) => {
+  const fetchData = useCallback(async (page = 1) => {
     setLoading(true);
     try {
       const examResponse = await authAxios.get("/admin/userexams", {
-        params: { page: page - 1, size: pagination.pageSize } // Thêm tham số phân trang
+        params: { page: page - 1, size: pagination.pageSize },
       });
       const exams = examResponse.data.data || [];
-      const totalElements = examResponse.data.totalElements || 0; // Giả định API trả về totalElements
+      const totalElements = examResponse.data.totalElements || 0;
 
-      // 2-5. Logic lấy user và Gộp dữ liệu (Giữ nguyên)
       const uniqueUserIds = [...new Set(exams.map((item) => item.userExamDto.userId))];
-
-      const userPromises = uniqueUserIds.map(
-        (id) =>
-          authAxios.get(`/user/${id}`).catch(() => ({ data: { data: null } }))
+      const userPromises = uniqueUserIds.map((id) =>
+        authAxios.get(`/user/${id}`).catch(() => ({ data: { data: null } }))
       );
-
       const userResponses = await Promise.all(userPromises);
 
       const userMap = {};
@@ -95,15 +81,24 @@ export default function GetUserExam() {
       });
 
       setData(mergedData);
-      setPagination(prev => ({ ...prev, current: page, total: totalElements })); // Cập nhật tổng số phần tử
-
+      setPagination((prev) => ({ ...prev, current: page, total: totalElements }));
     } catch (error) {
       console.error("Lỗi lấy dữ liệu:", error);
       message.error("Không thể tải danh sách bài thi!");
     } finally {
       setLoading(false);
     }
+  }, [pagination.pageSize]);
+
+  // Thêm hàm handleReload để đồng bộ với Layout
+  const handleReload = () => {
+    // Luôn tải lại từ trang 1 khi nhấn nút Tải lại
+    fetchData(1);
   };
+
+  useEffect(() => {
+    fetchData(1);
+  }, [fetchData]);
 
   // Hàm lọc dữ liệu theo từ khóa tìm kiếm
   const getFilteredData = () => {

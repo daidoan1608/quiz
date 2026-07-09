@@ -1,26 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Statistic, theme } from "antd"; // Import component Antd
+import { Row, Col, Card, Statistic, theme, Typography } from "antd";
 import { authAxios } from "../../api/axiosConfig";
 import StatisticsChart from "../../components/common/StatisticsChart";
+import { ReadOutlined, QuestionCircleOutlined, FileTextOutlined, UserOutlined } from "@ant-design/icons";
 
-// Import Icon cho sinh động
-import {
-  ReadOutlined,
-  QuestionCircleOutlined,
-  FileTextOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+const { Title, Text } = Typography;
 
 export default function ContentHome() {
-  const [loading, setLoading] = useState(true); // Thêm state loading
+  const [loading, setLoading] = useState(true);
   const [statistics, setStatistics] = useState({
     totalSubjects: 0,
     totalQuestions: 0,
     totalUsers: 0,
     totalExams: 0,
   });
-
-  // Lấy token màu để trang trí icon nếu thích (không bắt buộc)
   const { token } = theme.useToken();
 
   useEffect(() => {
@@ -31,7 +24,6 @@ export default function ContentHome() {
         setStatistics(response.data.data);
       } catch (error) {
         console.error("Error fetching statistics:", error);
-        // Antd notification sẽ tốt hơn alert, nhưng giữ alert tạm cũng được
       } finally {
         setLoading(false);
       }
@@ -40,66 +32,52 @@ export default function ContentHome() {
     fetchStatistics();
   }, []);
 
+  const cards = [
+    { title: "Môn học", value: statistics.totalSubjects, icon: <ReadOutlined />, color: token.colorPrimary },
+    { title: "Câu hỏi", value: statistics.totalQuestions, icon: <QuestionCircleOutlined />, color: token.colorWarning },
+    { title: "Đề thi", value: statistics.totalExams, icon: <FileTextOutlined />, color: token.colorSuccess },
+    { title: "Người dùng", value: statistics.totalUsers, icon: <UserOutlined />, color: token.colorError },
+  ];
+
   return (
-    <div style={{ paddingBottom: 24 }}>
-      {" "}
-      {/* Padding dưới cùng để chart không sát đáy */}
-      {/* KHỐI 1: 4 CARD THỐNG KÊ */}
-      <Row gutter={[16, 16]}>
-        {" "}
-        {/* Gutter: Khoảng cách giữa các ô [ngang, dọc] */}
-        {/* Card 1: Môn học */}
-        <Col xs={24} sm={12} md={6}>
-          <Card bordered={true} loading={loading}>
-            <Statistic
-              title="Số môn học"
-              value={statistics.totalSubjects}
-              prefix={<ReadOutlined style={{ color: token.colorPrimary }} />}
-            />
-          </Card>
-        </Col>
-        {/* Card 2: Câu hỏi */}
-        <Col xs={24} sm={12} md={6}>
-          <Card bordered={true} loading={loading}>
-            <Statistic
-              title="Số câu hỏi"
-              value={statistics.totalQuestions}
-              prefix={
-                <QuestionCircleOutlined style={{ color: token.colorWarning }} />
-              }
-            />
-          </Card>
-        </Col>
-        {/* Card 3: Đề thi */}
-        <Col xs={24} sm={12} md={6}>
-          <Card bordered={true} loading={loading}>
-            <Statistic
-              title="Số đề thi"
-              value={statistics.totalExams}
-              prefix={
-                <FileTextOutlined style={{ color: token.colorSuccess }} />
-              }
-            />
-          </Card>
-        </Col>
-        {/* Card 4: Người dùng */}
-        <Col xs={24} sm={12} md={6}>
-          <Card bordered={true} loading={loading}>
-            <Statistic
-              title="Số người dùng"
-              value={statistics.totalUsers}
-              prefix={<UserOutlined style={{ color: token.colorError }} />}
-            />
-          </Card>
-        </Col>
-      </Row>
-      {/* KHỐI 2: BIỂU ĐỒ */}
-      <div style={{ marginTop: 24 }}>
-        <Card title="Thống kê tổng quan" bordered={false} loading={loading}>
-          {/* Truyền dữ liệu vào Chart như cũ */}
-          <StatisticsChart statistics={statistics} />
-        </Card>
+    <div>
+      <div style={{ marginBottom: 22 }}>
+        <Title level={2} style={{ margin: 0, letterSpacing: "-0.04em" }}>Dashboard</Title>
+        <Text type="secondary">Tổng quan nhanh về dữ liệu và hoạt động của hệ thống.</Text>
       </div>
+
+      <Row gutter={[18, 18]}>
+        {cards.map((item) => (
+          <Col xs={24} sm={12} lg={6} key={item.title}>
+            <Card bordered={false} loading={loading} className="modern-card">
+              <Statistic
+                title={item.title}
+                value={item.value}
+                prefix={
+                  <span
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 14,
+                      display: "inline-grid",
+                      placeItems: "center",
+                      marginRight: 6,
+                      color: item.color,
+                      background: `${item.color}18`,
+                    }}
+                  >
+                    {item.icon}
+                  </span>
+                }
+              />
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      <Card title="Thống kê tổng quan" bordered={false} loading={loading} className="modern-card" style={{ marginTop: 22 }}>
+        <StatisticsChart statistics={statistics} />
+      </Card>
     </div>
   );
 }

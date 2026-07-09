@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Form, Input, Button, Card, Select, message,
   Row, Col, Typography, Table, Tag, Space,
@@ -44,6 +44,17 @@ const UpdateUserModal = ({ isModalOpen, onCancel, onSuccess, userId }) => {
     fetchCategories();
   }, []);
 
+  const fetchModPermissions = useCallback(async (modId) => {
+    try {
+      const response = await authAxios.get(`/admin/permissions/mod/${modId}`);
+      setCurrentModPermissions(response.data || {});
+      resetPermForm();
+    } catch (error) {
+      console.error("Lỗi fetch permissions:", error);
+      setCurrentModPermissions({});
+    }
+  }, []);
+
   // --- FETCH USER DETAILS ---
   useEffect(() => {
     if (!isModalOpen || !userId) return;
@@ -76,18 +87,7 @@ const UpdateUserModal = ({ isModalOpen, onCancel, onSuccess, userId }) => {
       }
     };
     fetchUserDetails();
-  }, [userId, isModalOpen, form, onCancel]);
-
-  const fetchModPermissions = async (modId) => {
-    try {
-      const response = await authAxios.get(`/admin/permissions/mod/${modId}`);
-      setCurrentModPermissions(response.data || {});
-      resetPermForm();
-    } catch (error) {
-      console.error("Lỗi fetch permissions:", error);
-      setCurrentModPermissions({});
-    }
-  };
+  }, [userId, isModalOpen, form, onCancel, fetchModPermissions]);
 
   // --- HANDLERS ---
   const handleUpdateUser = async (values) => {

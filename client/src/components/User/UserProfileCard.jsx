@@ -1,7 +1,14 @@
 import React from "react";
-const BASE_URL_AVATAR = process.env.REACT_APP_AVATAR_URL
+const BASE_URL_AVATAR = process.env.REACT_APP_AVATAR_URL;
+const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-export default function UserProfileCard({ user, onUploadAvatar, onChangePasswordClick, onLogout, texts }) {
+export default function UserProfileCard({ user, avatarUrl, onUploadAvatar, onChangePasswordClick, onLogout, texts }) {
+  const resolvedAvatarUrl = avatarUrl || user?.avatarUrl || localStorage.getItem("avatarUrl");
+  const avatarSrc = resolvedAvatarUrl
+    ? resolvedAvatarUrl.startsWith("http")
+      ? resolvedAvatarUrl
+      : `${BASE_URL_AVATAR || ""}${resolvedAvatarUrl}`
+    : DEFAULT_AVATAR;
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -16,17 +23,14 @@ export default function UserProfileCard({ user, onUploadAvatar, onChangePassword
       {/* Avatar & Info */}
       <div className="flex flex-col items-center text-center">
         <div className="relative group cursor-pointer">
-<div
-  className="h-24 w-24 rounded-full bg-cover bg-center ring-4 ring-primary/20 dark:ring-primary/40"
-  style={{
-    // Ghép URL gốc của Backend vào trước đường dẫn tương đối
-    backgroundImage: `url("${
-      user.avatarUrl
-            ? (user.avatarUrl.startsWith("http") ? user.avatarUrl : BASE_URL_AVATAR + user.avatarUrl)
-            : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-    }")`
-  }}
-></div>
+          <img
+            src={avatarSrc}
+            alt={user?.fullName || user?.username || "User Avatar"}
+            className="h-24 w-24 rounded-full object-cover ring-4 ring-primary/20 dark:ring-primary/40 bg-gray-100 dark:bg-gray-700"
+            onError={(e) => {
+              e.currentTarget.src = DEFAULT_AVATAR;
+            }}
+          />
           {/* Overlay Upload Icon */}
           <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white">
             <span className="material-symbols-outlined">upload</span>
