@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,110 +8,224 @@
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-/* ------------------ THEME CONFIGURATION ------------------ */
-
+/* ------------------ AURA FRONTEND DESIGN TOKENS ------------------ */
 :root {
-  /* Default light theme variables (Blue Accent) */
-  --primary-color: 19, 127, 236; /* #137fec */
-  --primary-hover: 15, 102, 190;
+  color-scheme: light;
+
+  /* RGB tokens used by Tailwind config */
+  --primary-color: 0, 88, 190; /* #0058be */
+  --primary-hover: 33, 112, 228; /* #2170e4 */
   --primary-light: 239, 246, 255;
-  
-  --bg-page: 246, 247, 248; /* #f6f7f8 */
+  --bg-page: 247, 249, 251; /* #f7f9fb */
   --bg-card: 255, 255, 255;
+
+  /* Semantic CSS tokens */
+  --aura-bg: #f7f9fb;
+  --aura-canvas: #ffffff;
+  --aura-surface: #f8fafc;
+  --aura-surface-2: #f2f4f6;
+  --aura-text: #191c1e;
+  --aura-muted: #424754;
+  --aura-subtle: #64748b;
+  --aura-primary: #0058be;
+  --aura-primary-hover: #2170e4;
+  --aura-primary-soft: #eaf2ff;
+  --aura-border: #e2e8f0;
+  --aura-border-strong: #c2c6d6;
+  --aura-error: #ba1a1a;
+  --aura-success: #15803d;
+  --aura-warning: #b45309;
+  --aura-radius-sm: 6px;
+  --aura-radius: 12px;
+  --aura-radius-lg: 18px;
+  --aura-radius-xl: 24px;
+  --aura-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.05);
+  --aura-shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.08);
 }
 
-/* Light mode overrides for themes */
 .theme-blue {
-  --primary-color: 19, 127, 236;
-  --primary-hover: 15, 102, 190;
+  --primary-color: 0, 88, 190;
+  --primary-hover: 33, 112, 228;
   --primary-light: 239, 246, 255;
-  --bg-page: 246, 247, 248;
+  --aura-primary: #0058be;
+  --aura-primary-hover: #2170e4;
+  --aura-primary-soft: #eaf2ff;
 }
 
 .theme-emerald {
   --primary-color: 16, 185, 129;
   --primary-hover: 5, 150, 105;
   --primary-light: 240, 253, 250;
-  --bg-page: 240, 244, 241;
+  --aura-primary: #059669;
+  --aura-primary-hover: #10b981;
+  --aura-primary-soft: #ecfdf5;
 }
 
 .theme-cyberpunk {
-  --primary-color: 236, 72, 153;
+  --primary-color: 190, 24, 93;
   --primary-hover: 219, 39, 119;
-  --primary-light: 253, 244, 255;
-  --bg-page: 245, 240, 248;
+  --primary-light: 253, 242, 248;
+  --aura-primary: #be185d;
+  --aura-primary-hover: #db2777;
+  --aura-primary-soft: #fdf2f8;
 }
 
 .theme-sunset {
-  --primary-color: 249, 115, 22;
-  --primary-hover: 234, 88, 12;
+  --primary-color: 234, 88, 12;
+  --primary-hover: 249, 115, 22;
   --primary-light: 255, 247, 237;
-  --bg-page: 248, 242, 238;
+  --aura-primary: #ea580c;
+  --aura-primary-hover: #f97316;
+  --aura-primary-soft: #fff7ed;
 }
 
 .theme-slate {
   --primary-color: 79, 70, 229;
   --primary-hover: 67, 56, 202;
   --primary-light: 238, 242, 255;
-  --bg-page: 241, 243, 247;
+  --aura-primary: #4f46e5;
+  --aura-primary-hover: #4338ca;
+  --aura-primary-soft: #eef2ff;
 }
 
-/* Default Dark theme variables */
 .dark {
-  --primary-color: 19, 127, 236;
-  --primary-hover: 30, 144, 255;
-  --primary-light: 30, 58, 138;
-  
-  --bg-page: 16, 25, 34; /* #101922 */
-  --bg-card: 28, 42, 54; /* #1C2A36 */
+  color-scheme: dark;
+  --primary-color: 96, 165, 250; /* #60a5fa */
+  --primary-hover: 164, 201, 255;
+  --primary-light: 30, 41, 59;
+  --bg-page: 15, 23, 42; /* #0f172a */
+  --bg-card: 30, 41, 59; /* #1e293b */
+
+  --aura-bg: #0f172a;
+  --aura-canvas: #101415;
+  --aura-surface: #1e293b;
+  --aura-surface-2: #334155;
+  --aura-text: #f8fafc;
+  --aura-muted: #c1c7d3;
+  --aura-subtle: #94a3b8;
+  --aura-primary: #60a5fa;
+  --aura-primary-hover: #a4c9ff;
+  --aura-primary-soft: rgba(96, 165, 250, 0.14);
+  --aura-border: #334155;
+  --aura-border-strong: #414751;
+  --aura-shadow: none;
+  --aura-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
 }
 
-/* Dark mode overrides for themes */
-.theme-blue.dark {
-  --primary-color: 19, 127, 236;
-  --primary-hover: 30, 144, 255;
-  --primary-light: 30, 58, 138;
-  --bg-page: 16, 25, 34;
-  --bg-card: 28, 42, 54;
-}
-
-.theme-emerald.dark {
-  --primary-color: 16, 185, 129;
-  --primary-hover: 52, 211, 153;
-  --primary-light: 6, 95, 70;
-  --bg-page: 12, 24, 20;
-  --bg-card: 22, 38, 32;
-}
-
-.theme-cyberpunk.dark {
-  --primary-color: 236, 72, 153;
-  --primary-hover: 244, 114, 182;
-  --primary-light: 131, 24, 67;
-  --bg-page: 21, 12, 36;
-  --bg-card: 32, 19, 52;
-}
-
-.theme-sunset.dark {
-  --primary-color: 249, 115, 22;
-  --primary-hover: 251, 146, 60;
-  --primary-light: 124, 45, 18;
-  --bg-page: 24, 15, 12;
-  --bg-card: 38, 23, 19;
-}
-
-.theme-slate.dark {
-  --primary-color: 99, 102, 241;
-  --primary-hover: 129, 140, 248;
-  --primary-light: 49, 46, 129;
-  --bg-page: 15, 23, 42;
-  --bg-card: 30, 41, 59;
-}
-
-/* Custom transitions helper to make theme switching look premium */
 .theme-transition,
 .theme-transition *,
 .theme-transition *::before,
 .theme-transition *::after {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease, box-shadow 0.3s ease !important;
 }
 
+@layer base {
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(var(--primary-color), 0.08), transparent 34rem),
+      linear-gradient(180deg, var(--aura-canvas) 0%, var(--aura-bg) 40%, var(--aura-bg) 100%);
+    color: var(--aura-text);
+    font-size: 16px;
+    line-height: 24px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: rgba(var(--primary-color), 0.18); }
+
+  a { color: inherit; }
+
+  button,
+  input,
+  select,
+  textarea { font: inherit; }
+
+  :focus-visible {
+    outline: 3px solid rgba(var(--primary-color), 0.28);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .aura-container {
+    width: min(100% - 32px, 1280px);
+    margin-inline: auto;
+  }
+
+  .aura-page {
+    min-height: 100vh;
+    background: var(--aura-bg);
+    color: var(--aura-text);
+  }
+
+  .aura-card {
+    border: 1px solid var(--aura-border);
+    border-radius: var(--aura-radius-lg);
+    background: color-mix(in srgb, var(--aura-canvas) 92%, transparent);
+    box-shadow: var(--aura-shadow);
+  }
+
+  .aura-button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: var(--aura-radius);
+    font-weight: 700;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .aura-button-primary {
+    background: var(--aura-primary);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(var(--primary-color), 0.18);
+  }
+
+  .dark .aura-button-primary { color: #0f172a; }
+
+  .aura-button-primary:hover {
+    background: var(--aura-primary-hover);
+    transform: translateY(-1px);
+  }
+
+  .aura-button-subtle {
+    border: 1px solid var(--aura-border);
+    background: var(--aura-surface);
+    color: var(--aura-text);
+  }
+
+  .aura-input {
+    min-height: 44px;
+    border-radius: var(--aura-radius);
+    border: 1px solid var(--aura-border);
+    background: var(--aura-canvas);
+    color: var(--aura-text);
+  }
+
+  .dark .aura-input { background: var(--aura-surface); }
+
+  .aura-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 4px 10px;
+    background: var(--aura-primary-soft);
+    color: var(--aura-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+}
+
+@media (max-width: 768px) {
+  body { font-size: 15px; }
+  .aura-container { width: min(100% - 24px, 1280px); }
+}

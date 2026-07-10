@@ -6,12 +6,11 @@ import Footer from "../components/Footer";
 
 const Layout = () => {
   return (
-    // THAY ĐỔI ĐÃ ÁP DỤNG Ở ĐÂY:
-    <div className="layout min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div className="layout aura-page min-h-screen flex flex-col transition-colors duration-300">
       <Headers />
-      <div className="main-content flex flex-col">
+      <main className="main-content flex-1 flex flex-col">
         <Outlet />
-      </div>
+      </main>
       <Footer />
     </div>
   );
