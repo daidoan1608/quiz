@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-public class PermissionAssignmentDTO {
+public class PermissionAssignmentDto {
 
     // ID của người dùng (Mod) được phân quyền
     private UUID modUserId;

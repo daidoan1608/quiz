@@ -23,10 +23,11 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (userId, role, username) => {
+  const login = (userId, role, username, fullName) => {
     localStorage.setItem("userId", userId);
     localStorage.setItem("role", role);
     localStorage.setItem("username", username);
+    localStorage.setItem("fullName", fullName || username || "Admin");
     setIsLoggedIn(true);
     setUser(userId);
     navigate("/", { replace: true });

@@ -17,12 +17,12 @@ const FavoritesModal = ({ isOpen, onClose }) => {
 
   const handleReview = (subjectId) => {
     onClose(); // Đóng modal trước khi chuyển trang
-    navigate(`/listChap`, { state: { subjectId } });
+    navigate(`/subjects/${subjectId}`, { state: { subjectId } });
   };
 
   const handleMockTest = (subjectId) => {
     onClose();
-    navigate(`/exams`, { state: { subjectId } });
+    navigate(`/subjects/${subjectId}`, { state: { subjectId } });
   };
 
   if (!isOpen) return null;

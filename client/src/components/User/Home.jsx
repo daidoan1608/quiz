@@ -79,7 +79,7 @@ export default function Home() {
             {/* Glowing background highlights */}
             <div className="absolute top-0 left-1/4 w-72 h-72 bg-primary/20 rounded-full blur-3xl -z-10 pointer-events-none"></div>
             <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-blue-400/10 dark:bg-indigo-500/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
-            
+
             <div className="flex-1 flex flex-col gap-5 text-center lg:text-left">
               <span className="inline-flex w-fit mx-auto lg:mx-0 items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                 ✨ Học tập thông minh cùng AI
@@ -91,19 +91,13 @@ export default function Home() {
                 {texts.slogan1 ||
                   "Nền tảng ôn tập và kiểm tra thử hàng đầu giúp bạn đạt điểm số cao nhất."}
               </p>
-              
+
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start mt-2">
-                <button 
-                  onClick={() => navigate("/exam")}
+                <button
+                  onClick={() => navigate("/subjects")}
                   className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
                 >
-                  Bắt đầu thi thử
-                </button>
-                <button 
-                  onClick={() => navigate("/revision")}
-                  className="px-6 py-3 rounded-xl bg-white dark:bg-gray-800 text-gray-700 dark:text-white font-bold text-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition active:scale-95 cursor-pointer"
-                >
-                  Ôn tập lý thuyết
+                  Bắt đầu
                 </button>
               </div>
             </div>
@@ -242,7 +236,7 @@ export default function Home() {
                     subjects.slice(0, 6).map((item, index) => (
                       <div
                         key={index}
-                        onClick={() => navigate(`/list-chapter`, { state: { subjectId: item.subjectId } })}
+                        onClick={() => navigate(`/subjects/${item.subjectId}`, { state: { subjectId: item.subjectId } })}
                         className="flex flex-col gap-4 rounded-2xl p-6 bg-white dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700/50 hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 dark:hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
                       >
                         <div className="flex items-center justify-center size-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
@@ -410,7 +404,7 @@ export default function Home() {
                 >
                   {/* Decorative Gradient Background for Avatar */}
                   <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary/20 to-primary/5 rounded-t-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
- 
+
                   <div className="relative flex flex-col items-center">
                     {/* Avatar */}
                     <div className="relative mb-4">
@@ -437,7 +431,7 @@ export default function Home() {
                         </svg>
                       </div>
                     </div>
- 
+
                     {/* Info */}
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
                       {member.name}
@@ -448,7 +442,7 @@ export default function Home() {
                     <p className="text-gray-500 dark:text-gray-400 text-sm text-center italic">
                       "{member.quote}"
                     </p>
- 
+
                     {/* Social Links (Demo) */}
                     <div className="flex gap-3 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
                       <button className="text-gray-400 hover:text-primary transition-colors cursor-pointer">

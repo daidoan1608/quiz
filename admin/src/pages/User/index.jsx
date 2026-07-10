@@ -23,8 +23,8 @@ import {
 import ManagementPageLayout from '../../layouts/ManagementPageLayout'; // <-- Thay đổi đường dẫn nếu cần
 
 // IMPORT CÁC MODAL ĐÃ TÁCH
-import AddUserModal from "../../components/modal/AddUserModal";
-import UpdateUserModal from "../../components/modal/UpdateUserModal";
+import AddUserModal from "../../components/Modal/AddUserModal";
+import UpdateUserModal from "../../components/Modal/UpdateUserModal";
 
 const { Text } = Typography;
 const { Option } = Select;

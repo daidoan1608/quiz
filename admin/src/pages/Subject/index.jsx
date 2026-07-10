@@ -23,9 +23,9 @@ import ManagementPageLayout from '../../layouts/ManagementPageLayout';
 
 // --- IMPORT API VÀ MODAL ---
 import { authAxios } from "../../api/axiosConfig";
-import AddSubjectModal from "../../components/modal/AddSubjectModal";
-import UpdateSubjectModal from "../../components/modal/UpdateSubjectModal";
-import ChapterListModal from "../../components/modal/ChapterListModal";
+import AddSubjectModal from "../../components/Modal/AddSubjectModal";
+import UpdateSubjectModal from "../../components/Modal/UpdateSubjectModal";
+import ChapterListModal from "../../components/Modal/ChapterListModal";
 
 const { Text } = Typography;
 

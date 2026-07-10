@@ -19,7 +19,7 @@ import {
     ReloadOutlined,
     SearchOutlined,
 } from "@ant-design/icons";
-import ChapterQuestionModal from '../../components/modal/ChapterQuestionModal'; // Điều chỉnh đường dẫn thực tế
+import ChapterQuestionModal from '../../components/Modal/ChapterQuestionModal'; // Điều chỉnh đường dẫn thực tế
 
 const { Title, Text } = Typography;
 

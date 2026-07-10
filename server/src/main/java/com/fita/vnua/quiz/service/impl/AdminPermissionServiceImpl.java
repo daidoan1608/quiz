@@ -1,7 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
-import com.fita.vnua.quiz.model.dto.PermissionAssignmentDTO;
+import com.fita.vnua.quiz.model.dto.PermissionAssignmentDto;
 import com.fita.vnua.quiz.model.dto.request.RoleUpdateRequest;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.model.entity.UserSubjectPermission;
@@ -27,7 +27,7 @@ public class AdminPermissionServiceImpl implements AdminPermissionService {
 
     @Override
     @Transactional
-    public void assignSubjectPermissions(PermissionAssignmentDTO assignment) {
+    public void assignSubjectPermissions(PermissionAssignmentDto assignment) {
         User targetUser = userRepository.findById(assignment.getModUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("User to assign permissions not found."));
 
@@ -71,7 +71,7 @@ public class AdminPermissionServiceImpl implements AdminPermissionService {
         return "Đã cập nhật vai trò thành: " + newRole;
     }
 
-    private UserSubjectPermission buildPermission(PermissionAssignmentDTO assignment, String permission) {
+    private UserSubjectPermission buildPermission(PermissionAssignmentDto assignment, String permission) {
         UserSubjectPermission userSubjectPermission = new UserSubjectPermission();
         userSubjectPermission.setUserId(assignment.getModUserId());
         userSubjectPermission.setSubjectId(assignment.getSubjectId());

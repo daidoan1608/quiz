@@ -1,6 +1,6 @@
-package com.fita.vnua.quiz.repository;
+﻿package com.fita.vnua.quiz.repository;
 
-import com.fita.vnua.quiz.genaretor.FavoriteId;
+import com.fita.vnua.quiz.generator.FavoriteId;
 import com.fita.vnua.quiz.model.entity.Favorite;
 import com.fita.vnua.quiz.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

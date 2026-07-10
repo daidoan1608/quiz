@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Select } from 'antd';
 import { publicAxios } from '../../api/axiosConfig';
-import { useLanguage } from '../Context/LanguageProvider';
-import subjectTranslations from '../../Languages/subjectTranslations';
+import { useLanguage } from '../context/LanguageProvider';
+import subjectTranslations from '../../languages/subjectTranslations';
 
 const { Option } = Select;
 

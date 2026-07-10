@@ -80,7 +80,9 @@ export default function ExamUsers() {
       return;
     }
     const startTime = new Date().toISOString();
-    navigate("/taketheexam", { state: { examId, startTime } });
+    navigate(`/subjects/${subjectId}/exams/${examId}`, {
+      state: { examId, subjectId, startTime },
+    });
   };
 
   // --- RENDER HELPERS ---
@@ -142,7 +144,7 @@ export default function ExamUsers() {
             <span>/</span>
             <span
               className="hover:text-blue-600 cursor-pointer transition-colors"
-              onClick={() => navigate("/chooseExam")}
+              onClick={() => navigate("/subjects")}
             >
               Môn học
             </span>

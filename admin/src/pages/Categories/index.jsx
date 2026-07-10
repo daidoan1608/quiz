@@ -21,9 +21,9 @@ import {
 import ManagementPageLayout from '../../layouts/ManagementPageLayout';
 
 // --- IMPORT CÁC MODAL ĐÃ TÁCH ---
-import AddCategoryModal from "../../components/modal/AddCategoryModal";
-import UpdateCategoryModal from "../../components/modal/UpdateCategoryModal";
-import SubjectListModal from "../../components/modal/SubjectListModal"; // <-- ĐÃ THÊM MODAL MÔN HỌC
+import AddCategoryModal from "../../components/Modal/AddCategoryModal";
+import UpdateCategoryModal from "../../components/Modal/UpdateCategoryModal";
+import SubjectListModal from "../../components/Modal/SubjectListModal"; // <-- ĐÃ THÊM MODAL MÔN HỌC
 
 export default function CategoryManager() {
     const [categories, setCategories] = useState([]);

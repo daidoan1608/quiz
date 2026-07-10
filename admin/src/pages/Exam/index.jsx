@@ -23,8 +23,8 @@ import {
 import ManagementPageLayout from '../../layouts/ManagementPageLayout';
 
 // --- IMPORT MODAL ĐÃ TÁCH ---
-import AddExamModal from "../../components/modal/AddExamModal";
-import ExamViewModal from "../../components/modal/ExamViewModal"; // IMPORT MODAL MỚI
+import AddExamModal from "../../components/Modal/AddExamModal";
+import ExamViewModal from "../../components/Modal/ExamViewModal"; // IMPORT MODAL MỚI
 
 const { Text } = Typography;
 

@@ -1,6 +1,6 @@
-package com.fita.vnua.quiz.service.impl;
+﻿package com.fita.vnua.quiz.service.impl;
 
-import com.fita.vnua.quiz.genaretor.FavoriteId;
+import com.fita.vnua.quiz.generator.FavoriteId;
 import com.fita.vnua.quiz.model.dto.FavoriteDto;
 import com.fita.vnua.quiz.model.entity.Favorite;
 import com.fita.vnua.quiz.model.entity.Subject;

@@ -1,6 +1,6 @@
 package com.fita.vnua.quiz.service;
 
-import com.fita.vnua.quiz.model.dto.PermissionAssignmentDTO;
+import com.fita.vnua.quiz.model.dto.PermissionAssignmentDto;
 import com.fita.vnua.quiz.model.dto.request.RoleUpdateRequest;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface AdminPermissionService {
-    void assignSubjectPermissions(PermissionAssignmentDTO assignment);
+    void assignSubjectPermissions(PermissionAssignmentDto assignment);
 
     Map<Long, List<String>> getPermissionsByModId(UUID userId);
 

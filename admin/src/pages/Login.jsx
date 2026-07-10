@@ -19,14 +19,14 @@ function Login() {
         password: values.password,
       });
 
-      const { userId, role, username } = response.data.data;
+      const { userId, role, username, fullName } = response.data.data;
 
       if (role === "USER") {
         message.error("Bạn không có quyền truy cập trang quản trị!");
         return;
       }
 
-      login(userId, role, username || values.username);
+      login(userId, role, username || values.username, fullName);
       message.success("Đăng nhập thành công!");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại!";

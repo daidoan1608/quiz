@@ -23,8 +23,7 @@ export default function LessonList() {
 
   // Hàm chuyển hướng khi bấm vào môn học
   const handleViewSubject = (item) => {
-    // Điều hướng đến trang chi tiết môn học (sửa đường dẫn theo router của bạn)
-    navigate(`/listChapters`, { state: { subjectId: item.subjectId } });
+    navigate(`/subjects/${item.subjectId}`, { state: { subjectId: item.subjectId } });
   };
 
   return (
@@ -52,7 +51,7 @@ export default function LessonList() {
                 {texts.noFavorites || "Bạn chưa có môn học yêu thích nào."}
               </p>
               <button
-                onClick={() => navigate("/chooseExam")}
+                onClick={() => navigate("/subjects")}
                 className="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-bold hover:opacity-90 transition-opacity"
               >
                 Khám phá môn học

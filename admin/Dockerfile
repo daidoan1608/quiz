@@ -17,8 +17,8 @@ RUN npm run build
 # Cài đặt server 'serve' để chạy các file tĩnh sau khi build
 RUN npm install -g serve
 
-# Mở cổng 3001 (cho user) hoặc 3000 (cho admin)
-EXPOSE 3000
+# Mở cổng 3001 cho admin
+EXPOSE 3001
 
 # Chạy thư mục build đã được tối ưu hóa
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["serve", "-s", "build", "-l", "3001"]

@@ -34,8 +34,7 @@ export default function Headers() {
 
   const navItems = [
     { name: texts.home || "Trang chủ", link: "/" },
-    { name: texts.revision || "Ôn tập", link: "/revision" },
-    { name: texts.exams || "Kiểm tra", link: "/exam" },
+    { name: (texts.subjects || "Môn học").toUpperCase(), link: "/subjects" },
     { name: texts.rank || "Xếp hạng", link: "/rank" },
   ];
 

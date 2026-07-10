@@ -7,7 +7,7 @@ import GetQuestion from "../pages/Question/index.jsx";
 import GetSubject from "../pages/Subject/index.jsx";
 import GetUser from "../pages/User/index.jsx";
 import GetUserExam from "../pages/ExamUser/GetUserExam.jsx";
-import GetUserExambyId from "../pages/ExamUser/GetUserExambyId.jsx";
+import GetUserExamById from "../pages/ExamUser/GetUserExamById.jsx";
 import GetCategories from "../pages/Categories/index.jsx";
 import NotificationManager from "../pages/NotificationManager.jsx";
 
@@ -22,7 +22,7 @@ export default function ContentRoutes() {
       <Route path="/chapters" element={<GetChapter />} />
       <Route path="/questions" element={<GetQuestion />} />
       <Route path="/userexams" element={<GetUserExam />} />
-      <Route path="/userexam/:userExamId" element={<GetUserExambyId />} />
+      <Route path="/userexam/:userExamId" element={<GetUserExamById />} />
       <Route path="/notifications" element={<NotificationManager />} />
     </Routes>
   );

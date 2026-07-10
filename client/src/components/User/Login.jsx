@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   LockOutlined,
   UserOutlined,
-  GoogleOutlined,
   FacebookOutlined,
   GithubOutlined,
 } from "@ant-design/icons";
@@ -198,7 +197,7 @@ function Login() {
           </div>
 
           <div className="mt-6 flex justify-center gap-4">
-            <div className="flex items-center justify-center w-12 h-12">
+            <div className="social-login-btn relative overflow-hidden">
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
                   const idToken = credentialResponse.credential;
@@ -217,16 +216,48 @@ function Login() {
               shape="circle"
               icon={<FacebookOutlined className="text-xl text-blue-600" />}
               onClick={() => handleOAuthLogin("facebook")}
-              className="flex items-center justify-center w-12 h-12 border border-gray-300 hover:bg-gray-50 transition-colors"
+              className="social-login-btn"
             />
             <Button
               shape="circle"
               icon={<GithubOutlined className="text-xl text-gray-800" />}
               onClick={() => handleOAuthLogin("github")}
-              className="flex items-center justify-center w-12 h-12 border border-gray-300 hover:bg-gray-50 transition-colors"
+              className="social-login-btn"
             />
           </div>
         </div>
+
+        <style>{`
+          .social-login-btn {
+            width: 48px !important;
+            min-width: 48px !important;
+            height: 48px !important;
+            padding: 0 !important;
+            border-radius: 9999px !important;
+            border: 1px solid #d1d5db !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: #ffffff !important;
+            line-height: 1 !important;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+          }
+
+          .social-login-btn:hover {
+            background: #f9fafb !important;
+            border-color: #9ca3af !important;
+          }
+
+          .social-login-btn iframe,
+          .social-login-btn > div,
+          .social-login-btn [role="button"] {
+            width: 48px !important;
+            min-width: 48px !important;
+            max-width: 48px !important;
+            height: 48px !important;
+            border-radius: 9999px !important;
+          }
+        `}</style>
 
         {/* Footer Link */}
         <div className="text-center mt-6">

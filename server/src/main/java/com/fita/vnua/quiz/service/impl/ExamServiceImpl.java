@@ -1,10 +1,10 @@
-package com.fita.vnua.quiz.service.impl;
+﻿package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.ExamDto;
 import com.fita.vnua.quiz.model.dto.ExamSummaryDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
-import com.fita.vnua.quiz.genaretor.ExamQuestionId;
+import com.fita.vnua.quiz.generator.ExamQuestionId;
 import com.fita.vnua.quiz.model.dto.request.ExamRequest;
 import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;

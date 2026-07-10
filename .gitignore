@@ -32,3 +32,17 @@ MAINTENANCE_PLAN.md
 # Local design references
 DESIGN.md
 DESIGN (1).md
+
+# IDE / editor project files
+*.iml
+.classpath
+.project
+.factorypath
+.settings/
+.vs/
+**/.settings/
+**/.vs/
+
+# Runtime uploads
+server/uploads/
+!server/uploads/.gitkeep

@@ -82,7 +82,7 @@ const Footer = () => {
                 <a
                   // Đã thêm dark:text-gray-400
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
-                  href="/revision"
+                  href="/subjects"
                 >
                   Ôn tập kiến thức
                 </a>
@@ -91,7 +91,7 @@ const Footer = () => {
                 <a
                   // Đã thêm dark:text-gray-400
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
-                  href="/chooseExams"
+                  href="/subjects"
                 >
                   Làm bài kiểm tra
                 </a>

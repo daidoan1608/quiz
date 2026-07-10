@@ -23,9 +23,9 @@ import {
 import ManagementPageLayout from '../../layouts/ManagementPageLayout'; // <-- Đảm bảo đường dẫn đúng
 
 // --- IMPORT CÁC MODAL ĐÃ TÁCH ---
-import AddQuestionModal from "../../components/modal/AddQuestionModal";
-import UpdateQuestionModal from "../../components/modal/UpdateQuestionModal";
-import ImportModal from "../../components/modal/ImportModal"; // Giả sử path đúng
+import AddQuestionModal from "../../components/Modal/AddQuestionModal";
+import UpdateQuestionModal from "../../components/Modal/UpdateQuestionModal";
+import ImportModal from "../../components/Modal/ImportModal"; // Giả sử path đúng
 
 import { parseMarkdown } from "../../utils/parseMarkdown";
 

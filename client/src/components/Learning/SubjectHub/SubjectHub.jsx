@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useAuth } from "../../../context/AuthProvider";
 import { useFavorites } from "../../../context/FavoritesContext";
@@ -13,7 +13,8 @@ export default function RevisionListChap() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { subjectId } = location.state || {};
+  const params = useParams();
+  const subjectId = location.state?.subjectId || params.subjectId;
   const { isLoggedIn } = useAuth();
   const { favorites, toggleFavorite } = useFavorites();
 

@@ -1,6 +1,6 @@
-package com.fita.vnua.quiz.model.entity;
+﻿package com.fita.vnua.quiz.model.entity;
 
-import com.fita.vnua.quiz.genaretor.ExamQuestionId;
+import com.fita.vnua.quiz.generator.ExamQuestionId;
 import jakarta.persistence.*;
 import lombok.Data;
 

@@ -12,8 +12,8 @@ import moment from 'moment';
 
 // --- IMPORT CÁC COMPONENTS TÁCH RỜI ---
 import ManagementPageLayout from '../layouts/ManagementPageLayout'; // <-- COMPONENT LAYOUT CHUNG
-import CreateNotificationModal from '../components/modal/CreateNotificationModal';
-import RecipientDetailModal from '../components/modal/RecipientDetailModal';
+import CreateNotificationModal from '../components/Modal/CreateNotificationModal';
+import RecipientDetailModal from '../components/Modal/RecipientDetailModal';
 
 const NotificationManager = () => {
 

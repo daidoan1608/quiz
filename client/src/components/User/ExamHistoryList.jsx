@@ -10,7 +10,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
   const [expandedSubjects, setExpandedSubjects] = useState({});
 
   const handleShowDetail = (exam) => {
-    navigate("/detail", {
+    navigate("/account/detail", {
       state: {
         examId: exam.examId,
         userExamId: exam.userExamDto?.userExamId || exam.userExamDto?.id,

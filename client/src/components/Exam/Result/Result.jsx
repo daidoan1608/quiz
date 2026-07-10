@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { authAxios } from "../../../api/axiosConfig";
-import { useLanguage } from "../../../context/LanguageProvider";
+import { parseMarkdown } from "../../../utils/parseMarkdown";
 
 export default function ResultExam() {
   // --- STATE ---
@@ -13,10 +13,11 @@ export default function ResultExam() {
   // --- HOOKS ---
   const location = useLocation();
   const navigate = useNavigate();
-  // Giả định location.state chứa: examId, userExamId, correctAnswers, totalQuestions
-  const { examId, userExamId, correctAnswers, totalQuestions } =
-    location.state || {};
-  const { texts } = useLanguage();
+  const params = useParams();
+  // Result là bước cuối của luồng: /subjects/:subjectId/exams/:examId/result
+  const subjectId = location.state?.subjectId || params.subjectId;
+  const examId = location.state?.examId || params.examId;
+  const { userExamId, correctAnswers, totalQuestions } = location.state || {};
 
   // --- 1. FETCH DỮ LIỆU ---
   useEffect(() => {
@@ -251,9 +252,11 @@ export default function ResultExam() {
             <button
               onClick={() => {
                 const newStartTime = new Date().toISOString();
-                navigate("/taketheexam", {
+                const currentSubjectId = subjectId || examData?.subjectId;
+                navigate(`/subjects/${currentSubjectId}/exams/${examId}`, {
                   state: {
                     examId: examId,
+                    subjectId: currentSubjectId,
                     startTime: newStartTime,
                   },
                 });
@@ -267,13 +270,10 @@ export default function ResultExam() {
             </button>
             <button
               onClick={() => {
-                if (examData && examData.subjectId) {
-                  navigate("/list-exam", {
-                    state: { subjectId: examData.subjectId },
-                  });
-                } else {
-                  navigate("/chooseExam");
-                }
+                const currentSubjectId = subjectId || examData?.subjectId;
+                navigate(`/subjects/${currentSubjectId}`, {
+                  state: { subjectId: currentSubjectId },
+                });
               }}
               className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
@@ -333,46 +333,62 @@ export default function ResultExam() {
                         </div>
                       </div>
 
-                      {/* Grid Đáp án (2 cột) */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-2">
-                        {/* Cột 1: Đáp án của bạn */}
-                        <div
-                          className={`flex flex-col gap-1 p-3 rounded-lg border relative
-                            ${
-                                isSkipped
-                                ? "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600"
-                                : isCorrect
-                                ? "bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800"
-                                : "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800"
-                            }`}
-                        >
-                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            Đáp án của bạn
-                          </span>
-                          <span
-                            className={`font-semibold ${
-                                isSkipped
-                                ? "text-gray-600 dark:text-gray-300"
-                                : isCorrect
-                                ? "text-gray-800 dark:text-gray-200"
-                                : "text-red-800 dark:text-red-300"
-                            }`}
-                          >
-                            {userSelectedAnswer
-                              ? userSelectedAnswer.content
-                              : "Chưa chọn đáp án"}
-                          </span>
-                        </div>
+                      {/* Hiển thị đầy đủ tất cả đáp án */}
+                      <div className="grid grid-cols-1 gap-3 mt-2 sm:grid-cols-2">
+                        {question.answers.map((answer, answerIndex) => {
+                          const answerId = answer.optionId || answer.answerId;
+                          const isUserChoice = answerId === userAnswerId;
+                          const isRightAnswer = answer.isCorrect;
 
-                        {/* Cột 2: Đáp án đúng (Luôn hiện) */}
-                        <div className="flex flex-col gap-1 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 relative">
-                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            Đáp án đúng
-                          </span>
-                          <span className="font-semibold text-gray-800 dark:text-gray-200">
-                            {correctAnswer?.content}
-                          </span>
-                        </div>
+                          let answerClass = "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/60";
+                          if (isRightAnswer) {
+                            answerClass = "border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-900/30";
+                          }
+                          if (isUserChoice && !isRightAnswer) {
+                            answerClass = "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/30";
+                          }
+
+                          return (
+                            <div
+                              key={answerId || answerIndex}
+                              className={`flex items-start gap-3 rounded-lg border p-3 ${answerClass}`}
+                            >
+                              <div className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                                isRightAnswer
+                                  ? "bg-green-500 text-white"
+                                  : isUserChoice
+                                  ? "bg-red-500 text-white"
+                                  : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                              }`}>
+                                {String.fromCharCode(65 + answerIndex)}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {isRightAnswer && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                                      <span className="material-symbols-outlined !text-sm">check_circle</span>
+                                      Đáp án đúng
+                                    </span>
+                                  )}
+                                  {isUserChoice && (
+                                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold ${
+                                      isRightAnswer
+                                        ? "bg-primary/10 text-primary"
+                                        : "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+                                    }`}>
+                                      <span className="material-symbols-outlined !text-sm">person</span>
+                                      Bạn chọn
+                                    </span>
+                                  )}
+                                </div>
+                                <div
+                                  className="mt-2 text-sm font-medium text-gray-800 dark:text-gray-200"
+                                  dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>

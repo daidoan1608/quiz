@@ -1,4 +1,4 @@
-// src/routes/AppRoutes.jsx
+﻿// src/routes/AppRoutes.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";

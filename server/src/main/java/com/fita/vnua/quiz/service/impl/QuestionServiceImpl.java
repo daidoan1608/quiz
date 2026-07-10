@@ -54,7 +54,7 @@ public class QuestionServiceImpl implements QuestionService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllQuestion();
         }
-        return questionRepository.findByQuestionTextContainingIgnoreCase(keyword.trim()).stream()
+        return questionRepository.findByContentContainingIgnoreCase(keyword.trim()).stream()
                 .map(question -> modelMapper.map(question, QuestionDto.class))
                 .toList();
     }

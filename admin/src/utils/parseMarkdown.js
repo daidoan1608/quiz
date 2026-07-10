@@ -15,6 +15,13 @@
  * 4. Chuyển \n thành <br />
  * 5. Khôi phục các placeholders thành HTML/LaTeX thực
  */
+const escapeHtml = (value) => String(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
 export const parseMarkdown = (text) => {
   if (!text) return '';
 
@@ -46,23 +53,23 @@ export const parseMarkdown = (text) => {
   // ── BƯỚC 2: Trích xuất lệnh định dạng LaTeX văn bản ───────────────────────
   // \textbf{...} → <strong>
   processedText = processedText.replace(/\\textbf\{([^}]*)\}/g, (_, c) =>
-    reserve(`<strong>${c}</strong>`)
+    reserve(`<strong>${escapeHtml(c)}</strong>`)
   );
   // \textit{...} → <em>
   processedText = processedText.replace(/\\textit\{([^}]*)\}/g, (_, c) =>
-    reserve(`<em>${c}</em>`)
+    reserve(`<em>${escapeHtml(c)}</em>`)
   );
   // \emph{...} → <em>
   processedText = processedText.replace(/\\emph\{([^}]*)\}/g, (_, c) =>
-    reserve(`<em>${c}</em>`)
+    reserve(`<em>${escapeHtml(c)}</em>`)
   );
   // \underline{...} → <u>
   processedText = processedText.replace(/\\underline\{([^}]*)\}/g, (_, c) =>
-    reserve(`<u>${c}</u>`)
+    reserve(`<u>${escapeHtml(c)}</u>`)
   );
   // \texttt{...} → <code>
   processedText = processedText.replace(/\\texttt\{([^}]*)\}/g, (_, c) =>
-    reserve(`<code class="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-1 rounded">${c}</code>`)
+    reserve(`<code class="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-1 rounded">${escapeHtml(c)}</code>`)
   );
   // \rule{w}{h} → <hr>
   processedText = processedText.replace(/\\rule\{[^}]*\}\{[^}]*\}/g, () =>

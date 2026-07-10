@@ -29,7 +29,7 @@ import {
 
 const { Title, Text } = Typography;
 
-export default function GetUserExambyId() {
+export default function GetUserExamById() {
   const { userExamId } = useParams();
   const navigate = useNavigate();
   const { token } = theme.useToken(); // Lấy token màu để style động

@@ -1,6 +1,6 @@
 package com.fita.vnua.quiz.controller;
 
-import com.fita.vnua.quiz.model.dto.PermissionAssignmentDTO;
+import com.fita.vnua.quiz.model.dto.PermissionAssignmentDto;
 import com.fita.vnua.quiz.model.dto.request.RoleUpdateRequest;
 import com.fita.vnua.quiz.service.AdminPermissionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +24,7 @@ public class AdminPermissionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/subject-assignment")
     @Operation(summary = "API cập nhập quyền cho mod")
-    public ResponseEntity<String> assignSubjectPermissions(@RequestBody PermissionAssignmentDTO assignment) {
+    public ResponseEntity<String> assignSubjectPermissions(@RequestBody PermissionAssignmentDto assignment) {
         adminPermissionService.assignSubjectPermissions(assignment);
         return ResponseEntity.ok("Permissions assigned successfully.");
     }

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Table } from 'antd';
-import { useLanguage } from '../Context/LanguageProvider';
+import { useLanguage } from '../context/LanguageProvider';
 import subjectTranslations from '../../languages/subjectTranslations';
 
 export const getTitle = (averageScore, texts) => {

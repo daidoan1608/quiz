@@ -22,7 +22,7 @@ export default function Rank() {
   const fetchLeaderboardData = async () => {
     try {
       setIsLoading(true);
-      const response = await publicAxios.get("/public/summaries");
+      const response = await publicAxios.get("/public/user-exam-summaries");
       const result = response.data;
 
       if (result.status !== "success") {

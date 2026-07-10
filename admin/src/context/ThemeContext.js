@@ -50,14 +50,31 @@ const getBgContainerColor = (colorTheme, mode) => {
   }
 };
 
+const allowedModes = ['light', 'dark'];
+const allowedColorThemes = ['blue', 'emerald', 'cyberpunk', 'sunset', 'slate'];
+
 export const ThemeProvider = ({ children }) => {
   const [mode, setMode] = useState(() => {
-    return localStorage.getItem('theme-mode') || localStorage.getItem('appTheme') || 'light';
+    const savedMode = localStorage.getItem('theme-mode') || localStorage.getItem('appTheme') || 'light';
+    return allowedModes.includes(savedMode) ? savedMode : 'light';
   });
 
   const [colorTheme, setColorTheme] = useState(() => {
-    return localStorage.getItem('theme-color') || 'blue';
+    const savedColorTheme = localStorage.getItem('theme-color') || 'blue';
+    return allowedColorThemes.includes(savedColorTheme) ? savedColorTheme : 'blue';
   });
+
+  const updateMode = (nextMode) => {
+    if (allowedModes.includes(nextMode)) {
+      setMode(nextMode);
+    }
+  };
+
+  const updateColorTheme = (nextColorTheme) => {
+    if (allowedColorThemes.includes(nextColorTheme)) {
+      setColorTheme(nextColorTheme);
+    }
+  };
 
   const toggleTheme = () => {
     setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
@@ -81,9 +98,9 @@ export const ThemeProvider = ({ children }) => {
         theme: mode, // Hỗ trợ tương thích ngược
         toggleTheme,  // Hỗ trợ tương thích ngược
         mode,
-        setMode,
+        setMode: updateMode,
         colorTheme,
-        setColorTheme,
+        setColorTheme: updateColorTheme,
       }}
     >
       <ConfigProvider

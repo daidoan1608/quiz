@@ -16,6 +16,7 @@ export const ContentHeader = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { token } = antTheme.useToken();
   const username = localStorage.getItem("username") || "Admin";
+  const displayName = localStorage.getItem("fullName") || username;
 
   const handleLogout = () => {
     logout();
@@ -35,7 +36,7 @@ export const ContentHeader = () => {
       key: "user-info",
       label: (
         <div style={{ cursor: "default", padding: "6px 4px" }}>
-          <Text strong>{username}</Text>
+          <Text strong>{displayName}</Text>
           <br />
           <Text type="secondary" style={{ fontSize: 12 }}>Quản trị hệ thống</Text>
         </div>
@@ -99,7 +100,7 @@ export const ContentHeader = () => {
             <Button type="text" style={{ height: 44, padding: "0 8px 0 6px" }}>
               <Space size={10}>
                 <Avatar icon={<UserOutlined />} style={{ background: token.colorPrimary }} />
-                <span style={{ fontWeight: 700 }}>{username}</span>
+                <span style={{ fontWeight: 700 }}>{displayName}</span>
               </Space>
             </Button>
           </Dropdown>

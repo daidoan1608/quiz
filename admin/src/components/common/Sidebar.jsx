@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTheme } from "../../context/ThemeContext";
 import { Layout, Menu, Button } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -33,6 +34,7 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { mode } = useTheme();
 
   return (
     <Sider
@@ -40,7 +42,7 @@ export default function Sidebar() {
       collapsed={collapsed}
       onCollapse={setCollapsed}
       trigger={null}
-      theme="light"
+      theme={mode === "dark" ? "dark" : "light"}
       width={270}
       className="admin-sidebar"
       style={{
@@ -71,7 +73,7 @@ export default function Sidebar() {
       </div>
 
       <Menu
-        theme="light"
+        theme={mode === "dark" ? "dark" : "light"}
         mode="inline"
         selectedKeys={[location.pathname]}
         onClick={({ key }) => navigate(key)}

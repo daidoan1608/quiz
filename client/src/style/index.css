@@ -112,6 +112,51 @@
   --aura-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
 }
 
+.dark.theme-blue {
+  --primary-color: 96, 165, 250;
+  --primary-hover: 147, 197, 253;
+  --primary-light: 30, 41, 59;
+  --aura-primary: #60a5fa;
+  --aura-primary-hover: #93c5fd;
+  --aura-primary-soft: rgba(96, 165, 250, 0.16);
+}
+
+.dark.theme-emerald {
+  --primary-color: 52, 211, 153;
+  --primary-hover: 110, 231, 183;
+  --primary-light: 6, 78, 59;
+  --aura-primary: #34d399;
+  --aura-primary-hover: #6ee7b7;
+  --aura-primary-soft: rgba(52, 211, 153, 0.16);
+}
+
+.dark.theme-cyberpunk {
+  --primary-color: 244, 114, 182;
+  --primary-hover: 249, 168, 212;
+  --primary-light: 80, 7, 36;
+  --aura-primary: #f472b6;
+  --aura-primary-hover: #f9a8d4;
+  --aura-primary-soft: rgba(244, 114, 182, 0.16);
+}
+
+.dark.theme-sunset {
+  --primary-color: 251, 146, 60;
+  --primary-hover: 253, 186, 116;
+  --primary-light: 67, 20, 7;
+  --aura-primary: #fb923c;
+  --aura-primary-hover: #fdba74;
+  --aura-primary-soft: rgba(251, 146, 60, 0.16);
+}
+
+.dark.theme-slate {
+  --primary-color: 129, 140, 248;
+  --primary-hover: 165, 180, 252;
+  --primary-light: 49, 46, 129;
+  --aura-primary: #818cf8;
+  --aura-primary-hover: #a5b4fc;
+  --aura-primary-soft: rgba(129, 140, 248, 0.16);
+}
+
 .theme-transition,
 .theme-transition *,
 .theme-transition *::before,

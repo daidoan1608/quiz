@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { message } from "antd";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 
@@ -33,9 +33,12 @@ export default function RevisionChap1() {
   // --- HOOKS ---
   const location = useLocation();
   const navigate = useNavigate();
-  // Lấy data truyền từ trang trước (cần đảm bảo trang trước truyền đủ tên)
-  const { chapterId, subjectId, subjectName, chapterName } =
-    location.state || {};
+  const params = useParams();
+  // Lấy data truyền từ trang trước hoặc URL mới /subjects/:subjectId/chapters/:chapterId
+  const chapterId = location.state?.chapterId || params.chapterId;
+  const subjectId = location.state?.subjectId || params.subjectId;
+  const subjectName = location.state?.subjectName;
+  const chapterName = location.state?.chapterName;
 
   // 1. Fetch dữ liệu
   useEffect(() => {
@@ -222,7 +225,7 @@ export default function RevisionChap1() {
             </button>
             <span className="material-symbols-outlined text-base">chevron_right</span>
             <button
-              onClick={() => navigate("/listChap", { state: { subjectId } })}
+              onClick={() => navigate(`/subjects/${subjectId}`, { state: { subjectId } })}
               className="max-w-[180px] truncate font-bold hover:text-primary"
             >
               {subjectName || "Môn học"}

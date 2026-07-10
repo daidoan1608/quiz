@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-    List<Question> findByQuestionTextContainingIgnoreCase(String questionText);
+    List<Question> findByContentContainingIgnoreCase(String content);
 
     @Query("SELECT q FROM Question q WHERE q.chapter.chapterId = :chapterId")
     List<Question> findByChapter(@Param("chapterId") Long chapterId);

@@ -1,51 +1,41 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { authAxios } from "../../../api/axiosConfig";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useLanguage } from "../../../context/LanguageProvider";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 
-
 const getFullImageUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
   const apiRoot = process.env.REACT_APP_API_URL
-    ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
-    : 'http://localhost:8080';
-  return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+    ? process.env.REACT_APP_API_URL.replace("/api/v1/", "")
+    : "http://localhost:8080";
+  return `${apiRoot}${url.startsWith("/") ? "" : "/"}${url}`;
 };
 
 export default function Exam() {
-  // --- STATE QUẢN LÝ DỮ LIỆU ---
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [markedQuestions, setMarkedQuestions] = useState(new Set()); // State để đánh dấu câu hỏi (Flag)
-
-  // --- STATE QUẢN LÝ THỜI GIAN & UI ---
+  const [markedQuestions, setMarkedQuestions] = useState(new Set());
   const [timeLeft, setTimeLeft] = useState(null);
   const [duration, setDuration] = useState(0);
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // Index câu hỏi hiện tại
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- REFS ---
   const endTimeRef = useRef(null);
   const handleSubmitRef = useRef(null);
-  const timerStartedRef = useRef(false);
 
-  useEffect(() => {
-    handleSubmitRef.current = handleSubmit;
-  }, [handleSubmit]);
-
-  // --- HOOKS ---
   const navigate = useNavigate();
   const location = useLocation();
-  const { examId, startTime } = location.state || {};
+  const params = useParams();
+  const examId = location.state?.examId || params.examId;
+  const subjectId = location.state?.subjectId || params.subjectId;
+  const startTime = location.state?.startTime || new Date().toISOString();
   const { texts } = useLanguage();
 
-  // --- 1. NỘP BÀI (SUBMIT LOGIC) ---
   const handleSubmit = useCallback(async () => {
-    // Logic tính điểm và format dữ liệu
     const userId = localStorage.getItem("userId");
     const endTime = new Date().toISOString();
 
@@ -58,76 +48,56 @@ export default function Exam() {
       return count;
     }, 0);
 
-    const score = (correctAnswersCount / questions.length) * 100;
-
     const userAnswerDtos = Object.entries(selectedAnswers)
       .map(([questionIndex, answerIndex]) => {
         const question = questions[questionIndex];
         if (!question) return null;
         const answer = question.answers[answerIndex];
-        return answer
-          ? {
-              questionId: question.questionId,
-              answerId: answer.answerId || answer.optionId,
-            }
-          : null;
+        return answer ? { questionId: question.questionId, answerId: answer.answerId || answer.optionId } : null;
       })
       .filter(Boolean);
 
-    const payload = {
-      userExamDto: { userId, examId, startTime, endTime, score },
-      userAnswerDtos,
-    };
-
     try {
-      const response = await authAxios.post("user-exams", payload);
+      const response = await authAxios.post("user-exams", {
+        // Không gửi score từ FE. Backend sẽ tự chấm lại dựa trên userAnswerDtos.
+        userExamDto: { userId, examId, startTime, endTime },
+        userAnswerDtos,
+      });
       if (response.status === 200) {
         alert("Nộp bài thành công!");
-        navigate("/result", {
+        navigate(`/subjects/${subjectId}/exams/${examId}/result`, {
           state: {
             examId,
+            subjectId,
             userExamId: response.data.data.userExamId,
             correctAnswers: correctAnswersCount,
-            timeTaken: duration * 60 - timeLeft,
+            timeTaken: duration * 60 - (timeLeft || 0),
             totalQuestions: questions.length,
           },
         });
       }
     } catch (error) {
       console.error("Lỗi nộp bài:", error);
-      alert(
-        error.response?.status === 403
-          ? "Phiên đăng nhập hết hạn."
-          : "Lỗi khi nộp bài."
-      );
+      alert(error.response?.status === 403 ? "Phiên đăng nhập hết hạn." : "Lỗi khi nộp bài.");
     }
-  }, [
-    questions,
-    selectedAnswers,
-    examId,
-    startTime,
-    duration,
-    timeLeft,
-    navigate,
-  ]);
+  }, [questions, selectedAnswers, examId, subjectId, startTime, duration, timeLeft, navigate]);
 
-  // --- 2. FETCH DỮ LIỆU ---
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
+
   useEffect(() => {
     const getAllQuestionsByExamId = async () => {
       try {
         setIsLoading(true);
         const response = await authAxios.get(`public/exams/${examId}`);
         const data = response.data.data;
-
         setSubjectName(data.subjectName);
         setTitle(data.title);
         setDuration(data.duration);
-
-        const targetEndTime = Date.now() + data.duration * 60 * 1000;
-        endTimeRef.current = targetEndTime;
-
+        endTimeRef.current = Date.now() + data.duration * 60 * 1000;
         setTimeLeft(data.duration * 60);
-        setQuestions(data.questions);
+        setQuestions(data.questions || []);
       } catch (error) {
         console.error("Lỗi tải đề:", error);
         alert("Không thể tải đề thi.");
@@ -139,295 +109,179 @@ export default function Exam() {
     if (examId) getAllQuestionsByExamId();
   }, [examId, navigate]);
 
-  // --- 3. ĐẾM NGƯỢC THỜI GIAN ---
   useEffect(() => {
-    if (timeLeft === null || !endTimeRef.current || timerStartedRef.current) return;
-
-    timerStartedRef.current = true;
+    if (timeLeft === null || !endTimeRef.current) return;
     const timerId = setInterval(() => {
-      const now = Date.now();
-      const remaining = Math.max(0, Math.floor((endTimeRef.current - now) / 1000));
+      const remaining = Math.max(0, Math.floor((endTimeRef.current - Date.now()) / 1000));
       setTimeLeft(remaining);
-
       if (remaining <= 0) {
         clearInterval(timerId);
-        handleSubmitRef.current();
+        handleSubmitRef.current?.();
       }
     }, 1000);
-
     return () => clearInterval(timerId);
   }, [timeLeft]);
 
-  // --- KÍCH HOẠT MATHJAX ĐỂ DỊCH LATEX ---
   useEffect(() => {
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      window.MathJax.typesetPromise();
-    }
+    if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
   }, [currentQuestionIndex, questions]);
 
-  // --- 4. CÁC HÀM XỬ LÝ SỰ KIỆN ---
   const handleAnswerSelect = (answerIndex) => {
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [currentQuestionIndex]: answerIndex,
-    }));
+    setSelectedAnswers((prev) => ({ ...prev, [currentQuestionIndex]: answerIndex }));
   };
 
   const toggleMarkQuestion = () => {
     setMarkedQuestions((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(currentQuestionIndex)) newSet.delete(currentQuestionIndex);
-      else newSet.add(currentQuestionIndex);
-      return newSet;
+      const next = new Set(prev);
+      next.has(currentQuestionIndex) ? next.delete(currentQuestionIndex) : next.add(currentQuestionIndex);
+      return next;
     });
   };
 
-  // --- HELPERS FORMAT THỜI GIAN ---
-  const hours = Math.floor(timeLeft / 3600);
-  const minutes = Math.floor((timeLeft % 3600) / 60);
-  const seconds = timeLeft % 60;
+  const safeTimeLeft = timeLeft ?? 0;
+  const hours = Math.floor(safeTimeLeft / 3600);
+  const minutes = Math.floor((safeTimeLeft % 3600) / 60);
+  const seconds = safeTimeLeft % 60;
 
-  // --- RENDER ---
-  if (isLoading)
-    return (
-      <div className="flex h-screen items-center justify-center">
-        Đang tải đề thi...
-      </div>
-    );
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Đang tải đề thi...</div>;
+  }
 
   const currentQuestion = questions[currentQuestionIndex];
-  const progressPercent =
-    (Object.keys(selectedAnswers).length / questions.length) * 100;
+  const answeredCount = Object.keys(selectedAnswers).length;
+  const progressPercent = questions.length ? (answeredCount / questions.length) * 100 : 0;
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-gray-200">
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-4 lg:p-8">
-        <div className="mx-auto grid max-w-7xl grid-cols-12 gap-6">
-          {/* --- LEFT COLUMN: INFO & TIMER --- */}
-          <aside className="col-span-12 lg:col-span-3 space-y-6">
-            {/* Exam Info */}
-            <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
-              <h4 className="text-lg font-bold mb-2 line-clamp-2">{title}</h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Môn: {subjectName}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Số câu: {questions.length}
-              </p>
-            </div>
+    <div className="relative flex min-h-screen w-full flex-col bg-background-light text-gray-900 transition-colors duration-300 dark:bg-background-dark dark:text-gray-100">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-7xl">
+          <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+            <button onClick={() => navigate("/subjects")} className="font-bold uppercase tracking-wide hover:text-primary">Môn học</button>
+            <span className="material-symbols-outlined text-base">chevron_right</span>
+            <button
+              onClick={() => subjectId ? navigate(`/subjects/${subjectId}`, { state: { subjectId } }) : navigate("/subjects")}
+              className="max-w-[220px] truncate font-bold hover:text-primary"
+            >
+              {subjectName || "Môn học"}
+            </button>
+            <span className="material-symbols-outlined text-base">chevron_right</span>
+            <span className="max-w-[260px] truncate font-bold text-gray-900 dark:text-white">{title || "Bài kiểm tra"}</span>
+          </nav>
 
-            {/* Timer */}
-            <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
-              <h4 className="text-base font-semibold mb-4 text-center">
-                {texts.conutDown || "Thời gian còn lại"}
-              </h4>
-              <div className="flex gap-3">
-                {[hours, minutes, seconds].map((val, idx) => (
-                  <div
-                    key={idx}
-                    className="flex grow basis-0 flex-col items-stretch gap-2"
-                  >
-                    <div className="flex h-16 grow items-center justify-center rounded-lg px-3 bg-background-light dark:bg-white/10">
-                      <p className="text-2xl font-bold tracking-[-0.015em]">
-                        {val.toString().padStart(2, "0")}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {idx === 0 ? "Giờ" : idx === 1 ? "Phút" : "Giây"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+          <section className="mb-8 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <div className="p-6 md:p-8">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
+                <span className="material-symbols-outlined text-base">quiz</span>
+                Làm bài kiểm tra
               </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between">
-                  <p className="text-base font-medium">Tiến độ</p>
+              <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h1 className="text-3xl font-black tracking-tight text-gray-950 dark:text-white md:text-4xl">{title || "Bài kiểm tra"}</h1>
+                  <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600 dark:text-gray-300">
+                    Hoàn thành các câu hỏi trong thời gian quy định. Bạn có thể chuyển nhanh giữa các câu bằng bảng bên phải.
+                  </p>
                 </div>
-                <div className="rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                  <div
-                    className="h-2 rounded-full bg-primary transition-all duration-500"
-                    style={{ width: `${progressPercent}%` }}
-                  ></div>
+                <div className="rounded-2xl bg-primary/10 px-5 py-4 text-right text-primary">
+                  <p className="text-xs font-bold uppercase tracking-wide">Tiến độ</p>
+                  <p className="text-3xl font-black">{answeredCount}/{questions.length}</p>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Đã trả lời: {Object.keys(selectedAnswers).length}/
-                  {questions.length} câu
-                </p>
               </div>
-            </div>
-          </aside>
-
-          {/* --- MIDDLE COLUMN: QUESTION AREA --- */}
-          <section className="col-span-12 lg:col-span-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col min-h-[500px]">
-            <div className="p-6 flex-grow">
-              {/* Question Content */}
-              <h3 className="text-xl font-bold leading-tight text-left pb-2 text-primary">
-                Câu {currentQuestionIndex + 1}
-              </h3>
-              <div
-                className="text-base font-normal leading-relaxed pb-6 pt-1 text-gray-800 dark:text-gray-200"
-                dangerouslySetInnerHTML={{ __html: parseMarkdown(currentQuestion?.content) }}
-              />
-
-              {currentQuestion?.imageUrl && (
-                <div className="my-4 text-center">
-                  <img
-                    src={getFullImageUrl(currentQuestion.imageUrl)}
-                    alt="Minh họa câu hỏi"
-                    className="max-h-64 max-w-full rounded-lg mx-auto shadow-sm border border-gray-200 dark:border-gray-700"
-                  />
-                </div>
-              )}
-
-              {/* Answers Options */}
-              <div className="space-y-4">
-                {currentQuestion?.answers?.map((answer, index) => {
-                  const isSelected =
-                    selectedAnswers[currentQuestionIndex] === index;
-                  return (
-                    <label
-                      key={answer.optionId || index}
-                      className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
-                        ${
-                          isSelected
-                            ? "border-primary bg-primary/10 dark:bg-primary/20"
-                            : "border-gray-200 dark:border-gray-600 hover:border-primary/50"
-                        }
-                      `}
-                    >
-                      <input
-                        type="radio"
-                        name={`question-${currentQuestionIndex}`}
-                        className="h-5 w-5 mt-0.5 border-gray-300 text-primary focus:ring-primary flex-shrink-0"
-                        checked={isSelected}
-                        onChange={() => handleAnswerSelect(index)}
-                      />
-                      <span
-                        className={`ml-4 text-base font-medium ${
-                          isSelected ? "text-primary dark:text-white" : ""
-                        }`}
-                        dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
-                      />
-                    </label>
-                  );
-                })}
+              <div className="mt-6 h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progressPercent}%` }} />
               </div>
-            </div>
-
-            {/* Action Bar (Footer) */}
-            <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() =>
-                    setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
-                  }
-                  disabled={currentQuestionIndex === 0}
-                  className="flex items-center justify-center gap-2 rounded-lg h-10 px-4 text-sm font-bold bg-gray-200 hover:bg-gray-300 dark:bg-white/10 dark:hover:bg-white/20 disabled:opacity-50 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-base">
-                    arrow_back
-                  </span>
-                  <span className="hidden sm:inline">Câu trước</span>
-                </button>
-
-                <button
-                  onClick={() =>
-                    setCurrentQuestionIndex((prev) =>
-                      Math.min(questions.length - 1, prev + 1)
-                    )
-                  }
-                  disabled={currentQuestionIndex === questions.length - 1}
-                  className="flex items-center justify-center gap-2 rounded-lg h-10 px-4 text-sm font-bold bg-primary text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                >
-                  <span className="hidden sm:inline">Câu tiếp theo</span>
-                  <span className="material-symbols-outlined text-base">
-                    arrow_forward
-                  </span>
-                </button>
             </div>
           </section>
 
-          {/* --- RIGHT COLUMN: QUESTION PALETTE --- */}
-          <aside className="col-span-12 lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 sticky top-24">
-              <h4 className="text-base font-semibold mb-4">
-                {texts.table || "Danh sách câu hỏi"}
-              </h4>
-
-              {/* Grid Numbers */}
-              <div className="p-2 grid grid-cols-5 gap-2 mb-6 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
-                {questions.map((_, idx) => {
-                  const isCurrent = currentQuestionIndex === idx;
-                  const isAnswered = selectedAnswers[idx] !== undefined;
-                  const isMarked = markedQuestions.has(idx);
-
-                  let bgClass =
-                    "bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-transparent"; // Default
-
-                  if (isCurrent) {
-                    bgClass =
-                      "bg-primary text-white ring-2 ring-offset-2 ring-primary dark:ring-offset-gray-900";
-                  } else if (isAnswered) {
-                    bgClass = "bg-green-500 text-white border-green-600";
-                  }
-
-                  // Priority: Current > Answered > Default. Mark overlays using absolute icon.
-
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentQuestionIndex(idx)}
-                      className={`relative flex size-9 items-center justify-center rounded-lg text-sm font-bold transition-all ${bgClass}`}
-                    >
-                      {idx + 1}
-                      {isMarked && (
-                        <span
-                          className="material-symbols-outlined absolute -top-1 -right-1 text-[14px] text-yellow-500 bg-white dark:bg-gray-800 rounded-full"
-                          style={{ fontVariationSettings: "'FILL' 1" }}
-                        >
-                          bookmark
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+          <div className="grid grid-cols-12 gap-6">
+            <aside className="col-span-12 space-y-6 lg:col-span-3">
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <h4 className="mb-2 line-clamp-2 text-lg font-bold">{title}</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Môn: {subjectName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Số câu: {questions.length}</p>
               </div>
 
-              {/* Legends (Chú thích) */}
-              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400 mb-6 border-t border-gray-100 dark:border-gray-700 pt-4">
-                <div className="flex items-center gap-3">
-                  <div className="size-4 rounded-sm bg-primary"></div>
-                  <span>Câu hiện tại</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="size-4 rounded-sm bg-green-500"></div>
-                  <span>Đã trả lời</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="size-4 rounded-sm bg-gray-200 dark:bg-white/10 border border-gray-400"></div>
-                  <span>Chưa trả lời</span>
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <h4 className="mb-4 text-center text-base font-semibold">{texts.conutDown || "Thời gian còn lại"}</h4>
+                <div className="flex gap-3">
+                  {[hours, minutes, seconds].map((val, idx) => (
+                    <div key={idx} className="flex grow basis-0 flex-col items-stretch gap-2">
+                      <div className="flex h-16 grow items-center justify-center rounded-xl bg-primary/10 px-3 text-primary">
+                        <p className="text-2xl font-bold tracking-[-0.015em]">{val.toString().padStart(2, "0")}</p>
+                      </div>
+                      <p className="text-center text-xs text-gray-500 dark:text-gray-400">{idx === 0 ? "Giờ" : idx === 1 ? "Phút" : "Giây"}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <button
-                onClick={() => {
-                  if (window.confirm("Bạn có chắc chắn muốn nộp bài không?")) {
-                    handleSubmit();
-                  }
-                }}
-                className="w-full flex items-center justify-center gap-2 rounded-lg h-11 px-6 text-base font-bold bg-green-600 text-white hover:bg-green-700 transition-colors shadow-lg shadow-green-500/20"
-              >
-                <span className="material-symbols-outlined">check_circle</span>
-                <span>{texts.submit || "Nộp bài"}</span>
-              </button>
-            </div>
-          </aside>
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <p className="text-base font-medium">Tiến độ</p>
+                <div className="mt-3 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div className="h-2 rounded-full bg-primary transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                </div>
+                <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">Đã trả lời: {answeredCount}/{questions.length} câu</p>
+              </div>
+            </aside>
+
+            <section className="col-span-12 flex min-h-[520px] flex-col rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:col-span-6">
+              <div className="flex-grow p-6">
+                <h3 className="pb-2 text-left text-xl font-bold leading-tight text-primary">Câu {currentQuestionIndex + 1}</h3>
+                <div className="pb-6 pt-1 text-base font-normal leading-relaxed text-gray-800 dark:text-gray-200" dangerouslySetInnerHTML={{ __html: parseMarkdown(currentQuestion?.content) }} />
+                {currentQuestion?.imageUrl && (
+                  <div className="my-4 text-center">
+                    <img src={getFullImageUrl(currentQuestion.imageUrl)} alt="Minh họa câu hỏi" className="mx-auto max-h-64 max-w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700" />
+                  </div>
+                )}
+                <div className="space-y-4">
+                  {currentQuestion?.answers?.map((answer, index) => {
+                    const isSelected = selectedAnswers[currentQuestionIndex] === index;
+                    return (
+                      <label key={answer.optionId || index} className={`flex cursor-pointer items-start rounded-xl border p-4 transition-all duration-200 hover:shadow-md ${isSelected ? "border-primary bg-primary/10 dark:bg-primary/20" : "border-gray-200 hover:border-primary/50 dark:border-gray-600"}`}>
+                        <input type="radio" name={`question-${currentQuestionIndex}`} className="mt-0.5 h-5 w-5 flex-shrink-0 border-gray-300 text-primary focus:ring-primary" checked={isSelected} onChange={() => handleAnswerSelect(index)} />
+                        <span className={`ml-4 text-base font-medium ${isSelected ? "text-primary dark:text-white" : ""}`} dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }} />
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex items-center justify-between border-t border-gray-200 p-4 dark:border-gray-700">
+                <button onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))} disabled={currentQuestionIndex === 0} className="flex h-11 items-center justify-center gap-2 rounded-xl bg-gray-100 px-5 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
+                  <span className="material-symbols-outlined text-base">arrow_back</span><span className="hidden sm:inline">Câu trước</span>
+                </button>
+                <button onClick={toggleMarkQuestion} className="hidden h-11 items-center justify-center gap-2 rounded-xl bg-yellow-500/10 px-4 text-sm font-bold text-yellow-600 transition-colors hover:bg-yellow-500/20 sm:flex">
+                  <span className="material-symbols-outlined text-base">bookmark</span>Đánh dấu
+                </button>
+                <button onClick={() => setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))} disabled={currentQuestionIndex === questions.length - 1} className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
+                  <span className="hidden sm:inline">Câu tiếp theo</span><span className="material-symbols-outlined text-base">arrow_forward</span>
+                </button>
+              </div>
+            </section>
+
+            <aside className="col-span-12 lg:col-span-3">
+              <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <h4 className="mb-4 flex items-center gap-2 text-lg font-black text-gray-950 dark:text-white"><span className="material-symbols-outlined">grid_view</span>{texts.table || "Danh sách câu hỏi"}</h4>
+                <div className="mb-6 grid max-h-[300px] grid-cols-5 gap-2 overflow-y-auto p-2 pr-1">
+                  {questions.map((_, idx) => {
+                    const isCurrent = currentQuestionIndex === idx;
+                    const isAnswered = selectedAnswers[idx] !== undefined;
+                    const isMarked = markedQuestions.has(idx);
+                    let bgClass = "border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400";
+                    if (isCurrent) bgClass = "border-primary bg-primary text-white ring-2 ring-primary/20";
+                    else if (isAnswered) bgClass = "border-green-600 bg-green-500 text-white";
+                    return <button key={idx} onClick={() => setCurrentQuestionIndex(idx)} className={`relative flex size-9 items-center justify-center rounded-lg text-sm font-bold transition-all ${bgClass}`}>{idx + 1}{isMarked && <span className="material-symbols-outlined absolute -right-1 -top-1 rounded-full bg-white text-[14px] text-yellow-500 dark:bg-gray-800" style={{ fontVariationSettings: "'FILL' 1" }}>bookmark</span>}</button>;
+                  })}
+                </div>
+                <div className="mb-6 space-y-3 border-t border-gray-100 pt-4 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-400">
+                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm bg-primary" /><span>Câu hiện tại</span></div>
+                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm bg-green-500" /><span>Đã trả lời</span></div>
+                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm border border-gray-400 bg-gray-200 dark:bg-white/10" /><span>Chưa trả lời</span></div>
+                </div>
+                <button onClick={() => { if (window.confirm("Bạn có chắc chắn muốn nộp bài không?")) handleSubmit(); }} className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 text-base font-bold text-white shadow-md transition-all hover:bg-green-700 hover:shadow-lg active:scale-95">
+                  <span className="material-symbols-outlined">check_circle</span><span>{texts.submit || "Nộp bài"}</span>
+                </button>
+              </div>
+            </aside>
+          </div>
         </div>
       </main>
     </div>

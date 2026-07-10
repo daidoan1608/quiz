@@ -22,9 +22,9 @@ import {
 import ManagementPageLayout from '../../layouts/ManagementPageLayout';
 
 // --- IMPORT CÁC MODAL ĐÃ TÁCH ---
-import AddChapterModal from "../../components/modal/AddChapterModal";
-import UpdateChapterModal from "../../components/modal/UpdateChapterModal";
-import ChapterQuestionModal from "../../components/modal/ChapterQuestionModal";
+import AddChapterModal from "../../components/Modal/AddChapterModal";
+import UpdateChapterModal from "../../components/Modal/UpdateChapterModal";
+import ChapterQuestionModal from "../../components/Modal/ChapterQuestionModal";
 
 const { Text } = Typography;
 

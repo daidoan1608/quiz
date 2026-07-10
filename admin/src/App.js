@@ -9,7 +9,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 
 function App() {
   return (
-    <Router>
+    <Router basename="/admin">
       <AuthProvider>
         <ThemeProvider>
           <Routes>

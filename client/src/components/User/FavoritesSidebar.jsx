@@ -2,15 +2,15 @@ import React from 'react';
 
 export default function FavoritesSidebar({ favoriteList }) {
   // Dữ liệu mẫu nếu không truyền props
-  const list = favoriteList;
+  const list = Array.isArray(favoriteList) ? favoriteList : [];
 
   return (
         <section className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
           <h2 className="text-gray-900 dark:text-white text-base font-bold leading-normal">Môn học yêu thích</h2>
 
           <div className="flex flex-col gap-3">
-            {list.map((item) => (
-              <div key={item.id} className="flex flex-col gap-2 rounded-lg bg-white dark:bg-gray-800 p-3 shadow-sm border border-gray-200 dark:border-gray-700">
+            {list.map((item, index) => (
+              <div key={item.id || item.favoriteId || item.subjectId || `${item.subjectName}-${index}`} className="flex flex-col gap-2 rounded-lg bg-white dark:bg-gray-800 p-3 shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between gap-2">
                   <div>
                     <p className="text-gray-900 dark:text-white text-sm font-semibold leading-normal truncate max-w-[150px]">

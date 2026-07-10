@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authAxios } from "../../../api/axiosConfig";
-import { useLanguage } from "../../../context/LanguageProvider";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
 
 
@@ -26,7 +25,6 @@ export default function ResultExam() {
     const navigate = useNavigate();
     // CHỈ LẤY CÁC ID CẦN THIẾT. LOẠI BỎ correctAnswers và totalQuestions khỏi state
     const { examId, userExamId } = location.state || {};
-    const { texts } = useLanguage();
 
     // --- 1. FETCH DATA (Giữ nguyên) ---
     useEffect(() => {
@@ -123,14 +121,21 @@ export default function ResultExam() {
             <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
                 <div className="flex flex-col gap-8">
 
-                    {/* 1. Header Kết quả */}
+                    {/* 1. Header chi tiết lịch sử */}
                     <div className="flex flex-wrap justify-between gap-4 items-center">
                         <div className="flex flex-col gap-2">
+                            <button
+                                onClick={() => navigate("/account")}
+                                className="mb-2 inline-flex w-fit items-center gap-2 text-sm font-semibold text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                            >
+                                <span className="material-symbols-outlined !text-lg">arrow_back</span>
+                                Quay lại tài khoản
+                            </button>
                             <p className="text-gray-900 dark:text-white text-3xl md:text-4xl font-black tracking-[-0.033em]">
-                                Kết quả: {examData.title}
+                                Chi tiết lần làm bài
                             </p>
                             <p className="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
-                                {rawScore >= 50 ? "Chúc mừng! Bạn đã hoàn thành bài kiểm tra." : "Hãy cố gắng hơn lần sau nhé!"}
+                                {examData.title}
                             </p>
                         </div>
                     </div>
@@ -215,49 +220,7 @@ export default function ResultExam() {
                         </div>
                     </div>
 
-                    {/* 4. Action Buttons */}
-                    <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                        <button
-                            disabled
-                            className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-primary text-white text-sm font-semibold opacity-50 cursor-not-allowed"
-                        >
-                            <span className="material-symbols-outlined text-base">school</span>
-                            Ôn tập câu sai (Sắp ra mắt)
-                        </button>
-                        <button
-                            onClick={() => {
-                                const newStartTime = new Date().toISOString();
-                                navigate("/taketheexam", {
-                                    state: {
-                                        examId: examId,
-                                        startTime: newStartTime,
-                                    },
-                                });
-                            }}
-                            className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        >
-                            <span className="material-symbols-outlined text-base">refresh</span>
-                            Làm lại bài kiểm tra
-                        </button>
-                        <button
-                            onClick={() => {
-                                // Sử dụng examData.subjectId để quay về trang danh sách đề thi
-                                if (examData && examData.subjectId) {
-                                    navigate("/list-exam", {
-                                        state: { subjectId: examData.subjectId },
-                                    });
-                                } else {
-                                    navigate("/chooseExam");
-                                }
-                            }}
-                            className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        >
-                            <span className="material-symbols-outlined text-base">list_alt</span>
-                            Quay về danh sách
-                        </button>
-                    </div>
-
-                    {/* 5. Chi tiết câu trả lời */}
+                    {/* 4. Chi tiết câu trả lời */}
                     <div className="flex flex-col gap-6">
                         <h2 className="text-gray-900 dark:text-white text-2xl font-bold leading-tight">Chi tiết câu trả lời</h2>
                         <div className="flex flex-col gap-4">
@@ -307,34 +270,62 @@ export default function ResultExam() {
                                                 </div>
                                             </div>
 
-                                            {/* Grid Đáp án (User chọn vs Đáp án đúng) */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-2">
-                                                {/* Cột: Đáp án của bạn */}
-                                                <div className={`flex flex-col gap-1 p-3 rounded-lg border relative
-                                                    ${isSkipped
-                                                        ? "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600"
-                                                        : isCorrect
-                                                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                                                            : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                                                    }`}
-                                                >
-                                                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Đáp án của bạn</span>
-                                                    <span
-                                                        className={`font-semibold ${isSkipped ? "text-gray-600 dark:text-gray-300" : isCorrect ? "text-green-800 dark:text-green-300" : "text-red-800 dark:text-red-300"}`}
-                                                        dangerouslySetInnerHTML={{ __html: userSelectedAnswer ? parseMarkdown(userSelectedAnswer.content) : "Chưa chọn" }}
-                                                    />
-                                                </div>
+                                            {/* Hiển thị đầy đủ tất cả đáp án - dạng lịch sử, khác màn result */}
+                                            <div className="flex flex-col gap-2 mt-2">
+                                                {question.answers.map((answer, answerIndex) => {
+                                                    const answerId = answer.optionId || answer.answerId;
+                                                    const isUserChoice = answerId === userAnswerId;
+                                                    const isRightAnswer = answer.isCorrect;
 
-                                                {/* Cột: Đáp án đúng (Chỉ hiện khi user SAI hoặc BỎ QUA) */}
-                                                {(!isCorrect || isSkipped) && (
-                                                    <div className="flex flex-col gap-1 p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 relative">
-                                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Đáp án đúng</span>
-                                                        <span
-                                                            className="font-semibold text-gray-800 dark:text-gray-200"
-                                                            dangerouslySetInnerHTML={{ __html: parseMarkdown(correctAnswer?.content) }}
-                                                        />
-                                                    </div>
-                                                )}
+                                                    let answerClass = "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/60";
+                                                    if (isRightAnswer) {
+                                                        answerClass = "border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-900/30";
+                                                    }
+                                                    if (isUserChoice && !isRightAnswer) {
+                                                        answerClass = "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/30";
+                                                    }
+
+                                                    return (
+                                                        <div
+                                                            key={answerId || answerIndex}
+                                                            className={`flex items-start gap-3 rounded-lg border-l-4 border-y border-r p-3 ${answerClass}`}
+                                                        >
+                                                            <div className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                                                                isRightAnswer
+                                                                    ? "bg-green-500 text-white"
+                                                                    : isUserChoice
+                                                                    ? "bg-red-500 text-white"
+                                                                    : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                                                            }`}>
+                                                                {String.fromCharCode(65 + answerIndex)}
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    {isRightAnswer && (
+                                                                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                                                                            <span className="material-symbols-outlined !text-sm">check_circle</span>
+                                                                            Đáp án đúng
+                                                                        </span>
+                                                                    )}
+                                                                    {isUserChoice && (
+                                                                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold ${
+                                                                            isRightAnswer
+                                                                                ? "bg-primary/10 text-primary"
+                                                                                : "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+                                                                        }`}>
+                                                                            <span className="material-symbols-outlined !text-sm">person</span>
+                                                                            Bạn chọn
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div
+                                                                    className="mt-2 text-sm font-medium text-gray-800 dark:text-gray-200"
+                                                                    dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
 
                                         </div>
