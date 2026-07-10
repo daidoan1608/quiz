@@ -1,15 +1,18 @@
 package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.SubjectDto;
+import com.fita.vnua.quiz.model.dto.SubjectSummaryDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface SubjectService {
-    List<SubjectDto> getAllSubject();
+    List<SubjectSummaryDto> getAllSubject();
 
-    List<SubjectDto> getSubjectsByCategoryId(Long categoryId);
+    List<SubjectSummaryDto> searchSubjects(String keyword);
+
+    List<SubjectSummaryDto> getSubjectsByCategoryId(Long categoryId);
 
     SubjectDto getSubjectById(Long subjectId);
 
@@ -19,6 +22,6 @@ public interface SubjectService {
 
     Response delete(Long subjectId);
 
-    List<SubjectDto> getSubjectsByUser(UUID userId);
+    List<SubjectSummaryDto> getSubjectsByUser(UUID userId);
 
 }

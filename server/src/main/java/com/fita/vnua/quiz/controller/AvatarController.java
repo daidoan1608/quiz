@@ -6,6 +6,7 @@ import com.fita.vnua.quiz.service.impl.AvatarStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/users/me")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Avatar API", description = "API thao tác thêm sửa xoá avatar")
 public class AvatarController {
     private final AvatarStorageService storage;
@@ -27,9 +29,7 @@ public class AvatarController {
             @AuthenticationPrincipal User currentUser,
             @RequestParam("file") MultipartFile file) throws Exception {
         UUID userId = currentUser.getUserId();
-        System.out.println("=== Upload avatar ===");
-        System.out.println("userId = " + userId);
-        System.out.println("file = " + file.getOriginalFilename());
+        log.debug("Uploading avatar for userId={}, file={}", userId, file.getOriginalFilename());
 
         String oldUrl = userService.getUserById(userId).getAvatarUrl();
 

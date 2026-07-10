@@ -1,14 +1,15 @@
 package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.ExamDto;
+import com.fita.vnua.quiz.model.dto.ExamSummaryDto;
 import com.fita.vnua.quiz.model.dto.request.ExamRequest;
 
 import java.util.List;
 
 public interface ExamService {
-    List<ExamDto> getAllExams();
+    List<ExamSummaryDto> getAllExams();
 
-    List<ExamDto> getExamsBySubjectId(Long subjectId);
+    List<ExamSummaryDto> getExamsBySubjectId(Long subjectId);
 
     ExamDto getExamById(Long id);
 

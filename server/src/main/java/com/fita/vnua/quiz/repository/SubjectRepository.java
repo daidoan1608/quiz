@@ -12,8 +12,10 @@ import java.util.UUID;
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
     List<Subject> findSubjectsByCategory(Category category);
 
+    List<Subject> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description);
+
     @Query(value = """
-    SELECT 
+    SELECT
         s.*
     FROM user_exam ue
     JOIN exam e ON ue.exam_id = e.exam_id

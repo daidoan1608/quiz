@@ -1,19 +1,20 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.ChapterDto;
 import com.fita.vnua.quiz.model.dto.ExamInfo;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
+import com.fita.vnua.quiz.model.dto.SubjectSummaryDto;
 import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.entity.Category;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Exam;
 import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.repository.*;
-import com.fita.vnua.quiz.service.CategoryService;
 import com.fita.vnua.quiz.service.SubjectService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,30 +33,36 @@ public class SubjectServiceImpl implements SubjectService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<SubjectDto> getAllSubject() {
-        List<Subject> subjects = subjectRepository.findAll();
-
-        // Duyệt qua từng môn học và map sang DTO chi tiết bằng hàm helper
-        return subjects.stream()
-                .map(this::mapSubjectToDetailedDto)
+    public List<SubjectSummaryDto> getAllSubject() {
+        return subjectRepository.findAll().stream()
+                .map(this::mapSubjectToSummaryDto)
                 .toList();
     }
 
     @Override
-    public List<SubjectDto> getSubjectsByCategoryId(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId).get();
-        List<SubjectDto> subjects = subjectRepository.findSubjectsByCategory(category).stream().map(subject -> modelMapper.map(subject, SubjectDto.class)).toList();
-        for (SubjectDto subject : subjects) {
-            List<ChapterDto> chapterDtos = chapterRepository.findBySubject(subject.getSubjectId()).stream().map(chapter -> modelMapper.map(chapter, ChapterDto.class)).toList();
-            subject.setChapters(chapterDtos);
+    public List<SubjectSummaryDto> searchSubjects(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllSubject();
         }
-        return subjects;
+        return subjectRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword.trim(), keyword.trim())
+                .stream()
+                .map(this::mapSubjectToSummaryDto)
+                .toList();
+    }
+
+    @Override
+    public List<SubjectSummaryDto> getSubjectsByCategoryId(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+        return subjectRepository.findSubjectsByCategory(category).stream()
+                .map(this::mapSubjectToSummaryDto)
+                .toList();
     }
 
     @Override
     public SubjectDto getSubjectById(Long subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học với ID: " + subjectId));
+                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
 
         // Gọi hàm helper để lấy chi tiết
         return mapSubjectToDetailedDto(subject);
@@ -71,7 +78,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public SubjectDto update(Long subjectId, SubjectDto subjectDto) {
         var existingSubject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new EntityNotFoundException("Subject not found"));
+                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
 
         existingSubject.setName(subjectDto.getName());
         existingSubject.setDescription(subjectDto.getDescription());
@@ -81,7 +88,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public Response delete(Long subjectId) {
         var existingSubject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new EntityNotFoundException("Subject not found"));
+                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
         subjectRepository.delete(existingSubject);
         return Response.builder()
                 .responseMessage("Subject deleted successfully")
@@ -89,9 +96,22 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public List<SubjectDto> getSubjectsByUser(UUID userId) {
+    public List<SubjectSummaryDto> getSubjectsByUser(UUID userId) {
         List<Subject> subjects = subjectRepository.findSubjectsWithUserExams(userId);
-        return subjects.stream().map(subject -> modelMapper.map(subject, SubjectDto.class)).toList();
+        return subjects.stream().map(this::mapSubjectToSummaryDto).toList();
+    }
+
+    private SubjectSummaryDto mapSubjectToSummaryDto(Subject subject) {
+        SubjectSummaryDto subjectDto = modelMapper.map(subject, SubjectSummaryDto.class);
+        List<Exam> exams = examRepository.findExamsBySubjectId(subject.getSubjectId());
+        List<Chapter> chapters = chapterRepository.findBySubject(subject.getSubjectId());
+        long totalQuestions = chapters.stream()
+                .mapToLong(questionRepository::countByChapter)
+                .sum();
+        subjectDto.setTotalChapters(chapters.size());
+        subjectDto.setTotalExams(exams.size());
+        subjectDto.setTotalQuestions(totalQuestions);
+        return subjectDto;
     }
 
     private SubjectDto mapSubjectToDetailedDto(Subject subject) {

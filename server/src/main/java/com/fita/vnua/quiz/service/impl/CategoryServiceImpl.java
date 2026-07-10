@@ -1,6 +1,8 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.CategoryDto;
+import com.fita.vnua.quiz.model.dto.CategorySummaryDto;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.entity.Category;
 import com.fita.vnua.quiz.model.entity.Subject;
@@ -9,6 +11,7 @@ import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,23 +25,33 @@ public class CategoryServiceImpl implements CategoryService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<CategoryDto> getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
-        List<CategoryDto> categoryDtos = new ArrayList<>();
-        for (Category category : categories) {
-            CategoryDto categoryDto = modelMapper.map(category, CategoryDto.class);
-            List<Subject> subjects = subjectRepository.findSubjectsByCategory(category);
-            List<SubjectDto> subjectDtos = subjects.stream().map(subject -> modelMapper.map(subject, SubjectDto.class)).toList();
-            categoryDto.setSubjects(subjectDtos);
-            categoryDtos.add(categoryDto);
+    public List<CategorySummaryDto> getAllCategories() {
+        return categoryRepository.findAll().stream()
+                .map(this::mapCategoryToSummaryDto)
+                .toList();
+    }
+
+    @Override
+    public List<CategorySummaryDto> searchCategories(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllCategories();
         }
-        return categoryDtos;
+        return categoryRepository.findByCategoryNameContainingIgnoreCaseOrCategoryDescriptionContainingIgnoreCase(keyword.trim(), keyword.trim())
+                .stream()
+                .map(this::mapCategoryToSummaryDto)
+                .toList();
     }
 
     @Override
     public CategoryDto getCategoryById(Long id) {
-        Category category = categoryRepository.findById(id).orElse(null);
-        return category != null ? modelMapper.map(category, CategoryDto.class) : null;
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+        CategoryDto categoryDto = modelMapper.map(category, CategoryDto.class);
+        List<SubjectDto> subjectDtos = subjectRepository.findSubjectsByCategory(category).stream()
+                .map(subject -> modelMapper.map(subject, SubjectDto.class))
+                .toList();
+        categoryDto.setSubjects(subjectDtos);
+        return categoryDto;
     }
 
     @Override
@@ -50,10 +63,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
-        Category category = categoryRepository.findById(id).orElse(null);
-        if (category == null) {
-            return null;
-        }
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
         category.setCategoryName((categoryDto.getCategoryName()));
         category.setCategoryDescription(categoryDto.getCategoryDescription());
         Category savedCategory = categoryRepository.save(category);
@@ -62,6 +73,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Long id) {
-        categoryRepository.deleteById(id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+        categoryRepository.delete(category);
+    }
+
+    private CategorySummaryDto mapCategoryToSummaryDto(Category category) {
+        CategorySummaryDto categoryDto = modelMapper.map(category, CategorySummaryDto.class);
+        categoryDto.setTotalSubjects(subjectRepository.findSubjectsByCategory(category).size());
+        return categoryDto;
     }
 }

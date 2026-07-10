@@ -24,11 +24,9 @@ function Login() {
 
   useEffect(() => {
     const savedUsername = localStorage.getItem("savedUsername");
-    const savedPassword = localStorage.getItem("savedPassword");
-    if (savedUsername && savedPassword) {
+    if (savedUsername) {
       form.setFieldsValue({
         username: savedUsername,
-        password: savedPassword,
         remember: true,
       });
       setRemember(true);
@@ -43,22 +41,20 @@ function Login() {
         password: values.password,
       });
 
-      const { accessToken, refreshToken, userId, fullName, avatarUrl } = response.data.data;
+      const { userId, fullName, avatarUrl } = response.data.data;
       const avatarResponse = await authAxios.get("users/me/avatar");
       const avatar = avatarResponse.data.data;
       if (values.remember) {
         localStorage.setItem("savedUsername", values.username);
-        localStorage.setItem("savedPassword", values.password);
         localStorage.setItem("fullName", fullName);
         localStorage.setItem("avatarUrl", avatar);
       } else {
         localStorage.removeItem("savedUsername");
-        localStorage.removeItem("savedPassword");
         localStorage.removeItem("fullName");
         localStorage.removeItem("avatarUrl");
       }
 
-      login(accessToken, refreshToken, userId, fullName, avatarUrl);
+      login(userId, fullName, avatarUrl);
       navigate("/");
     } catch (error) {
       const errorMessage =
@@ -75,8 +71,8 @@ function Login() {
       // Lưu ý: Logic OAuth thường cần redirect sang trang của provider,
       // code này đang giả định luồng gọi API trực tiếp.
       const response = await publicAxios.post(`/auth/${provider}`);
-      const { accessToken, refreshToken, userId } = response.data;
-      login(accessToken, refreshToken, userId);
+      const { userId, fullName, avatarUrl } = response.data?.data || response.data;
+      login(userId, fullName, avatarUrl);
       navigate("/");
     } catch (error) {
       message.error(`Đăng nhập bằng ${provider} thất bại!`);
@@ -87,8 +83,8 @@ function Login() {
     setLoading(true);
     try {
       const response = await publicAxios.post("/auth/google", { idToken });
-      const { accessToken, refreshToken, userId, fullName, avatarUrl } = response.data.data;
-      login(accessToken, refreshToken, userId, fullName, avatarUrl);
+      const { userId, fullName, avatarUrl } = response.data.data;
+      login(userId, fullName, avatarUrl);
       message.success("Đăng nhập Google thành công!");
       navigate("/");
     } catch (error) {

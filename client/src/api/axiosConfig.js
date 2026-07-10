@@ -12,6 +12,8 @@ const config = {
     "Content-Type": "application/json",
   },
   withCredentials: true, // QUAN TRỌNG: Để gửi Cookie đi
+  xsrfCookieName: "XSRF-TOKEN",
+  xsrfHeaderName: "X-XSRF-TOKEN",
 };
 
 const authAxios = axios.create(config);

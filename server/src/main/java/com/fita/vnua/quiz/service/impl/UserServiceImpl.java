@@ -6,7 +6,6 @@ import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -36,7 +35,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(UUID userId) {
-        return userRepository.findById(userId).map(user -> modelMapper.map(user, UserDto.class)).orElse(null);
+        return userRepository.findById(userId)
+                .map(user -> modelMapper.map(user, UserDto.class))
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto update(UUID userId, UserDto userDto) {
         var existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
         existingUser.setFullName(userDto.getFullName());
         existingUser.setEmail(userDto.getEmail());
         existingUser.setRole(userDto.getRole());
@@ -85,7 +86,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Response delete(UUID userId) {
-        userRepository.deleteById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+        userRepository.delete(user);
         return Response.builder()
                 .responseMessage("User deleted successfully")
                 .responseCode("200 OK").build();
@@ -109,7 +112,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean updateAvatar(UUID userId, String avatarUrl) {
         var existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
         existingUser.setAvatarUrl(avatarUrl);
         userRepository.save(existingUser);
         return true;

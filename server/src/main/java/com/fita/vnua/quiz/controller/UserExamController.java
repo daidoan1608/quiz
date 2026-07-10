@@ -27,29 +27,15 @@ public class UserExamController {
     @GetMapping("public/user-exam-summaries")
     @Operation(summary = "Thống kê điểm thi của người dùng")
     public ResponseEntity<ApiResponse<List<UserExamSummaryDto>>> getUserExamSummaries() {
-        try {
-            List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries();
-            if (summaries.isEmpty()) {
-                return ResponseEntity.status(204).body(ApiResponse.error("No summaries found", List.of("No user exam summaries available")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("Summaries fetched successfully", summaries));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch summaries", List.of(e.getMessage())));
-        }
+        List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries();
+        return ResponseEntity.ok(ApiResponse.success("Summaries fetched successfully", summaries));
     }
 
     @GetMapping("admin/user-exams")
     @Operation(summary = "Lấy danh sách bài thi của tất cả người dùng")
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getAllUserExams() {
-        try {
-            List<UserExamResponse> userExams = userExamService.getAllUserExams();
-            if (userExams.isEmpty()) {
-                return ResponseEntity.status(204).body(ApiResponse.error("No user exams found", List.of("No user exams available")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch user exams", List.of(e.getMessage())));
-        }
+        List<UserExamResponse> userExams = userExamService.getAllUserExams();
+        return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
     }
 
     @GetMapping("user-exams")
@@ -58,15 +44,8 @@ public class UserExamController {
             @Parameter(description = "User ID", required = true) @RequestParam("userId") UUID userId,
             @Parameter(description = "Subject ID", required = true) @RequestParam("subjectId") Long subjectId
     ) {
-        try {
-            List<UserExamResponse> userExams = userExamService.getExamsByUserAndSubject(userId, subjectId);
-            if (userExams.isEmpty()) {
-                return ResponseEntity.status(204).body(ApiResponse.error("No user exams found", List.of("No user exams found for the given user ID and subject ID")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch user exams", List.of(e.getMessage())));
-        }
+        List<UserExamResponse> userExams = userExamService.getExamsByUserAndSubject(userId, subjectId);
+        return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
     }
 
     @GetMapping("users/{userId}/user-exams/recent")
@@ -74,29 +53,15 @@ public class UserExamController {
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getLast7UserExamsByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
     ) {
-        try {
-            List<UserExamResponse> userExams = userExamService.getLast7ExamsByUser(userId);
-            if (userExams.isEmpty()) {
-                return ResponseEntity.status(204).body(ApiResponse.error("No user exams found", List.of("No user exams found for the given user ID")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch user exams", List.of(e.getMessage())));
-        }
+        List<UserExamResponse> userExams = userExamService.getLast7ExamsByUser(userId);
+        return ResponseEntity.ok(ApiResponse.success("User exams fetched successfully", userExams));
     }
 
     @GetMapping("user-exams/{userExamId}")
     @Operation(summary = "Lấy bài thi của người dùng theo ID")
     public ResponseEntity<ApiResponse<UserExamResponse>> getUserExamById(@PathVariable("userExamId") Long userExamId) {
-        try {
-            UserExamResponse userExam = userExamService.getUserExamById(userExamId);
-            if (userExam == null) {
-                return ResponseEntity.status(204).body(ApiResponse.error("No user exam found", List.of("No user exam found for the given ID")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("User exam fetched successfully", userExam));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch user exam", List.of(e.getMessage())));
-        }
+        UserExamResponse userExam = userExamService.getUserExamById(userExamId);
+        return ResponseEntity.ok(ApiResponse.success("User exam fetched successfully", userExam));
     }
 
     @GetMapping("users/{userId}/user-exams/count")
@@ -104,43 +69,23 @@ public class UserExamController {
     public ResponseEntity<ApiResponse<List<Map<Long, Object>>>> getExamAttemptsByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
     ) {
-        try {
-            List<Map<Long, Object>> attempts = userExamService.getExamAttemptsByUserId(userId);
-            return ResponseEntity.ok(ApiResponse.success("Exam attempts fetched successfully", attempts));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch exam attempts", List.of(e.getMessage())));
-        }
+        List<Map<Long, Object>> attempts = userExamService.getExamAttemptsByUserId(userId);
+        return ResponseEntity.ok(ApiResponse.success("Exam attempts fetched successfully", attempts));
     }
 
     @PostMapping("user-exams")
     @Operation(summary = "Tạo bài thi cho người dùng")
     public ResponseEntity<ApiResponse<UserExamDto>> createUserExam(@RequestBody UserExamRequest userExamRequest) {
-        try {
-            UserExamDto saveUserExam = userExamService.createUserExam(userExamRequest);
-            if (saveUserExam == null) {
-                return ResponseEntity.status(400).body(ApiResponse.error("User exam not created", List.of("Failed to create user exam")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("User exam created successfully", saveUserExam));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to create user exam", List.of(e.getMessage())));
-        }
+        UserExamDto saveUserExam = userExamService.createUserExam(userExamRequest);
+        return ResponseEntity.ok(ApiResponse.success("User exam created successfully", saveUserExam));
     }
 
     @GetMapping("users/{userId}/user-exams")
     @Operation(summary = "Lấy bài thi của người dùng theo userId")
-    public ResponseEntity<ApiResponse<?>> getUserExamByUserId(
+    public ResponseEntity<ApiResponse<List<UserExamResponse>>> getUserExamByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
     ) {
-        try {
-            List<UserExamResponse> userExam = userExamService.getUserExamByUserId(userId);
-            if (userExam == null) {
-                return ResponseEntity.status(404).body(ApiResponse.error("No user exam found", List.of("No user exam found for the given user ID")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("User exam fetched successfully", userExam));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch user exam", List.of(e.getMessage())));
-        }
+        List<UserExamResponse> userExam = userExamService.getUserExamByUserId(userId);
+        return ResponseEntity.ok(ApiResponse.success("User exam fetched successfully", userExam));
     }
 }
-
-

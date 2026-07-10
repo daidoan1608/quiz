@@ -17,6 +17,8 @@ public interface QuestionService {
 
     List<QuestionDto> getAllQuestion();
 
+    List<QuestionDto> searchQuestions(String keyword);
+
     List<QuestionDto> getQuestionsBySubject(Long subjectId);
 
     List<QuestionDto> getQuestionsBySubjectAndNumber(Long subjectId, int number);

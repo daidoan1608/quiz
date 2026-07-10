@@ -11,10 +11,9 @@ export const FavoritesProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const userId = localStorage.getItem("userId");
-  const accessToken = localStorage.getItem("accessToken") || user?.accessToken;
 
   useEffect(() => {
-    if (accessToken && userId) {
+    if (isLoggedIn && userId) {
       loadFavorites();
     } else {
       setFavorites([]);

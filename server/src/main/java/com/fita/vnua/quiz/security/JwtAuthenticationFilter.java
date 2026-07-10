@@ -8,10 +8,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,27 +20,12 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-//    private static final List<String> EXCLUDE_URLS = List.of(
-//            "/swagger-ui/**",
-//            "/v3/api-docs/**",
-//            "/api/v1/auth/**",
-//            "/api/v1/otp/**",
-//            "/api/v1/public/**",
-//            "/avatars/**"
-//    );
-//
-//    private final List<AntPathRequestMatcher> exclusionMatchers = EXCLUDE_URLS.stream()
-//            .map(AntPathRequestMatcher::new)
-//            .toList();
-
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService userDetailsService;
-
-    public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil, CustomUserDetailsService userDetailsService) {
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.userDetailsService = userDetailsService;
-    }
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(
@@ -49,28 +35,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         try {
-            String jwtToken = null;
-            // 1. Lấy JWT từ Cookie (Thay vì Header Authorization)
-            // Hàm này đã được thêm vào JwtTokenUtil ở bước trước
-            jwtToken = jwtTokenUtil.getJwtFromCookies(request);
+            String jwtToken = jwtTokenUtil.getJwtFromCookies(request);
 
             if (jwtToken == null) {
                 String authHeader = request.getHeader("Authorization");
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                    jwtToken = authHeader.substring(7); // Cắt bỏ chữ "Bearer "
+                    jwtToken = authHeader.substring(7);
                 }
             }
 
-            // 2. Nếu tìm thấy token trong cookie và chưa có authentication trong context
             if (jwtToken != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                // Lấy username từ token (Hàm này có thể throw CustomApiException nếu token lỗi)
                 String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
 
                 if (username != null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                    // Validate token
                     if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -78,29 +57,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities()
                         );
 
-                        // Set thông tin request (IP, Session ID...) vào authentication
-                        // authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }
             }
         } catch (CustomApiException ex) {
-//            // Trường hợp token hết hạn hoặc không hợp lệ, bạn có 2 lựa chọn:
-//
-//            // Lựa chọn A (Hiện tại của bạn): Trả về lỗi ngay lập tức
-//            // response.setStatus(ex.getStatus().value());
-//            // response.setContentType("application/json");
-//            // response.getWriter().write("{\"message\": \"" + ex.getMessage() + "\"}");
-//            // return; // Dừng filter chain
-//
-//            // Lựa chọn B (Khuyên dùng): Bỏ qua lỗi, coi như người dùng chưa đăng nhập (Anonymous)
-//            // SecurityContextHolder.clearContext();
-//            // Lý do: Đôi khi cookie hết hạn nhưng user đang truy cập trang public, không nên chặn họ.
-//            // Nếu họ truy cập trang private, SecurityConfig sẽ chặn sau.
-//
-//            // Ở đây tôi giữ theo logic cũ của bạn (Lựa chọn A) nhưng log ra console để debug
-            System.out.println("JWT Filter Error: " + ex.getMessage());
+            log.debug("JWT authentication failed: {}", ex.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
@@ -108,21 +70,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     "Phiên đăng nhập không hợp lệ hoặc đã hết hạn",
                     List.of(ex.getMessage())
             );
-            response.getWriter().write(new ObjectMapper().writeValueAsString(body));
+            response.getWriter().write(objectMapper.writeValueAsString(body));
             return;
         } catch (Exception e) {
-            // Log các lỗi khác nếu có
-            System.err.println("Cannot set user authentication: " + e.getMessage());
+            log.warn("Cannot set user authentication", e);
         }
 
         filterChain.doFilter(request, response);
     }
-
-//    @Override
-//    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
-//        // Trả về TRUE nếu request khớp với bất kỳ đường dẫn nào trong danh sách loại trừ
-//        // Khi TRUE, doFilterInternal sẽ KHÔNG được chạy.
-//        return exclusionMatchers.stream().anyMatch(matcher -> matcher.matches(request));
-//    }
 
 }

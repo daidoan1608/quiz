@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -24,7 +25,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (MessagingException e) {
-            throw new RuntimeException("Lỗi khi gửi email: " + e.getMessage());
+            throw new CustomApiException("Lỗi khi gửi email: " + e.getMessage(), e);
         }
     }
 }

@@ -11,6 +11,8 @@ public interface ChapterService {
 
     List<ChapterDto> getAllChapter();
 
+    List<ChapterDto> searchChapters(String keyword);
+
     Optional<ChapterDto> getChapterById(Long chapterId);
 
     ChapterDto create(ChapterDto chapterDto);

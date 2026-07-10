@@ -9,6 +9,8 @@ const config = {
     "Content-Type": "application/json",
   },
   withCredentials: true,
+  xsrfCookieName: "XSRF-TOKEN",
+  xsrfHeaderName: "X-XSRF-TOKEN",
 };
 
 const authAxios = axios.create(config);
@@ -28,11 +30,9 @@ let isRefreshing = false;
 let failedQueue = [];
 
 const clearAuthStorage = () => {
-  localStorage.removeItem("accessToken");
   localStorage.removeItem("userId");
   localStorage.removeItem("role");
   localStorage.removeItem("username");
-  sessionStorage.removeItem("refreshToken");
 };
 
 const redirectToLoginOnce = () => {
@@ -53,14 +53,6 @@ const processQueue = (error) => {
   });
   failedQueue = [];
 };
-
-authAxios.interceptors.request.use((requestConfig) => {
-  const token = localStorage.getItem("accessToken");
-  if (token) {
-    requestConfig.headers.Authorization = `Bearer ${token}`;
-  }
-  return requestConfig;
-});
 
 authAxios.interceptors.response.use(
   (response) => response,
@@ -93,13 +85,7 @@ authAxios.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const refreshToken = sessionStorage.getItem("refreshToken");
-      const response = await publicAxios.post("/auth/refresh", refreshToken ? { refreshToken } : undefined);
-      const newAccessToken = response.data?.data?.accessToken || response.data?.accessToken;
-
-      if (newAccessToken) {
-        localStorage.setItem("accessToken", newAccessToken);
-      }
+      await publicAxios.post("/auth/refresh");
 
       processQueue(null);
       return authAxios(originalRequest);

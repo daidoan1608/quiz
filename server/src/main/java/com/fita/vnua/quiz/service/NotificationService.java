@@ -2,6 +2,7 @@ package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.response.CampaignResponse;
 import com.fita.vnua.quiz.model.dto.response.NotificationResponse;
+import com.fita.vnua.quiz.model.dto.response.RecipientResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,8 @@ public interface NotificationService {
     void sendBatchNotification(List<UUID> userIds, String title, String message);
 
     Page<CampaignResponse> getAllCampaigns(String keyword, Pageable pageable);
+
+    Page<RecipientResponse> getRecipientsByHistoryId(Long historyId, Pageable pageable);
 
     @Transactional
     void deleteHistory(Long historyId);

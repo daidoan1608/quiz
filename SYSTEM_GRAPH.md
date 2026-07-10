@@ -22,7 +22,7 @@ flowchart LR
 
     subgraph External["Dich vu ngoai"]
         GoogleOAuth["Google OAuth2"]
-        GoogleDrive["Google Drive\nAvatar storage"]
+        Cloudinary["Cloudinary\nImage storage"]
         Gmail["SMTP Gmail\nOTP / Email"]
     end
 
@@ -33,7 +33,7 @@ flowchart LR
     Nginx --> Backend
     Backend -->|"JPA repositories"| MySQL
     Backend -->|"xac thuc Google"| GoogleOAuth
-    Backend -->|"upload avatar"| GoogleDrive
+    Backend -->|"upload image"| Cloudinary
     Backend -->|"gui OTP / email"| Gmail
 ```
 
@@ -69,7 +69,7 @@ flowchart TB
         QuizSvc["Category / Subject / Chapter / Question / Exam services"]
         UserExamSvc["UserExamService"]
         NotifySvc["NotificationService"]
-        AvatarSvc["AvatarStorageService / GDriveAvatarService"]
+        AvatarSvc["AvatarStorageService"]
         StatsSvc["StatisticsService"]
     end
 
@@ -480,13 +480,13 @@ sequenceDiagram
     actor U as User
     participant FE as React app
     participant API as AvatarController
-    participant Drive as Google Drive
+    participant Storage as Image storage
     participant FS as Local uploads
     participant DB as MySQL
 
     U->>FE: Chon anh dai dien
     FE->>API: POST /api/v1/users/me/avatar/{userId}
-    API->>Drive: Upload avatar neu cau hinh GDrive
+    API->>Storage: Upload avatar neu cau hinh Cloudinary
     API->>FS: Hoac luu vao uploads/avatars
     API->>DB: Cap nhat User.avatarUrl
     API-->>FE: URL avatar moi

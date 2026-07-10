@@ -13,9 +13,8 @@ export const AuthProvider = ({ children }) => {
 
   // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
     const userInfo = localStorage.getItem("userId");
-    if (token && userInfo) {
+    if (userInfo) {
       setIsLoggedIn(true);
       setUser(userInfo);
     } else {
@@ -24,9 +23,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (accessToken, refreshToken, userId, role, username) => {
-    if (accessToken) localStorage.setItem("accessToken", accessToken);
-    if (refreshToken) sessionStorage.setItem("refreshToken", refreshToken);
+  const login = (userId, role, username) => {
     localStorage.setItem("userId", userId);
     localStorage.setItem("role", role);
     localStorage.setItem("username", username);

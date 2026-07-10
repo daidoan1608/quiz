@@ -11,11 +11,10 @@ export const AuthProvider = ({ children }) => {
   const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
     const userInfo = localStorage.getItem("userId");
     const userFullName = localStorage.getItem("fullName");
     const userAvatarUrl = localStorage.getItem("avatarUrl");
-    if (token && userInfo) {
+    if (userInfo) {
       setIsLoggedIn(true);
       setUser(userInfo);
       setFullName(userFullName || "");
@@ -29,9 +28,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (accessToken, refreshToken, userId, fullName, avatarUrl) => {
-    localStorage.setItem("accessToken", accessToken);
-    sessionStorage.setItem("refreshToken", refreshToken);
+  const login = (userId, fullName, avatarUrl) => {
     localStorage.setItem("userId", userId);
     localStorage.setItem("fullName", fullName);
     localStorage.setItem("avatarUrl", avatarUrl); // Đã lưu vào localStorage
@@ -50,8 +47,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
     localStorage.removeItem("userId");
     localStorage.removeItem("fullName");
     localStorage.removeItem("avatarUrl");

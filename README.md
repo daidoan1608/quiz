@@ -33,7 +33,7 @@ flowchart LR
     AdminApp --> API
     API --> DB[(MySQL 8)]
     API --> Mail[Gmail SMTP / OTP]
-    API --> Google[Google OAuth / Google Drive]
+    API --> Google[Google OAuth]
     Nginx[Nginx reverse proxy] --> Client
     Nginx --> AdminApp
     Nginx --> API
@@ -44,7 +44,7 @@ Luồng chính:
 1. Người dùng hoặc quản trị viên thao tác trên frontend React.
 2. Frontend gọi REST API qua Axios, base URL mặc định là `http://localhost:8080/api/v1/`.
 3. Backend Spring Boot xác thực JWT/refresh token, kiểm tra quyền và xử lý nghiệp vụ.
-4. Dữ liệu được lưu trong MySQL; email OTP gửi qua SMTP; ảnh/các tài nguyên upload có thể lưu local hoặc Google Drive tùy cấu hình.
+4. Dữ liệu được lưu trong MySQL; email OTP gửi qua SMTP; ảnh/các tài nguyên upload lưu local hoặc Cloudinary tùy cấu hình.
 
 ## Công nghệ sử dụng
 
@@ -59,7 +59,7 @@ Luồng chính:
 - MySQL Connector/J
 - JWT `jjwt`
 - OAuth2 Client / Resource Server
-- Google API Client, Google OAuth Client, Google Drive API
+- Google OAuth Client
 - Spring Mail
 - Apache POI để import Excel
 - Springdoc OpenAPI / Swagger UI
@@ -205,12 +205,13 @@ spring.mail.password=${MAIL_PASSWORD:<gmail-app-password>}
 
 google.client.id=${GOOGLE_CLIENT_ID:<google-client-id>}
 
-gdrive.saKeyPath=classpath:keys/sa.json
-gdrive.folderId=<google-drive-folder-id>
-gdrive.makePublic=true
-
 avatar.upload-dir=uploads/avatars
 question.upload-dir=uploads/questions
+cloudinary.enabled=false
+cloudinary.cloud-name=<cloudinary-cloud-name>
+cloudinary.api-key=<cloudinary-api-key>
+cloudinary.api-secret=<cloudinary-api-secret>
+cloudinary.folder=quiz
 ```
 
 > Lưu ý: không commit secret thật như JWT secret, Gmail app password, mật khẩu database production hoặc Google service account key. Nên truyền qua biến môi trường khi deploy.

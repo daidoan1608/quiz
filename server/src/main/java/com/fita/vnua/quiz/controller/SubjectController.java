@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.SubjectDto;
+import com.fita.vnua.quiz.model.dto.SubjectSummaryDto;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.service.SubjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,93 +23,62 @@ public class SubjectController {
 
     @GetMapping("public/subjects")
     @Operation(summary = "Lấy danh sách tất cả các môn học")
-    public ResponseEntity<ApiResponse<List<SubjectDto>>> getAllSubject() {
-        try {
-            List<SubjectDto> subjects = subjectService.getAllSubject();
-            if (subjects.isEmpty()) {
-                return ResponseEntity.status(204).body(ApiResponse.error("No subject found", List.of("No subjects available")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch subjects", List.of(e.getMessage())));
-        }
+    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getAllSubject() {
+        List<SubjectSummaryDto> subjects = subjectService.getAllSubject();
+        return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
+    }
+
+    @GetMapping("public/subjects/search")
+    @Operation(summary = "Tìm kiếm môn học theo tên hoặc mô tả")
+    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> searchSubjects(@RequestParam("q") String keyword) {
+        List<SubjectSummaryDto> subjects = subjectService.searchSubjects(keyword);
+        return ResponseEntity.ok(ApiResponse.success("Subjects searched successfully", subjects));
     }
 
     @GetMapping("user/subjects")
     @Operation(summary = "Lấy các môn học mà user đã làm bài thi")
-    public ResponseEntity<ApiResponse<List<SubjectDto>>> getSubjectsByUser(
-            @RequestParam UUID userId
-    ) {
-        List<SubjectDto> subjects = subjectService.getSubjectsByUser(userId);
-        if (subjects.isEmpty()) {
-            return ResponseEntity.status(204)
-                    .body(ApiResponse.error("Không tìm thấy môn học nào", List.of("User chưa có bài thi")));
-        }
+    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getSubjectsByUser(@RequestParam UUID userId) {
+        List<SubjectSummaryDto> subjects = subjectService.getSubjectsByUser(userId);
         return ResponseEntity.ok(ApiResponse.success("Fetched successfully", subjects));
     }
 
     @GetMapping("public/subjects/category/{categoryId}")
     @Operation(summary = "Lấy danh sách môn học theo Id danh mục")
-    public ResponseEntity<ApiResponse<List<SubjectDto>>> getSubjectByCategoryId(@PathVariable("categoryId") Long categoryId) {
-        try {
-            List<SubjectDto> subjects = subjectService.getSubjectsByCategoryId(categoryId);
-            if (subjects.isEmpty()) {
-                return ResponseEntity.status(204).body(ApiResponse.error("No subject found", List.of("No subjects found for the given category")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch subjects", List.of(e.getMessage())));
-        }
+    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getSubjectByCategoryId(@PathVariable("categoryId") Long categoryId) {
+        List<SubjectSummaryDto> subjects = subjectService.getSubjectsByCategoryId(categoryId);
+        return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
     }
 
     @GetMapping("public/subjects/{subjectId}")
     @Operation(summary = "Lấy môn học theo Id môn học")
     public ResponseEntity<ApiResponse<SubjectDto>> getSubjectById(@PathVariable("subjectId") Long subjectId) {
-        try {
-            SubjectDto subject = subjectService.getSubjectById(subjectId);
-            if (subject == null) {
-                return ResponseEntity.status(204).body(ApiResponse.error("No subject found", List.of("No subject found for the given ID")));
-            }
-            return ResponseEntity.ok(ApiResponse.success("Subject fetched successfully", subject));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to fetch subject", List.of(e.getMessage())));
-        }
+        SubjectDto subject = subjectService.getSubjectById(subjectId);
+        return ResponseEntity.ok(ApiResponse.success("Subject fetched successfully", subject));
     }
 
     @PostMapping("admin/subjects")
     @Operation(summary = "Tạo môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> createSubject(@RequestBody SubjectDto subjectDto) {
-        try {
-            SubjectDto createdSubject = subjectService.create(subjectDto);
-            return ResponseEntity.ok(ApiResponse.success("Subject created successfully", createdSubject));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to create subject", List.of(e.getMessage())));
-        }
+        SubjectDto createdSubject = subjectService.create(subjectDto);
+        return ResponseEntity.ok(ApiResponse.success("Subject created successfully", createdSubject));
     }
 
     @PreAuthorize("hasPermission(#subjectId, 'Subject', 'UPDATE') or hasRole('ADMIN')")
     @PatchMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Cập nhật môn học (admin)")
-    public ResponseEntity<ApiResponse<SubjectDto>> updateSubject(@PathVariable("subjectId") Long subjectId, @RequestBody SubjectDto subjectDto) {
-        try {
-            SubjectDto updatedSubject = subjectService.update(subjectId, subjectDto);
-            return ResponseEntity.ok(ApiResponse.success("Subject updated successfully", updatedSubject));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to update subject", List.of(e.getMessage())));
-        }
+    public ResponseEntity<ApiResponse<SubjectDto>> updateSubject(
+            @PathVariable("subjectId") Long subjectId,
+            @RequestBody SubjectDto subjectDto
+    ) {
+        SubjectDto updatedSubject = subjectService.update(subjectId, subjectDto);
+        return ResponseEntity.ok(ApiResponse.success("Subject updated successfully", updatedSubject));
     }
 
     @PreAuthorize("hasPermission(#subjectId, 'Subject', 'DELETE')")
     @DeleteMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Xóa môn học (admin)")
-    public ResponseEntity<ApiResponse<Object>> deleteSubject(@PathVariable("subjectId") Long subjectId) {
-        try {
-            subjectService.delete(subjectId);
-            return ResponseEntity.ok(ApiResponse.success("Subject deleted successfully", "Deleted subject with id: " + subjectId));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(ApiResponse.error("Failed to delete subject", List.of(e.getMessage())));
-        }
+    public ResponseEntity<Void> deleteSubject(@PathVariable("subjectId") Long subjectId) {
+        subjectService.delete(subjectId);
+        return ResponseEntity.noContent().build();
     }
 }
-
-

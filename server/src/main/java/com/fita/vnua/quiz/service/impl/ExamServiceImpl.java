@@ -1,6 +1,8 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.ExamDto;
+import com.fita.vnua.quiz.model.dto.ExamSummaryDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.genaretor.ExamQuestionId;
 import com.fita.vnua.quiz.model.dto.request.ExamRequest;
@@ -11,6 +13,7 @@ import com.fita.vnua.quiz.service.NotificationService;
 import com.fita.vnua.quiz.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,45 +36,51 @@ public class ExamServiceImpl implements ExamService {
     private final UserAnswerRepository userAnswerRepository;
     private final UserExamRepository userExamRepository;
 
-    protected List<ExamDto> mapExamsToExamDtos(List<Exam> exams) {
-        List<ExamDto> examDtos = new ArrayList<>();
-        for (Exam exam : exams) {
-            ExamDto examDto = new ExamDto();
-            examDto.setExamId(exam.getExamId());
-            examDto.setTitle(exam.getTitle());
-            examDto.setDescription(exam.getDescription());
-            examDto.setDuration(exam.getDuration());
-            examDto.setSubjectId(exam.getSubject().getSubjectId());
-            examDto.setCreatedBy(exam.getCreatedBy().getUserId());
-            examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
-            examDto.setQuestions(questionService.getQuestionsByExamId(exam.getExamId()));
-            examDtos.add(examDto);
-        }
-        return examDtos;
+    protected List<ExamSummaryDto> mapExamsToSummaryDtos(List<Exam> exams) {
+        return exams.stream()
+                .map(this::mapExamToSummaryDto)
+                .toList();
+    }
+
+    private ExamSummaryDto mapExamToSummaryDto(Exam exam) {
+        ExamSummaryDto dto = new ExamSummaryDto();
+        dto.setExamId(exam.getExamId());
+        dto.setTitle(exam.getTitle());
+        dto.setDescription(exam.getDescription());
+        dto.setDuration(exam.getDuration());
+        dto.setSubjectId(exam.getSubject().getSubjectId());
+        dto.setSubjectName(exam.getSubject().getName());
+        dto.setCreatedBy(exam.getCreatedBy().getUserId());
+        dto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
+        dto.setQuestionCount(examQuestionRepository.countByExam(exam).intValue());
+        return dto;
     }
 
     @Override
-    public List<ExamDto> getAllExams() {
+    public List<ExamSummaryDto> getAllExams() {
         List<Exam> exams = examRepository.findByDeletedFalse();
-        return mapExamsToExamDtos(exams);
+        return mapExamsToSummaryDtos(exams);
     }
 
     @Override
-    public List<ExamDto> getExamsBySubjectId(Long subjectId) {
+    public List<ExamSummaryDto> getExamsBySubjectId(Long subjectId) {
         List<Exam> exams = examRepository.findExamsBySubjectId(subjectId);
-        return mapExamsToExamDtos(exams);
+        return mapExamsToSummaryDtos(exams);
     }
 
     @Override
     public ExamDto getExamById(Long id) {
-        Exam exam = examRepository.findExamByExamId(id);
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
         ExamDto examDto = new ExamDto();
         examDto.setExamId(exam.getExamId());
         examDto.setTitle(exam.getTitle());
         examDto.setDescription(exam.getDescription());
         examDto.setDuration(exam.getDuration());
         examDto.setSubjectId(exam.getSubject().getSubjectId());
-        examDto.setSubjectName(subjectRepository.findById(exam.getSubject().getSubjectId()).orElseThrow(() -> new RuntimeException("Subject not found")).getName());
+        examDto.setSubjectName(subjectRepository.findById(exam.getSubject().getSubjectId())
+                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND))
+                .getName());
         examDto.setCreatedBy(exam.getCreatedBy().getUserId());
         examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
         examDto.setQuestions(questionService.getQuestionsByExamId(exam.getExamId()));
@@ -187,13 +196,13 @@ public class ExamServiceImpl implements ExamService {
 
         // Lấy đối tượng Subject để dùng sau này cho việc gửi thông báo
         Subject subject = subjectRepository.findById(examDto.getSubjectId())
-                .orElseThrow(() -> new RuntimeException("Subject not found"));
+                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
         exam.setSubject(subject);
 
         exam.setDescription(examDto.getDescription());
         exam.setDuration(examDto.getDuration());
         exam.setCreatedBy(userRepository.findById(examDto.getCreatedBy())
-                .orElseThrow(() -> new RuntimeException("User not found")));
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND)));
         exam.setCreatedTime(LocalDate.now());
 
         // Lưu lần 1 để lấy Exam ID
@@ -278,13 +287,13 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public ExamDto updateExam(Long id, ExamDto examDto) {
         Exam exam = examRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + id));
+                .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
         exam.setTitle(examDto.getTitle());
         exam.setDescription(examDto.getDescription());
         exam.setDuration(examDto.getDuration());
         if (examDto.getSubjectId() != null) {
             Subject subject = subjectRepository.findById(examDto.getSubjectId())
-                    .orElseThrow(() -> new RuntimeException("Subject not found with id: " + examDto.getSubjectId()));
+                    .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
             exam.setSubject(subject);
         }
         Exam updatedExam = examRepository.save(exam);
@@ -305,7 +314,7 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public void deleteExam(Long id) {
         Exam exam = examRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + id));
+                .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
 
         exam.setDeleted(true);
         examRepository.save(exam);

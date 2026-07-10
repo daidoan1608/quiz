@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.configuration;
 
+import com.fita.vnua.quiz.configuration.properties.SecurityProperties;
 import com.fita.vnua.quiz.security.CustomPermissionEvaluator;
 import com.fita.vnua.quiz.security.JwtAccessDeniedHandler;
 import com.fita.vnua.quiz.security.JwtAuthenticationEntryPoint;
@@ -15,12 +16,13 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -37,6 +39,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final SecurityProperties securityProperties;
 
     // Inject danh sách domain từ application.properties
     @Value("${app.cors.allowed-origins}")
@@ -48,9 +51,16 @@ public class SecurityConfig {
                 // 1. Cấu hình CORS ngay tại SecurityFilterChain
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // 2. Tắt CSRF (Vì ta dùng SameSite Cookie để chống CSRF rồi)
-                // Nếu bật CSRF, bạn phải setup thêm logic phức tạp ở FE
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> {
+                    if (!securityProperties.isCsrfEnabled()) {
+                        csrf.disable();
+                        return;
+                    }
+
+                    csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+                    securityProperties.getCsrfIgnoredAntMatchers()
+                            .forEach(pattern -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher(pattern)));
+                })
 
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(

@@ -36,6 +36,7 @@ public class NotificationHistory {
     private LocalDateTime createdAt;
 
     // Khi xóa lịch sử -> Xóa sạch các thông báo con
+    @Builder.Default
     @OneToMany(mappedBy = "history", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Notification> notifications = new ArrayList<>();
 

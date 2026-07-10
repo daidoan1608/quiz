@@ -1,82 +1,92 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.service.storage.ImageStorage;
+import com.fita.vnua.quiz.service.storage.ImageValidator;
+import com.fita.vnua.quiz.service.storage.StoredImage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class AvatarStorageService {
 
+    private static final String AVATAR_PUBLIC_PATH = "/avatars/";
+    private static final String QUESTION_PUBLIC_PATH = "/questions/";
+
+    private final ImageStorage imageStorage;
+    private final ImageValidator imageValidator;
+
     @Value("${avatar.upload-dir}")
-    private String uploadDir;
+    private String avatarUploadDir;
 
     @Value("${avatar.default-url}")
-    private String defaultUrl;
+    private String defaultAvatarUrl;
 
     @Value("${question.upload-dir:uploads/questions}")
     private String questionUploadDir;
 
     public Uploaded saveAvatar(UUID userId, MultipartFile file, String oldUrl) throws Exception {
-        // Xóa file cũ nếu có (không xóa default)
-        if (oldUrl != null && oldUrl.startsWith("/avatars/") && !oldUrl.equals(defaultUrl)) {
-            deleteAvatar(oldUrl);
-        }
+        byte[] bytes = readAndValidate(file);
+        deleteOldAvatar(oldUrl);
 
-        // Tạo folder nếu chưa tồn tại
-        Path folder = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(folder);
+        String extension = imageValidator.getSafeExtension(file.getOriginalFilename());
+        String filename = "avatar_" + userId + "_" + System.currentTimeMillis() + extension;
 
-        // Tên file duy nhất
-        String ext = getExtension(file.getOriginalFilename());
-        String filename = "avatar_" + userId + "_" + System.currentTimeMillis() + ext;
-
-        // Lưu file
-        Path target = folder.resolve(filename);
-        file.transferTo(target.toFile());
-
-        // Trả về đường dẫn
-        String url = "/avatars/" + filename;
-        return new Uploaded(filename, url);
+        return toUploaded(imageStorage.save(avatarUploadDir, AVATAR_PUBLIC_PATH, filename, bytes));
     }
 
     public void deleteAvatar(String url) {
         try {
-            String filename = url.replace("/avatars/", "");
-            Path path = Paths.get(uploadDir).resolve(filename).toAbsolutePath();
-            Files.deleteIfExists(path);
+            imageStorage.delete(avatarUploadDir, AVATAR_PUBLIC_PATH, url);
         } catch (Exception e) {
-            System.err.println("⚠️ Không thể xóa avatar cũ: " + e.getMessage());
+            log.warn("Unable to delete old avatar: {}", url, e);
         }
     }
 
     public String getDefaultUrl() {
-        return defaultUrl;
+        return defaultAvatarUrl;
     }
 
     public Uploaded saveQuestionImage(MultipartFile file) throws Exception {
-        Path folder = Paths.get(questionUploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(folder);
-
-        String ext = getExtension(file.getOriginalFilename());
-        String filename = "q_" + UUID.randomUUID().toString() + ext;
-
-        Path target = folder.resolve(filename);
-        file.transferTo(target.toFile());
-
-        String url = "/questions/" + filename;
-        return new Uploaded(filename, url);
+        byte[] bytes = readAndValidate(file);
+        return saveQuestionImage(file.getOriginalFilename(), bytes);
     }
 
-    private String getExtension(String name) {
-        if (name == null || !name.contains(".")) return ".jpg";
-        return name.substring(name.lastIndexOf("."));
+    public Uploaded saveQuestionImage(String originalName, byte[] bytes) throws Exception {
+        imageValidator.validate(originalName, null, bytes == null ? 0 : bytes.length, bytes);
+
+        String extension = imageValidator.getSafeExtension(originalName);
+        String filename = "q_" + UUID.randomUUID() + extension;
+
+        return toUploaded(imageStorage.save(questionUploadDir, QUESTION_PUBLIC_PATH, filename, bytes));
+    }
+
+    private byte[] readAndValidate(MultipartFile file) throws Exception {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Image file is required");
+        }
+
+        byte[] bytes = file.getBytes();
+        imageValidator.validate(file.getOriginalFilename(), file.getContentType(), file.getSize(), bytes);
+        return bytes;
+    }
+
+    private void deleteOldAvatar(String oldUrl) {
+        if (oldUrl != null && oldUrl.startsWith(AVATAR_PUBLIC_PATH) && !oldUrl.equals(defaultAvatarUrl)) {
+            deleteAvatar(oldUrl);
+        }
+    }
+
+    private Uploaded toUploaded(StoredImage storedImage) {
+        return new Uploaded(storedImage.filename(), storedImage.url());
     }
 
     @Data

@@ -6,7 +6,6 @@ import com.fita.vnua.quiz.model.dto.request.PersonalNotificationRequest;
 import com.fita.vnua.quiz.model.dto.request.SubjectNotificationRequest;
 import com.fita.vnua.quiz.model.dto.response.CampaignResponse;
 import com.fita.vnua.quiz.model.dto.response.RecipientResponse;
-import com.fita.vnua.quiz.repository.NotificationRepository;
 import com.fita.vnua.quiz.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -23,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 public class AdminNotificationController {
 
     private final NotificationService notificationService;
-    private final NotificationRepository notificationRepository; // Inject thêm cái này để xem chi tiết người nhận
 
     // 1. Gửi thông báo TOÀN HỆ THỐNG (VD: Bảo trì server)
     @PostMapping("/global")
@@ -87,8 +85,7 @@ public class AdminNotificationController {
     public ResponseEntity<Page<RecipientResponse>> getRecipients(
             @PathVariable Long id,
             Pageable pageable) {
-        // Gọi trực tiếp Repo hoặc bạn có thể wrap vào Service nếu muốn chuẩn chỉ hơn
-        return ResponseEntity.ok(notificationRepository.findRecipientsByHistoryId(id, pageable));
+        return ResponseEntity.ok(notificationService.getRecipientsByHistoryId(id, pageable));
     }
 
     // 7. THU HỒI thông báo (Xóa History -> Xóa hết con)

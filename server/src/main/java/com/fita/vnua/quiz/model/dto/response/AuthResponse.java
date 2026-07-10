@@ -15,6 +15,7 @@ import java.util.UUID;
 public class AuthResponse {
     private String accessToken;
     private String refreshToken;
+    @Builder.Default
     private String tokenType = "Bearer";
     private UUID userId;
     private String username;

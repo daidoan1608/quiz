@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.Optional;
 
 @Entity
 @Table(name = "otp_codes")
@@ -19,8 +18,11 @@ public class OtpCode {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user; // Liên kết với bảng users
 
-    @Column(nullable = false, length = 6)
+    @Column(nullable = false)
     private String otp;
+
+    @Column(nullable = false)
+    private int failedAttempts = 0;
 
     @Column(nullable = false)
     private Instant otpExpiry; // Thời gian hết hạn

@@ -71,8 +71,6 @@ const ForgotPassword = () => {
         // ✅ BACKEND TRẢ resetToken TRONG data
         const resetToken = res.data;
 
-        console.log("ResetToken:", resetToken);
-
         setToken(resetToken);
         setStep(3);
         form.resetFields();
@@ -82,11 +80,6 @@ const ForgotPassword = () => {
 
   // ================= STEP 3: RESET PASSWORD =================
   const handleResetPassword = (values) => {
-    console.log("Payload reset:", {
-      resetToken: token,
-      newPassword: values.password,
-    });
-
     handleApiRequest(
       "otp/reset",
       {

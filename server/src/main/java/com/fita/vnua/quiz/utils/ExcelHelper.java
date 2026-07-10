@@ -1,9 +1,11 @@
 package com.fita.vnua.quiz.utils;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpStatus;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ public class ExcelHelper {
 
                 // Kiểm tra nếu difficulty không hợp lệ sau khi bỏ khoảng trống
                 if (!difficulty.equalsIgnoreCase("EASY") && !difficulty.equalsIgnoreCase("MEDIUM") && !difficulty.equalsIgnoreCase("HARD")) {
-                    throw new RuntimeException("Difficulty không hợp lệ: " + difficulty);
+                    throw new CustomApiException("Difficulty không hợp lệ: " + difficulty, HttpStatus.BAD_REQUEST);
                 }
                 questionDto.setDifficulty(difficulty);
 
@@ -72,8 +74,10 @@ public class ExcelHelper {
             }
 
             return questionList;
+        } catch (CustomApiException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi đọc file Excel: " + e.getMessage(), e);
+            throw new CustomApiException("Lỗi khi đọc file Excel: " + e.getMessage(), e);
         }
     }
 

@@ -39,6 +39,7 @@ public class Notification {
     private UUID userId;
 
     // Trạng thái đọc (Chỉ dùng cho PERSONAL, GLOBAL dùng bảng phụ)
+    @Builder.Default
     @Column(name = "is_read")
     private boolean isRead = false;
 

@@ -3,18 +3,17 @@ services:
     build: ./server
     restart: always
     expose:
-      - "8080" # Dùng expose thay vì ports để chỉ container nội bộ thấy nhau
+      - "8080"
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=quiz
-      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
-      - MAIL_USERNAME=${MAIL_USERNAME:-example@gmail.com}
-      - MAIL_PASSWORD=${MAIL_PASSWORD:?MAIL_PASSWORD is required}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_NAME=${DB_NAME:-quiz}
 
   user:
     build: ./client
@@ -32,13 +31,12 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: quiz
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-quiz}
     volumes:
       - ./mysql.init:/docker-entrypoint-initdb.d
       - db-data:/var/lib/mysql
 
-  # THÊM NGINX VÀO ĐÂY
   nginx:
     image: nginx:alpine
     restart: always
@@ -47,7 +45,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro # Đọc SSL từ máy thật
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
       - user

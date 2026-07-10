@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.*;
 import java.util.function.Function;
@@ -42,7 +43,14 @@ public class JwtTokenUtil {
     private final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret must be configured");
+        }
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("JWT secret must be at least 32 bytes for HS256");
+        }
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(Map<String, Object> claims, String subject) {
@@ -179,7 +187,10 @@ public class JwtTokenUtil {
     public ResponseCookie getCleanJwtCookie() {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, "")
                 .path("/")
-                .maxAge(0); // Set maxAge = 0 để xóa ngay lập tức
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite); // Set maxAge = 0 để xóa ngay lập tức
 
         if (cookieDomain != null && !cookieDomain.isEmpty()) {
             builder.domain(cookieDomain);
@@ -191,7 +202,10 @@ public class JwtTokenUtil {
     public ResponseCookie getCleanRefreshJwtCookie() {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
                 .path("/")
-                .maxAge(0);
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite);
 
         if (cookieDomain != null && !cookieDomain.isEmpty()) {
             builder.domain(cookieDomain);

@@ -1,7 +1,9 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.response.CampaignResponse;
 import com.fita.vnua.quiz.model.dto.response.NotificationResponse;
+import com.fita.vnua.quiz.model.dto.response.RecipientResponse;
 import com.fita.vnua.quiz.model.entity.GlobalNotificationRead;
 import com.fita.vnua.quiz.model.entity.Notification;
 import com.fita.vnua.quiz.model.entity.NotificationHistory;
@@ -9,6 +11,7 @@ import com.fita.vnua.quiz.repository.*;
 import com.fita.vnua.quiz.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -156,6 +159,12 @@ public class NotificationServiceImpl implements NotificationService {
                         .build());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RecipientResponse> getRecipientsByHistoryId(Long historyId, Pageable pageable) {
+        return notificationRepository.findRecipientsByHistoryId(historyId, pageable);
+    }
+
     @Transactional
     @Override
     public void deleteHistory(Long historyId) {
@@ -163,7 +172,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (historyRepository.existsById(historyId)) {
             historyRepository.deleteById(historyId);
         } else {
-            throw new RuntimeException("Chiến dịch không tồn tại");
+            throw new CustomApiException("Chiến dịch không tồn tại", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -181,11 +190,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void markAsRead(Long notificationId, UUID currentUserId) {
         Notification noti = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo"));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy thông báo", HttpStatus.NOT_FOUND));
 
         if (noti.getType() == Notification.NotificationType.PERSONAL) {
             if (!noti.getUserId().equals(currentUserId)) {
-                throw new RuntimeException("Unauthorized");
+                throw new CustomApiException("Bạn không có quyền đọc thông báo này", HttpStatus.FORBIDDEN);
             }
             noti.setRead(true);
             notificationRepository.save(noti);

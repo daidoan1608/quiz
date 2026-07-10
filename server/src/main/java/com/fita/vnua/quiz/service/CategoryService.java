@@ -1,11 +1,14 @@
 package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.CategoryDto;
+import com.fita.vnua.quiz.model.dto.CategorySummaryDto;
 
 import java.util.List;
 
 public interface CategoryService {
-    List<CategoryDto> getAllCategories();
+    List<CategorySummaryDto> getAllCategories();
+
+    List<CategorySummaryDto> searchCategories(String keyword);
 
     CategoryDto getCategoryById(Long id);
 

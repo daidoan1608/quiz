@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.entity.RefreshToken;
 import com.fita.vnua.quiz.model.entity.User;
@@ -9,12 +10,18 @@ import com.fita.vnua.quiz.security.JwtTokenUtil;
 import com.fita.vnua.quiz.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,18 +34,13 @@ public class AuthServiceImpl implements AuthService {
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
 
-    /**
-     * Hàm 1: Chỉ lấy thông tin User để trả về cho Client hiển thị (Avatar, Name...)
-     * AccessToken và RefreshToken trong object này sẽ để NULL (vì đã gửi qua Cookie)
-     */
     @Override
     public AuthResponse createAuthResponse(UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userDetails.getUsername()));
+        User user = getUserByUsername(userDetails.getUsername());
 
         return AuthResponse.builder()
-                .accessToken(null)  // Không gửi token ở body
-                .refreshToken(null) // Không gửi token ở body
+                .accessToken(null)
+                .refreshToken(null)
                 .tokenType(null)
                 .userId(user.getUserId())
                 .username(user.getUsername())
@@ -49,13 +51,9 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    /**
-     * Hàm 2: Tạo chuỗi JWT Access Token
-     */
     @Override
     public String generateAccessToken(UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = getUserByUsername(userDetails.getUsername());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getUserId().toString());
@@ -64,17 +62,10 @@ public class AuthServiceImpl implements AuthService {
         return jwtTokenUtil.generateToken(claims, userDetails.getUsername());
     }
 
-    /**
-     * Hàm 3: Tạo Refresh Token (Lưu DB + Trả về chuỗi UUID)
-     */
     @Override
     @Transactional
     public String generateRefreshToken(UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        // (Option) Xóa các token cũ nếu muốn mỗi user chỉ có 1 session
-        // refreshTokenRepository.deleteByUser(user);
+        User user = getUserByUsername(userDetails.getUsername());
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(UUID.randomUUID())
@@ -84,46 +75,73 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         refreshTokenRepository.save(refreshToken);
-
         return refreshToken.getToken().toString();
     }
 
-    /**
-     * Hàm 4: Refresh Access Token (Check UUID trong DB -> Tạo JWT mới)
-     */
     @Override
     public String refreshAccessToken(UUID refreshTokenId) {
         RefreshToken refreshToken = refreshTokenRepository.findByTokenAndRevoked(refreshTokenId, false)
-                .orElseThrow(() -> new RuntimeException("Refresh token không tồn tại hoặc đã bị thu hồi"));
+                .orElseThrow(() -> new CustomApiException("Refresh token không tồn tại hoặc đã bị thu hồi", HttpStatus.UNAUTHORIZED));
 
         if (refreshToken.getExpiryDate().before(new Date())) {
-            refreshTokenRepository.delete(refreshToken); // Xóa token hết hạn
-            throw new RuntimeException("Refresh token đã hết hạn");
+            refreshTokenRepository.delete(refreshToken);
+            throw new CustomApiException("Refresh token đã hết hạn", HttpStatus.UNAUTHORIZED);
         }
 
         User user = refreshToken.getUser();
-
-        // Tạo lại UserDetails đơn giản để truyền vào hàm generateAccessToken
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword() != null ? user.getPassword() : "",
-                Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
 
         return generateAccessToken(userDetails);
     }
 
-    /**
-     * Hàm 5: Revoke (Logout)
-     */
     @Override
     public void revokeRefreshToken(UUID tokenId) {
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenAndRevoked(tokenId, false)
-                .orElse(null);
+        refreshTokenRepository.findByTokenAndRevoked(tokenId, false)
+                .ifPresent(refreshToken -> {
+                    refreshToken.setRevoked(true);
+                    refreshTokenRepository.save(refreshToken);
+                });
+    }
 
-        if (refreshToken != null) {
-            refreshToken.setRevoked(true);
-            refreshTokenRepository.save(refreshToken);
+    @Override
+    @Transactional
+    public User findOrCreateGoogleUser(String email, String name, String picture) {
+        return userRepository.findByEmail(email)
+                .map(user -> syncGoogleProfile(user, name, picture))
+                .orElseGet(() -> createGoogleUser(email, name, picture));
+    }
+
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    }
+
+    private User createGoogleUser(String email, String name, String picture) {
+        User user = new User();
+        user.setEmail(email);
+        user.setUsername(email.split("@")[0]);
+        user.setFullName(name);
+        user.setRole(User.Role.USER);
+        user.setAuthProvider(User.AuthProvider.GOOGLE);
+        user.setPassword(null);
+        user.setAvatarUrl(picture);
+        return userRepository.save(user);
+    }
+
+    private User syncGoogleProfile(User user, String name, String picture) {
+        boolean changed = false;
+        if (name != null && !name.equals(user.getFullName())) {
+            user.setFullName(name);
+            changed = true;
         }
+        if (picture != null && !picture.equals(user.getAvatarUrl())) {
+            user.setAvatarUrl(picture);
+            changed = true;
+        }
+        return changed ? userRepository.save(user) : user;
     }
 }

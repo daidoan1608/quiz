@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChapterRepository extends JpaRepository<Chapter, Long> {
+    List<Chapter> findByNameContainingIgnoreCase(String name);
+
     @Query("SELECT c FROM Chapter c WHERE c.subject.subjectId = :subjectId")
     List<Chapter> findBySubject(Long subjectId);
 
