@@ -8,7 +8,7 @@ import { parseMarkdown } from "../../../utils/parseMarkdown";
 const getFullImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  const apiRoot = process.env.REACT_APP_API_URL 
+  const apiRoot = process.env.REACT_APP_API_URL
     ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
     : 'http://localhost:8080';
   return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
@@ -34,7 +34,7 @@ export default function ResultExam() {
             try {
                 const [examResponse, userAnswersResponse] = await Promise.all([
                     authAxios.get(`public/exams/${examId}`),
-                    authAxios.get(`user/userexams/${userExamId}`),
+                    authAxios.get(`user-exams/${userExamId}`),
                 ]);
                 setExamData(examResponse.data.data);
                 setUserAnswers(userAnswersResponse.data.data);
@@ -285,10 +285,10 @@ export default function ResultExam() {
                                                     </div>
                                                     {question.imageUrl && (
                                                         <div className="my-2">
-                                                            <img 
-                                                                src={getFullImageUrl(question.imageUrl)} 
-                                                                alt="Minh họa câu hỏi" 
-                                                                className="max-h-48 max-w-full rounded-lg shadow-xs border border-gray-200 dark:border-gray-700" 
+                                                            <img
+                                                                src={getFullImageUrl(question.imageUrl)}
+                                                                alt="Minh họa câu hỏi"
+                                                                className="max-h-48 max-w-full rounded-lg shadow-xs border border-gray-200 dark:border-gray-700"
                                                             />
                                                         </div>
                                                     )}
@@ -319,7 +319,7 @@ export default function ResultExam() {
                                                     }`}
                                                 >
                                                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Đáp án của bạn</span>
-                                                    <span 
+                                                    <span
                                                         className={`font-semibold ${isSkipped ? "text-gray-600 dark:text-gray-300" : isCorrect ? "text-green-800 dark:text-green-300" : "text-red-800 dark:text-red-300"}`}
                                                         dangerouslySetInnerHTML={{ __html: userSelectedAnswer ? parseMarkdown(userSelectedAnswer.content) : "Chưa chọn" }}
                                                     />
@@ -329,7 +329,7 @@ export default function ResultExam() {
                                                 {(!isCorrect || isSkipped) && (
                                                     <div className="flex flex-col gap-1 p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 relative">
                                                         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Đáp án đúng</span>
-                                                        <span 
+                                                        <span
                                                             className="font-semibold text-gray-800 dark:text-gray-200"
                                                             dangerouslySetInnerHTML={{ __html: parseMarkdown(correctAnswer?.content) }}
                                                         />

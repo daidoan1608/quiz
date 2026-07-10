@@ -45,7 +45,7 @@ export default function ExamUsers() {
         if (isLoggedIn && userId) {
           try {
             const historyResp = await authAxios.get(
-              `user/userexams/count/${userId}`
+              `users/${userId}/user-exams/count`
             );
             const statsMap = new Map();
             historyResp.data.data.forEach((item) => {

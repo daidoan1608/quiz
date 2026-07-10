@@ -46,7 +46,7 @@ export default function GetUserExam() {
   const fetchData = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const examResponse = await authAxios.get("/admin/userexams", {
+      const examResponse = await authAxios.get("/admin/user-exams", {
         params: { page: page - 1, size: pagination.pageSize },
       });
       const exams = examResponse.data.data || [];
@@ -54,7 +54,7 @@ export default function GetUserExam() {
 
       const uniqueUserIds = [...new Set(exams.map((item) => item.userExamDto.userId))];
       const userPromises = uniqueUserIds.map((id) =>
-        authAxios.get(`/user/${id}`).catch(() => ({ data: { data: null } }))
+        authAxios.get(`/users/${id}`).catch(() => ({ data: { data: null } }))
       );
       const userResponses = await Promise.all(userPromises);
 

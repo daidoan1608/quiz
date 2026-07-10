@@ -45,7 +45,7 @@ export default function Notifications() {
     // 1. Đánh dấu đã đọc nếu chưa đọc
     if (!notif.isRead) {
       try {
-        await authAxios.put(`/notifications/${notif.id}/read`);
+        await authAxios.patch(`/notifications/${notif.id}`);
         setNotifications((prev) =>
           prev.map((item) =>
             item.id === notif.id ? { ...item, isRead: true } : item
@@ -67,7 +67,7 @@ export default function Notifications() {
   // --- 3. ĐÁNH DẤU TẤT CẢ ĐÃ ĐỌC ---
   const handleMarkAllAsRead = async () => {
     try {
-      await authAxios.put("/notifications/read-all");
+      await authAxios.patch("/notifications");
       setNotifications((prev) =>
         prev.map((notif) => ({ ...notif, isRead: true }))
       );

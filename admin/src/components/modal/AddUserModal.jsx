@@ -16,7 +16,7 @@ const AddUserModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await authAxios.post("/admin/add/users", values);
+      await authAxios.post("/admin/users", values);
       message.success("Thêm người dùng thành công!");
       form.resetFields();
       onSuccess(); // Gọi hàm để đóng modal và làm mới dữ liệu

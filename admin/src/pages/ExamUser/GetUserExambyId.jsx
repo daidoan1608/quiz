@@ -44,7 +44,7 @@ export default function GetUserExambyId() {
     try {
       setLoading(true);
       // 1. Lấy chi tiết bài thi UserExam
-      const response = await authAxios.get(`/user/userexams/${userExamId}`);
+      const response = await authAxios.get(`/user-exams/${userExamId}`);
       const detail = response.data.data;
       setExamDetail(detail);
 
@@ -54,7 +54,7 @@ export default function GetUserExambyId() {
 
       const [questionRes, userRes] = await Promise.all([
         authAxios.get(`/public/exams/${examId}`),
-        authAxios.get(`/user/${userId}`),
+        authAxios.get(`/users/${userId}`),
       ]);
 
       setExamQuestions(questionRes.data.data.questions || []);

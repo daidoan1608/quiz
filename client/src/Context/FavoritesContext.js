@@ -24,7 +24,7 @@ export const FavoritesProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const resp = await authAxios.get(`/user/favorites/user/${userId}`);
+      const resp = await authAxios.get(`/users/${userId}/favorites`);
       setFavorites(resp.data.data || []);
     } catch (err) {
       setError("Không thể tải danh sách yêu thích.");
@@ -40,7 +40,7 @@ export const FavoritesProvider = ({ children }) => {
       return;
     }
     try {
-      await authAxios.post("/user/favorites", {
+      await authAxios.post("/favorites", {
         userId,
         subjectId,
         subjectName,
@@ -55,7 +55,7 @@ export const FavoritesProvider = ({ children }) => {
   const removeFavorite = async (subjectId, subjectName) => {
     if (!userId) return;
     try {
-      await authAxios.delete("/user/favorites", {
+      await authAxios.delete("/favorites", {
         data: { userId, subjectId, subjectName },
       });
       setFavorites((prev) => prev.filter((fav) => fav.subjectId !== subjectId));

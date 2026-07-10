@@ -8,7 +8,7 @@ import { parseMarkdown } from "../../../utils/parseMarkdown";
 const getFullImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  const apiRoot = process.env.REACT_APP_API_URL 
+  const apiRoot = process.env.REACT_APP_API_URL
     ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
     : 'http://localhost:8080';
   return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
@@ -80,7 +80,7 @@ export default function Exam() {
     };
 
     try {
-      const response = await authAxios.post("user/userexams", payload);
+      const response = await authAxios.post("user-exams", payload);
       if (response.status === 200) {
         alert("Nộp bài thành công!");
         navigate("/result", {
@@ -122,10 +122,10 @@ export default function Exam() {
         setSubjectName(data.subjectName);
         setTitle(data.title);
         setDuration(data.duration);
-        
+
         const targetEndTime = Date.now() + data.duration * 60 * 1000;
         endTimeRef.current = targetEndTime;
-        
+
         setTimeLeft(data.duration * 60);
         setQuestions(data.questions);
       } catch (error) {
@@ -270,17 +270,17 @@ export default function Exam() {
               <h3 className="text-xl font-bold leading-tight text-left pb-2 text-primary">
                 Câu {currentQuestionIndex + 1}
               </h3>
-              <div 
+              <div
                 className="text-base font-normal leading-relaxed pb-6 pt-1 text-gray-800 dark:text-gray-200"
                 dangerouslySetInnerHTML={{ __html: parseMarkdown(currentQuestion?.content) }}
               />
 
               {currentQuestion?.imageUrl && (
                 <div className="my-4 text-center">
-                  <img 
-                    src={getFullImageUrl(currentQuestion.imageUrl)} 
-                    alt="Minh họa câu hỏi" 
-                    className="max-h-64 max-w-full rounded-lg mx-auto shadow-sm border border-gray-200 dark:border-gray-700" 
+                  <img
+                    src={getFullImageUrl(currentQuestion.imageUrl)}
+                    alt="Minh họa câu hỏi"
+                    className="max-h-64 max-w-full rounded-lg mx-auto shadow-sm border border-gray-200 dark:border-gray-700"
                   />
                 </div>
               )}

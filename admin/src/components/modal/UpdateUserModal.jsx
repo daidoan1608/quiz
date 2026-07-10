@@ -62,7 +62,7 @@ const UpdateUserModal = ({ isModalOpen, onCancel, onSuccess, userId }) => {
     const fetchUserDetails = async () => {
       setLoadingUser(true);
       try {
-        const response = await authAxios.get(`user/${userId}`);
+        const response = await authAxios.get(`users/${userId}`);
         const userData = response.data.data;
 
         form.setFieldsValue({

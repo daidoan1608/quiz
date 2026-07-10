@@ -29,8 +29,8 @@ const Account = () => {
     try {
       setLoading(true);
       const [userResponse, examsResponse] = await Promise.all([
-        authAxios.get(`user/${userId}`),
-        authAxios.get(`user/userexams/user/${userId}`),
+        authAxios.get(`users/${userId}`),
+        authAxios.get(`users/${userId}/user-exams`),
       ]);
 
       // Xử lý dữ liệu User và đồng bộ avatar từ localStorage/AuthContext nếu API chưa trả về avatar
@@ -70,8 +70,8 @@ const Account = () => {
   const handleChangePassword = async (values) => {
     const userId = localStorage.getItem("userId");
     try {
-      const response = await authAxios.post(
-        `user/change-password/${userId}`,
+      const response = await authAxios.patch(
+        `users/${userId}/password`,
         values
       );
       if (response.data === "Mật khẩu không đúng") {
@@ -102,8 +102,8 @@ const Account = () => {
       setLoading(true);
 
       // Gọi API Upload
-      const response = await authAxios.post(
-        `/users/me/avatar/${userId}`,
+      const response = await authAxios.put(
+        `/users/me/avatar`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

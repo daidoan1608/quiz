@@ -24,7 +24,7 @@ export default function ResultExam() {
       try {
         const [examResponse, userAnswersResponse] = await Promise.all([
           authAxios.get(`public/exams/${examId}`),
-          authAxios.get(`user/userexams/${userExamId}`),
+          authAxios.get(`user-exams/${userExamId}`),
         ]);
         setExamData(examResponse.data.data);
         setUserAnswers(userAnswersResponse.data.data);
