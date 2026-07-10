@@ -44,14 +44,21 @@ export default function CategoryManager() {
     const isAdmin = currentUserRole === "ADMIN";
 
     useEffect(() => {
-        fetchCategories();
-    }, []);
+        const timeoutId = setTimeout(() => {
+            fetchCategories(searchText);
+        }, 400);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchText]);
 
     // --- 1. LẤY DỮ LIỆU ---
-    const fetchCategories = async () => {
+    const fetchCategories = async (keyword = "") => {
         setLoading(true);
         try {
-            const response = await authAxios.get("/public/categories");
+            const trimmedKeyword = keyword.trim();
+            const response = trimmedKeyword
+                ? await authAxios.get("/public/categories/search", { params: { q: trimmedKeyword } })
+                : await authAxios.get("/public/categories");
             const data = Array.isArray(response.data.data)
                 ? response.data.data
                 : [response.data.data];
@@ -103,16 +110,8 @@ export default function CategoryManager() {
         setCategoryNameToViewSubjects(null);
     };
 
-    // Hàm lọc dữ liệu (Giữ nguyên)
-    const getFilteredData = () => {
-        if (!searchText) return categories;
-        const lowerSearch = searchText.toLowerCase();
-        return categories.filter(
-            (item) =>
-                item.categoryName?.toLowerCase().includes(lowerSearch) ||
-                item.categoryDescription?.toLowerCase().includes(lowerSearch)
-        );
-    };
+    // Search dùng endpoint BE /public/categories/search?q=...
+    const getFilteredData = () => categories;
 
     // --- 3. CẤU HÌNH CỘT (Cập nhật Hành động để mở Modal) ---
     const columns = [

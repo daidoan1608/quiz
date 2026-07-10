@@ -44,8 +44,12 @@ export default function QuestionManager() {
     const [questionIdToUpdate, setQuestionIdToUpdate] = useState(null);
 
     useEffect(() => {
-        getAllQuestions();
-    }, []);
+        const timeoutId = setTimeout(() => {
+            getAllQuestions(searchText);
+        }, 400);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchText]);
 
     // Kích hoạt MathJax sau khi bảng render
     useEffect(() => {
@@ -55,10 +59,13 @@ export default function QuestionManager() {
     }, [questions, loading, searchText]);
 
     // --- 1. LẤY DỮ LIỆU (Giữ nguyên) ---
-    const getAllQuestions = async () => {
+    const getAllQuestions = async (keyword = "") => {
         setLoading(true);
         try {
-            const response = await authAxios.get("/admin/questions");
+            const trimmedKeyword = keyword.trim();
+            const response = trimmedKeyword
+                ? await authAxios.get("/admin/questions/search", { params: { q: trimmedKeyword } })
+                : await authAxios.get("/admin/questions");
             const data = Array.isArray(response.data.data) ? response.data.data : [];
             setQuestions(data);
         } catch (error) {
@@ -97,17 +104,8 @@ export default function QuestionManager() {
         handleCloseModal();
     };
 
-    // Hàm lọc dữ liệu (Giữ nguyên)
-    const getFilteredData = () => {
-        if (!searchText) return questions;
-        const lowerSearch = searchText.toLowerCase();
-        return questions.filter(
-            (item) =>
-                item.content?.toLowerCase().includes(lowerSearch) ||
-                item.chapterName?.toLowerCase().includes(lowerSearch) ||
-                item.questionId?.toString().includes(lowerSearch)
-        );
-    };
+    // Search dùng endpoint BE /admin/questions/search?q=...
+    const getFilteredData = () => questions;
 
     const renderAnswerContent = (answers, index) => {
         const answer = answers && answers[index];

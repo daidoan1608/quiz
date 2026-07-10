@@ -43,14 +43,21 @@ export default function ChapterManager() {
     const [chapterIdToView, setChapterIdToView] = useState(null);
 
     useEffect(() => {
-        fetchChapters();
-    }, []);
+        const timeoutId = setTimeout(() => {
+            fetchChapters(searchText);
+        }, 400);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchText]);
 
     // --- 1. LẤY DỮ LIỆU (Giữ nguyên) ---
-    const fetchChapters = async () => {
+    const fetchChapters = async (keyword = "") => {
         setLoading(true);
         try {
-            const response = await authAxios.get("/public/chapters");
+            const trimmedKeyword = keyword.trim();
+            const response = trimmedKeyword
+                ? await authAxios.get("/public/chapters/search", { params: { q: trimmedKeyword } })
+                : await authAxios.get("/public/chapters");
             const data = Array.isArray(response.data.data) ? response.data.data : [];
             setChapters(data);
         } catch (error) {
@@ -97,17 +104,8 @@ export default function ChapterManager() {
         handleCloseModal();
     };
 
-    // Hàm lọc dữ liệu (Giữ nguyên)
-    const getFilteredData = () => {
-        if (!searchText) return chapters;
-        const lowerSearch = searchText.toLowerCase();
-        return chapters.filter(
-            (item) =>
-                item.name?.toLowerCase().includes(lowerSearch) ||
-                item.subjectId?.toString().includes(lowerSearch) ||
-                item.chapterId?.toString().includes(lowerSearch)
-        );
-    };
+    // Search dùng endpoint BE /public/chapters/search?q=...
+    const getFilteredData = () => chapters;
 
     // --- 3. CẤU HÌNH CỘT (Giữ nguyên) ---
     const columns = [

@@ -45,11 +45,14 @@ export default function UserManager() {
   const isMod = currentUserRole === "MOD";
 
   // --- 1. CALL API ---
-  const fetchUsers = async () => {
+  const fetchUsers = async (keyword = "") => {
     setLoading(true);
     try {
-      const response = await authAxios.get("/admin/users");
-      setUsers(response.data.data);
+      const trimmedKeyword = keyword.trim();
+      const response = trimmedKeyword
+        ? await authAxios.get("/admin/users/search", { params: { key: trimmedKeyword } })
+        : await authAxios.get("/admin/users");
+      setUsers(response.data.data || []);
     } catch (error) {
       console.error("Lỗi API:", error);
       message.error("Không thể lấy danh sách người dùng!");
@@ -59,8 +62,12 @@ export default function UserManager() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    const timeoutId = setTimeout(() => {
+      fetchUsers(searchText);
+    }, 400);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchText]);
 
   // --- 2. XỬ LÝ XÓA USER (Giữ nguyên) ---
   const handleDelete = async (userId) => {
@@ -70,7 +77,7 @@ export default function UserManager() {
     }
 
     try {
-      await authAxios.delete(`/admin/delete/users/${userId}`);
+      await authAxios.delete(`/admin/users/${userId}`);
       message.success("Xóa người dùng thành công!");
       setUsers((prev) => prev.filter((user) => user.userId !== userId));
     } catch (error) {
@@ -91,18 +98,10 @@ export default function UserManager() {
     setIsUpdateModalOpen(true);
   };
 
-  // --- 4. LỌC DỮ LIỆU (Client-side) (Giữ nguyên) ---
+  // --- 4. LỌC DỮ LIỆU ---
+  // Search dùng endpoint BE /admin/users/search?key=..., role vẫn lọc client-side.
   const getFilteredData = () => {
-    return users.filter((user) => {
-      const matchRole = selectedRole === "all" || user.role === selectedRole;
-      const lowerSearch = searchText.toLowerCase();
-      const matchSearch =
-        (user.username && user.username.toLowerCase().includes(lowerSearch)) ||
-        (user.email && user.email.toLowerCase().includes(lowerSearch)) ||
-        (user.fullName && user.fullName.toLowerCase().includes(lowerSearch));
-
-      return matchRole && matchSearch;
-    });
+    return users.filter((user) => selectedRole === "all" || user.role === selectedRole);
   };
 
   const handleModalClose = () => {

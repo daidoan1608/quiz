@@ -1,5 +1,5 @@
 // src/pages/Subjects/SubjectManager.js
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Typography,
@@ -49,15 +49,17 @@ export default function SubjectManager() {
 
 
   // --- 1. LOGIC LẤY DỮ LIỆU (Tương đương refreshData) ---
-  const fetchSubjects = async () => {
+  const fetchSubjects = async (keyword = "") => {
     if (!isAdmin) {
         // Môn học là public, không cần check quyền, chỉ cần check quyền khi chỉnh sửa/xoá.
     }
     setLoading(true);
     try {
-      const response = await authAxios.get("public/subjects");
-      // Giả định data trả về là response.data.data hoặc response.data
-      setSubjects(response.data.data || response.data);
+      const trimmedKeyword = keyword.trim();
+      const response = trimmedKeyword
+        ? await authAxios.get("public/subjects/search", { params: { q: trimmedKeyword } })
+        : await authAxios.get("public/subjects");
+      setSubjects(response.data.data || response.data || []);
     } catch (error) {
       console.error("Lỗi API:", error);
       message.error("Không thể tải danh sách môn học.");
@@ -67,8 +69,12 @@ export default function SubjectManager() {
   };
 
   useEffect(() => {
-    fetchSubjects();
-  }, []);
+    const timeoutId = setTimeout(() => {
+      fetchSubjects(searchText);
+    }, 400);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchText]);
 
   // --- 2. LOGIC XỬ LÝ DELETE ---
   const handleDelete = async (id) => {
@@ -110,15 +116,7 @@ export default function SubjectManager() {
 
 
   // --- 4. LỌC DỮ LIỆU (Giữ nguyên logic useMemo) ---
-  const filteredSubjects = useMemo(() => {
-    if (!searchText) return subjects;
-    const lowerSearch = searchText.toLowerCase();
-    return subjects.filter(
-      (item) =>
-        item.name?.toLowerCase().includes(lowerSearch) ||
-        item.subjectId?.toString().includes(lowerSearch)
-    );
-  }, [subjects, searchText]);
+  const filteredSubjects = subjects;
 
 
   // --- 5. ĐỊNH NGHĨA CỘT (Giữ nguyên) ---
