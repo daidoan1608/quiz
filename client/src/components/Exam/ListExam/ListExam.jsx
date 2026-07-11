@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { authAxios, publicAxios } from "../../../api/axiosConfig";
 import { useLocation, useNavigate } from "react-router-dom";
-import LoginPrompt from "../../modal/LoginPrompt";
+import LoginPrompt from "../../Modal/LoginPrompt";
 import { useAuth } from "../../../context/AuthProvider";
 import { useLanguage } from "../../../context/LanguageProvider";
 

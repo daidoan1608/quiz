@@ -1,0 +1,63 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="35 18 130 88" width="100%" height="100%">
+  <defs>
+    <!-- Gradients for 3D Diamond Shading with System Theme Variables & Fallbacks -->
+    <!-- Light Gradient (Cyan-Blue / Theme Accent) for the lit facets -->
+    <linearGradient id="lightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--aura-primary-hover, #00f2fe)" />
+      <stop offset="100%" stop-color="var(--aura-primary, #0072ff)" />
+    </linearGradient>
+    
+    <!-- Dark Gradient (Violet-Deep Purple / Theme Dark) for the shadowed facets -->
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--aura-primary, #7209b7)" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+
+    <!-- General Gradient for Q checkmark & text (Absolute positioning prevents rendering bugs on text/tspan) -->
+    <linearGradient id="techGrad" x1="120" y1="0" x2="220" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="var(--aura-primary, #00c6ff)" />
+      <stop offset="100%" stop-color="var(--aura-primary-hover, #7209b7)" />
+    </linearGradient>
+  </defs>
+
+  <!-- Transparent Background to fit seamlessly into any system container -->
+  <rect width="100%" height="100%" fill="none" />
+
+  <!-- Unified Typographic Lockup (Shifted for perfect centering) -->
+  <g transform="translate(21, 7)">
+    <!-- Q Body Circle and Checkmark Tail (Single continuous path, starts at 2h, winds CCW to 4h30, goes down-right to (84,90), then hooks up-right to (99,78)) -->
+    <path d="M 79 54 A 22 22 0 1 0 76 81 L 84 90 L 99 78" fill="none" stroke="url(#techGrad)" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="miter" />
+
+    <!-- Graduation Cap (Opaque 3D Facets - Diamond Crystal Effect, overlapping Q circle, tilted at -10 degrees around Q center) -->
+    <g transform="rotate(-10, 60, 65)">
+      <!-- Neck Base Left Side (Shadowed - Solid Opaque) -->
+      <polygon points="48,41 48,47 60,51 60,41" fill="url(#darkGrad)" stroke="url(#darkGrad)" stroke-width="0.8" stroke-linejoin="miter" />
+      
+      <!-- Neck Base Right Side (Lighted - Solid Opaque) -->
+      <polygon points="60,41 60,51 72,47 72,41" fill="url(#lightGrad)" stroke="url(#lightGrad)" stroke-width="0.8" stroke-linejoin="miter" />
+      
+      <!-- Diamond Top Board - Facet 1 (Top-Left - Shadowed) -->
+      <polygon points="60,22 36,34 60,34" fill="url(#darkGrad)" opacity="0.75" stroke="url(#darkGrad)" stroke-width="0.5" stroke-linejoin="miter" />
+      
+      <!-- Diamond Top Board - Facet 2 (Bottom-Left - Intermediate) -->
+      <polygon points="36,34 60,46 60,34" fill="url(#darkGrad)" opacity="0.88" stroke="url(#darkGrad)" stroke-width="0.5" stroke-linejoin="miter" />
+      
+      <!-- Diamond Top Board - Facet 3 (Bottom-Right - Lit) -->
+      <polygon points="60,46 84,34 60,34" fill="url(#lightGrad)" opacity="0.95" stroke="url(#lightGrad)" stroke-width="0.5" stroke-linejoin="miter" />
+      
+      <!-- Diamond Top Board - Facet 4 (Top-Right - Highlight) -->
+      <polygon points="84,34 60,22 60,34" fill="url(#lightGrad)" opacity="0.85" stroke="url(#lightGrad)" stroke-width="0.5" stroke-linejoin="miter" />
+
+      <!-- Cap Tassel (ÄuÃ´i mÅ© tá»‘t nghiá»‡p - Treo bÃªn TRÃI Ä‘á»ƒ cÃ¢n Ä‘á»‘i bá»‘ cá»¥c) -->
+      <path d="M 36 34 L 28 48 L 28 60" fill="none" stroke="url(#darkGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="miter" />
+      <circle cx="28" cy="60" r="2.5" fill="url(#darkGrad)" />
+    </g>
+
+    <!-- Typography Segment "uiz" - Completing "Quiz" in the 2h-4h30 gap (NÃ©t vá»«a - Tá»± Ä‘á»™ng thÃ­ch á»©ng mÃ u ná»n Dark/Light) -->
+    <text x="81" y="73" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="21" font-weight="normal" letter-spacing="-0.03em" fill="var(--aura-text, #1e1b4b)">uiz</text>
+
+    <!-- Typography Segment "NUA" - Completing "VNUA" after the checkmark tail (V) (NÃ©t vá»«a - Tá»± Ä‘á»™ng Ä‘á»“ng bá»™ mÃ u chá»§ Ä‘á») -->
+    <text x="101" y="88" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="20" font-weight="normal" letter-spacing="-0.03em" fill="url(#techGrad)">NUA</text>
+  </g>
+</svg>
+

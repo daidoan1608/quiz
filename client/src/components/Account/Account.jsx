@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthProvider";
 import { useLanguage } from "../../context/LanguageProvider";
 import { message } from "antd";
 import UserProfileCard from "../User/UserProfileCard";
-import ChangePasswordModal from "../modal/ChangePasswordModal";
+import ChangePasswordModal from "../Modal/ChangePasswordModal";
 import ExamHistoryList from "../User/ExamHistoryList";
 
 const Account = () => {

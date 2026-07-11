@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useAuth } from "../../../context/AuthProvider";
 import { useFavorites } from "../../../context/FavoritesContext";
-import LoginPrompt from "../../modal/LoginPrompt";
+import LoginPrompt from "../../Modal/LoginPrompt";
 
 export default function RevisionListChap() {
   const [subjectData, setSubjectData] = useState(null);
