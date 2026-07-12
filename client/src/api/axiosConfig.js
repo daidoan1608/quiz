@@ -2,7 +2,8 @@ import axios from "axios";
 import { message } from "antd";
 
 // 1. Dùng process.env vì là Create React App
-const BASE_URL = process.env.REACT_APP_API_URL || "/api/v1/";
+const DEFAULT_API_URL = "http://localhost:8080/api/v1/";
+const BASE_URL = process.env.REACT_APP_API_URL || DEFAULT_API_URL;
 
 // 2. Cấu hình chung
 const config = {

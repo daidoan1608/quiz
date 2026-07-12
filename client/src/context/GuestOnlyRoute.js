@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthProvider"; // Import custom hook
+import { useAuth } from "context/AuthProvider"; // Import custom hook
 
 const GuestOnlyRoute = ({ children }) => {
   const { isLoggedIn } = useAuth();

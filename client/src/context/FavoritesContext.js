@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
-import { authAxios } from "../api/axiosConfig";
+import { authAxios } from "api/axiosConfig";
 import { message } from "antd";
-import { useAuth } from "../context/AuthProvider";
+import { useAuth } from "context/AuthProvider";
 
 const FavoritesContext = createContext();
 
