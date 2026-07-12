@@ -8,7 +8,7 @@ const Layout = () => {
   return (
     <div className="layout aura-page min-h-screen flex flex-col transition-colors duration-300">
       <Headers />
-      <main className="main-content flex-1 flex flex-col">
+      <main className="main-content flex flex-1 flex-col">
         <Outlet />
       </main>
       <Footer />

@@ -18,6 +18,12 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
     @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId")
     List<UserExam> findUserExamsByUserId(UUID userId);
 
+    @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId AND ue.exam.examId = :examId AND ue.status = 'IN_PROGRESS' ORDER BY ue.updatedAt DESC")
+    List<UserExam> findInProgressByUserIdAndExamId(@Param("userId") UUID userId, @Param("examId") Long examId);
+
+    @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId AND ue.status = 'IN_PROGRESS' ORDER BY ue.updatedAt DESC")
+    List<UserExam> findInProgressByUserId(@Param("userId") UUID userId);
+
     @Query("SELECT ue.exam.examId AS examId, COUNT(ue) AS attempts " +
             "FROM UserExam ue " +
             "WHERE ue.user.userId = :userId " +
@@ -25,7 +31,7 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
     List<Map<Long, Object>> countExamsByUserId(@Param("userId") UUID userId);
 
     @Query(value = """
-        SELECT 
+        SELECT
             u.user_id as userId,
             u.username as username,
             u.avatar_url as avatarUrl,
@@ -38,9 +44,14 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
         JOIN user u ON ue.user_id = u.user_id
         JOIN exam e ON ue.exam_id = e.exam_id
         JOIN subject s ON e.subject_id = s.subject_id
-        GROUP BY u.user_id, u.username
+        WHERE (:fromDate IS NULL OR ue.start_time >= :fromDate)
+          AND (:toDate IS NULL OR ue.start_time < :toDate)
+        GROUP BY u.user_id, u.username, u.avatar_url
         """, nativeQuery = true)
-    List<UserExamSummaryProjection> getUserExamSummaries();
+    List<UserExamSummaryProjection> getUserExamSummaries(
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate
+    );
 
     public interface UserExamSummaryProjection {
         byte[] getUserId();
@@ -54,7 +65,7 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
     }
 
     @Query(value = """
-    SELECT 
+    SELECT
         ue.*
     FROM user_exam ue
     JOIN exam e ON ue.exam_id = e.exam_id
@@ -69,7 +80,7 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
     );
 
     @Query(value = """
-    SELECT 
+    SELECT
         ue.*
     FROM user_exam ue
     JOIN exam e ON ue.exam_id = e.exam_id

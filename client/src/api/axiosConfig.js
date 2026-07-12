@@ -18,6 +18,16 @@ const config = {
 const authAxios = axios.create(config);
 const publicAxios = axios.create(config);
 
+const attachLanguageHeader = (requestConfig) => {
+  const language = localStorage.getItem("appLanguage") || "vi";
+  requestConfig.headers = requestConfig.headers || {};
+  requestConfig.headers["Accept-Language"] = language;
+  return requestConfig;
+};
+
+authAxios.interceptors.request.use(attachLanguageHeader);
+publicAxios.interceptors.request.use(attachLanguageHeader);
+
 const getApiErrorMessage = (error, fallback = "Có lỗi xảy ra, vui lòng thử lại!") => {
   const responseData = error?.response?.data;
   if (responseData?.message) return responseData.message;

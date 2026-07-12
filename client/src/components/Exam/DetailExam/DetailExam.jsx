@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authAxios } from "../../../api/axiosConfig";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
+import { typesetMath } from "../../../utils/typesetMath";
 
 
 const getFullImageUrl = (url) => {
@@ -53,9 +54,7 @@ export default function ResultExam() {
     }, [examId, userExamId]);
 
     useEffect(() => {
-        if (window.MathJax && window.MathJax.typesetPromise && examData) {
-            window.MathJax.typesetPromise();
-        }
+        if (examData) typesetMath();
     }, [examData]);
 
     if (loading) return <div className="flex h-screen items-center justify-center">Đang tải kết quả...</div>;
@@ -66,26 +65,36 @@ export default function ResultExam() {
         return <div className="flex h-screen items-center justify-center text-red-500">Lỗi: Không tìm thấy dữ liệu bài thi chi tiết.</div>;
     }
 
+    const getAnswerId = (answer) => answer?.optionId || answer?.answerId;
+    const sameAnswerSet = (a, b) =>
+        a.length === b.length && a.every((id) => b.includes(id));
+
+    const userAnswerIdsByQuestion = (userAnswers.userAnswerDtos || []).reduce((acc, userAnswer) => {
+        if (!userAnswer.questionId || !userAnswer.answerId) return acc;
+        acc[userAnswer.questionId] = acc[userAnswer.questionId] || [];
+        if (!acc[userAnswer.questionId].includes(userAnswer.answerId)) {
+            acc[userAnswer.questionId].push(userAnswer.answerId);
+        }
+        return acc;
+    }, {});
+
+    const questionResults = examData.questions.map((question) => {
+        const selectedIds = userAnswerIdsByQuestion[question.questionId] || [];
+        const correctIds = (question.answers || [])
+            .filter((answer) => answer.isCorrect)
+            .map(getAnswerId)
+            .filter(Boolean);
+        const isSkipped = selectedIds.length === 0;
+        const isCorrect = !isSkipped && sameAnswerSet(selectedIds, correctIds);
+        return { question, selectedIds, correctIds, isSkipped, isCorrect };
+    });
+
     const rawScore = userAnswers.userExamDto.score || 0;
     const calculatedTotal = examData.questions.length; // Lấy tổng số câu từ examData
+    const calculatedCorrect = questionResults.filter((result) => result.isCorrect).length;
 
-    let calculatedCorrect = 0;
-    const answeredQuestionsDtos = userAnswers.userAnswerDtos || [];
-
-    // Tính toán số câu Đúng và Số câu đã làm
-    calculatedCorrect = answeredQuestionsDtos.reduce((count, userAnswer) => {
-        const question = examData.questions.find(q => q.questionId === userAnswer.questionId);
-
-        // Kiểm tra xem đáp án được chọn có phải là đáp án đúng không
-        const isCorrect = question?.answers.some(
-            a => a.isCorrect && (a.optionId || a.answerId) === userAnswer.answerId
-        );
-
-        return count + (isCorrect ? 1 : 0);
-    }, 0);
-
-    // Số câu đã làm (Answers submitted)
-    const answeredQuestions = answeredQuestionsDtos.length;
+    // Số câu đã làm: multichoice có nhiều đáp án vẫn chỉ tính là 1 câu
+    const answeredQuestions = questionResults.filter((result) => !result.isSkipped).length;
 
     // Số câu Bỏ qua (Skipped)
     const skippedAnswers = calculatedTotal - answeredQuestions;
@@ -225,16 +234,7 @@ export default function ResultExam() {
                         <h2 className="text-gray-900 dark:text-white text-2xl font-bold leading-tight">Chi tiết câu trả lời</h2>
                         <div className="flex flex-col gap-4">
 
-                            {examData.questions.map((question, index) => {
-                                const userAnswerObj = userAnswers.userAnswerDtos?.find(u => u.questionId === question.questionId);
-                                const userAnswerId = userAnswerObj?.answerId;
-
-                                const correctAnswer = question.answers.find(a => a.isCorrect);
-                                const userSelectedAnswer = question.answers.find(a => (a.optionId || a.answerId) === userAnswerId);
-
-                                const isSkipped = !userAnswerObj;
-                                const isCorrect = !isSkipped && correctAnswer && (userSelectedAnswer === correctAnswer);
-
+                            {questionResults.map(({ question, selectedIds, isSkipped, isCorrect }, index) => {
                                 return (
                                     <div key={question.questionId} className="rounded-xl p-5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                                         <div className="flex flex-col gap-4">
@@ -273,8 +273,8 @@ export default function ResultExam() {
                                             {/* Hiển thị đầy đủ tất cả đáp án - dạng lịch sử, khác màn result */}
                                             <div className="flex flex-col gap-2 mt-2">
                                                 {question.answers.map((answer, answerIndex) => {
-                                                    const answerId = answer.optionId || answer.answerId;
-                                                    const isUserChoice = answerId === userAnswerId;
+                                                    const answerId = getAnswerId(answer);
+                                                    const isUserChoice = selectedIds.includes(answerId);
                                                     const isRightAnswer = answer.isCorrect;
 
                                                     let answerClass = "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/60";

@@ -14,6 +14,7 @@ import Layout from "../layouts/Layout";
 import Login from "../components/User/Login";
 import RegisterForm from "../components/User/Register";
 import ForgotPassword from "../components/User/ForgotPassword";
+import VerifyEmail from "../components/User/VerifyEmail";
 import Home from "../components/User/Home";
 import RevisionUser from "../components/Learning/SubjectList/SubjectList";
 import RevisionListChap from "../components/Learning/SubjectHub/SubjectHub";
@@ -37,6 +38,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<GuestOnlyRoute><Login /></GuestOnlyRoute>} />
       <Route path="/register" element={<GuestOnlyRoute><RegisterForm /></GuestOnlyRoute>} />
       <Route path="/forgot" element={<ForgotPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
       {/* --- PROTECTED ROUTES (Có Header/Footer) --- */}
       <Route element={<Layout />}>

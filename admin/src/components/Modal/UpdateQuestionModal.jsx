@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Form, Input, Button, Modal, Select, Radio, Checkbox, Alert, Upload,
-  message, Typography, Divider, Skeleton, Row, Col,
+  message, Typography, Divider, Skeleton, Row, Col, theme,
 } from "antd";
 import {
   SaveOutlined, EditOutlined, CheckCircleOutlined, UploadOutlined
@@ -15,6 +15,7 @@ const { TextArea } = Input;
 
 const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) => {
   const [form] = Form.useForm();
+  const { token } = theme.useToken();
 
   // State quản lý
   const [loadingData, setLoadingData] = useState(true);
@@ -36,6 +37,35 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
   const answer_1 = Form.useWatch("answer_1", form);
   const answer_2 = Form.useWatch("answer_2", form);
   const answer_3 = Form.useWatch("answer_3", form);
+
+  const previewBoxStyle = {
+    padding: '8px 12px',
+    border: `1px dashed ${token.colorBorder}`,
+    borderRadius: 6,
+    background: token.colorFillQuaternary,
+    color: token.colorText,
+  };
+
+  const previewLabelStyle = {
+    color: token.colorTextSecondary,
+    fontSize: 11,
+    marginBottom: 4,
+  };
+
+  const answerPreviewBoxStyle = {
+    marginTop: 4,
+    padding: '4px 8px',
+    border: `1px dashed ${token.colorBorder}`,
+    borderRadius: 4,
+    background: token.colorFillQuaternary,
+    color: token.colorText,
+    fontSize: 13,
+  };
+
+  const answerPreviewLabelStyle = {
+    color: token.colorTextSecondary,
+    marginRight: 8,
+  };
 
   useEffect(() => {
     if (window.MathJax && window.MathJax.typesetPromise) {
@@ -215,17 +245,14 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
               {content && (
                 <div
                   style={{
+                    ...previewBoxStyle,
                     marginTop: -12,
                     marginBottom: 16,
-                    padding: '8px 12px',
-                    border: '1px dashed #d9d9d9',
-                    borderRadius: 6,
-                    background: '#fafafa',
                     maxHeight: 120,
                     overflowY: 'auto'
                   }}
                 >
-                  <div style={{ color: '#8c8c8c', fontSize: 11, marginBottom: 4 }}>Xem trước nội dung câu hỏi:</div>
+                  <div style={previewLabelStyle}>Xem trước nội dung câu hỏi:</div>
                   <div dangerouslySetInnerHTML={{ __html: parseMarkdown(content) }} />
                 </div>
               )}
@@ -359,16 +386,9 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                     if (!ansVal) return null;
                     return (
                       <div
-                        style={{
-                          marginTop: 4,
-                          padding: '4px 8px',
-                          border: '1px dashed #d9d9d9',
-                          borderRadius: 4,
-                          background: '#fafafa',
-                          fontSize: 13
-                        }}
+                        style={answerPreviewBoxStyle}
                       >
-                        <span style={{ color: '#8c8c8c', marginRight: 8 }}>Xem trước {String.fromCharCode(65 + index)}:</span>
+                        <span style={answerPreviewLabelStyle}>Xem trước {String.fromCharCode(65 + index)}:</span>
                         <span dangerouslySetInnerHTML={{ __html: parseMarkdown(ansVal) }} />
                       </div>
                     );
@@ -420,16 +440,9 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                         if (!ansVal) return null;
                         return (
                           <div
-                            style={{
-                              marginTop: 4,
-                              padding: '4px 8px',
-                              border: '1px dashed #d9d9d9',
-                              borderRadius: 4,
-                              background: '#fafafa',
-                              fontSize: 13
-                            }}
+                            style={answerPreviewBoxStyle}
                           >
-                            <span style={{ color: '#8c8c8c', marginRight: 8 }}>Xem trước {String.fromCharCode(65 + index)}:</span>
+                            <span style={answerPreviewLabelStyle}>Xem trước {String.fromCharCode(65 + index)}:</span>
                             <span dangerouslySetInnerHTML={{ __html: parseMarkdown(ansVal) }} />
                           </div>
                         );

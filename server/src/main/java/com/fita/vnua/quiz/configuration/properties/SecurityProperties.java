@@ -15,7 +15,9 @@ public class SecurityProperties {
             "/api/v1/auth/register",
             "/api/v1/auth/google",
             "/api/v1/auth/refresh",
-            "/api/v1/otp/**"
+            "/api/v1/otp/**",
+            "/api/v1/exam-attempts/**",
+            "/api/v1/user-exams"
     ));
 
     public boolean isCsrfEnabled() {

@@ -268,6 +268,52 @@
     font-weight: 700;
     letter-spacing: 0.02em;
   }
+
+  .aura-pagination .ant-pagination-item,
+  .aura-pagination .ant-pagination-prev .ant-pagination-item-link,
+  .aura-pagination .ant-pagination-next .ant-pagination-item-link {
+    border-color: var(--aura-border);
+    background: var(--aura-canvas);
+    color: var(--aura-muted);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+  }
+
+  .aura-pagination .ant-pagination-item a,
+  .aura-pagination .ant-pagination-prev button,
+  .aura-pagination .ant-pagination-next button {
+    color: var(--aura-muted);
+  }
+
+  .aura-pagination .ant-pagination-item:hover,
+  .aura-pagination .ant-pagination-prev:not(.ant-pagination-disabled):hover .ant-pagination-item-link,
+  .aura-pagination .ant-pagination-next:not(.ant-pagination-disabled):hover .ant-pagination-item-link {
+    border-color: var(--aura-primary);
+    background: var(--aura-primary-soft);
+  }
+
+  .aura-pagination .ant-pagination-item:hover a,
+  .aura-pagination .ant-pagination-prev:not(.ant-pagination-disabled):hover button,
+  .aura-pagination .ant-pagination-next:not(.ant-pagination-disabled):hover button {
+    color: var(--aura-primary);
+  }
+
+  .aura-pagination .ant-pagination-item-active {
+    border-color: var(--aura-primary);
+    background: var(--aura-primary);
+    box-shadow: 0 8px 18px rgba(var(--primary-color), 0.22);
+  }
+
+  .aura-pagination .ant-pagination-item-active a {
+    color: #ffffff;
+    font-weight: 800;
+  }
+
+  .dark .aura-pagination .ant-pagination-item,
+  .dark .aura-pagination .ant-pagination-prev .ant-pagination-item-link,
+  .dark .aura-pagination .ant-pagination-next .ant-pagination-item-link {
+    background: var(--aura-surface);
+  }
 }
 
 @media (max-width: 768px) {

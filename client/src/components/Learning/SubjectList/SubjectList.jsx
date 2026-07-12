@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useFavorites } from "../../../context/FavoritesContext";
 import { useLanguage } from "../../../context/LanguageProvider";
-import subjectTranslations from "../../../languages/subjectTranslations";
 
 const subjectIcons = [
   "calculate",
@@ -30,7 +29,7 @@ const categoryIcons = [
 
 export default function RevisionUser() {
   const { favorites, toggleFavorite } = useFavorites();
-  const { texts, language } = useLanguage();
+  const { texts } = useLanguage();
   const navigate = useNavigate();
 
   const [subjects, setSubjects] = useState([]);
@@ -92,7 +91,7 @@ export default function RevisionUser() {
     currentPage * pageSize
   );
 
-  const getCategoryName = (category) => category?.categoryName || category?.name || "Khoa";
+  const getCategoryName = (category) => category?.categoryName || category?.name || texts.categoryFallback || "Khoa";
 
   const getProgress = (subject) => {
     const chapters = subject.totalChapters || 0;
@@ -104,15 +103,15 @@ export default function RevisionUser() {
 
   const getStatus = (subject) => {
     if ((subject.totalChapters || 0) > 0 && (subject.totalExams || 0) > 0) {
-      return { text: "Sẵn sàng", className: "bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20" };
+      return { text: texts.ready || "Sẵn sàng", className: "bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20" };
     }
     if ((subject.totalChapters || 0) > 0) {
-      return { text: "Ôn tập", className: "bg-primary/10 text-primary border border-primary/20" };
+      return { text: texts.practice || "Ôn tập", className: "bg-primary/10 text-primary border border-primary/20" };
     }
     if ((subject.totalExams || 0) > 0) {
-      return { text: "Kiểm tra", className: "bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20" };
+      return { text: texts.test || "Kiểm tra", className: "bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20" };
     }
-    return { text: "Chưa có", className: "bg-gray-100 text-gray-500 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600" };
+    return { text: texts.unavailable || "Chưa có", className: "bg-gray-100 text-gray-500 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600" };
   };
 
   const handleOpenSubject = (subject) => {
@@ -125,23 +124,28 @@ export default function RevisionUser() {
     setIsMobileSidebarOpen(false);
   };
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f9f9ff] dark:bg-background-dark">
+      <div className="flex flex-1 items-center justify-center bg-[#f9f9ff] dark:bg-background-dark">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary"></div>
-          <p className="text-gray-500 font-medium">Đang tải danh sách môn học...</p>
+          <p className="text-gray-500 font-medium">{texts.loadingSubjects || "Đang tải danh sách môn học..."}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f9ff] dark:bg-background-dark text-[#151c27] dark:text-gray-100 transition-colors duration-300">
+    <div className="bg-[#f9f9ff] dark:bg-background-dark text-[#151c27] dark:text-gray-100 transition-colors duration-300">
       <main className="mx-auto grid w-full max-w-screen-2xl grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:px-8">
         <div className="flex flex-col justify-between gap-4 lg:col-span-2 lg:flex-row lg:items-center">
           <nav className="flex flex-wrap items-center gap-2 text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            <span className="text-gray-900 dark:text-white">MÔN HỌC</span>
+            <span className="text-gray-900 dark:text-white">{texts.subjects || "MÔN HỌC"}</span>
           </nav>
 
           <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
@@ -162,7 +166,7 @@ export default function RevisionUser() {
               className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50 active:scale-95 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 lg:hidden"
             >
               <span className="material-symbols-outlined">filter_list</span>
-              Bộ lọc
+              {texts.filterLabel || "Bộ lọc"}
             </button>
           </div>
         </div>
@@ -179,8 +183,8 @@ export default function RevisionUser() {
 
           <div className="relative z-50 flex h-full w-4/5 max-w-xs flex-col gap-1 overflow-y-auto rounded-r-2xl border border-gray-200 bg-white p-4 shadow-xl dark:border-gray-700 dark:bg-gray-800 lg:h-fit lg:w-full lg:max-w-none lg:rounded-xl lg:shadow-sm">
             <div className="mb-2 px-4 py-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Bộ lọc</p>
-              <h3 className="mt-1 text-lg font-bold text-gray-900 dark:text-white">Khoa / ngành</h3>
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{texts.filterLabel || "Bộ lọc"}</p>
+              <h3 className="mt-1 text-lg font-bold text-gray-900 dark:text-white">{texts.facultyMajor || "Khoa / ngành"}</h3>
             </div>
 
             <button
@@ -192,7 +196,7 @@ export default function RevisionUser() {
               }`}
             >
               <span className="material-symbols-outlined">apps</span>
-              <span className="text-sm font-semibold">Tất cả môn</span>
+              <span className="text-sm font-semibold">{texts.allSubjects || "Tất cả môn"}</span>
             </button>
 
             {categories.map((category, index) => {
@@ -218,25 +222,13 @@ export default function RevisionUser() {
                 </button>
               );
             })}
-
-            <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-700">
-              <button
-                onClick={() => paginatedSubjects[0] && handleOpenSubject(paginatedSubjects[0])}
-                disabled={!paginatedSubjects[0]}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white transition-all hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-lg">bolt</span>
-                Học nhanh
-              </button>
-            </div>
           </div>
         </aside>
 
         <section className="flex min-w-0 flex-1 flex-col gap-8 lg:row-start-2">
           {paginatedSubjects.length > 0 ? (
-            <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <section className="grid grid-cols-1 content-start gap-6 md:min-h-[840px] md:grid-cols-2 xl:min-h-[560px] xl:grid-cols-3">
               {paginatedSubjects.map((subject, index) => {
-                const translatedName = subjectTranslations[subject.name]?.[language] || subject.name;
                 const progress = getProgress(subject);
                 const status = getStatus(subject);
                 const isFavorited = favorites.some((fav) => fav.subjectId === subject.subjectId);
@@ -264,7 +256,7 @@ export default function RevisionUser() {
                           }}
                           disabled={!localStorage.getItem("userId")}
                           className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-700"
-                          title="Yêu thích"
+                          title={texts.favorite || "Yêu thích"}
                         >
                           <span
                             className={`material-symbols-outlined text-xl ${isFavorited ? "text-red-500" : ""}`}
@@ -278,16 +270,16 @@ export default function RevisionUser() {
 
                     <div className="space-y-2">
                       <h3 className="line-clamp-2 text-2xl font-bold leading-tight text-gray-950 transition-colors group-hover:text-primary dark:text-white">
-                        {translatedName}
+                        {subject.name}
                       </h3>
                       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        {subject.totalChapters || 0} chương • {subject.totalQuestions || 0} câu hỏi • {subject.totalExams || 0} đề thi
+                        {subject.totalChapters || 0} {texts.chapters || "chương"} • {subject.totalQuestions || 0} {texts.questions || "câu hỏi"} • {subject.totalExams || 0} {texts.examsCount || "đề thi"}
                       </p>
                     </div>
 
                     <div className="mt-auto space-y-3">
                       <div className="flex items-end justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wide text-gray-400">Mức độ sẵn sàng</span>
+                        <span className="text-xs font-bold uppercase tracking-wide text-gray-400">{texts.readiness || "Mức độ sẵn sàng"}</span>
                         <span className="text-sm font-bold text-primary">{progress}%</span>
                       </div>
                       <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
@@ -304,15 +296,15 @@ export default function RevisionUser() {
           ) : (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800">
               <span className="material-symbols-outlined mb-4 text-6xl text-gray-300">search_off</span>
-              <h3 className="mb-2 text-xl font-black text-gray-950 dark:text-white">Không tìm thấy môn học</h3>
+              <h3 className="mb-2 text-xl font-black text-gray-950 dark:text-white">{texts.noSubjectsFound || "Không tìm thấy môn học"}</h3>
               <p className="mb-5 max-w-sm text-gray-500 dark:text-gray-400">
-                Thử đổi từ khóa tìm kiếm hoặc chọn khoa khác để xem thêm môn học.
+                {texts.noSubjectsSuggestion || "Thử đổi từ khóa tìm kiếm hoặc chọn khoa khác để xem thêm môn học."}
               </p>
               <button
                 onClick={clearFilters}
                 className="rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg active:scale-95"
               >
-                Xem tất cả môn học
+                {texts.viewAllSubjects || "Xem tất cả môn học"}
               </button>
             </div>
           )}
@@ -323,9 +315,9 @@ export default function RevisionUser() {
                 current={currentPage}
                 pageSize={pageSize}
                 total={filteredSubjects.length}
-                onChange={setCurrentPage}
+                onChange={handlePageChange}
                 showSizeChanger={false}
-                className="dark:text-white"
+                className="aura-pagination"
               />
             </div>
           )}

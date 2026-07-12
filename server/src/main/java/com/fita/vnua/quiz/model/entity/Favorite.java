@@ -1,4 +1,4 @@
-﻿package com.fita.vnua.quiz.model.entity;
+package com.fita.vnua.quiz.model.entity;
 
 import com.fita.vnua.quiz.generator.FavoriteId;
 import jakarta.persistence.*;

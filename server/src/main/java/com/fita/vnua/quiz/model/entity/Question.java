@@ -3,8 +3,10 @@ package com.fita.vnua.quiz.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -29,6 +31,13 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
+
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
+    private UUID deletedBy;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Answer> answers = new ArrayList<>();

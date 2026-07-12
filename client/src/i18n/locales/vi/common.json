@@ -1,0 +1,85 @@
+{
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "noData": "Không có dữ liệu",
+    "loading": "Đang tải...",
+    "showDetail": "Xem chi tiết",
+    "minutes": "phút",
+    "seconds": "giây"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "subjects": "Môn học",
+    "rank": "Xếp hạng",
+    "account": "Thông tin tài khoản",
+    "favorites": "Yêu thích"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất"
+  },
+  "theme": {
+    "appearance": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "colorTone": "Tông màu"
+  },
+  "language": {
+    "change": "Đổi ngôn ngữ",
+    "label": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+  },
+  "home": {
+    "hero": {
+      "badge": "Học tập thông minh cùng AI",
+      "title": "Chinh phục mọi kỳ thi",
+      "slogan": "Nền tảng ôn tập và kiểm tra thử hàng đầu giúp bạn đạt điểm số cao nhất.",
+      "start": "Bắt đầu",
+      "mascotName": "Mèo Mascot AI",
+      "mascotDescription": "Trợ lý ôn thi dễ thương"
+    },
+    "learningPath": {
+      "comingSoon": "🚀 Tính năng đang phát triển",
+      "title": "Lộ trình học tập cá nhân"
+    },
+    "subjectsTitle": "Những môn học chúng mình hỗ trợ ôn tập",
+    "noSubjects": "Chưa có môn học nào",
+    "questionCount": "{{count}} câu hỏi",
+    "examInProgressFallback": "Bài thi đang thực hiện",
+    "subjectFallback": "Môn học",
+    "inProgress": {
+      "title": "Bài thi đang thực hiện",
+      "continue": "Tiếp tục làm bài",
+      "doing": "Đang làm",
+      "remainingMinutes": "Còn {{count}} phút",
+      "emptyLoggedIn": "Không có bài thi đang thực hiện",
+      "emptyGuest": "Đăng nhập để tiếp tục các bài thi còn dang dở",
+      "emptyDescription": "Các bài thi chưa hoàn thành của bạn sẽ xuất hiện tại đây."
+    }
+  },
+  "footer": {
+    "description": "Nền tảng ôn tập và kiểm tra trắc nghiệm trực tuyến chất lượng cao dành cho sinh viên VNUA.",
+    "menu": "Danh mục",
+    "contact": "Thông tin liên hệ",
+    "address": "Địa chỉ",
+    "hotline": "Hotline",
+    "copyright": "QuizVNUA. All rights reserved.",
+    "terms": "Điều khoản",
+    "privacy": "Bảo mật"
+  },
+  "exam": {
+    "chooseExam": "Hãy chọn bài thi",
+    "submit": "Nộp bài",
+    "confirmSubmit": "Bạn có chắc chắn muốn nộp bài không?",
+    "timeRemaining": "Thời gian còn lại",
+    "answerTable": "Danh sách câu hỏi",
+    "result": "Kết quả bài thi",
+    "correct": "Câu đúng",
+    "score": "Điểm",
+    "questions": "câu hỏi"
+  }
+}

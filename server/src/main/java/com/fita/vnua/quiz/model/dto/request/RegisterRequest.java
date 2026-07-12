@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.model.dto.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +20,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "Username không được để trống")
     @Size(min = 3, max = 20, message = "Username phải từ 3-20 ký tự")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username chỉ được chứa chữ cái, số và dấu gạch dưới")
     private String username;
 
     @NotBlank(message = "Email không được để trống")

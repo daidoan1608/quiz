@@ -17,6 +17,8 @@ public interface QuestionService {
 
     List<QuestionDto> getAllQuestion();
 
+    List<QuestionDto> getDeletedQuestions();
+
     List<QuestionDto> searchQuestions(String keyword);
 
     List<QuestionDto> getQuestionsBySubject(Long subjectId);
@@ -34,6 +36,8 @@ public interface QuestionService {
     QuestionDto update(Long questionId, QuestionDto questionDto);
 
     Response delete(Long questionId);
+
+    QuestionDto restore(Long questionId);
 
     Map<String, Object> totalQuestionBySubject(Long subjectId);
 

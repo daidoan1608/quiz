@@ -223,6 +223,18 @@ body.dark .admin-brand-mark {
   backdrop-filter: blur(18px);
 }
 
+.ant-modal .ant-modal-header,
+.ant-modal .ant-modal-title,
+.ant-modal .ant-modal-title .ant-typography {
+  background: transparent !important;
+  color: var(--admin-text) !important;
+}
+
+.ant-modal .ant-modal-title .ant-typography {
+  display: inline-flex;
+  align-items: center;
+}
+
 .ant-card-head {
   border-bottom: 1px solid var(--admin-border) !important;
   font-weight: 700 !important;

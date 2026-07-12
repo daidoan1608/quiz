@@ -49,21 +49,28 @@ const AddChapterModal = ({ isModalOpen, onCancel, onSuccess }) => {
   }, [isModalOpen, categories.length, fetchCategories]);
 
   // Xử lý khi người dùng chọn Khoa
-  const handleCategoryChange = (categoryId) => {
+  const handleCategoryChange = async (categoryId) => {
     // 1. Reset ô môn học trong Form
     form.setFieldsValue({ subjectId: null });
+    setSubjects([]);
+    setIsSubjectDisabled(true);
 
-    // 2. Tìm khoa tương ứng để lấy danh sách môn
-    const selectedCategory = categories.find(
-      (c) => c.categoryId === categoryId
-    );
+    if (!categoryId) return;
 
-    if (selectedCategory && selectedCategory.subjects) {
-      setSubjects(selectedCategory.subjects);
-      setIsSubjectDisabled(false); // Mở khóa ô môn học
-    } else {
-      setSubjects([]);
-      setIsSubjectDisabled(true);
+    try {
+      // API /public/categories chỉ trả summary, không có subjects.
+      // Vì vậy cần gọi riêng API lấy môn học theo khoa.
+      const response = await authAxios.get(`/public/subjects/category/${categoryId}`);
+      const subjectData = Array.isArray(response.data.data) ? response.data.data : [];
+      setSubjects(subjectData);
+      setIsSubjectDisabled(subjectData.length === 0);
+
+      if (subjectData.length === 0) {
+        message.warning("Khoa này chưa có môn học nào!");
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách môn học:", error);
+      message.error("Không thể lấy danh sách môn học theo khoa!");
     }
   };
 

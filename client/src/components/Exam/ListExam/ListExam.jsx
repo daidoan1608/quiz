@@ -14,6 +14,7 @@ export default function ExamUsers() {
 
   // Lưu số lần làm bài: Map<examId, attempts>
   const [userExamStats, setUserExamStats] = useState(new Map());
+  const [inProgressExams, setInProgressExams] = useState(new Map());
 
   // --- HOOKS ---
   const navigate = useNavigate();
@@ -52,6 +53,15 @@ export default function ExamUsers() {
               statsMap.set(item.examId, item.attempts);
             });
             setUserExamStats(statsMap);
+
+            const inProgressResp = await authAxios.get(
+              `users/${userId}/exam-attempts/in-progress`
+            );
+            const inProgressMap = new Map();
+            (inProgressResp.data?.data || []).forEach((attempt) => {
+              if (attempt.examId) inProgressMap.set(Number(attempt.examId), attempt);
+            });
+            setInProgressExams(inProgressMap);
           } catch (histError) {
             console.error("Lỗi lấy lịch sử thi:", histError);
             // Không block UI chính nếu lỗi lấy lịch sử
@@ -194,6 +204,7 @@ export default function ExamUsers() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {exams.map((exam) => {
               const attempts = userExamStats.get(exam.examId) || 0;
+              const isInProgress = inProgressExams.has(Number(exam.examId));
               const isAttempted = attempts > 0;
 
               return (
@@ -202,7 +213,9 @@ export default function ExamUsers() {
                   onClick={() => handleExamClick(exam.examId)}
                   className={`group relative flex flex-col justify-between bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 transition-all duration-300 cursor-pointer overflow-hidden
                     ${
-                      isAttempted
+                      isInProgress
+                        ? "border-amber-200 dark:border-amber-800 shadow-sm hover:shadow-md hover:border-amber-400"
+                        : isAttempted
                         ? "border-blue-100 dark:border-blue-900/30 shadow-sm hover:shadow-md hover:border-blue-300"
                         : "border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-500 hover:-translate-y-1"
                     }
@@ -218,13 +231,22 @@ export default function ExamUsers() {
                     <span
                       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border
                       ${
-                        isAttempted
+                        isInProgress
+                          ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800"
+                          : isAttempted
                           ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"
                           : "bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                       }
                     `}
                     >
-                      {isAttempted ? (
+                      {isInProgress ? (
+                        <>
+                          <span className="material-symbols-outlined text-[14px]">
+                            pending_actions
+                          </span>
+                          Đang làm
+                        </>
+                      ) : isAttempted ? (
                         <>
                           <span className="material-symbols-outlined text-[14px]">
                             check_circle
@@ -270,8 +292,8 @@ export default function ExamUsers() {
                       </span>
                     </div>
 
-                    <button className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-all">
-                      <span>{isAttempted ? "Làm lại" : "Bắt đầu"}</span>
+                    <button className={`flex items-center gap-1 px-4 py-2 text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg active:scale-95 transition-all ${isInProgress ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-600 hover:bg-blue-700"}`}>
+                      <span>{isInProgress ? "Tiếp tục" : isAttempted ? "Làm lại" : "Bắt đầu"}</span>
                       <span className="material-symbols-outlined text-lg">
                         arrow_forward
                       </span>

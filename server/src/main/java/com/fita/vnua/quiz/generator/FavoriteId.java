@@ -1,4 +1,4 @@
-﻿package com.fita.vnua.quiz.generator;
+package com.fita.vnua.quiz.generator;
 
 import jakarta.persistence.Embeddable;
 import lombok.Data;

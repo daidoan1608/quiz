@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { authAxios } from "../../../api/axiosConfig";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
+import { typesetMath } from "../../../utils/typesetMath";
 
 export default function ResultExam() {
   // --- STATE ---
@@ -17,7 +18,7 @@ export default function ResultExam() {
   // Result là bước cuối của luồng: /subjects/:subjectId/exams/:examId/result
   const subjectId = location.state?.subjectId || params.subjectId;
   const examId = location.state?.examId || params.examId;
-  const { userExamId, correctAnswers, totalQuestions } = location.state || {};
+  const { userExamId, totalQuestions } = location.state || {};
 
   // --- 1. FETCH DỮ LIỆU ---
   useEffect(() => {
@@ -45,6 +46,10 @@ export default function ResultExam() {
     }
   }, [examId, userExamId]);
 
+  useEffect(() => {
+    if (examData) typesetMath();
+  }, [examData]);
+
   if (loading)
     return (
       <div className="flex h-screen items-center justify-center bg-background-light dark:bg-background-dark">
@@ -68,13 +73,37 @@ export default function ResultExam() {
     );
   }
 
+  const getAnswerId = (answer) => answer?.optionId || answer?.answerId;
+  const sameAnswerSet = (a, b) =>
+    a.length === b.length && a.every((id) => b.includes(id));
+
+  const userAnswerIdsByQuestion = (userAnswers.userAnswerDtos || []).reduce((acc, userAnswer) => {
+    if (!userAnswer.questionId || !userAnswer.answerId) return acc;
+    acc[userAnswer.questionId] = acc[userAnswer.questionId] || [];
+    if (!acc[userAnswer.questionId].includes(userAnswer.answerId)) {
+      acc[userAnswer.questionId].push(userAnswer.answerId);
+    }
+    return acc;
+  }, {});
+
+  const questionResults = (examData.questions || []).map((question) => {
+    const selectedIds = userAnswerIdsByQuestion[question.questionId] || [];
+    const correctIds = (question.answers || [])
+      .filter((answer) => answer.isCorrect)
+      .map(getAnswerId)
+      .filter(Boolean);
+    const isSkipped = selectedIds.length === 0;
+    const isCorrect = !isSkipped && sameAnswerSet(selectedIds, correctIds);
+    return { question, selectedIds, correctIds, isSkipped, isCorrect };
+  });
+
   // Dữ liệu cơ bản
   const rawScore = userAnswers.userExamDto.score || 0; // Điểm số trên thang 100
-  const calculatedTotal = totalQuestions || 1; // Tổng số câu hỏi
-  const calculatedCorrect = correctAnswers || 0; // Số câu trả lời đúng (từ location.state)
+  const calculatedTotal = examData.questions?.length || totalQuestions || 1; // Tổng số câu hỏi
+  const calculatedCorrect = questionResults.filter((result) => result.isCorrect).length;
 
-  // Số câu đã làm = số câu trả lời được lưu trong userAnswerDtos
-  const answeredQuestions = userAnswers.userAnswerDtos?.length || 0;
+  // Số câu đã làm = số câu có ít nhất một đáp án được chọn (multichoice vẫn tính là 1 câu)
+  const answeredQuestions = questionResults.filter((result) => !result.isSkipped).length;
 
   // Số câu Bỏ qua (Skipped)
   const skippedAnswers = calculatedTotal - answeredQuestions;
@@ -290,21 +319,7 @@ export default function ResultExam() {
               Chi tiết câu trả lời
             </h2>
             <div className="flex flex-col gap-4">
-              {examData.questions.map((question, index) => {
-                const userAnswerObj = userAnswers.userAnswerDtos?.find(
-                  (u) => u.questionId === question.questionId
-                );
-                const userAnswerId = userAnswerObj?.answerId;
-
-                const correctAnswer = question.answers.find((a) => a.isCorrect);
-                const userSelectedAnswer = question.answers.find(
-                  (a) => (a.optionId || a.answerId) === userAnswerId
-                );
-
-                // Xác định trạng thái
-                const isSkipped = !userAnswerObj;
-                const isCorrect = !isSkipped && correctAnswer && (userSelectedAnswer === correctAnswer);
-
+              {questionResults.map(({ question, selectedIds, isSkipped, isCorrect }, index) => {
                 return (
                   <div
                     key={question.questionId}
@@ -313,9 +328,10 @@ export default function ResultExam() {
                     <div className="flex flex-col gap-4">
                       {/* Tiêu đề câu hỏi & Badge */}
                       <div className="flex justify-between items-start gap-4">
-                        <p className="text-gray-800 dark:text-gray-200 font-semibold">
-                          Câu {index + 1}: {question.content}
-                        </p>
+                        <div className="text-gray-800 dark:text-gray-200 font-semibold flex flex-wrap gap-2">
+                          <span className="shrink-0">Câu {index + 1}:</span>
+                          <div dangerouslySetInnerHTML={{ __html: parseMarkdown(question.content) }} />
+                        </div>
                         <div
                           className={`flex items-center gap-2 text-sm font-medium px-3 py-1 rounded-full shrink-0
                             ${
@@ -335,9 +351,9 @@ export default function ResultExam() {
 
                       {/* Hiển thị đầy đủ tất cả đáp án */}
                       <div className="grid grid-cols-1 gap-3 mt-2 sm:grid-cols-2">
-                        {question.answers.map((answer, answerIndex) => {
-                          const answerId = answer.optionId || answer.answerId;
-                          const isUserChoice = answerId === userAnswerId;
+                          {question.answers.map((answer, answerIndex) => {
+                          const answerId = getAnswerId(answer);
+                          const isUserChoice = selectedIds.includes(answerId);
                           const isRightAnswer = answer.isCorrect;
 
                           let answerClass = "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/60";

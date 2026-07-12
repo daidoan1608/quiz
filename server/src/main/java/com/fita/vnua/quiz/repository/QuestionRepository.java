@@ -10,17 +10,28 @@ import java.util.List;
 import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-    List<Question> findByContentContainingIgnoreCase(String content);
+    List<Question> findByDeletedFalse();
 
-    @Query("SELECT q FROM Question q WHERE q.chapter.chapterId = :chapterId")
+    List<Question> findByDeletedTrue();
+
+    Optional<Question> findByQuestionIdAndDeletedFalse(Long questionId);
+
+    List<Question> findByContentContainingIgnoreCaseAndDeletedFalse(String content);
+
+    default List<Question> findByContentContainingIgnoreCase(String content) {
+        return findByContentContainingIgnoreCaseAndDeletedFalse(content);
+    }
+
+    @Query("SELECT q FROM Question q WHERE q.chapter.chapterId = :chapterId AND q.deleted = false")
     List<Question> findByChapter(@Param("chapterId") Long chapterId);
 
-    @Query("SELECT q FROM Question q JOIN q.chapter c JOIN c.subject s WHERE s.subjectId = :subjectId")
+    @Query("SELECT q FROM Question q JOIN q.chapter c JOIN c.subject s WHERE s.subjectId = :subjectId AND q.deleted = false")
     List<Question> findQuestionsBySubjectId(@Param("subjectId") Long subjectId);
 
     @Query(value = "SELECT q.* FROM question q " +
             "JOIN chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.subject_id = :subjectId " +
+            "AND q.deleted = false " +
             "AND (:difficulty IS NULL OR q.difficulty = :difficulty) " +
             "ORDER BY RAND() " +
             "LIMIT :number", nativeQuery = true)
@@ -32,6 +43,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query(value = "SELECT q.* FROM question q " +
             "JOIN chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.chapter_id = :chapterId " +
+            "AND q.deleted = false " +
             "ORDER BY RAND() " +
             "LIMIT :number", nativeQuery = true)
     List<Question> findQuestionsByChapter(
@@ -42,6 +54,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query(value = "SELECT q.* FROM question q " +
             "JOIN chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.subject_id = :subjectId " +
+            "AND q.deleted = false " +
             "ORDER BY RAND() LIMIT :number", nativeQuery = true)
     List<Question> findRandomQuestionsBySubject(
             @Param("subjectId") Long subjectId,
@@ -50,18 +63,31 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query(value = "SELECT q.* FROM question q JOIN exam_question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId", nativeQuery = true)
     List<Question> findQuestionsByExamId(Long examId);
 
-    long countByDifficulty(Question.Difficulty difficulty);
+    long countByDifficultyAndDeletedFalse(Question.Difficulty difficulty);
+
+    default long countByDifficulty(Question.Difficulty difficulty) {
+        return countByDifficultyAndDeletedFalse(difficulty);
+    }
 
     @Query("SELECT q.chapter.subject.subjectId FROM Question q WHERE q.questionId = :questionId")
     Optional<Long> findSubjectIdByQuestionId(@Param("questionId") Long questionId);
 
-    int countByChapter(Chapter chapter);
+    int countByChapterAndDeletedFalse(Chapter chapter);
 
-    long countByChapterAndDifficulty(Chapter chapter, Question.Difficulty difficulty);
+    default int countByChapter(Chapter chapter) {
+        return countByChapterAndDeletedFalse(chapter);
+    }
+
+    long countByChapterAndDifficultyAndDeletedFalse(Chapter chapter, Question.Difficulty difficulty);
+
+    default long countByChapterAndDifficulty(Chapter chapter, Question.Difficulty difficulty) {
+        return countByChapterAndDifficultyAndDeletedFalse(chapter, difficulty);
+    }
 
     @Query("SELECT q.chapter.chapterId, q.difficulty, COUNT(q) " +
            "FROM Question q " +
            "WHERE q.chapter.subject.subjectId = :subjectId " +
+           "AND q.deleted = false " +
            "GROUP BY q.chapter.chapterId, q.difficulty")
     List<Object[]> countQuestionsBySubjectGroupedByChapterAndDifficulty(@Param("subjectId") Long subjectId);
 }

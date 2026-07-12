@@ -125,13 +125,13 @@ function Login() {
           <Form.Item
             name="username"
             rules={[
-              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+              { required: true, message: "Vui lòng nhập tên đăng nhập hoặc email!" },
             ]}
             className="mb-4"
           >
             <Input
               prefix={<UserOutlined className="text-gray-400" />}
-              placeholder="Tên đăng nhập"
+              placeholder="Tên đăng nhập hoặc email"
               className="rounded-lg py-2.5"
             />
           </Form.Item>

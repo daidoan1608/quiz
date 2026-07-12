@@ -64,6 +64,13 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("All questions fetched successfully", questions));
     }
 
+    @GetMapping("admin/questions/deleted")
+    @Operation(summary = "Lấy danh sách câu hỏi đã xóa mềm")
+    public ResponseEntity<ApiResponse<List<QuestionDto>>> getDeletedQuestions() {
+        List<QuestionDto> questions = questionService.getDeletedQuestions();
+        return ResponseEntity.ok(ApiResponse.success("Deleted questions fetched successfully", questions));
+    }
+
     @GetMapping("admin/questions/search")
     @Operation(summary = "Tìm kiếm câu hỏi theo nội dung")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> searchQuestions(@RequestParam("q") String keyword) {
@@ -97,10 +104,17 @@ public class QuestionController {
     }
 
     @DeleteMapping("admin/questions/{questionId}")
-    @Operation(summary = "Xóa câu hỏi")
+    @Operation(summary = "Xóa mềm câu hỏi")
     public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId) {
         questionService.delete(questionId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("admin/questions/{questionId}/restore")
+    @Operation(summary = "Khôi phục câu hỏi đã xóa mềm")
+    public ResponseEntity<ApiResponse<QuestionDto>> restoreQuestion(@PathVariable("questionId") Long questionId) {
+        QuestionDto restoredQuestion = questionService.restore(questionId);
+        return ResponseEntity.ok(ApiResponse.success("Question restored successfully", restoredQuestion));
     }
 
     @PostMapping("admin/questions/upload-image")

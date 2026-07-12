@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { publicAxios } from "../../api/axiosConfig";
+import { authAxios, publicAxios } from "../../api/axiosConfig";
 import { useLanguage } from "../../context/LanguageProvider";
+import { useAuth } from "../../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import CatMascot from "./CatMascot";
 
 export default function Home() {
   const [subjects, setSubjects] = useState([]);
-  const { texts } = useLanguage();
+  const [inProgressAttempts, setInProgressAttempts] = useState([]);
+  const { t } = useLanguage();
+  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     getAllSubjects();
   }, []);
+
+  useEffect(() => {
+    getInProgressAttempts();
+  }, [isLoggedIn, userId]);
 
   const getAllSubjects = async () => {
     try {
@@ -22,7 +30,43 @@ export default function Home() {
     }
   };
 
+  const getInProgressAttempts = async () => {
+    if (!isLoggedIn || !userId) {
+      setInProgressAttempts([]);
+      return;
+    }
 
+    try {
+      const resp = await authAxios.get(`users/${userId}/exam-attempts/in-progress`);
+      setInProgressAttempts(resp.data?.data || []);
+    } catch (error) {
+      console.error("Lỗi khi lấy bài đang thực hiện:", error);
+      setInProgressAttempts([]);
+    }
+  };
+
+  const getAttemptProgress = (attempt) => {
+    const total = Number(attempt.totalQuestions) || 0;
+    const answered = Number(attempt.answeredCount) || 0;
+    return total > 0 ? Math.min(100, Math.round((answered / total) * 100)) : 0;
+  };
+
+  const formatRemainingTime = (seconds) => {
+    const value = Number(seconds);
+    if (!Number.isFinite(value) || value <= 0) return t("home.inProgress.doing");
+    const minutes = Math.ceil(value / 60);
+    return t("home.inProgress.remainingMinutes", { count: minutes });
+  };
+
+  const continueAttempt = (attempt) => {
+    navigate(`/subjects/${attempt.subjectId}/exams/${attempt.examId}`, {
+      state: {
+        subjectId: attempt.subjectId,
+        examId: attempt.examId,
+        title: attempt.title,
+      },
+    });
+  };
 
   // --- DỮ LIỆU TEAM (MỚI) ---
   const teamMembers = [
@@ -82,14 +126,13 @@ export default function Home() {
 
             <div className="flex-1 flex flex-col gap-5 text-center lg:text-left">
               <span className="inline-flex w-fit mx-auto lg:mx-0 items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                ✨ Học tập thông minh cùng AI
+                ✨ {t("home.hero.badge")}
               </span>
               <h1 className="text-gray-900 dark:text-white text-4xl sm:text-5xl font-black leading-tight tracking-tight">
-                {texts.onlineTest || "Chinh phục mọi kỳ thi"}
+                {t("home.hero.title")}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg max-w-xl leading-relaxed">
-                {texts.slogan1 ||
-                  "Nền tảng ôn tập và kiểm tra thử hàng đầu giúp bạn đạt điểm số cao nhất."}
+                {t("home.hero.slogan")}
               </p>
 
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start mt-2">
@@ -97,7 +140,7 @@ export default function Home() {
                   onClick={() => navigate("/subjects")}
                   className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
                 >
-                  Bắt đầu
+                  {t("home.hero.start")}
                 </button>
               </div>
             </div>
@@ -107,8 +150,8 @@ export default function Home() {
                 <div className="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700/50 pb-3">
                   <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">🐱</div>
                   <div className="text-left">
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">Mèo Mascot AI</h3>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400">Trợ lý ôn thi dễ thương</p>
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t("home.hero.mascotName")}</h3>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">{t("home.hero.mascotDescription")}</p>
                   </div>
                 </div>
                 <CatMascot />
@@ -125,14 +168,14 @@ export default function Home() {
                 {/* --- LỚP PHỦ (OVERLAY) --- */}
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-[2px]">
                   <span className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-4 py-2 rounded-full font-bold text-xs sm:text-sm shadow-lg transform -rotate-2">
-                    🚀 Tính năng đang phát triển
+                    {t("home.learningPath.comingSoon")}
                   </span>
                 </div>
 
                 {/* --- NỘI DUNG BÊN DƯỚI (BỊ LÀM MỜ & KHÓA CLICK) --- */}
                 <div className="opacity-40 pointer-events-none select-none grayscale">
                   <h2 className="text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 text-gray-900 dark:text-white">
-                    Lộ trình học tập cá nhân
+                    {t("home.learningPath.title")}
                   </h2>
                   <div className="grid grid-cols-[40px_1fr] gap-x-2 pt-2">
                     {/* Step 1 */}
@@ -227,7 +270,7 @@ export default function Home() {
               <section>
                 <div className="flex items-center justify-between px-2 pb-5 pt-2">
                   <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                    {texts.subjectsTitle || "Ôn tập trắc nghiệm"}
+                    {t("home.subjectsTitle")}
                   </h2>
                 </div>
 
@@ -292,94 +335,71 @@ export default function Home() {
                             {item.name}
                           </h3>
                           <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                            {item.totalQuestions} câu hỏi ôn tập
+                            {t("home.questionCount", { count: item.totalQuestions })}
                           </p>
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="col-span-full py-12 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
-                      {texts.noSubjects || "Chưa có môn học nào."}
+                      {t("home.noSubjects")}
                     </div>
                   )}
                 </div>
               </section>
             </div>
 
-            {/* CỘT PHẢI (SIDEBAR - ĐÃ ẨN MỜ) */}
+            {/* CỘT PHẢI (SIDEBAR) */}
             <aside className="lg:col-span-1">
-              <div className="sticky top-24 relative overflow-hidden rounded-xl">
-                {/* --- LỚP PHỦ (OVERLAY) --- */}
-                <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-[2px]">
-                  <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-gray-200 dark:border-gray-600 shadow-sm">
-                    Coming Soon...
-                  </span>
-                </div>
-
-                {/* --- NỘI DUNG SIDEBAR (BỊ LÀM MỜ) --- */}
-                <div className="opacity-40 pointer-events-none select-none grayscale">
-                  <h2 className="text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 pt-2 text-gray-900 dark:text-white">
-                    Đang thực hiện
-                  </h2>
-                  <div className="flex flex-col gap-4">
-                    {/* Item 1 */}
-                    <div className="p-5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-bold text-gray-800 dark:text-white">
-                          Đề thi thử THPT QG 2024
-                        </p>
-                        <span className="text-xs font-semibold bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
-                          Đang làm
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                        Môn Toán
+              <div className="sticky top-24 rounded-xl">
+                <h2 className="text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 pt-2 text-gray-900 dark:text-white">
+                  {t("home.inProgress.title")}
+                </h2>
+                <div className="flex flex-col gap-4">
+                  {isLoggedIn && inProgressAttempts.length > 0 ? (
+                    inProgressAttempts.slice(0, 4).map((attempt) => {
+                      const progress = getAttemptProgress(attempt);
+                      return (
+                        <div key={attempt.attemptId || attempt.userExamId || attempt.examId} className="p-5 rounded-xl bg-white dark:bg-gray-800 border border-amber-100 dark:border-amber-900/40 shadow-sm">
+                          <div className="flex justify-between items-start gap-3 mb-2">
+                            <p className="font-bold text-gray-800 dark:text-white line-clamp-2">
+                              {attempt.title || t("home.examInProgressFallback")}
+                            </p>
+                            <span className="shrink-0 text-xs font-semibold bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                              {t("home.inProgress.doing")}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                            {attempt.subjectName || t("home.subjectFallback")} • {formatRemainingTime(attempt.remainingTime)}
+                          </p>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                            <div
+                              className="bg-amber-500 h-2 rounded-full transition-all duration-1000"
+                              style={{ width: `${progress}%` }}
+                            ></div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {attempt.answeredCount || 0}/{attempt.totalQuestions || 0} {t("exam.questions", "câu")} • {progress}%
+                            </p>
+                            <button onClick={() => continueAttempt(attempt)} className="text-sm font-bold text-blue-600 hover:underline">
+                              {t("home.inProgress.continue")}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="p-5 rounded-xl bg-white dark:bg-gray-800 border border-dashed border-gray-200 dark:border-gray-700 text-center shadow-sm">
+                      <span className="material-symbols-outlined text-4xl text-gray-300 mb-2">history_edu</span>
+                      <p className="font-bold text-gray-800 dark:text-white">
+                        {isLoggedIn ? t("home.inProgress.emptyLoggedIn") : t("home.inProgress.emptyGuest")}
                       </p>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-1000"
-                          style={{ width: "45%" }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Hoàn thành 45%
-                        </p>
-                        <button className="text-sm font-bold text-blue-600 hover:underline">
-                          Tiếp tục
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Item 2 */}
-                    <div className="p-5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-bold text-gray-800 dark:text-white">
-                          Dao động cơ
-                        </p>
-                        <span className="text-xs font-semibold bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                          Ôn tập
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                        Môn Vật Lý
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {t("home.inProgress.emptyDescription")}
                       </p>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
-                        <div
-                          className="bg-green-500 h-2 rounded-full transition-all duration-1000"
-                          style={{ width: "80%" }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Hoàn thành 80%
-                        </p>
-                        <button className="text-sm font-bold text-green-600 hover:underline">
-                          Tiếp tục
-                        </button>
-                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </aside>
@@ -387,12 +407,10 @@ export default function Home() {
           <section className="flex flex-col items-center justify-center pt-10 pb-6">
             <div className="text-center max-w-3xl mx-auto mb-12">
               <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
-                Đội ngũ phát triển
+                {t("home.team.title")}
               </h2>
               <p className="text-gray-500 dark:text-gray-400 text-lg">
-                Chúng tôi là nhóm sinh viên đam mê công nghệ, với sứ mệnh mang
-                đến nền tảng ôn tập hiệu quả và miễn phí cho cộng đồng học sinh,
-                sinh viên.
+                {t("home.team.description")}
               </p>
             </div>
 

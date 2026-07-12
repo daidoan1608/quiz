@@ -35,8 +35,17 @@ public class User implements UserDetails {
     @Column(nullable = true)
     private String avatarUrl;
 
+    @Column(nullable = true)
+    private String phone;
+
+    @Column(nullable = true)
+    private String address;
+
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    @Column(nullable = false)
+    private boolean emailVerified = false;
 
     public enum AuthProvider {
         LOCAL, GOOGLE, FACEBOOK, GITHUB
@@ -64,7 +73,9 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        // Tài khoản quản trị được tạo nội bộ không cần luồng xác thực email như USER đăng ký.
+        // Nếu không cho ADMIN/MOD enabled ở đây, Spring Security sẽ chặn đăng nhập dù đúng mật khẩu.
+        return role == Role.ADMIN || role == Role.MOD || emailVerified || authProvider != AuthProvider.LOCAL;
     }
 
     public enum Role {

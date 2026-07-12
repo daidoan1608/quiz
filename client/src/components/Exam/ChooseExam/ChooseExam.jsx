@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { publicAxios } from "../../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../context/LanguageProvider";
-import subjectTranslations from "../../../languages/subjectTranslations";
 import { useFavorites } from "../../../context/FavoritesContext";
 import { Pagination } from "antd";
 import FilterSidebar from "../../User/FilterSidebar";
@@ -11,15 +10,11 @@ import FavoritesSidebar from "../../User/FavoritesSidebar";
 // --- Component Card Môn học ---
 const SubjectCard = ({
   item,
-  language,
   isFavorited,
   toggleFavorite,
   handleSelect,
   categoryName,
 }) => {
-  const translatedName =
-    subjectTranslations[item.name]?.[language] || item.name;
-
   return (
     <div className="group bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200/60 dark:border-gray-700/50 hover:border-primary/50 dark:hover:border-primary/50 shadow-sm hover:shadow-xl hover:shadow-primary/5 dark:hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full justify-between">
       <div>
@@ -31,7 +26,7 @@ const SubjectCard = ({
               {categoryName || "Môn học"}
             </span>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 min-h-[3.5rem] group-hover:text-primary transition-colors leading-snug">
-              {translatedName}
+              {item.name}
             </h3>
           </div>
 
@@ -105,7 +100,7 @@ export default function ChooseExam() {
 
   // --- HOOKS ---
   const navigate = useNavigate();
-  const { texts, language } = useLanguage();
+  const { texts } = useLanguage();
   const { favorites, toggleFavorite } = useFavorites();
 
   // --- EFFECT: Load Data (Subjects + Categories) ---
@@ -258,7 +253,6 @@ export default function ChooseExam() {
                     <SubjectCard
                       key={item.subjectId}
                       item={item}
-                      language={language}
                       isFavorited={isFavorited}
                       toggleFavorite={toggleFavorite}
                       handleSelect={handleSelectExamBySubjectId}

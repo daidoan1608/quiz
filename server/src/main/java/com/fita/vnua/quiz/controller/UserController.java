@@ -66,6 +66,16 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("User fetched successfully", user));
     }
 
+    @PatchMapping("users/{userId}")
+    @Operation(summary = "Cập nhật thông tin cá nhân", description = "Người dùng cập nhật họ tên, email, số điện thoại, địa chỉ")
+    public ResponseEntity<ApiResponse<UserDto>> updateProfile(
+            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
+            @RequestBody UserDto userDto
+    ) {
+        UserDto updatedUser = userService.update(userId, userDto);
+        return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", updatedUser));
+    }
+
     @PostMapping("admin/users")
     @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
     public ResponseEntity<ApiResponse<UserDto>> createUser(@RequestBody UserDto userDto) {

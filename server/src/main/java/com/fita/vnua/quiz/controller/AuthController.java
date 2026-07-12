@@ -9,6 +9,7 @@ import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
 import com.fita.vnua.quiz.service.AuthService;
+import jakarta.validation.Valid;
 import com.fita.vnua.quiz.service.UserService;
 import com.fita.vnua.quiz.service.impl.GoogleIdTokenVerifierService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +42,7 @@ public class AuthController {
     private final JwtTokenUtil jwtTokenUtil;
     private final GoogleIdTokenVerifierService googleVerifier;
     private final CustomUserDetailsService customUserDetailsService;
+    private final com.fita.vnua.quiz.service.EmailVerificationService emailVerificationService;
 
     @PostMapping("login")
     @Operation(summary = "API đăng nhập (Trả về HttpOnly Cookie)")
@@ -53,7 +55,7 @@ public class AuthController {
             return buildAuthenticatedResponse("Login successful", userDetails);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Authentication failed", List.of("Invalid username or password")));
+                    .body(ApiResponse.error("Authentication failed", List.of("Invalid username/email or password")));
         }
     }
 
@@ -93,13 +95,33 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    @Operation(summary = "API đăng ký tài khoản (Auto Login Cookie)")
-    public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestBody RegisterRequest registerRequest) {
-        if (userService.isEmailExisted(registerRequest.getEmail())) {
+    @Operation(summary = "API đăng ký tài khoản (Gửi email xác thực)")
+    public ResponseEntity<ApiResponse<Object>> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        User existingByEmail = userService.findEntityByEmail(registerRequest.getEmail());
+        User existingByUsername = userService.findEntityByUsername(registerRequest.getUsername());
+
+        if (existingByEmail != null && existingByEmail.isEmailVerified()) {
             throw new CustomApiException("Email is already existed", HttpStatus.BAD_REQUEST);
         }
-        if (userService.isUsernameExisted(registerRequest.getUsername())) {
+        if (existingByUsername != null && existingByUsername.isEmailVerified()) {
             throw new CustomApiException("Username is already existed", HttpStatus.BAD_REQUEST);
+        }
+        if (existingByEmail != null && existingByUsername != null
+                && !existingByEmail.getUserId().equals(existingByUsername.getUserId())) {
+            throw new CustomApiException("Email or username is already pending verification", HttpStatus.BAD_REQUEST);
+        }
+
+        User pendingUser = existingByEmail != null ? existingByEmail : existingByUsername;
+        if (pendingUser != null) {
+            UserDto pendingUserDto = new UserDto();
+            pendingUserDto.setUsername(registerRequest.getUsername());
+            pendingUserDto.setEmail(registerRequest.getEmail());
+            pendingUserDto.setFullName(registerRequest.getFullName());
+            pendingUserDto.setPassword(registerRequest.getPassword());
+            UserDto updatedPendingUser = userService.update(pendingUser.getUserId(), pendingUserDto);
+            User updatedPendingEntity = userService.findEntityById(updatedPendingUser.getUserId());
+            emailVerificationService.createAndSendVerification(updatedPendingEntity);
+            return ResponseEntity.ok(ApiResponse.success("Verification email has been resent. Please check your email.", null));
         }
 
         UserDto user = new UserDto();
@@ -108,18 +130,19 @@ public class AuthController {
         user.setEmail(registerRequest.getEmail());
         user.setFullName(registerRequest.getFullName());
         user.setRole(User.Role.USER);
-        userService.create(user);
+        UserDto createdUser = userService.create(user);
+        User createdEntity = userService.findEntityById(createdUser.getUserId());
+        emailVerificationService.createAndSendVerification(createdEntity);
 
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(registerRequest.getUsername(), registerRequest.getPassword())
-            );
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return buildAuthenticatedResponse("Registration successful", userDetails);
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Authentication failed after registration", List.of("Authentication failed after registration")));
-        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Registration successful. Please check your email to verify your account.", null));
+    }
+
+    @GetMapping("verify-email")
+    @Operation(summary = "API xác thực email tài khoản bằng token")
+    public ResponseEntity<ApiResponse<Object>> verifyEmail(@RequestParam String token) {
+        emailVerificationService.verifyEmail(token);
+        return ResponseEntity.ok(ApiResponse.success("Email verified successfully", null));
     }
 
     @PostMapping("google")

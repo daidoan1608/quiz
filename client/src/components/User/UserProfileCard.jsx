@@ -2,7 +2,7 @@ import React from "react";
 const BASE_URL_AVATAR = process.env.REACT_APP_AVATAR_URL;
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-export default function UserProfileCard({ user, avatarUrl, onUploadAvatar, onChangePasswordClick, onLogout, texts }) {
+export default function UserProfileCard({ user, avatarUrl, onUploadAvatar, onPersonalInfoClick, onRoadmapClick, onChangePasswordClick, texts }) {
   const resolvedAvatarUrl = avatarUrl || user?.avatarUrl || localStorage.getItem("avatarUrl");
   const avatarSrc = resolvedAvatarUrl
     ? resolvedAvatarUrl.startsWith("http")
@@ -46,9 +46,24 @@ export default function UserProfileCard({ user, avatarUrl, onUploadAvatar, onCha
 
       {/* Menu Actions */}
       <div className="flex flex-col gap-1 border-t border-gray-100 dark:border-gray-700 pt-4">
-        <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left group">
+        <button
+          onClick={onPersonalInfoClick}
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left group"
+        >
           <span className="material-symbols-outlined text-gray-400 group-hover:text-primary">person</span>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary">Thông tin cá nhân</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary">
+            {texts?.personalInfo || "Thông tin cá nhân"}
+          </span>
+        </button>
+
+        <button
+          onClick={onRoadmapClick}
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left group"
+        >
+          <span className="material-symbols-outlined text-gray-400 group-hover:text-primary">route</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary">
+            {texts?.learningRoadmap || "Lộ trình"}
+          </span>
         </button>
 
         <button
@@ -57,17 +72,7 @@ export default function UserProfileCard({ user, avatarUrl, onUploadAvatar, onCha
         >
           <span className="material-symbols-outlined text-gray-400 group-hover:text-primary">lock_reset</span>
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary">
-            {texts.changePass || "Đổi mật khẩu"}
-          </span>
-        </button>
-
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left group mt-2"
-        >
-          <span className="material-symbols-outlined text-red-400 group-hover:text-red-600">logout</span>
-          <span className="text-sm font-medium text-red-600 group-hover:text-red-700">
-            {texts.logout || "Đăng xuất"}
+            {texts?.changePass || "Đổi mật khẩu"}
           </span>
         </button>
       </div>

@@ -3,6 +3,7 @@ import { authAxios } from "../../../api/axiosConfig";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useLanguage } from "../../../context/LanguageProvider";
 import { parseMarkdown } from "../../../utils/parseMarkdown";
+import { typesetMath } from "../../../utils/typesetMath";
 
 const getFullImageUrl = (url) => {
   if (!url) return "";
@@ -16,54 +17,92 @@ const getFullImageUrl = (url) => {
 export default function Exam() {
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [markedQuestions, setMarkedQuestions] = useState(new Set());
   const [timeLeft, setTimeLeft] = useState(null);
   const [duration, setDuration] = useState(0);
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [startTime, setStartTime] = useState(new Date().toISOString());
+  const [isDraftReady, setIsDraftReady] = useState(false);
+  const [userExamId, setUserExamId] = useState(null);
 
   const endTimeRef = useRef(null);
   const handleSubmitRef = useRef(null);
+  const selectedAnswersRef = useRef({});
+  const currentQuestionIndexRef = useRef(0);
+  const userExamIdRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
   const examId = location.state?.examId || params.examId;
   const subjectId = location.state?.subjectId || params.subjectId;
-  const startTime = location.state?.startTime || new Date().toISOString();
+  const userId = localStorage.getItem("userId");
+  const examDraftKey = userId && examId ? `exam_draft_${userId}_${examId}` : null;
   const { texts } = useLanguage();
 
+  useEffect(() => {
+    selectedAnswersRef.current = selectedAnswers;
+  }, [selectedAnswers]);
+
+  useEffect(() => {
+    currentQuestionIndexRef.current = currentQuestionIndex;
+  }, [currentQuestionIndex]);
+
+  useEffect(() => {
+    userExamIdRef.current = userExamId;
+  }, [userExamId]);
+
+  const isMultipleChoice = (question) => question?.questionType === "MULTIPLE_CHOICE";
+
+  const normalizeSelectedIndexes = (value) => Array.isArray(value) ? value : value !== undefined ? [value] : [];
+
+  const isQuestionAnswered = (question, value) => isMultipleChoice(question)
+    ? Array.isArray(value) && value.length > 0
+    : value !== undefined;
+
   const handleSubmit = useCallback(async () => {
-    const userId = localStorage.getItem("userId");
     const endTime = new Date().toISOString();
 
     const correctAnswersCount = questions.reduce((count, question, index) => {
-      const userAnswerIndex = selectedAnswers[index];
-      if (userAnswerIndex !== undefined) {
-        const selectedAnswer = question.answers[userAnswerIndex];
-        return selectedAnswer.isCorrect ? count + 1 : count;
-      }
-      return count;
+      const selectedIndexes = normalizeSelectedIndexes(selectedAnswers[index]);
+      if (!selectedIndexes.length) return count;
+      const selectedAnswerIds = selectedIndexes
+        .map((answerIndex) => question.answers?.[answerIndex])
+        .filter(Boolean)
+        .map((answer) => answer.answerId || answer.optionId)
+        .sort();
+      const correctAnswerIds = (question.answers || [])
+        .filter((answer) => answer.isCorrect)
+        .map((answer) => answer.answerId || answer.optionId)
+        .sort();
+      return selectedAnswerIds.length === correctAnswerIds.length && selectedAnswerIds.every((id, idx) => id === correctAnswerIds[idx]) ? count + 1 : count;
     }, 0);
 
     const userAnswerDtos = Object.entries(selectedAnswers)
-      .map(([questionIndex, answerIndex]) => {
+      .flatMap(([questionIndex, answerValue]) => {
         const question = questions[questionIndex];
-        if (!question) return null;
-        const answer = question.answers[answerIndex];
-        return answer ? { questionId: question.questionId, answerId: answer.answerId || answer.optionId } : null;
-      })
-      .filter(Boolean);
+        if (!question) return [];
+        return normalizeSelectedIndexes(answerValue)
+          .map((answerIndex) => {
+            const answer = question.answers?.[answerIndex];
+            return answer ? { questionId: question.questionId, answerId: answer.answerId || answer.optionId } : null;
+          })
+          .filter(Boolean);
+      });
 
     try {
-      const response = await authAxios.post("user-exams", {
-        // Không gửi score từ FE. Backend sẽ tự chấm lại dựa trên userAnswerDtos.
-        userExamDto: { userId, examId, startTime, endTime },
-        userAnswerDtos,
-      });
+      const response = userExamId
+        ? await authAxios.post(`exam-attempts/${userExamId}/submit`)
+        : await authAxios.post("user-exams", {
+            // Không gửi score từ FE. Backend sẽ tự chấm lại dựa trên userAnswerDtos.
+            userExamDto: { userId, examId, startTime, endTime },
+            userAnswerDtos,
+          });
       if (response.status === 200) {
+        setUserExamId(null);
+        if (examDraftKey) localStorage.removeItem(examDraftKey);
         alert("Nộp bài thành công!");
         navigate(`/subjects/${subjectId}/exams/${examId}/result`, {
           state: {
@@ -80,7 +119,7 @@ export default function Exam() {
       console.error("Lỗi nộp bài:", error);
       alert(error.response?.status === 403 ? "Phiên đăng nhập hết hạn." : "Lỗi khi nộp bài.");
     }
-  }, [questions, selectedAnswers, examId, subjectId, startTime, duration, timeLeft, navigate]);
+  }, [questions, selectedAnswers, userExamId, examId, subjectId, startTime, duration, timeLeft, navigate, userId, examDraftKey]);
 
   useEffect(() => {
     handleSubmitRef.current = handleSubmit;
@@ -90,14 +129,85 @@ export default function Exam() {
     const getAllQuestionsByExamId = async () => {
       try {
         setIsLoading(true);
-        const response = await authAxios.get(`public/exams/${examId}`);
-        const data = response.data.data;
+        const [examResponse, attemptResponse] = await Promise.all([
+          authAxios.get(`public/exams/${examId}`),
+          userId ? authAxios.post("exam-attempts/start", { userId, examId }) : Promise.resolve(null),
+        ]);
+        const data = examResponse.data.data;
+        const attempt = attemptResponse?.data?.data;
         setSubjectName(data.subjectName);
         setTitle(data.title);
         setDuration(data.duration);
-        endTimeRef.current = Date.now() + data.duration * 60 * 1000;
-        setTimeLeft(data.duration * 60);
         setQuestions(data.questions || []);
+        if (attempt?.userExamId) setUserExamId(attempt.userExamId);
+
+        const fallbackStartTime = attempt?.startTime || location.state?.startTime || new Date().toISOString();
+        let restoredDraft = null;
+        if (examDraftKey) {
+          try {
+            restoredDraft = JSON.parse(localStorage.getItem(examDraftKey));
+          } catch (draftError) {
+            console.warn("Không đọc được draft bài thi:", draftError);
+            localStorage.removeItem(examDraftKey);
+          }
+        }
+
+        if (attempt?.userAnswerDtos?.length) {
+          const answerIndexByQuestion = {};
+          attempt.userAnswerDtos.forEach((userAnswer) => {
+            const questionIndex = (data.questions || []).findIndex((question) => question.questionId === userAnswer.questionId);
+            if (questionIndex < 0) return;
+            const question = (data.questions || [])[questionIndex];
+            const answerIndex = (question?.answers || []).findIndex(
+              (answer) => (answer.answerId || answer.optionId) === userAnswer.answerId
+            );
+            if (answerIndex < 0) return;
+            if (isMultipleChoice(question)) {
+              answerIndexByQuestion[questionIndex] = [...(answerIndexByQuestion[questionIndex] || []), answerIndex];
+            } else {
+              answerIndexByQuestion[questionIndex] = answerIndex;
+            }
+          });
+          setSelectedAnswers(answerIndexByQuestion);
+          setCurrentQuestionIndex(
+            Math.min(
+              Math.max(Number(attempt.currentQuestionIndex) || 0, 0),
+              Math.max((data.questions || []).length - 1, 0)
+            )
+          );
+          const remainingSeconds = Math.max(0, Number(attempt.remainingTime ?? data.duration * 60));
+          endTimeRef.current = Date.now() + remainingSeconds * 1000;
+          setTimeLeft(remainingSeconds);
+          setStartTime(fallbackStartTime);
+        } else if (restoredDraft?.endTime && Number(restoredDraft.endTime) > Date.now()) {
+          endTimeRef.current = Number(restoredDraft.endTime);
+          setTimeLeft(Math.max(0, Math.floor((Number(restoredDraft.endTime) - Date.now()) / 1000)));
+          setStartTime(restoredDraft.startTime || fallbackStartTime);
+          setSelectedAnswers(restoredDraft.selectedAnswers || {});
+          setCurrentQuestionIndex(
+            Math.min(
+              Math.max(Number(restoredDraft.currentQuestionIndex) || 0, 0),
+              Math.max((data.questions || []).length - 1, 0)
+            )
+          );
+        } else if (restoredDraft?.endTime && Number(restoredDraft.endTime) <= Date.now()) {
+          endTimeRef.current = Date.now();
+          setTimeLeft(0);
+          setStartTime(restoredDraft.startTime || fallbackStartTime);
+          setSelectedAnswers(restoredDraft.selectedAnswers || {});
+          setCurrentQuestionIndex(
+            Math.min(
+              Math.max(Number(restoredDraft.currentQuestionIndex) || 0, 0),
+              Math.max((data.questions || []).length - 1, 0)
+            )
+          );
+        } else {
+          const newEndTime = Date.now() + data.duration * 60 * 1000;
+          endTimeRef.current = newEndTime;
+          setTimeLeft(data.duration * 60);
+          setStartTime(fallbackStartTime);
+        }
+        setIsDraftReady(true);
       } catch (error) {
         console.error("Lỗi tải đề:", error);
         alert("Không thể tải đề thi.");
@@ -107,10 +217,10 @@ export default function Exam() {
       }
     };
     if (examId) getAllQuestionsByExamId();
-  }, [examId, navigate]);
+  }, [examId, navigate, location.state?.startTime, examDraftKey, userId]);
 
   useEffect(() => {
-    if (timeLeft === null || !endTimeRef.current) return;
+    if (timeLeft === null || !endTimeRef.current || !isDraftReady) return;
     const timerId = setInterval(() => {
       const remaining = Math.max(0, Math.floor((endTimeRef.current - Date.now()) / 1000));
       setTimeLeft(remaining);
@@ -120,22 +230,82 @@ export default function Exam() {
       }
     }, 1000);
     return () => clearInterval(timerId);
-  }, [timeLeft]);
+  }, [timeLeft, isDraftReady]);
 
   useEffect(() => {
-    if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
+    if (!isDraftReady || !examDraftKey || !endTimeRef.current || userExamId) return;
+    localStorage.setItem(
+      examDraftKey,
+      JSON.stringify({
+        examId,
+        subjectId,
+        startTime,
+        endTime: endTimeRef.current,
+        selectedAnswers,
+        currentQuestionIndex,
+      })
+    );
+  }, [isDraftReady, examDraftKey, examId, subjectId, startTime, selectedAnswers, currentQuestionIndex, userExamId]);
+
+  useEffect(() => {
+    if (!isDraftReady || !userExamId || timeLeft === null) return;
+    const progressTimer = setTimeout(() => {
+      authAxios.patch(`exam-attempts/${userExamId}/progress`, {
+        currentQuestionIndex,
+        remainingTime: timeLeft,
+      }).catch((error) => console.error("Lỗi lưu tiến độ bài thi:", error));
+    }, 500);
+    return () => clearTimeout(progressTimer);
+  }, [isDraftReady, userExamId, currentQuestionIndex, timeLeft]);
+
+  useEffect(() => {
+    typesetMath();
   }, [currentQuestionIndex, questions]);
 
-  const handleAnswerSelect = (answerIndex) => {
-    setSelectedAnswers((prev) => ({ ...prev, [currentQuestionIndex]: answerIndex }));
-  };
+  const saveAnswerToServer = useCallback(async (questionIndex, answerValue) => {
+    const attemptId = userExamIdRef.current;
+    const question = questions[questionIndex];
+    if (!attemptId || !question) return;
 
-  const toggleMarkQuestion = () => {
-    setMarkedQuestions((prev) => {
-      const next = new Set(prev);
-      next.has(currentQuestionIndex) ? next.delete(currentQuestionIndex) : next.add(currentQuestionIndex);
-      return next;
-    });
+    const answerIds = normalizeSelectedIndexes(answerValue)
+      .map((answerIndex) => question.answers?.[answerIndex])
+      .filter(Boolean)
+      .map((answer) => answer.answerId || answer.optionId);
+
+    try {
+      await authAxios.put(`exam-attempts/${attemptId}/answers`, {
+        questionId: question.questionId,
+        answerId: answerIds[0],
+        answerIds,
+        currentQuestionIndex: questionIndex,
+        remainingTime: timeLeft ?? 0,
+      });
+    } catch (error) {
+      console.error("Lỗi lưu đáp án:", error);
+    }
+  }, [questions, timeLeft]);
+
+  const handleAnswerSelect = (answerIndex) => {
+    const question = questions[currentQuestionIndex];
+    if (!question) return;
+
+    if (isMultipleChoice(question)) {
+      setSelectedAnswers((prev) => {
+        const currentSelection = normalizeSelectedIndexes(prev[currentQuestionIndex]);
+        const nextSelection = currentSelection.includes(answerIndex)
+          ? currentSelection.filter((idx) => idx !== answerIndex)
+          : [...currentSelection, answerIndex];
+        const nextAnswers = { ...prev };
+        if (nextSelection.length) nextAnswers[currentQuestionIndex] = nextSelection;
+        else delete nextAnswers[currentQuestionIndex];
+        saveAnswerToServer(currentQuestionIndex, nextSelection);
+        return nextAnswers;
+      });
+      return;
+    }
+
+    setSelectedAnswers((prev) => ({ ...prev, [currentQuestionIndex]: answerIndex }));
+    saveAnswerToServer(currentQuestionIndex, answerIndex);
   };
 
   const safeTimeLeft = timeLeft ?? 0;
@@ -144,15 +314,15 @@ export default function Exam() {
   const seconds = safeTimeLeft % 60;
 
   if (isLoading) {
-    return <div className="flex h-screen items-center justify-center">Đang tải đề thi...</div>;
+    return <div className="flex min-h-[60vh] items-center justify-center">Đang tải đề thi...</div>;
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  const answeredCount = Object.keys(selectedAnswers).length;
+  const answeredCount = questions.reduce((count, question, index) => isQuestionAnswered(question, selectedAnswers[index]) ? count + 1 : count, 0);
   const progressPercent = questions.length ? (answeredCount / questions.length) * 100 : 0;
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-background-light text-gray-900 transition-colors duration-300 dark:bg-background-dark dark:text-gray-100">
+    <div className="relative flex w-full flex-col bg-background-light text-gray-900 transition-colors duration-300 dark:bg-background-dark dark:text-gray-100">
       <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">
           <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -201,7 +371,7 @@ export default function Exam() {
               </div>
 
               <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <h4 className="mb-4 text-center text-base font-semibold">{texts.conutDown || "Thời gian còn lại"}</h4>
+                <h4 className="mb-4 text-center text-base font-semibold">{texts.countDown || texts.conutDown || "Thời gian còn lại"}</h4>
                 <div className="flex gap-3">
                   {[hours, minutes, seconds].map((val, idx) => (
                     <div key={idx} className="flex grow basis-0 flex-col items-stretch gap-2">
@@ -212,14 +382,6 @@ export default function Exam() {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <p className="text-base font-medium">Tiến độ</p>
-                <div className="mt-3 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                  <div className="h-2 rounded-full bg-primary transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-                </div>
-                <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">Đã trả lời: {answeredCount}/{questions.length} câu</p>
               </div>
             </aside>
 
@@ -234,10 +396,12 @@ export default function Exam() {
                 )}
                 <div className="space-y-4">
                   {currentQuestion?.answers?.map((answer, index) => {
-                    const isSelected = selectedAnswers[currentQuestionIndex] === index;
+                    const isMultiple = isMultipleChoice(currentQuestion);
+                    const selectedValue = selectedAnswers[currentQuestionIndex];
+                    const isSelected = isMultiple ? normalizeSelectedIndexes(selectedValue).includes(index) : selectedValue === index;
                     return (
                       <label key={answer.optionId || index} className={`flex cursor-pointer items-start rounded-xl border p-4 transition-all duration-200 hover:shadow-md ${isSelected ? "border-primary bg-primary/10 dark:bg-primary/20" : "border-gray-200 hover:border-primary/50 dark:border-gray-600"}`}>
-                        <input type="radio" name={`question-${currentQuestionIndex}`} className="mt-0.5 h-5 w-5 flex-shrink-0 border-gray-300 text-primary focus:ring-primary" checked={isSelected} onChange={() => handleAnswerSelect(index)} />
+                        <input type={isMultiple ? "checkbox" : "radio"} name={`question-${currentQuestionIndex}`} className="mt-0.5 h-5 w-5 flex-shrink-0 border-gray-300 text-primary focus:ring-primary" checked={isSelected} onChange={() => handleAnswerSelect(index)} />
                         <span className={`ml-4 text-base font-medium ${isSelected ? "text-primary dark:text-white" : ""}`} dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }} />
                       </label>
                     );
@@ -247,9 +411,6 @@ export default function Exam() {
               <div className="flex items-center justify-between border-t border-gray-200 p-4 dark:border-gray-700">
                 <button onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))} disabled={currentQuestionIndex === 0} className="flex h-11 items-center justify-center gap-2 rounded-xl bg-gray-100 px-5 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
                   <span className="material-symbols-outlined text-base">arrow_back</span><span className="hidden sm:inline">Câu trước</span>
-                </button>
-                <button onClick={toggleMarkQuestion} className="hidden h-11 items-center justify-center gap-2 rounded-xl bg-yellow-500/10 px-4 text-sm font-bold text-yellow-600 transition-colors hover:bg-yellow-500/20 sm:flex">
-                  <span className="material-symbols-outlined text-base">bookmark</span>Đánh dấu
                 </button>
                 <button onClick={() => setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))} disabled={currentQuestionIndex === questions.length - 1} className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
                   <span className="hidden sm:inline">Câu tiếp theo</span><span className="material-symbols-outlined text-base">arrow_forward</span>
@@ -261,14 +422,13 @@ export default function Exam() {
               <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <h4 className="mb-4 flex items-center gap-2 text-lg font-black text-gray-950 dark:text-white"><span className="material-symbols-outlined">grid_view</span>{texts.table || "Danh sách câu hỏi"}</h4>
                 <div className="mb-6 grid max-h-[300px] grid-cols-5 gap-2 overflow-y-auto p-2 pr-1">
-                  {questions.map((_, idx) => {
+                  {questions.map((question, idx) => {
                     const isCurrent = currentQuestionIndex === idx;
-                    const isAnswered = selectedAnswers[idx] !== undefined;
-                    const isMarked = markedQuestions.has(idx);
+                    const isAnswered = isQuestionAnswered(question, selectedAnswers[idx]);
                     let bgClass = "border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400";
                     if (isCurrent) bgClass = "border-primary bg-primary text-white ring-2 ring-primary/20";
                     else if (isAnswered) bgClass = "border-green-600 bg-green-500 text-white";
-                    return <button key={idx} onClick={() => setCurrentQuestionIndex(idx)} className={`relative flex size-9 items-center justify-center rounded-lg text-sm font-bold transition-all ${bgClass}`}>{idx + 1}{isMarked && <span className="material-symbols-outlined absolute -right-1 -top-1 rounded-full bg-white text-[14px] text-yellow-500 dark:bg-gray-800" style={{ fontVariationSettings: "'FILL' 1" }}>bookmark</span>}</button>;
+                    return <button key={idx} onClick={() => setCurrentQuestionIndex(idx)} className={`relative flex size-9 items-center justify-center rounded-lg text-sm font-bold transition-all ${bgClass}`}>{idx + 1}</button>;
                   })}
                 </div>
                 <div className="mb-6 space-y-3 border-t border-gray-100 pt-4 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-400">

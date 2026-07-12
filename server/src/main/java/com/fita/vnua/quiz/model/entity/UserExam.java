@@ -29,4 +29,16 @@ public class UserExam {
 
     @Column
     private Float score;
+
+    @Column(nullable = false)
+    private String status = "SUBMITTED";
+
+    @Column
+    private Integer remainingTime;
+
+    @Column
+    private Integer currentQuestionIndex = 0;
+
+    @Column
+    private LocalDateTime updatedAt;
 }

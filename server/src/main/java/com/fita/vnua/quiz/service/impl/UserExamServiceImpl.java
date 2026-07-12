@@ -4,7 +4,11 @@ import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.UserAnswerDto;
 import com.fita.vnua.quiz.model.dto.UserExamDto;
 import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
+import com.fita.vnua.quiz.model.dto.request.SaveExamAttemptAnswerRequest;
+import com.fita.vnua.quiz.model.dto.request.StartExamAttemptRequest;
+import com.fita.vnua.quiz.model.dto.request.UpdateExamAttemptProgressRequest;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
+import com.fita.vnua.quiz.model.dto.response.ExamAttemptResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;
@@ -18,9 +22,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,8 +45,8 @@ public class UserExamServiceImpl implements UserExamService {
     private final SubjectService subjectService;
 
     @Override
-    public List<UserExamSummaryDto> getUserExamSummaries() {
-        List<UserExamRepository.UserExamSummaryProjection> projections = userExamRepository.getUserExamSummaries();
+    public List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate) {
+        List<UserExamRepository.UserExamSummaryProjection> projections = userExamRepository.getUserExamSummaries(fromDate, toDate);
 
         // Chuyển projection sang DTO
         return projections.stream().map(proj -> {
@@ -104,19 +111,17 @@ public class UserExamServiceImpl implements UserExamService {
         int totalExamQuestions = questions.size();
 
         if (totalExamQuestions > 0) {
-            Map<Long, Long> userAnswersMap = userAnswerDtos.stream()
+            Map<Long, Set<Long>> userAnswersMap = userAnswerDtos.stream()
                     .filter(ua -> ua.getQuestionId() != null && ua.getAnswerId() != null)
-                    .collect(Collectors.toMap(UserAnswerDto::getQuestionId, UserAnswerDto::getAnswerId, (a, b) -> a));
+                    .collect(Collectors.groupingBy(
+                            UserAnswerDto::getQuestionId,
+                            Collectors.mapping(UserAnswerDto::getAnswerId, Collectors.toSet())
+                    ));
 
             for (Question q : questions) {
-                Long chosenAnswerId = userAnswersMap.get(q.getQuestionId());
-                if (chosenAnswerId != null) {
-                    boolean isCorrect = q.getAnswers().stream()
-                            .filter(Answer::getIsCorrect)
-                            .anyMatch(ans -> ans.getOptionId().equals(chosenAnswerId));
-                    if (isCorrect) {
-                        correctAnswersCount++;
-                    }
+                Set<Long> chosenAnswerIds = userAnswersMap.get(q.getQuestionId());
+                if (isQuestionCorrect(q, chosenAnswerIds)) {
+                    correctAnswersCount++;
                 }
             }
             score = ((float) correctAnswersCount / totalExamQuestions) * 100;
@@ -125,9 +130,11 @@ public class UserExamServiceImpl implements UserExamService {
         UserExam userExam = new UserExam();
         userExam.setStartTime(userExamDto.getStartTime());
         userExam.setEndTime(userExamDto.getEndTime());
-        userExam.setScore(score);
-        userExam.setUser(user);
-        userExam.setExam(exam);
+            userExam.setScore(score);
+            userExam.setStatus("SUBMITTED");
+            userExam.setUpdatedAt(LocalDateTime.now());
+            userExam.setUser(user);
+            userExam.setExam(exam);
 
         UserExam savedUserExam = userExamRepository.save(userExam);
 
@@ -201,12 +208,165 @@ public class UserExamServiceImpl implements UserExamService {
         return userExamResponses;
     }
 
+    @Override
+    @Transactional
+    public ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request) {
+        List<UserExam> existingAttempts = userExamRepository.findInProgressByUserIdAndExamId(request.getUserId(), request.getExamId());
+        if (!existingAttempts.isEmpty()) {
+            return buildAttemptResponse(existingAttempts.get(0));
+        }
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
+        Exam exam = examRepository.findById(request.getExamId())
+                .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + request.getExamId()));
+
+        UserExam userExam = new UserExam();
+        userExam.setUser(user);
+        userExam.setExam(exam);
+        userExam.setStartTime(LocalDateTime.now());
+        userExam.setStatus("IN_PROGRESS");
+        userExam.setRemainingTime(exam.getDuration() == null ? null : exam.getDuration() * 60);
+        userExam.setCurrentQuestionIndex(0);
+        userExam.setUpdatedAt(LocalDateTime.now());
+
+        return buildAttemptResponse(userExamRepository.save(userExam));
+    }
+
+    @Override
+    public List<ExamAttemptResponse> getInProgressAttempts(UUID userId) {
+        return userExamRepository.findInProgressByUserId(userId).stream()
+                .map(this::buildAttemptResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public ExamAttemptResponse saveAttemptAnswer(Long userExamId, SaveExamAttemptAnswerRequest request) {
+        UserExam userExam = getInProgressUserExam(userExamId);
+        Question question = questionRepository.findById(request.getQuestionId())
+                .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + request.getQuestionId()));
+
+        List<Long> answerIds = request.getAnswerIds() != null ? request.getAnswerIds() : new ArrayList<>();
+        if (answerIds.isEmpty() && request.getAnswerId() != null) {
+            answerIds.add(request.getAnswerId());
+        }
+
+        userAnswerRepository.deleteByUserExamIdAndQuestionId(userExamId, request.getQuestionId());
+        for (Long answerId : new HashSet<>(answerIds)) {
+            Answer answer = answerRepository.findById(answerId)
+                    .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + answerId));
+            UserAnswer userAnswer = new UserAnswer();
+            userAnswer.setUserExam(userExam);
+            userAnswer.setQuestion(question);
+            userAnswer.setAnswer(answer);
+            userAnswerRepository.save(userAnswer);
+        }
+
+        updateAttemptProgressFields(userExam, request.getCurrentQuestionIndex(), request.getRemainingTime());
+        return buildAttemptResponse(userExamRepository.save(userExam));
+    }
+
+    @Override
+    @Transactional
+    public ExamAttemptResponse updateAttemptProgress(Long userExamId, UpdateExamAttemptProgressRequest request) {
+        UserExam userExam = getInProgressUserExam(userExamId);
+        updateAttemptProgressFields(userExam, request.getCurrentQuestionIndex(), request.getRemainingTime());
+        return buildAttemptResponse(userExamRepository.save(userExam));
+    }
+
+    @Override
+    @Transactional
+    public UserExamDto submitAttempt(Long userExamId) {
+        UserExam userExam = getInProgressUserExam(userExamId);
+        List<Question> questions = questionRepository.findQuestionsByExamId(userExam.getExam().getExamId());
+        List<UserAnswer> userAnswers = userAnswerRepository.findUserAnswersByUserExamId(userExamId);
+        Map<Long, Set<Long>> userAnswersMap = userAnswers.stream()
+                .collect(Collectors.groupingBy(
+                        ua -> ua.getQuestion().getQuestionId(),
+                        Collectors.mapping(ua -> ua.getAnswer().getOptionId(), Collectors.toSet())
+                ));
+
+        int correctAnswersCount = 0;
+        for (Question q : questions) {
+            if (isQuestionCorrect(q, userAnswersMap.get(q.getQuestionId()))) {
+                correctAnswersCount++;
+            }
+        }
+        float score = questions.isEmpty() ? 0 : ((float) correctAnswersCount / questions.size()) * 100;
+        userExam.setScore(score);
+        userExam.setEndTime(LocalDateTime.now());
+        userExam.setStatus("SUBMITTED");
+        userExam.setRemainingTime(0);
+        userExam.setUpdatedAt(LocalDateTime.now());
+        return convertUserExamsToUserExamDto(userExamRepository.save(userExam));
+    }
+
+    private boolean isQuestionCorrect(Question question, Set<Long> chosenAnswerIds) {
+        if (chosenAnswerIds == null || chosenAnswerIds.isEmpty()) return false;
+        Set<Long> correctAnswerIds = question.getAnswers().stream()
+                .filter(Answer::getIsCorrect)
+                .map(Answer::getOptionId)
+                .collect(Collectors.toSet());
+        return !correctAnswerIds.isEmpty() && correctAnswerIds.equals(chosenAnswerIds);
+    }
+
+    private UserExam getInProgressUserExam(Long userExamId) {
+        UserExam userExam = userExamRepository.findById(userExamId)
+                .orElseThrow(() -> new EntityNotFoundException("User exam not found with id: " + userExamId));
+        if (!"IN_PROGRESS".equals(userExam.getStatus())) {
+            throw new IllegalStateException("Attempt is not in progress");
+        }
+        return userExam;
+    }
+
+    private void updateAttemptProgressFields(UserExam userExam, Integer currentQuestionIndex, Integer remainingTime) {
+        if (currentQuestionIndex != null) userExam.setCurrentQuestionIndex(currentQuestionIndex);
+        if (remainingTime != null) userExam.setRemainingTime(Math.max(remainingTime, 0));
+        userExam.setUpdatedAt(LocalDateTime.now());
+    }
+
+    private ExamAttemptResponse buildAttemptResponse(UserExam userExam) {
+        List<UserAnswerDto> answers = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId()).stream()
+                .map(userAnswer -> {
+                    UserAnswerDto dto = new UserAnswerDto();
+                    dto.setUserAnswerId(userAnswer.getUserAnswerId());
+                    dto.setUserExamId(userExam.getUserExamId());
+                    dto.setQuestionId(userAnswer.getQuestion().getQuestionId());
+                    dto.setAnswerId(userAnswer.getAnswer().getOptionId());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        int totalQuestions = questionRepository.findQuestionsByExamId(userExam.getExam().getExamId()).size();
+
+        return ExamAttemptResponse.builder()
+                .userExamId(userExam.getUserExamId())
+                .examId(userExam.getExam().getExamId())
+                .subjectId(userExam.getExam().getSubject().getSubjectId())
+                .title(userExam.getExam().getTitle())
+                .subjectName(userExam.getExam().getSubject().getName())
+                .status(userExam.getStatus())
+                .startTime(userExam.getStartTime())
+                .endTime(userExam.getEndTime())
+                .updatedAt(userExam.getUpdatedAt())
+                .remainingTime(userExam.getRemainingTime())
+                .currentQuestionIndex(userExam.getCurrentQuestionIndex())
+                .answeredCount(answers.size())
+                .totalQuestions(totalQuestions)
+                .score(userExam.getScore())
+                .userAnswerDtos(answers)
+                .build();
+    }
+
     protected UserExamDto convertUserExamsToUserExamDto(UserExam userExam) {
         UserExamDto userExamDto = new UserExamDto();
             userExamDto.setUserExamId(userExam.getUserExamId());
             userExamDto.setStartTime(userExam.getStartTime());
             userExamDto.setEndTime(userExam.getEndTime());
             userExamDto.setScore(userExam.getScore());
+            userExamDto.setStatus(userExam.getStatus());
+            userExamDto.setRemainingTime(userExam.getRemainingTime());
+            userExamDto.setCurrentQuestionIndex(userExam.getCurrentQuestionIndex());
             userExamDto.setUserId(userExam.getUser().getUserId());
             userExamDto.setExamId(userExam.getExam().getExamId());
         return userExamDto;

@@ -13,6 +13,14 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
     @Query("SELECT ua FROM UserAnswer ua WHERE ua.userExam.userExamId = :userExamId")
     List<UserAnswer> findUserAnswersByUserExamId(Long userExamId);
 
+    @Query("SELECT ua FROM UserAnswer ua WHERE ua.userExam.userExamId = :userExamId AND ua.question.questionId = :questionId")
+    java.util.Optional<UserAnswer> findByUserExamIdAndQuestionId(@Param("userExamId") Long userExamId, @Param("questionId") Long questionId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM UserAnswer ua WHERE ua.userExam.userExamId = :userExamId AND ua.question.questionId = :questionId")
+    void deleteByUserExamIdAndQuestionId(@Param("userExamId") Long userExamId, @Param("questionId") Long questionId);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM UserAnswer ua WHERE ua.userExam.exam.examId = :examId")

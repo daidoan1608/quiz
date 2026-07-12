@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Optional<QuestionDto> getQuestionById(Long questionId) {
-        return questionRepository.findById(questionId).map(question -> modelMapper.map(question, QuestionDto.class));
+        return questionRepository.findByQuestionIdAndDeletedFalse(questionId)
+                .map(question -> modelMapper.map(question, QuestionDto.class));
     }
 
     @Override
@@ -46,7 +48,12 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionDto> getAllQuestion() {
-        return questionRepository.findAll().stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+        return questionRepository.findByDeletedFalse().stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+    }
+
+    @Override
+    public List<QuestionDto> getDeletedQuestions() {
+        return questionRepository.findByDeletedTrue().stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
     }
 
     @Override
@@ -149,17 +156,36 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Response delete(Long questionId) {
-        // Tìm kiếm câu hỏi theo ID
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
 
-        // Xóa câu hỏi (cùng với tất cả câu trả lời nhờ cascade)
-        questionRepository.delete(question);
+        if (Boolean.TRUE.equals(question.getDeleted())) {
+            return Response.builder()
+                    .responseMessage("Question already deleted")
+                    .responseCode("200 OK").build();
+        }
 
-        // Trả về phản hồi
+        question.setDeleted(true);
+        question.setDeletedAt(LocalDateTime.now());
+        question.setDeletedBy(null);
+        questionRepository.save(question);
+
         return Response.builder()
-                .responseMessage("Question deleted successfully")
+                .responseMessage("Question soft deleted successfully")
                 .responseCode("200 OK").build();
+    }
+
+    @Override
+    public QuestionDto restore(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
+
+        question.setDeleted(false);
+        question.setDeletedAt(null);
+        question.setDeletedBy(null);
+
+        Question restoredQuestion = questionRepository.save(question);
+        return modelMapper.map(restoredQuestion, QuestionDto.class);
     }
 
     @Override

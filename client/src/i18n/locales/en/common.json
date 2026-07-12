@@ -1,0 +1,97 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "noData": "No data",
+    "loading": "Loading...",
+    "showDetail": "View details",
+    "minutes": "minutes",
+    "seconds": "seconds"
+  },
+  "nav": {
+    "home": "Home",
+    "subjects": "Subjects",
+    "rank": "Ranking",
+    "account": "Account information",
+    "favorites": "Favorites"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "theme": {
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "colorTone": "Color tone",
+    "primaryColor": "Primary color",
+    "colorLabel": {
+      "blue": "Blue",
+      "emerald": "Emerald",
+      "cyberpunk": "Cyberpunk",
+      "sunset": "Sunset",
+      "slate": "Slate"
+    }
+  },
+  "language": {
+    "change": "Change language",
+    "label": "Language",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+  },
+  "home": {
+    "hero": {
+      "badge": "Smart learning with AI",
+      "title": "Conquer every exam",
+      "slogan": "A leading revision and mock test platform that helps you achieve your best scores.",
+      "start": "Start",
+      "mascotName": "AI Mascot Cat",
+      "mascotDescription": "A cute exam revision assistant"
+    },
+    "learningPath": {
+      "comingSoon": "🚀 Feature under development",
+      "title": "Personal learning path"
+    },
+    "subjectsTitle": "Subjects we support for revision",
+    "noSubjects": "No subjects available",
+    "questionCount": "{{count}} questions",
+    "examInProgressFallback": "Exam in progress",
+    "subjectFallback": "Subject",
+    "inProgress": {
+      "title": "In-progress exams",
+      "continue": "Continue exam",
+      "doing": "In progress",
+      "remainingMinutes": "{{count}} minutes left",
+      "emptyLoggedIn": "No in-progress exams",
+      "emptyGuest": "Log in to continue unfinished exams",
+      "emptyDescription": "Your unfinished exams will appear here."
+    },
+    "team": {
+      "title": "Our Team",
+      "description": "A passionate team building better learning experiences for VNUA students."
+    }
+  },
+  "footer": {
+    "description": "A high-quality online quiz revision and testing platform for VNUA students.",
+    "menu": "Menu",
+    "contact": "Contact information",
+    "address": "Address",
+    "hotline": "Hotline",
+    "copyright": "QuizVNUA. All rights reserved.",
+    "terms": "Terms",
+    "privacy": "Privacy"
+  },
+  "exam": {
+    "chooseExam": "Choose an exam",
+    "submit": "Submit",
+    "confirmSubmit": "Are you sure you want to submit?",
+    "timeRemaining": "Time remaining",
+    "answerTable": "Question list",
+    "result": "Exam result",
+    "correct": "Correct answers",
+    "score": "Score",
+    "questions": "questions"
+  }
+}

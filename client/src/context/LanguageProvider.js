@@ -1,32 +1,31 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import vi from "../languages/vi";
 import en from "../languages/en";
 
 const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
-  // Lấy ngôn ngữ đã lưu hoặc mặc định là 'vi'
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem("appLanguage") || "vi";
-  });
+  const { i18n, t: translate } = useTranslation();
+  const language = i18n.language?.startsWith("en") ? "en" : "vi";
 
   const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "vi" ? "en" : "vi"));
+    const nextLanguage = language === "vi" ? "en" : "vi";
+    localStorage.setItem("appLanguage", nextLanguage);
+    i18n.changeLanguage(nextLanguage);
   };
 
-  // Cập nhật localStorage khi language thay đổi
-  useEffect(() => {
-    localStorage.setItem("appLanguage", language);
-  }, [language]);
-
-  const texts = {
-    vi,
-    en,
+  const legacyTexts = language === "en" ? en : vi;
+  const t = (key, optionsOrFallback, maybeOptions) => {
+    if (typeof optionsOrFallback === "string") {
+      return translate(key, { defaultValue: optionsOrFallback, ...(maybeOptions || {}) });
+    }
+    return translate(key, optionsOrFallback);
   };
 
   return (
     <LanguageContext.Provider
-      value={{ language, toggleLanguage, texts: texts[language] }}
+      value={{ language, toggleLanguage, t, texts: legacyTexts }}
     >
       {children}
     </LanguageContext.Provider>

@@ -99,14 +99,31 @@ const AddExamModal = ({ isModalOpen, onCancel, onSuccess }) => {
 
   // --- HANDLERS ---
 
-  const handleCategoryChange = (val) => {
+  const handleCategoryChange = async (val) => {
     form.setFieldsValue({ subjectId: null }); // Reset môn học
     setSelectedSubject(null);
+    setSubjects([]);
     setMaxQuestions({}); // Reset limit
     setInputTotal(0); // Reset input
+    setInputDiff({ easy: 0, medium: 0, hard: 0 });
+    setInputChapters([]);
 
-    const cat = categories.find((c) => c.categoryId === val);
-    setSubjects(cat ? cat.subjects : []);
+    if (!val) return;
+
+    try {
+      // API /public/categories chỉ trả summary, không kèm subjects.
+      // Cần gọi riêng API lấy môn học theo khoa.
+      const response = await authAxios.get(`/public/subjects/category/${val}`);
+      const subjectData = Array.isArray(response.data.data) ? response.data.data : [];
+      setSubjects(subjectData);
+
+      if (subjectData.length === 0) {
+        message.warning("Khoa này chưa có môn học nào!");
+      }
+    } catch (error) {
+      console.error("Lỗi fetch môn học:", error);
+      message.error("Không thể tải danh sách môn học theo khoa.");
+    }
   };
 
   const handleSubjectChange = (val) => {
@@ -248,7 +265,7 @@ const AddExamModal = ({ isModalOpen, onCancel, onSuccess }) => {
               rules={[{ required: true, message: "Chọn môn!" }]}
             >
               <Select
-                placeholder="-- Chọn môn --"
+                placeholder={subjects.length === 0 ? "Vui lòng chọn khoa trước" : "-- Chọn môn --"}
                 onChange={handleSubjectChange}
                 disabled={subjects.length === 0}
                 showSearch

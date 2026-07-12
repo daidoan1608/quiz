@@ -41,6 +41,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findEntityById(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public User findEntityByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public User findEntityByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
+    @Override
     public List<UserDto> getUserBySearchKey(String keyword) {
         log.info("Searching for users with keyword: {}", keyword);
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -76,10 +92,27 @@ public class UserServiceImpl implements UserService {
     public UserDto update(UUID userId, UserDto userDto) {
         var existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
-        existingUser.setFullName(userDto.getFullName());
-        existingUser.setEmail(userDto.getEmail());
-        existingUser.setRole(userDto.getRole());
-        existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        if (userDto.getFullName() != null) {
+            existingUser.setFullName(userDto.getFullName());
+        }
+        if (userDto.getEmail() != null) {
+            existingUser.setEmail(userDto.getEmail());
+        }
+        if (userDto.getRole() != null) {
+            existingUser.setRole(userDto.getRole());
+        }
+        if (userDto.getAvatarUrl() != null) {
+            existingUser.setAvatarUrl(userDto.getAvatarUrl());
+        }
+        if (userDto.getPhone() != null) {
+            existingUser.setPhone(userDto.getPhone());
+        }
+        if (userDto.getAddress() != null) {
+            existingUser.setAddress(userDto.getAddress());
+        }
+        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
+            existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
         var updatedUser = userRepository.save(existingUser);
         return modelMapper.map(updatedUser, UserDto.class);
     }

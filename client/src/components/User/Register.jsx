@@ -13,20 +13,27 @@ const RegisterForm = () => {
     setLoading(true);
     try {
       // Gọi API đăng ký
-      const response = await publicAxios.post("/auth/register", {
+      await publicAxios.post("/auth/register", {
         username: values.username,
         email: values.email,
         password: values.password,
         fullName: values.fullName,
       });
 
-      // Nếu API trả về thành công (thường là status 200 hoặc 201)
-      message.success("Đăng ký thành công! Vui lòng đăng nhập.");
-      navigate("/login");
+      message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.", 6);
+      form.resetFields();
     } catch (error) {
       // Xử lý lỗi từ server trả về
+      const serverMessage = error.response?.data?.message;
+      const validationErrors = error.response?.data?.errors;
       const errorMessage =
-        error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại!";
+        Array.isArray(validationErrors) && validationErrors.length > 0
+          ? validationErrors.join(". ")
+          : serverMessage === "Username is already existed"
+            ? "Tên đăng nhập đã tồn tại!"
+            : serverMessage === "Email is already existed"
+              ? "Email đã tồn tại!"
+              : serverMessage || "Đăng ký thất bại. Vui lòng thử lại!";
       message.error(errorMessage);
     } finally {
       setLoading(false);
@@ -65,6 +72,12 @@ const RegisterForm = () => {
             name="username"
             rules={[
               { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+              { min: 3, message: "Tên đăng nhập phải có ít nhất 3 ký tự!" },
+              { max: 20, message: "Tên đăng nhập không được quá 20 ký tự!" },
+              {
+                pattern: /^[a-zA-Z0-9_]+$/,
+                message: "Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới!",
+              },
             ]}
             className="mb-4"
           >

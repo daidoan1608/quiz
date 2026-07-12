@@ -33,13 +33,19 @@ const clearAuthStorage = () => {
   localStorage.removeItem("userId");
   localStorage.removeItem("role");
   localStorage.removeItem("username");
+  localStorage.removeItem("fullName");
 };
+
+const ADMIN_BASENAME = "/admin";
+
+const getAdminLoginPath = () => `${ADMIN_BASENAME}/login`;
 
 const redirectToLoginOnce = () => {
   clearAuthStorage();
 
-  if (window.location.pathname !== "/login") {
-    window.location.replace("/login");
+  const loginPath = getAdminLoginPath();
+  if (window.location.pathname !== loginPath) {
+    window.location.replace(loginPath);
   }
 };
 

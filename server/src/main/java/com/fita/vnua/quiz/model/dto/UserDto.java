@@ -20,4 +20,6 @@ public class UserDto {
     private String email;
     private User.Role role;
     private String avatarUrl;
+    private String phone;
+    private String address;
 }

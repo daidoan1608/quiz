@@ -10,6 +10,7 @@ import {
     message,
     Input,
     Tag,
+    Modal,
 } from "antd";
 import {
     EditOutlined,
@@ -17,6 +18,7 @@ import {
     QuestionCircleOutlined,
     SearchOutlined,
     ImportOutlined,
+    UndoOutlined,
 } from "@ant-design/icons";
 
 // --- IMPORT LAYOUT CHUNG ---
@@ -27,7 +29,7 @@ import AddQuestionModal from "../../components/Modal/AddQuestionModal";
 import UpdateQuestionModal from "../../components/Modal/UpdateQuestionModal";
 import ImportModal from "../../components/Modal/ImportModal"; // Giả sử path đúng
 
-import { parseMarkdown } from "../../utils/parseMarkdown";
+import MarkdownLatex from "../../components/common/MarkdownLatex";
 
 const { Text } = Typography;
 
@@ -36,6 +38,9 @@ export default function QuestionManager() {
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState("");
+    const [deletedQuestions, setDeletedQuestions] = useState([]);
+    const [deletedLoading, setDeletedLoading] = useState(false);
+    const [isTrashModalOpen, setIsTrashModalOpen] = useState(false);
 
     // --- STATES QUẢN LÝ MODAL ---
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -50,13 +55,6 @@ export default function QuestionManager() {
 
         return () => clearTimeout(timeoutId);
     }, [searchText]);
-
-    // Kích hoạt MathJax sau khi bảng render
-    useEffect(() => {
-        if (window.MathJax && window.MathJax.typesetPromise && !loading && questions.length > 0) {
-            window.MathJax.typesetPromise();
-        }
-    }, [questions, loading, searchText]);
 
     // --- 1. LẤY DỮ LIỆU (Giữ nguyên) ---
     const getAllQuestions = async (keyword = "") => {
@@ -76,14 +74,45 @@ export default function QuestionManager() {
         }
     };
 
+    const getDeletedQuestions = async () => {
+        setDeletedLoading(true);
+        try {
+            const response = await authAxios.get("/admin/questions/deleted");
+            const data = Array.isArray(response.data.data) ? response.data.data : [];
+            setDeletedQuestions(data);
+        } catch (error) {
+            console.error("Error fetching deleted questions:", error);
+            message.error("Không thể tải thùng rác câu hỏi!");
+        } finally {
+            setDeletedLoading(false);
+        }
+    };
+
+    const handleOpenTrashModal = () => {
+        setIsTrashModalOpen(true);
+        getDeletedQuestions();
+    };
+
     // --- 2. HÀNH ĐỘNG (Giữ nguyên) ---
     const handleDelete = async (questionId) => {
         try {
             await authAxios.delete(`/admin/questions/${questionId}`);
             message.success("Xóa câu hỏi thành công!");
-            setQuestions((prev) => prev.filter((q) => q.questionId !== questionId));
+            setDeletedQuestions((prev) => prev.filter((q) => q.questionId !== questionId));
+            getAllQuestions(searchText);
         } catch (error) {
             message.error("Không thể xóa câu hỏi!");
+        }
+    };
+
+    const handleRestore = async (questionId) => {
+        try {
+            await authAxios.patch(`/admin/questions/${questionId}/restore`);
+            message.success("Khôi phục câu hỏi thành công!");
+            setDeletedQuestions((prev) => prev.filter((q) => q.questionId !== questionId));
+            getAllQuestions(searchText);
+        } catch (error) {
+            message.error("Không thể khôi phục câu hỏi!");
         }
     };
 
@@ -116,14 +145,15 @@ export default function QuestionManager() {
         return (
             <Tooltip
                 title={
-                    <div
+                    <MarkdownLatex
+                        content={answer.content}
                         style={{ maxWidth: 300 }}
-                        dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
                     />
                 }
                 overlayStyle={{ maxWidth: 320 }}
             >
-                <div
+                <MarkdownLatex
+                    content={answer.content}
                     style={{
                         maxWidth: 150,
                         overflow: 'hidden',
@@ -131,7 +161,6 @@ export default function QuestionManager() {
                         color: isCorrect ? '#52c41a' : undefined,
                         fontWeight: isCorrect ? 'bold' : undefined,
                     }}
-                    dangerouslySetInnerHTML={{ __html: parseMarkdown(answer.content) }}
                 />
             </Tooltip>
         );
@@ -147,14 +176,15 @@ export default function QuestionManager() {
             render: (text) => (
                 <Tooltip
                     title={
-                        <div
+                        <MarkdownLatex
+                            content={text}
                             style={{ maxWidth: 450, maxHeight: 300, overflowY: 'auto' }}
-                            dangerouslySetInnerHTML={{ __html: parseMarkdown(text) }}
                         />
                     }
                     overlayStyle={{ maxWidth: 480 }}
                 >
-                    <div
+                    <MarkdownLatex
+                        content={text}
                         style={{
                             maxWidth: 240,
                             maxHeight: 80,
@@ -162,7 +192,6 @@ export default function QuestionManager() {
                             fontWeight: 'bold',
                             cursor: 'help',
                         }}
-                        dangerouslySetInnerHTML={{ __html: parseMarkdown(text) }}
                     />
                 </Tooltip>
             ),
@@ -212,7 +241,7 @@ export default function QuestionManager() {
                     <Tooltip title="Xóa câu hỏi">
                         <Popconfirm
                             title="Xóa câu hỏi này?"
-                            description="Hành động này không thể hoàn tác!"
+                            description="Câu hỏi sẽ được chuyển vào danh sách đã xóa và có thể khôi phục."
                             onConfirm={() => handleDelete(record.questionId)}
                             okText="Xóa" cancelText="Hủy" okButtonProps={{ danger: true }}
                         >
@@ -235,13 +264,20 @@ export default function QuestionManager() {
 
     // 2. Bộ lọc/Tìm kiếm (Filters) - Chỉ gồm Input Search
     const questionFilters = (
-        <Input
-            placeholder="Tìm nội dung, chương..."
-            prefix={<SearchOutlined />}
-            onChange={(e) => setSearchText(e.target.value)}
-            allowClear
-            style={{ maxWidth: 300 }}
-        />
+        <Space wrap>
+            <Input
+                placeholder="Tìm nội dung, chương..."
+                prefix={<SearchOutlined />}
+                onChange={(e) => setSearchText(e.target.value)}
+                allowClear
+                style={{ maxWidth: 300 }}
+            />
+            <Tooltip title="Xem thùng rác câu hỏi">
+                <Button danger icon={<DeleteOutlined />} onClick={handleOpenTrashModal}>
+                    Thùng rác
+                </Button>
+            </Tooltip>
+        </Space>
     );
 
     // 3. Nút chức năng phụ (Import)
@@ -275,10 +311,45 @@ export default function QuestionManager() {
                 extra={extraActions} // Truyền nút Import vào phần extra
                 table={questionTable}
                 // Nút tải lại
-                onReload={getAllQuestions}
+                onReload={() => getAllQuestions(searchText)}
                 // Nút thêm mới
                 onAdd={() => setIsAddModalOpen(true)}
             />
+
+            <Modal
+                title={<Space><DeleteOutlined /> Thùng rác câu hỏi</Space>}
+                open={isTrashModalOpen}
+                onCancel={() => setIsTrashModalOpen(false)}
+                footer={null}
+                width={1200}
+            >
+                <Table
+                    columns={columns.map((column) =>
+                        column.key === "action"
+                            ? {
+                                ...column,
+                                render: (_, record) => (
+                                    <Tooltip title="Khôi phục câu hỏi">
+                                        <Popconfirm
+                                            title="Khôi phục câu hỏi này?"
+                                            onConfirm={() => handleRestore(record.questionId)}
+                                            okText="Khôi phục"
+                                            cancelText="Hủy"
+                                        >
+                                            <Button type="primary" ghost icon={<UndoOutlined />} />
+                                        </Popconfirm>
+                                    </Tooltip>
+                                ),
+                            }
+                            : column
+                    )}
+                    dataSource={deletedQuestions}
+                    rowKey="questionId"
+                    loading={deletedLoading}
+                    pagination={{ pageSize: 5, showSizeChanger: false }}
+                    scroll={{ x: 1500 }}
+                />
+            </Modal>
 
             {/* --- MODAL THÊM CÂU HỎI --- */}
             <AddQuestionModal

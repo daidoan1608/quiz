@@ -8,7 +8,7 @@ import { useTheme } from "../../context/ThemeProvider";
 const BASE_URL_AVATAR = process.env.REACT_APP_AVATAR_URL;
 export default function Headers() {
   const { isLoggedIn, logout, fullName, avatarUrl } = useAuth();
-  const { language, toggleLanguage, texts } = useLanguage();
+  const { language, toggleLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const currentAvatarUrl = avatarUrl || localStorage.getItem("avatarUrl");
@@ -33,9 +33,9 @@ export default function Headers() {
   };
 
   const navItems = [
-    { name: texts.home || "Trang chủ", link: "/" },
-    { name: (texts.subjects || "Môn học").toUpperCase(), link: "/subjects" },
-    { name: texts.rank || "Xếp hạng", link: "/rank" },
+    { name: t("nav.home"), link: "/" },
+    { name: t("nav.subjects"), link: "/subjects" },
+    { name: t("nav.rank"), link: "/rank" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -121,7 +121,7 @@ export default function Headers() {
                 <button
                   onClick={toggleLanguage}
                   className="hidden md:flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg size-10 bg-gray-100 dark:bg-gray-700/50 text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  title="Đổi ngôn ngữ"
+                   title={t("language.change")}
                 >
                   <span className="font-bold text-xs">
                     {language === "vi" ? "VN" : "EN"}
@@ -134,7 +134,7 @@ export default function Headers() {
                 <button
                   onClick={toggleTheme}
                   className="hidden md:flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg size-10 bg-gray-100 dark:bg-gray-700/50 text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  title="Chế độ tối"
+                  title={t("theme.dark")}
                 >
                   <span className="material-symbols-outlined text-xl">
                     {isDarkMode ? "light_mode" : "dark_mode"}
@@ -160,13 +160,13 @@ export default function Headers() {
                     href="/login"
                     className="!no-underline px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition"
                   >
-                    {texts.login}
+                    {t("auth.login")}
                   </a>
                   <a
                     href="/register"
                     className="!no-underline px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition"
                   >
-                    {texts.register}
+                    {t("auth.register")}
                   </a>
                 </div>
               ) : (
@@ -207,7 +207,7 @@ export default function Headers() {
                         >
                           <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">account_circle</span>
                           <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">
-                            {texts.account || "Thông tin tài khoản"}
+                            {t("nav.account")}
                           </p>
                         </div>
                         {/* 2. Yêu thích (Mở Modal) */}
@@ -220,7 +220,7 @@ export default function Headers() {
                         >
                           <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">star</span>
                           <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">
-                            {texts.favorites || "Yêu thích"}
+                            {t("nav.favorites")}
                           </p>
                         </div>
 
@@ -232,9 +232,9 @@ export default function Headers() {
                           <div className="flex items-center gap-4">
                             <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">language</span>
                             <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">
-                              Ngôn ngữ:{" "}
+                              {t("language.label")}: {" "}
                               <span className=" text-blue-600">
-                                {language === "vi" ? "Tiếng Việt" : "English"}
+                                {language === "vi" ? t("language.vietnamese") : t("language.english")}
                               </span>
                             </p>
                           </div>
@@ -248,7 +248,7 @@ export default function Headers() {
                                 {isDarkMode ? "dark_mode" : "light_mode"}
                               </span>
                               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                Giao diện
+                                {t("theme.appearance")}
                               </p>
                             </div>
                             <div className="flex gap-1 bg-gray-200 dark:bg-gray-700 p-0.5 rounded-lg">
@@ -260,7 +260,7 @@ export default function Headers() {
                                     : "text-gray-500 hover:text-gray-300"
                                 }`}
                               >
-                                Sáng
+                                {t("theme.light")}
                               </button>
                               <button
                                 onClick={() => setMode("dark")}
@@ -270,7 +270,7 @@ export default function Headers() {
                                     : "text-gray-500 hover:text-gray-900"
                                 }`}
                               >
-                                Tối
+                                {t("theme.dark")}
                               </button>
                             </div>
                           </div>
@@ -279,15 +279,15 @@ export default function Headers() {
 
                           <div className="flex flex-col gap-2">
                             <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                              Tông màu chủ đạo
+                              {t("theme.primaryColor")}
                             </p>
                             <div className="flex items-center justify-between gap-1 mt-1">
                               {[
-                                { name: "blue", color: "bg-blue-500", label: "Cơ bản" },
-                                { name: "emerald", color: "bg-emerald-500", label: "Lá" },
-                                { name: "cyberpunk", color: "bg-pink-500", label: "Neon" },
-                                { name: "sunset", color: "bg-orange-500", label: "Nắng" },
-                                { name: "slate", color: "bg-indigo-500", label: "Đá" },
+                                { name: "blue", color: "#0058be", label: t("theme.colorLabel.blue") },
+                                { name: "emerald", color: "#059669", label: t("theme.colorLabel.emerald") },
+                                { name: "cyberpunk", color: "#be185d", label: t("theme.colorLabel.cyberpunk") },
+                                { name: "sunset", color: "#ea580c", label: t("theme.colorLabel.sunset") },
+                                { name: "slate", color: "#4f46e5", label: t("theme.colorLabel.slate") },
                               ].map((themeOpt) => (
                                 <button
                                   key={themeOpt.name}
@@ -299,7 +299,7 @@ export default function Headers() {
                                       : "border-transparent"
                                   }`}
                                 >
-                                  <span className={`size-5 rounded-full ${themeOpt.color} shadow-inner`}></span>
+                                  <span className="size-5 rounded-full shadow-inner" style={{ backgroundColor: themeOpt.color }}></span>
                                   {colorTheme === themeOpt.name && (
                                     <span className="absolute text-white text-[10px] font-black leading-none">✓</span>
                                   )}
@@ -318,7 +318,7 @@ export default function Headers() {
                         >
                           <span className="material-symbols-outlined text-red-500 group-hover:scale-110 transition-transform">logout</span>
                           <p className="flex-1 truncate text-base font-normal leading-normal text-red-500">
-                            {texts.logout || "Đăng xuất"}
+                            {t("auth.logout")}
                           </p>
                         </div>
                       </div>
@@ -368,14 +368,14 @@ export default function Headers() {
                     className="flex items-center gap-4 rounded-lg px-4 py-3 text-sm font-medium transition-colors text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 cursor-pointer"
                   >
                       <span className="material-symbols-outlined">login</span>
-                      {texts.login}
+                      {t("auth.login")}
                   </div>
                   <div
                     onClick={() => handleMobileNavClick("/register")}
                     className="flex items-center gap-4 rounded-lg px-4 py-3 text-sm font-medium transition-colors text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 cursor-pointer"
                   >
                       <span className="material-symbols-outlined">person_add</span>
-                      {texts.register}
+                      {t("auth.register")}
                   </div>
 
                   <div className="my-2 h-px bg-gray-100 dark:bg-gray-700"></div>
@@ -390,9 +390,9 @@ export default function Headers() {
                 <div className="flex items-center gap-4">
                   <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">language</span>
                   <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">
-                    Ngôn ngữ:{" "}
+                    {t("language.label")}: {" "}
                     <span className=" text-blue-600">
-                      {language === "vi" ? "Tiếng Việt" : "English"}
+                      {language === "vi" ? t("language.vietnamese") : t("language.english")}
                     </span>
                   </p>
                 </div>
@@ -405,7 +405,7 @@ export default function Headers() {
                     <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
                       {isDarkMode ? "dark_mode" : "light_mode"}
                     </span>
-                    <p className="text-base font-medium text-gray-800 dark:text-gray-200">Giao diện</p>
+                    <p className="text-base font-medium text-gray-800 dark:text-gray-200">{t("theme.appearance")}</p>
                   </div>
                   <div className="flex gap-1 bg-gray-200 dark:bg-gray-700 p-0.5 rounded-lg">
                     <button
@@ -414,7 +414,7 @@ export default function Headers() {
                         !isDarkMode ? "bg-white text-gray-900 shadow-sm" : "text-gray-400"
                       }`}
                     >
-                      Sáng
+                      {t("theme.light")}
                     </button>
                     <button
                       onClick={() => setMode("dark")}
@@ -422,7 +422,7 @@ export default function Headers() {
                         isDarkMode ? "bg-gray-800 text-white shadow-sm" : "text-gray-500"
                       }`}
                     >
-                      Tối
+                      {t("theme.dark")}
                     </button>
                   </div>
                 </div>
@@ -430,14 +430,14 @@ export default function Headers() {
                 <div className="h-px bg-gray-200 dark:bg-gray-700/50 my-1"></div>
 
                 <div className="flex flex-col gap-2">
-                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Màu sắc chủ đạo</p>
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("theme.primaryColor")}</p>
                   <div className="flex items-center justify-between gap-1 mt-1">
                     {[
-                      { name: "blue", color: "bg-blue-500", label: "Cơ bản" },
-                      { name: "emerald", color: "bg-emerald-500", label: "Lá" },
-                      { name: "cyberpunk", color: "bg-pink-500", label: "Neon" },
-                      { name: "sunset", color: "bg-orange-500", label: "Nắng" },
-                      { name: "slate", color: "bg-indigo-500", label: "Đá" },
+                      { name: "blue", color: "#0058be", label: t("theme.colorLabel.blue") },
+                      { name: "emerald", color: "#059669", label: t("theme.colorLabel.emerald") },
+                      { name: "cyberpunk", color: "#be185d", label: t("theme.colorLabel.cyberpunk") },
+                      { name: "sunset", color: "#ea580c", label: t("theme.colorLabel.sunset") },
+                      { name: "slate", color: "#4f46e5", label: t("theme.colorLabel.slate") },
                     ].map((themeOpt) => (
                       <button
                         key={themeOpt.name}
@@ -448,7 +448,7 @@ export default function Headers() {
                             : "border-transparent"
                         }`}
                       >
-                        <span className={`size-6 rounded-full ${themeOpt.color} shadow-inner`}></span>
+                        <span className="size-6 rounded-full shadow-inner" style={{ backgroundColor: themeOpt.color }}></span>
                         {colorTheme === themeOpt.name && (
                           <span className="absolute text-white text-xs font-black">✓</span>
                         )}

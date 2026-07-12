@@ -6,6 +6,7 @@ import {
     FileTextOutlined, ClockCircleOutlined, ControlOutlined,CheckCircleFilled
 } from '@ant-design/icons';
 import { authAxios } from "../../api/axiosConfig"; // Giả định đường dẫn API đúng
+import MarkdownLatex from "../common/MarkdownLatex";
 
 const { Title, Text } = Typography;
 
@@ -47,13 +48,6 @@ const ExamViewModal = ({ isModalOpen, onCancel, examId }) => {
             setQuestions([]);
         }
     }, [isModalOpen, examId, fetchExamData]);
-
-    useEffect(() => {
-        if (window.MathJax && window.MathJax.typesetPromise && !loading && questions.length > 0) {
-            window.MathJax.typesetPromise();
-        }
-    }, [questions, loading]);
-
 
     // --- RENDER ANSWERS (Chỉ hiển thị nội dung, không có style đúng/sai) ---
 const renderAnswerItem = (ans, index, question) => {
@@ -99,7 +93,7 @@ const renderAnswerItem = (ans, index, question) => {
                     )}
                     .
                 </strong>
-                {ans.content}
+                <MarkdownLatex content={ans.content} as="span" />
             </span>
 
             {/* THÊM ICON HOẶC TEXT CHỈ THỊ ĐÁP ÁN ĐÚNG */}
@@ -174,9 +168,10 @@ const renderAnswerItem = (ans, index, question) => {
                                     style={{ border: `1px solid ${token.colorBorderSecondary}` }}
                                 >
                                     {/* Nội dung câu hỏi */}
-                                    <div style={{ fontSize: 15, marginBottom: 15 }}>
-                                        {question.content}
-                                    </div>
+                                    <MarkdownLatex
+                                        content={question.content}
+                                        style={{ fontSize: 15, marginBottom: 15 }}
+                                    />
 
                                     {/* Danh sách đáp án (CHỈ HIỂN THỊ, KHÔNG CÓ ĐÁP ÁN ĐÚNG/SAI) */}
                                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

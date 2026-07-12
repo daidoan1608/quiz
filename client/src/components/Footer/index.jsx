@@ -2,19 +2,15 @@ import React from "react";
 import { useLanguage } from "../../context/LanguageProvider";
 
 const Footer = () => {
-  const { texts } = useLanguage();
+  const { t } = useLanguage();
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-auto transition-colors duration-300">
       <div className="max-w-screen-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        {/* GRID SYSTEM: items-start để căn đỉnh, nhưng ta sẽ chỉnh margin tiêu đề để khớp logo */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          {/* --- CỘT 1: LOGO & GIỚI THIỆU (4/12) --- */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2 h-8">
-              {" "}
-              {/* Set cứng chiều cao h-8 để làm chuẩn */}
               <div className="size-8 text-blue-600 flex items-center justify-center">
                 <svg
                   fill="none"
@@ -32,18 +28,14 @@ const Footer = () => {
                 QuizVNUA
               </h2>
             </div>
-            {/* Đã thêm dark:text-gray-400 */}
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs">
-              Nền tảng ôn tập và kiểm tra trắc nghiệm trực tuyến chất lượng cao
-              dành cho sinh viên VNUA.
+              {t("footer.description")}
             </p>
-            {/* Social Icons */}
             <div className="mt-6 flex gap-4">
               <a
                 href="https://www.facebook.com/groups/ITHUA"
                 target="_blank"
                 rel="noopener noreferrer"
-                // Đã thêm dark:text-gray-400
                 className="text-gray-400 dark:text-gray-400 hover:text-blue-600 transition-colors !no-underline"
               >
                 <svg
@@ -62,51 +54,43 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* --- CỘT 2: DANH MỤC (3/12) --- */}
           <div className="lg:col-span-3 lg:pl-8">
-            {/* Đã thêm dark:text-white */}
             <h3 className="mt-1.5 text-sm font-bold tracking-wider uppercase text-gray-900 dark:text-white mb-4 h-6 flex items-center">
-              {texts.menu || "Danh mục"}
+              {t("footer.menu")}
             </h3>
             <ul className="space-y-3">
               <li>
                 <a
-                  // Đã thêm dark:text-gray-400
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
                   href="/"
                 >
-                  Trang chủ
+                  {t("nav.home")}
                 </a>
               </li>
               <li>
                 <a
-                  // Đã thêm dark:text-gray-400
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
                   href="/subjects"
                 >
-                  Ôn tập kiến thức
+                  {t("nav.subjects")}
                 </a>
               </li>
               <li>
                 <a
-                  // Đã thêm dark:text-gray-400
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
-                  href="/subjects"
+                  href="/rank"
                 >
-                  Làm bài kiểm tra
+                  {t("nav.rank")}
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* --- CỘT 3: THÔNG TIN LIÊN HỆ (5/12) --- */}
           <div className="lg:col-span-5">
-            {/* Đã thêm dark:text-white */}
             <h3 className="mt-1.5 text-sm font-bold tracking-wider uppercase text-gray-900 dark:text-white mb-4 h-6 flex items-center">
-              {texts.contact || "Thông tin liên hệ"}
+              {t("footer.contact")}
             </h3>
             <ul className="space-y-4">
-              {/* Item 1: Địa chỉ */}
               <li className="flex items-start gap-3">
                 <svg
                   className="w-5 h-5 mt-[2px] text-blue-600 shrink-0"
@@ -127,16 +111,14 @@ const Footer = () => {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                {/* Đã thêm dark:text-gray-400 cho text và dark:text-white cho font-semibold */}
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {texts.address || "Địa chỉ"}:{" "}
+                    {t("footer.address")}: {" "}
                   </span>
                   P316, Tầng 3 Nhà Hành chính, Học viện Nông nghiệp Việt Nam
                 </div>
               </li>
 
-              {/* Item 2: Hotline */}
               <li className="flex items-start gap-3">
                 <svg
                   className="w-5 h-5 mt-[2px] text-blue-600 shrink-0"
@@ -151,16 +133,14 @@ const Footer = () => {
                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                   />
                 </svg>
-                {/* Đã thêm dark:text-gray-400 cho text và dark:text-white cho font-semibold */}
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {texts.tel || "Hotline"}:{" "}
+                    {t("footer.hotline")}: {" "}
                   </span>
                   (024) 62617701
                 </div>
               </li>
 
-              {/* Item 3: Email */}
               <li className="flex items-start gap-3">
                 <svg
                   className="w-5 h-5 mt-[2px] text-blue-600 shrink-0"
@@ -175,7 +155,6 @@ const Footer = () => {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                {/* Đã thêm dark:text-gray-400 cho text và dark:text-white cho font-semibold */}
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
                     Email:{" "}
@@ -187,25 +166,23 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* --- FOOTER BOTTOM: BẢN QUYỀN --- */}
         <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-800 text-center md:flex md:justify-between md:items-center md:text-left">
-          {/* Đã thêm mt-8 và pt-4 để tạo khoảng cách hợp lý */}
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            &copy; {currentYear}{" "}
-            {texts.coppy || "QuizVNUA. All rights reserved."}
+            &copy; {currentYear} {" "}
+            {t("footer.copyright")}
           </p>
           <div className="mt-2 md:mt-0 flex justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
             <a
-              href="#"
+              href="/subjects"
               className="hover:text-blue-600 !no-underline transition-colors dark:hover:text-blue-400"
             >
-              Điều khoản
+              {t("footer.terms")}
             </a>
             <a
-              href="#"
+              href="/rank"
               className="hover:text-blue-600 !no-underline transition-colors dark:hover:text-blue-400"
             >
-              Bảo mật
+              {t("footer.privacy")}
             </a>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { authAxios } from '../../api/axiosConfig';
 import {
   Form, Input, Button, Select,
   Radio, Checkbox, message, Typography, Divider,
-  Row, Col, Alert, Modal, Upload
+  Row, Col, Alert, Modal, Upload, theme
 } from 'antd';
 import {
   SaveOutlined,
@@ -19,6 +19,7 @@ const { TextArea } = Input;
 
 const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const [form] = Form.useForm();
+  const { token } = theme.useToken();
 
   // State data
   const [categories, setCategories] = useState([]);
@@ -39,6 +40,35 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const answerB = Form.useWatch("answerB", form);
   const answerC = Form.useWatch("answerC", form);
   const answerD = Form.useWatch("answerD", form);
+
+  const previewBoxStyle = {
+    padding: '8px 12px',
+    border: `1px dashed ${token.colorBorder}`,
+    borderRadius: 6,
+    background: token.colorFillQuaternary,
+    color: token.colorText,
+  };
+
+  const previewLabelStyle = {
+    color: token.colorTextSecondary,
+    fontSize: 11,
+    marginBottom: 4,
+  };
+
+  const answerPreviewBoxStyle = {
+    marginTop: 4,
+    padding: '4px 8px',
+    border: `1px dashed ${token.colorBorder}`,
+    borderRadius: 4,
+    background: token.colorFillQuaternary,
+    color: token.colorText,
+    fontSize: 13,
+  };
+
+  const answerPreviewLabelStyle = {
+    color: token.colorTextSecondary,
+    marginRight: 8,
+  };
 
   useEffect(() => {
     if (window.MathJax && window.MathJax.typesetPromise) {
@@ -98,15 +128,27 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
     }
   }, [isModalOpen, categories.length, fetchCategories]);
 
-  // 2. Xử lý khi chọn Khoa -> Lọc Môn
-  const handleCategoryChange = (categoryId) => {
+  // 2. Xử lý khi chọn Khoa -> Fetch Môn theo Khoa
+  const handleCategoryChange = async (categoryId) => {
     form.setFieldsValue({ subjectId: null, chapterId: null });
     setSubjects([]);
     setChapters([]);
 
-    const selectedCategory = categories.find(cat => cat.categoryId === categoryId);
-    if (selectedCategory && selectedCategory.subjects) {
-      setSubjects(selectedCategory.subjects);
+    if (!categoryId) return;
+
+    try {
+      // API /public/categories chỉ trả summary, không kèm subjects.
+      // Cần gọi riêng API lấy môn học theo khoa.
+      const response = await authAxios.get(`/public/subjects/category/${categoryId}`);
+      const subjectData = Array.isArray(response.data.data) ? response.data.data : [];
+      setSubjects(subjectData);
+
+      if (subjectData.length === 0) {
+        message.warning("Khoa này chưa có môn học nào!");
+      }
+    } catch (error) {
+      console.error("Lỗi fetch môn học:", error);
+      message.error("Không thể tải danh sách môn học theo khoa.");
     }
   };
 
@@ -118,10 +160,11 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
     if (!subjectId) return;
 
     try {
-      const response = await authAxios.get(`/public/subjects/${subjectId}`);
-      if (response.data.status === 'success') {
-        setChapters(response.data.data.chapters || []);
-      } else {
+      const response = await authAxios.get(`/public/chapters/subject/${subjectId}`);
+      const chapterData = Array.isArray(response.data.data) ? response.data.data : [];
+      setChapters(chapterData);
+
+      if (chapterData.length === 0) {
         message.warning("Môn học này chưa có chương nào!");
       }
     } catch (error) {
@@ -248,7 +291,7 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
               rules={[{ required: true, message: "Vui lòng chọn môn!" }]}
             >
               <Select
-                placeholder="-- Chọn môn --"
+                placeholder={subjects.length === 0 ? "Vui lòng chọn khoa trước" : "-- Chọn môn --"}
                 onChange={handleSubjectChange}
                 disabled={subjects.length === 0}
                 showSearch
@@ -267,7 +310,7 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
               rules={[{ required: true, message: "Vui lòng chọn chương!" }]}
             >
               <Select
-                placeholder="-- Chọn chương --"
+                placeholder={chapters.length === 0 ? "Vui lòng chọn môn trước" : "-- Chọn chương --"}
                 disabled={chapters.length === 0}
                 showSearch
                 optionFilterProp="children"
@@ -292,17 +335,14 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
             {content && (
               <div
                 style={{
+                  ...previewBoxStyle,
                   marginTop: -12,
                   marginBottom: 16,
-                  padding: '8px 12px',
-                  border: '1px dashed #d9d9d9',
-                  borderRadius: 6,
-                  background: '#fafafa',
                   maxHeight: 120,
                   overflowY: 'auto'
                 }}
               >
-                <div style={{ color: '#8c8c8c', fontSize: 11, marginBottom: 4 }}>Xem trước nội dung câu hỏi:</div>
+                <div style={previewLabelStyle}>Xem trước nội dung câu hỏi:</div>
                 <div dangerouslySetInnerHTML={{ __html: parseMarkdown(content) }} />
               </div>
             )}
@@ -434,16 +474,9 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
                     if (!ansVal) return null;
                     return (
                       <div
-                        style={{
-                          marginTop: 4,
-                          padding: '4px 8px',
-                          border: '1px dashed #d9d9d9',
-                          borderRadius: 4,
-                          background: '#fafafa',
-                          fontSize: 13
-                        }}
+                        style={answerPreviewBoxStyle}
                       >
-                        <span style={{ color: '#8c8c8c', marginRight: 8 }}>Xem trước {label}:</span>
+                        <span style={answerPreviewLabelStyle}>Xem trước {label}:</span>
                         <span dangerouslySetInnerHTML={{ __html: parseMarkdown(ansVal) }} />
                       </div>
                     );
@@ -495,16 +528,9 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
                       if (!ansVal) return null;
                       return (
                         <div
-                          style={{
-                            marginTop: 4,
-                            padding: '4px 8px',
-                            border: '1px dashed #d9d9d9',
-                            borderRadius: 4,
-                            background: '#fafafa',
-                            fontSize: 13
-                          }}
+                          style={answerPreviewBoxStyle}
                         >
-                          <span style={{ color: '#8c8c8c', marginRight: 8 }}>Xem trước {label}:</span>
+                          <span style={answerPreviewLabelStyle}>Xem trước {label}:</span>
                           <span dangerouslySetInnerHTML={{ __html: parseMarkdown(ansVal) }} />
                         </div>
                       );

@@ -14,5 +14,8 @@ public class UserExamDto {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Float score;
+    private String status;
+    private Integer remainingTime;
+    private Integer currentQuestionIndex;
 
 }

@@ -6,7 +6,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
   const navigate = useNavigate();
 
   // State lưu trạng thái mở của từng môn (Key: Tên môn, Value: true/false)
-  // Mặc định là empty object, ta sẽ xử lý logic "mặc định mở" ở dưới
+  // Mặc định là empty object nên tất cả môn sẽ đóng, chỉ mở khi người dùng bấm vào.
   const [expandedSubjects, setExpandedSubjects] = useState({});
 
   const handleShowDetail = (exam) => {
@@ -27,16 +27,16 @@ export default function ExamHistoryList({ groupedExams, texts }) {
   const toggleSubject = (subject) => {
     setExpandedSubjects((prev) => ({
       ...prev,
-      // Nếu chưa có trong state (undefined) thì coi là đang mở -> bấm vào sẽ thành false (đóng)
+      // Nếu chưa có trong state (undefined) thì coi là đang đóng -> bấm vào sẽ thành true (mở)
       // Nếu đã có thì đảo ngược giá trị
-      [subject]: prev[subject] === undefined ? false : !prev[subject],
+      [subject]: prev[subject] === undefined ? true : !prev[subject],
     }));
   };
 
   if (Object.keys(groupedExams).length === 0) {
     return (
       <div className="text-center py-10 text-gray-500">
-        Chưa có lịch sử làm bài.
+        {texts?.noExamHistory || "Chưa có lịch sử làm bài."}
       </div>
     );
   }
@@ -44,8 +44,8 @@ export default function ExamHistoryList({ groupedExams, texts }) {
   return (
     <div className="flex flex-col gap-6">
       {Object.entries(groupedExams).map(([subject, exams]) => {
-        // Kiểm tra trạng thái: Mặc định là TRUE (mở) nếu chưa được set trong state
-        const isExpanded = expandedSubjects[subject] !== false;
+        // Kiểm tra trạng thái: Mặc định là FALSE (đóng) nếu chưa được set trong state
+        const isExpanded = expandedSubjects[subject] === true;
 
         return (
           <div
@@ -64,7 +64,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   {subject}
                   <span className="ml-2 text-sm font-normal text-gray-500">
-                    ({exams.length} bài)
+                    ({exams.length} {texts?.examAttemptUnit || "bài"})
                   </span>
                 </h3>
               </div>
@@ -110,7 +110,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
                               : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                           }`}
                         >
-                          {exam.score.toFixed(1)} đ
+                          {exam.score.toFixed(1)} {texts?.score || "đ"}
                         </span>
                       </div>
 
@@ -126,7 +126,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
                             check_circle
                           </span>
                           {exam.userExamDto?.correctAnswers}/
-                          {exam.userExamDto?.totalQuestions} câu đúng
+                          {exam.userExamDto?.totalQuestions} {texts?.correctUnit || "câu đúng"}
                         </div>
                       </div>
 
