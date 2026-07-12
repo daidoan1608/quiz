@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 
 const CAT_QUOTES = [
   // Nhóm động viên
@@ -23,26 +23,27 @@ export default function CatMascot() {
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Hàm đổi câu thoại ngẫu nhiên
-  const pokeCat = () => {
+  const pokeCat = useCallback(() => {
     setIsAnimating(true);
 
     // Random câu mới (đảm bảo không trùng câu cũ)
-    let newQuote;
-    do {
-      newQuote = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
-    } while (newQuote === quote);
-
-    setQuote(newQuote);
+    setQuote((currentQuote) => {
+      let newQuote;
+      do {
+        newQuote = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
+      } while (newQuote === currentQuote);
+      return newQuote;
+    });
 
     // Reset animation sau 300ms
     setTimeout(() => setIsAnimating(false), 300);
-  };
+  }, []);
 
   // Tự động đổi câu thoại mỗi 10 giây cho sinh động
   useEffect(() => {
     const interval = setInterval(pokeCat, 10000);
     return () => clearInterval(interval);
-  }, [quote]);
+  }, [pokeCat]);
 
   return (
     <div

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
 import { authAxios } from "../api/axiosConfig";
 import { message } from "antd";
 import { useAuth } from "../context/AuthProvider";
@@ -6,21 +6,13 @@ import { useAuth } from "../context/AuthProvider";
 const FavoritesContext = createContext();
 
 export const FavoritesProvider = ({ children }) => {
-  const { user, isLoggedIn } = useAuth(); // Lấy từ AuthProvider
+  const { isLoggedIn } = useAuth(); // Lấy từ AuthProvider
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const userId = localStorage.getItem("userId");
 
-  useEffect(() => {
-    if (isLoggedIn && userId) {
-      loadFavorites();
-    } else {
-      setFavorites([]);
-    }
-  }, [isLoggedIn, userId]);
-
-  const loadFavorites = async () => {
+  const loadFavorites = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -32,7 +24,15 @@ export const FavoritesProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (isLoggedIn && userId) {
+      loadFavorites();
+    } else {
+      setFavorites([]);
+    }
+  }, [isLoggedIn, userId, loadFavorites]);
 
   const addFavorite = async (subjectId, subjectName) => {
     if (!userId) {

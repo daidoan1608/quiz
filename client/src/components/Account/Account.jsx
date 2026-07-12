@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAxios } from "../../api/axiosConfig";
 import { useAuth } from "../../context/AuthProvider";
@@ -22,7 +22,7 @@ const Account = () => {
   const { texts } = useLanguage();
 
   // --- 1. FETCH DATA ---
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const userId = localStorage.getItem("userId");
     if (!userId) {
       message.error(texts.noUserId || "Vui lòng đăng nhập lại!");
@@ -65,11 +65,11 @@ const Account = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [avatarUrl, navigate, texts.noUserId]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   // --- 2. HANDLERS ---
   const handleChangePassword = async (values) => {

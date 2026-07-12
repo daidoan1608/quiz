@@ -14,6 +14,7 @@ export default function Rank() {
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
   const [filterCriteria, setFilterCriteria] = useState("total"); // 'total' (Tổng điểm) | 'avg' (Điểm trung bình)
+  const [openSelect, setOpenSelect] = useState(null);
 
   // --- CONTEXT ---
   const { isLoggedIn, user } = useAuth();
@@ -113,6 +114,87 @@ export default function Rank() {
   }, [isLoggedIn, fetchLeaderboardData]); // Thêm filterCriteria vào dependency
 
   const subjectOptions = allSubjects;
+  const criteriaOptions = [
+    { value: "total", label: texts.accumulatedScore || "Tổng điểm tích lũy" },
+    { value: "avg", label: texts.averageScoreFull || "Điểm trung bình" },
+  ];
+  const subjectSelectOptions = [
+    { value: "all", label: texts.allSubjectOption || "Tất cả môn học" },
+    ...subjectOptions.map((subject) => ({ value: subject, label: subject })),
+  ];
+
+  const CustomSelect = ({ id, value, options, onChange }) => {
+    const selected = options.find((option) => option.value === value) || options[0];
+    const isOpen = openSelect === id;
+
+    return (
+      <div
+        className="relative"
+        tabIndex={0}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            setOpenSelect(null);
+          }
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setOpenSelect(isOpen ? null : id)}
+          className={`w-full min-h-12 rounded-2xl border bg-white dark:bg-gray-700/90 pl-4 pr-12 text-left text-base font-semibold text-gray-900 dark:text-white transition-all shadow-sm cursor-pointer
+            ${
+              isOpen
+                ? "border-primary ring-4 ring-primary/15 shadow-md"
+                : "border-gray-200 dark:border-gray-600 hover:border-primary/50 hover:shadow-md"
+            }
+          `}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+        >
+          <span className="block truncate">{selected?.label}</span>
+          <span className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary transition-all dark:bg-primary/15 ${isOpen ? "rotate-180 bg-primary/15" : ""}`}>
+            <span className="material-symbols-outlined text-[20px] leading-none">
+              expand_more
+            </span>
+          </span>
+        </button>
+
+        {isOpen && (
+          <div className="absolute left-0 right-0 z-30 mt-2 max-h-64 overflow-auto rounded-2xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 shadow-2xl shadow-gray-900/10 dark:shadow-black/40 animate-[fadeIn_0.12s_ease-out]" role="listbox">
+            {options.map((option) => {
+              const active = option.value === value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpenSelect(null);
+                  }}
+                  className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors
+                    ${
+                      active
+                        ? "bg-primary text-white shadow-sm"
+                        : "text-gray-700 dark:text-gray-200 hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15"
+                    }
+                  `}
+                >
+                  <span className="truncate">{option.label}</span>
+                  {active && (
+                    <span className="material-symbols-outlined text-[18px] leading-none">
+                      check
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // --- HELPER RENDERING ---
   const renderRankIcon = (rank) => {
@@ -211,14 +293,12 @@ export default function Rank() {
                       <p className="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">
                         {texts.rankingCriteria || "Tiêu chí xếp hạng"}
                       </p>
-                      <select
-                        className="form-select w-full rounded-2xl text-gray-900 dark:text-white focus:outline-0 focus:ring-4 focus:ring-primary/15 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/80 focus:border-primary h-12 px-4 text-base transition-all shadow-inner"
+                      <CustomSelect
+                        id="criteria"
                         value={filterCriteria}
-                        onChange={(e) => setFilterCriteria(e.target.value)}
-                      >
-                        <option value="total">{texts.accumulatedScore || "Tổng điểm tích lũy"}</option>
-                        <option value="avg">{texts.averageScoreFull || "Điểm trung bình"}</option>
-                      </select>
+                        options={criteriaOptions}
+                        onChange={setFilterCriteria}
+                      />
                     </label>
                   </div>
 
@@ -228,18 +308,12 @@ export default function Rank() {
                       <p className="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">
                         {texts.subject || "Môn học"}
                       </p>
-                      <select
-                        className="form-select w-full rounded-2xl text-gray-900 dark:text-white focus:outline-0 focus:ring-4 focus:ring-primary/15 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/80 focus:border-primary h-12 px-4 text-base transition-all shadow-inner"
+                      <CustomSelect
+                        id="subject"
                         value={selectedSubject}
-                        onChange={(e) => setSelectedSubject(e.target.value)}
-                      >
-                        <option value="all">{texts.allSubjectOption || "Tất cả môn học"}</option>
-                        {subjectOptions.map((subject) => (
-                          <option key={subject} value={subject}>
-                            {subject}
-                          </option>
-                        ))}
-                      </select>
+                        options={subjectSelectOptions}
+                        onChange={setSelectedSubject}
+                      />
                     </label>
                   </div>
                 </div>

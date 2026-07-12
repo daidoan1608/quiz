@@ -4,6 +4,7 @@ import {
   UserOutlined,
   FacebookOutlined,
   GithubOutlined,
+  GoogleOutlined,
 } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -18,9 +19,6 @@ function Login() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
-  // State 'remember' chỉ để trigger re-render nếu cần, logic chính nằm ở Form Antd
-  const [remember, setRemember] = useState(false);
-
   useEffect(() => {
     const savedUsername = localStorage.getItem("savedUsername");
     if (savedUsername) {
@@ -28,7 +26,6 @@ function Login() {
         username: savedUsername,
         remember: true,
       });
-      setRemember(true);
     }
   }, [form]);
 
@@ -95,8 +92,8 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 bg-[url('https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg')] bg-no-repeat bg-center bg-cover py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
+    <div className="auth-page min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="auth-card w-full max-w-md space-y-8 p-10 rounded-2xl shadow-xl">
         {/* Header Section */}
         <div className="text-center">
           <img
@@ -105,10 +102,10 @@ function Login() {
             className="mx-auto h-16 w-auto mb-4 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate("/")}
           />
-          <h2 className="text-3xl font-extrabold text-blue-600 tracking-tight">
+          <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--aura-primary)" }}>
             ĐĂNG NHẬP
           </h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm" style={{ color: "var(--aura-subtle)" }}>
             Chào mừng bạn quay trở lại!
           </p>
         </div>
@@ -119,7 +116,7 @@ function Login() {
           onFinish={handleSubmit}
           initialValues={{ remember: false }}
           layout="vertical"
-          className="mt-8 space-y-6"
+          className="auth-form mt-8 space-y-6"
           size="large"
         >
           <Form.Item
@@ -130,7 +127,7 @@ function Login() {
             className="mb-4"
           >
             <Input
-              prefix={<UserOutlined className="text-gray-400" />}
+              prefix={<UserOutlined className="auth-input-icon" />}
               placeholder="Tên đăng nhập hoặc email"
               className="rounded-lg py-2.5"
             />
@@ -142,7 +139,7 @@ function Login() {
             className="mb-4"
           >
             <Input.Password
-              prefix={<LockOutlined className="text-gray-400" />}
+              prefix={<LockOutlined className="auth-input-icon" />}
               placeholder="Mật khẩu"
               className="rounded-lg py-2.5"
             />
@@ -150,11 +147,7 @@ function Login() {
 
           <Form.Item name="remember" valuePropName="checked" className="mb-4">
             <div className="flex items-center justify-between">
-              <Checkbox
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="text-gray-600"
-              >
+              <Checkbox className="auth-checkbox">
                 Ghi nhớ đăng nhập
               </Checkbox>
               <a
@@ -163,7 +156,7 @@ function Login() {
                   e.preventDefault();
                   navigate("/forgot");
                 }}
-                className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                className="auth-link text-sm font-medium hover:underline"
               >
                 Quên mật khẩu?
               </a>
@@ -176,7 +169,7 @@ function Login() {
               type="primary"
               htmlType="submit"
               loading={loading}
-              className="w-full h-12 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold text-lg shadow-md transition-all duration-300 border-none"
+              className="auth-primary-btn w-full h-12 rounded-lg font-semibold text-lg shadow-md transition-all duration-300 border-none"
             >
               Đăng nhập
             </Button>
@@ -187,17 +180,20 @@ function Login() {
         <div>
           <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full auth-divider-line"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
+              <span className="auth-divider-label px-2">
                 Hoặc đăng nhập với
               </span>
             </div>
           </div>
 
           <div className="mt-6 flex justify-center gap-4">
-            <div className="social-login-btn relative overflow-hidden">
+            <div className="social-login-btn google-login-btn relative overflow-hidden" aria-label="Đăng nhập với Google">
+              <span className="google-login-fallback" aria-hidden="true">
+                <GoogleOutlined />
+              </span>
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
                   const idToken = credentialResponse.credential;
@@ -234,18 +230,31 @@ function Login() {
             height: 48px !important;
             padding: 0 !important;
             border-radius: 9999px !important;
-            border: 1px solid #d1d5db !important;
+            border: 1px solid var(--aura-border) !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            background: #ffffff !important;
+            background: var(--aura-canvas) !important;
+            color: var(--aura-text) !important;
             line-height: 1 !important;
             transition: background-color 0.2s ease, border-color 0.2s ease;
           }
 
           .social-login-btn:hover {
-            background: #f9fafb !important;
-            border-color: #9ca3af !important;
+            background: var(--aura-primary-soft) !important;
+            border-color: var(--aura-primary) !important;
+          }
+
+          .google-login-fallback {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #ea4335;
+            pointer-events: none;
+            z-index: 1;
           }
 
           .social-login-btn iframe,
@@ -257,18 +266,26 @@ function Login() {
             height: 48px !important;
             border-radius: 9999px !important;
           }
+
+          .google-login-btn iframe,
+          .google-login-btn > div,
+          .google-login-btn [role="button"] {
+            opacity: 0 !important;
+            position: relative !important;
+            z-index: 2 !important;
+          }
         `}</style>
 
         {/* Footer Link */}
         <div className="text-center mt-6">
-          <span className="text-gray-600">Chưa có tài khoản? </span>
+          <span style={{ color: "var(--aura-muted)" }}>Chưa có tài khoản? </span>
           <a
             href="/register"
             onClick={(e) => {
               e.preventDefault();
               navigate("/register");
             }}
-            className="font-medium text-blue-600 hover:text-blue-500 hover:underline transition-colors"
+            className="auth-link font-medium hover:underline transition-colors"
           >
             Đăng ký ngay
           </a>

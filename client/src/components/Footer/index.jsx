@@ -173,13 +173,13 @@ const Footer = () => {
           </p>
           <div className="mt-2 md:mt-0 flex justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
             <a
-              href="/subjects"
+              href="/terms"
               className="hover:text-blue-600 !no-underline transition-colors dark:hover:text-blue-400"
             >
               {t("footer.terms")}
             </a>
             <a
-              href="/rank"
+              href="/privacy"
               className="hover:text-blue-600 !no-underline transition-colors dark:hover:text-blue-400"
             >
               {t("footer.privacy")}

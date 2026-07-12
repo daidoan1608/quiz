@@ -269,6 +269,154 @@
     letter-spacing: 0.02em;
   }
 
+  .auth-page {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 16% 12%, rgba(var(--primary-color), 0.18), transparent 26rem),
+      radial-gradient(circle at 84% 18%, rgba(var(--primary-color), 0.10), transparent 22rem),
+      linear-gradient(180deg, var(--aura-canvas) 0%, var(--aura-bg) 100%);
+    color: var(--aura-text);
+  }
+
+  .auth-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    background-image: url("https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    mix-blend-mode: multiply;
+  }
+
+  .dark .auth-page::before {
+    opacity: 0.08;
+    mix-blend-mode: screen;
+  }
+
+  .auth-card {
+    position: relative;
+    z-index: 1;
+    border: 1px solid var(--aura-border);
+    background: color-mix(in srgb, var(--aura-canvas) 92%, transparent);
+    color: var(--aura-text);
+    box-shadow: var(--aura-shadow-lg);
+    backdrop-filter: blur(18px);
+  }
+
+  .dark .auth-card {
+    background: color-mix(in srgb, var(--aura-surface) 88%, transparent);
+  }
+
+  .auth-form .ant-input-affix-wrapper,
+  .auth-form .ant-input,
+  .auth-form .ant-input-password {
+    border-color: var(--aura-border);
+    background: var(--aura-canvas);
+    color: var(--aura-text);
+  }
+
+  .dark .auth-form .ant-input-affix-wrapper,
+  .dark .auth-form .ant-input,
+  .dark .auth-form .ant-input-password {
+    background: var(--aura-surface);
+  }
+
+  .auth-form .ant-input,
+  .auth-form .ant-input-password input,
+  .auth-form .ant-input-affix-wrapper input {
+    background: transparent;
+    color: var(--aura-text);
+  }
+
+  .auth-form .ant-input::placeholder,
+  .auth-form .ant-input-password input::placeholder,
+  .auth-form .ant-input-affix-wrapper input::placeholder {
+    color: var(--aura-subtle);
+  }
+
+  .auth-form .ant-input-affix-wrapper:hover,
+  .auth-form .ant-input:hover,
+  .auth-form .ant-input-affix-wrapper-focused,
+  .auth-form .ant-input:focus {
+    border-color: var(--aura-primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color), 0.14);
+  }
+
+  .auth-input-icon,
+  .auth-form .ant-input-password-icon,
+  .auth-checkbox,
+  .auth-checkbox .ant-checkbox + span {
+    color: var(--aura-muted) !important;
+  }
+
+  .auth-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+    border-color: var(--aura-primary);
+    background: var(--aura-primary);
+  }
+
+  .auth-link {
+    color: var(--aura-primary);
+  }
+
+  .auth-link:hover {
+    color: var(--aura-primary-hover);
+  }
+
+  .auth-primary-btn,
+  .auth-primary-btn.ant-btn-primary {
+    background: var(--aura-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 20px rgba(var(--primary-color), 0.20);
+  }
+
+  .auth-primary-btn:hover,
+  .auth-primary-btn.ant-btn-primary:hover {
+    background: var(--aura-primary-hover) !important;
+    transform: translateY(-1px);
+  }
+
+  .dark .auth-primary-btn,
+  .dark .auth-primary-btn.ant-btn-primary {
+    color: #0f172a !important;
+  }
+
+  .auth-divider-line,
+  .auth-footer {
+    border-top: 1px solid var(--aura-border);
+  }
+
+  .auth-divider-label {
+    background: color-mix(in srgb, var(--aura-canvas) 92%, transparent);
+    color: var(--aura-subtle);
+  }
+
+  .dark .auth-divider-label {
+    background: color-mix(in srgb, var(--aura-surface) 88%, transparent);
+  }
+
+  .social-login-btn {
+    border-color: var(--aura-border) !important;
+    background: var(--aura-canvas) !important;
+    color: var(--aura-text) !important;
+  }
+
+  .social-login-btn:hover {
+    border-color: var(--aura-primary) !important;
+    background: var(--aura-primary-soft) !important;
+  }
+
+  .dark .social-login-btn {
+    background: var(--aura-surface) !important;
+  }
+
+  .dark .social-login-btn .anticon-github {
+    color: var(--aura-text) !important;
+  }
+
   .aura-pagination .ant-pagination-item,
   .aura-pagination .ant-pagination-prev .ant-pagination-item-link,
   .aura-pagination .ant-pagination-next .ant-pagination-item-link {

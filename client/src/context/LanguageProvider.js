@@ -1,7 +1,5 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import vi from "../languages/vi";
-import en from "../languages/en";
 
 const LanguageContext = createContext();
 
@@ -15,7 +13,6 @@ export function LanguageProvider({ children }) {
     i18n.changeLanguage(nextLanguage);
   };
 
-  const legacyTexts = language === "en" ? en : vi;
   const t = (key, optionsOrFallback, maybeOptions) => {
     if (typeof optionsOrFallback === "string") {
       return translate(key, { defaultValue: optionsOrFallback, ...(maybeOptions || {}) });
@@ -23,9 +20,23 @@ export function LanguageProvider({ children }) {
     return translate(key, optionsOrFallback);
   };
 
+  const texts = useMemo(
+    () =>
+      new Proxy(
+        {},
+        {
+          get: (_target, key) => {
+            if (typeof key !== "string") return undefined;
+            return translate(key, { defaultValue: key });
+          },
+        }
+      ),
+    [translate]
+  );
+
   return (
     <LanguageContext.Provider
-      value={{ language, toggleLanguage, t, texts: legacyTexts }}
+      value={{ language, toggleLanguage, t, texts }}
     >
       {children}
     </LanguageContext.Provider>

@@ -26,6 +26,8 @@ import Account from "../components/Account/Account";
 import Rank from "../components/Rank/Rank";
 import LessonList from "../components/Favorites/LessonList";
 import Notifications from "../components/Pages/Notifications";
+import Terms from "../components/Pages/Terms";
+import Privacy from "../components/Pages/Privacy";
 
 const AppRoutes = () => {
   const { loading } = useAuth();
@@ -60,6 +62,8 @@ const AppRoutes = () => {
 
         <Route path="/rank" element={<Rank />} />
         <Route path="/favorites" element={<LessonList />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
       </Route>
     </Routes>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { authAxios, publicAxios } from "../../api/axiosConfig";
 import { useLanguage } from "../../context/LanguageProvider";
 import { useAuth } from "../../context/AuthProvider";
@@ -13,14 +13,6 @@ export default function Home() {
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
 
-  useEffect(() => {
-    getAllSubjects();
-  }, []);
-
-  useEffect(() => {
-    getInProgressAttempts();
-  }, [isLoggedIn, userId]);
-
   const getAllSubjects = async () => {
     try {
       const resp = await publicAxios.get("public/subjects");
@@ -30,7 +22,7 @@ export default function Home() {
     }
   };
 
-  const getInProgressAttempts = async () => {
+  const getInProgressAttempts = useCallback(async () => {
     if (!isLoggedIn || !userId) {
       setInProgressAttempts([]);
       return;
@@ -43,7 +35,15 @@ export default function Home() {
       console.error("Lỗi khi lấy bài đang thực hiện:", error);
       setInProgressAttempts([]);
     }
-  };
+  }, [isLoggedIn, userId]);
+
+  useEffect(() => {
+    getAllSubjects();
+  }, []);
+
+  useEffect(() => {
+    getInProgressAttempts();
+  }, [getInProgressAttempts]);
 
   const getAttemptProgress = (attempt) => {
     const total = Number(attempt.totalQuestions) || 0;

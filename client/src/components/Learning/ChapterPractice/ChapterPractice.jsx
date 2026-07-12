@@ -88,14 +88,14 @@ export default function RevisionChap1() {
   };
 
   if (isLoading) {
-    return <div className="flex min-h-[60vh] items-center justify-center">Đang tải câu hỏi ôn tập...</div>;
+    return <div className="flex min-h-[60vh] items-center justify-center">{texts.loadingPracticeQuestions || "Đang tải câu hỏi ôn tập..."}</div>;
   }
 
   if (!questions.length) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-4 text-center">
-        <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">Chưa có câu hỏi ôn tập cho chương này.</p>
-        <button onClick={() => navigate(-1)} className="rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-md">Quay lại</button>
+        <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">{texts.noPracticeQuestionsForChapter || "Chưa có câu hỏi ôn tập cho chương này."}</p>
+        <button onClick={() => navigate(-1)} className="rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-md">{texts.back || "Quay lại"}</button>
       </div>
     );
   }
@@ -112,33 +112,33 @@ export default function RevisionChap1() {
       <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl">
           <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-            <button onClick={() => navigate("/subjects")} className="font-bold uppercase tracking-wide hover:text-primary">Môn học</button>
+            <button onClick={() => navigate("/subjects")} className="font-bold uppercase tracking-wide hover:text-primary">{texts.subjects || "Môn học"}</button>
             <span className="material-symbols-outlined text-base">chevron_right</span>
             <button
               onClick={() => subjectId ? navigate(`/subjects/${subjectId}`, { state: { subjectId } }) : navigate("/subjects")}
               className="max-w-[220px] truncate font-bold hover:text-primary"
             >
-              {subjectName || "Môn học"}
+              {subjectName || texts.subjects || "Môn học"}
             </button>
             <span className="material-symbols-outlined text-base">chevron_right</span>
-            <span className="max-w-[260px] truncate font-bold text-gray-900 dark:text-white">{title || "Câu hỏi ôn tập"}</span>
+            <span className="max-w-[260px] truncate font-bold text-gray-900 dark:text-white">{title || texts.practiceQuestions || "Câu hỏi ôn tập"}</span>
           </nav>
 
           <section className="mb-8 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <div className="p-6 md:p-8">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
                 <span className="material-symbols-outlined text-base">quiz</span>
-                Ôn tập theo chương
+                {texts.chapterPractice || "Ôn tập theo chương"}
               </div>
               <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <h1 className="text-3xl font-black tracking-tight text-gray-950 dark:text-white md:text-4xl">{title || "Câu hỏi ôn tập"}</h1>
+                  <h1 className="text-3xl font-black tracking-tight text-gray-950 dark:text-white md:text-4xl">{title || texts.practiceQuestions || "Câu hỏi ôn tập"}</h1>
                   <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600 dark:text-gray-300">
-                    Hoàn thành các câu hỏi ôn tập. Bạn có thể chuyển nhanh giữa các câu bằng bảng bên phải.
+                    {texts.chapterPracticeDescription || "Hoàn thành các câu hỏi ôn tập. Bạn có thể chuyển nhanh giữa các câu bằng bảng bên phải."}
                   </p>
                 </div>
                 <div className="rounded-2xl bg-primary/10 px-5 py-4 text-right text-primary">
-                  <p className="text-xs font-bold uppercase tracking-wide">Tiến độ</p>
+                  <p className="text-xs font-bold uppercase tracking-wide">{texts.progress || "Tiến độ"}</p>
                   <p className="text-3xl font-black">{answeredCount}/{questions.length}</p>
                 </div>
               </div>
@@ -152,18 +152,18 @@ export default function RevisionChap1() {
             <aside className="col-span-12 space-y-6 lg:col-span-3">
               <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <h4 className="mb-2 line-clamp-2 text-lg font-bold">{title}</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Môn: {subjectName}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Số câu: {questions.length}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{texts.subject || "Môn"}: {subjectName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{texts.questionCountLabel || "Số câu"}: {questions.length}</p>
               </div>
             </aside>
 
             <section className="col-span-12 flex min-h-[520px] flex-col rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:col-span-6">
               <div className="flex-grow p-6">
-                <h3 className="pb-2 text-left text-xl font-bold leading-tight text-primary">Câu {currentQuestionIndex + 1}</h3>
+                <h3 className="pb-2 text-left text-xl font-bold leading-tight text-primary">{texts.questionLabel || "Câu"} {currentQuestionIndex + 1}</h3>
                 <div className="pb-6 pt-1 text-base font-normal leading-relaxed text-gray-800 dark:text-gray-200" dangerouslySetInnerHTML={{ __html: parseMarkdown(currentQuestion?.content) }} />
                 {currentQuestion?.imageUrl && (
                   <div className="my-4 text-center">
-                    <img src={getFullImageUrl(currentQuestion.imageUrl)} alt="Minh họa câu hỏi" className="mx-auto max-h-64 max-w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700" />
+                    <img src={getFullImageUrl(currentQuestion.imageUrl)} alt={texts.questionIllustration || "Minh họa câu hỏi"} className="mx-auto max-h-64 max-w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700" />
                   </div>
                 )}
                 <div className="space-y-4">
@@ -198,17 +198,17 @@ export default function RevisionChap1() {
                 {isMultipleChoice(currentQuestion) && !confirmedAnswers[currentQuestionIndex] && (
                   <div className="mt-6 flex justify-center">
                     <button onClick={handleConfirmMultipleAnswer} className="flex h-11 items-center justify-center gap-2 rounded-xl bg-green-600 px-8 font-bold text-white shadow-md transition-all hover:bg-green-700 hover:shadow-lg active:scale-95">
-                      <span className="material-symbols-outlined text-lg">check_circle</span><span>Kiểm tra đáp án</span>
+                      <span className="material-symbols-outlined text-lg">check_circle</span><span>{texts.checkAnswer || "Kiểm tra đáp án"}</span>
                     </button>
                   </div>
                 )}
               </div>
               <div className="flex items-center justify-between border-t border-gray-200 p-4 dark:border-gray-700">
                 <button onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))} disabled={currentQuestionIndex === 0} className="flex h-11 items-center justify-center gap-2 rounded-xl bg-gray-100 px-5 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
-                  <span className="material-symbols-outlined text-base">arrow_back</span><span className="hidden sm:inline">Câu trước</span>
+                  <span className="material-symbols-outlined text-base">arrow_back</span><span className="hidden sm:inline">{texts.previousQuestion || "Câu trước"}</span>
                 </button>
                 <button onClick={() => setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))} disabled={currentQuestionIndex === questions.length - 1} className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
-                  <span className="hidden sm:inline">Câu tiếp theo</span><span className="material-symbols-outlined text-base">arrow_forward</span>
+                  <span className="hidden sm:inline">{texts.nextQuestion || "Câu tiếp theo"}</span><span className="material-symbols-outlined text-base">arrow_forward</span>
                 </button>
               </div>
             </section>
@@ -227,12 +227,12 @@ export default function RevisionChap1() {
                   })}
                 </div>
                 <div className="mb-6 space-y-3 border-t border-gray-100 pt-4 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-400">
-                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm bg-primary" /><span>Câu hiện tại</span></div>
-                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm bg-green-500" /><span>Đã trả lời</span></div>
-                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm border border-gray-400 bg-gray-200 dark:bg-white/10" /><span>Chưa trả lời</span></div>
+                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm bg-primary" /><span>{texts.currentQuestion || "Câu hiện tại"}</span></div>
+                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm bg-green-500" /><span>{texts.answered || "Đã trả lời"}</span></div>
+                  <div className="flex items-center gap-3"><div className="size-4 rounded-sm border border-gray-400 bg-gray-200 dark:bg-white/10" /><span>{texts.notAnswered || "Chưa trả lời"}</span></div>
                 </div>
                 <button onClick={() => navigate(-1)} className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gray-100 px-6 text-base font-bold text-gray-700 shadow-md transition-all hover:bg-gray-200 hover:shadow-lg active:scale-95 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
-                  <span className="material-symbols-outlined">arrow_back</span><span>Quay lại</span>
+                  <span className="material-symbols-outlined">arrow_back</span><span>{texts.back || "Quay lại"}</span>
                 </button>
               </div>
             </aside>

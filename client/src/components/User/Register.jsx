@@ -41,8 +41,8 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 bg-[url('https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg')] bg-no-repeat bg-center bg-cover py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
+    <div className="auth-page min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="auth-card w-full max-w-md space-y-8 p-10 rounded-2xl shadow-xl">
         {/* Header Section */}
         <div className="text-center">
           <img
@@ -51,10 +51,10 @@ const RegisterForm = () => {
             className="mx-auto h-16 w-auto mb-4 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate("/")}
           />
-          <h2 className="text-3xl font-extrabold text-blue-600 tracking-tight">
+          <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--aura-primary)" }}>
             ĐĂNG KÝ TÀI KHOẢN
           </h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm" style={{ color: "var(--aura-subtle)" }}>
             Tạo tài khoản để bắt đầu hành trình học tập
           </p>
         </div>
@@ -65,7 +65,7 @@ const RegisterForm = () => {
           autoComplete="off"
           layout="vertical"
           onFinish={onFinish}
-          className="mt-8 space-y-5"
+          className="auth-form mt-8 space-y-5"
           size="large"
         >
           <Form.Item
@@ -83,7 +83,7 @@ const RegisterForm = () => {
           >
             <Input
               placeholder="Tên đăng nhập"
-              prefix={<UserOutlined className="text-gray-400" />}
+              prefix={<UserOutlined className="auth-input-icon" />}
               className="rounded-lg py-2.5"
             />
           </Form.Item>
@@ -95,7 +95,7 @@ const RegisterForm = () => {
           >
             <Input
               placeholder="Họ và tên"
-              prefix={<UserOutlined className="text-gray-400" />}
+              prefix={<UserOutlined className="auth-input-icon" />}
               className="rounded-lg py-2.5"
             />
           </Form.Item>
@@ -110,7 +110,7 @@ const RegisterForm = () => {
           >
             <Input
               placeholder="Email"
-              prefix={<MailOutlined className="text-gray-400" />}
+              prefix={<MailOutlined className="auth-input-icon" />}
               className="rounded-lg py-2.5"
             />
           </Form.Item>
@@ -125,7 +125,7 @@ const RegisterForm = () => {
           >
             <Input.Password
               placeholder="Mật khẩu"
-              prefix={<LockOutlined className="text-gray-400" />}
+              prefix={<LockOutlined className="auth-input-icon" />}
               className="rounded-lg py-2.5"
             />
           </Form.Item>
@@ -150,7 +150,7 @@ const RegisterForm = () => {
           >
             <Input.Password
               placeholder="Xác nhận mật khẩu"
-              prefix={<LockOutlined className="text-gray-400" />}
+              prefix={<LockOutlined className="auth-input-icon" />}
               className="rounded-lg py-2.5"
             />
           </Form.Item>
@@ -161,7 +161,7 @@ const RegisterForm = () => {
               type="primary"
               htmlType="submit"
               loading={loading}
-              className="w-full h-12 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold text-lg shadow-md transition-all duration-300 border-none"
+              className="auth-primary-btn w-full h-12 rounded-lg font-semibold text-lg shadow-md transition-all duration-300 border-none"
             >
               Đăng ký ngay
             </Button>
@@ -169,15 +169,15 @@ const RegisterForm = () => {
         </Form>
 
         {/* Footer Link */}
-        <div className="text-center mt-6 pt-4 border-t border-gray-100">
-          <span className="text-gray-600">Đã có tài khoản? </span>
+        <div className="auth-footer text-center mt-6 pt-4">
+          <span style={{ color: "var(--aura-muted)" }}>Đã có tài khoản? </span>
           <a
             href="/login"
             onClick={(e) => {
               e.preventDefault();
               navigate("/login");
             }}
-            className="font-medium text-blue-600 hover:text-blue-500 hover:underline transition-colors"
+            className="auth-link font-medium hover:underline transition-colors"
           >
             Đăng nhập ngay
           </a>
