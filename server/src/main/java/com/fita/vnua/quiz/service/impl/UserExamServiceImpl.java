@@ -210,16 +210,27 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     @Transactional
-    public ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request) {
+    public synchronized ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request) {
         List<UserExam> existingAttempts = userExamRepository.findInProgressByUserIdAndExamId(request.getUserId(), request.getExamId());
         if (!existingAttempts.isEmpty()) {
-            return buildAttemptResponse(existingAttempts.get(0));
+            UserExam latestAttempt = existingAttempts.get(0);
+            closeDuplicatedInProgressAttempts(existingAttempts, latestAttempt);
+            return buildAttemptResponse(latestAttempt);
         }
 
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
         Exam exam = examRepository.findById(request.getExamId())
                 .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + request.getExamId()));
+
+        // Kiểm tra lại sau khi load User/Exam để tránh trường hợp 2 request start chạy gần như đồng thời
+        // tạo ra 2 bản ghi IN_PROGRESS cho cùng user + exam.
+        existingAttempts = userExamRepository.findInProgressByUserIdAndExamId(request.getUserId(), request.getExamId());
+        if (!existingAttempts.isEmpty()) {
+            UserExam latestAttempt = existingAttempts.get(0);
+            closeDuplicatedInProgressAttempts(existingAttempts, latestAttempt);
+            return buildAttemptResponse(latestAttempt);
+        }
 
         UserExam userExam = new UserExam();
         userExam.setUser(user);
@@ -304,11 +315,36 @@ public class UserExamServiceImpl implements UserExamService {
 
     private boolean isQuestionCorrect(Question question, Set<Long> chosenAnswerIds) {
         if (chosenAnswerIds == null || chosenAnswerIds.isEmpty()) return false;
+
         Set<Long> correctAnswerIds = question.getAnswers().stream()
-                .filter(Answer::getIsCorrect)
+                .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
                 .map(Answer::getOptionId)
                 .collect(Collectors.toSet());
-        return !correctAnswerIds.isEmpty() && correctAnswerIds.equals(chosenAnswerIds);
+        if (correctAnswerIds.isEmpty()) return false;
+
+        Question.QuestionType questionType = question.getQuestionType() != null
+                ? question.getQuestionType()
+                : Question.QuestionType.SINGLE_CHOICE;
+
+        return switch (questionType) {
+            case SINGLE_CHOICE -> chosenAnswerIds.size() == 1
+                    && correctAnswerIds.size() == 1
+                    && correctAnswerIds.equals(chosenAnswerIds);
+            case MULTIPLE_CHOICE -> correctAnswerIds.equals(chosenAnswerIds);
+            case FILL_IN_THE_BLANK -> false;
+        };
+    }
+
+    private void closeDuplicatedInProgressAttempts(List<UserExam> existingAttempts, UserExam keepAttempt) {
+        if (existingAttempts.size() <= 1) return;
+        LocalDateTime now = LocalDateTime.now();
+        for (UserExam attempt : existingAttempts) {
+            if (attempt.getUserExamId().equals(keepAttempt.getUserExamId())) continue;
+            attempt.setStatus("CANCELLED");
+            attempt.setEndTime(now);
+            attempt.setUpdatedAt(now);
+            userExamRepository.save(attempt);
+        }
     }
 
     private UserExam getInProgressUserExam(Long userExamId) {
@@ -351,7 +387,7 @@ public class UserExamServiceImpl implements UserExamService {
                 .updatedAt(userExam.getUpdatedAt())
                 .remainingTime(userExam.getRemainingTime())
                 .currentQuestionIndex(userExam.getCurrentQuestionIndex())
-                .answeredCount(answers.size())
+                .answeredCount((int) answers.stream().map(UserAnswerDto::getQuestionId).distinct().count())
                 .totalQuestions(totalQuestions)
                 .score(userExam.getScore())
                 .userAnswerDtos(answers)
