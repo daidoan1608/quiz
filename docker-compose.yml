@@ -7,14 +7,9 @@ services:
     depends_on:
       - db
     env_file:
-      - .env
+      - ./server/.env
     environment:
       - DB_HOST=db
-      - DB_PORT=${DB_PORT:-3306}
-      - DB_USER=${DB_USER:-root}
-      - DB_PASSWORD=${DB_PASSWORD:-root}
-      - DB_NAME=${DB_NAME:-quiz}
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:${DB_PORT:-3306}/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
 
   user:
     build: ./client
@@ -32,6 +27,8 @@ services:
     image: mysql:8.0
     restart: always
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    env_file:
+      - ./server/.env
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_DATABASE: ${DB_NAME:-quiz}
