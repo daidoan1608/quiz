@@ -1,7 +1,9 @@
 package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
+import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
+import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.repository.ChapterRepository;
@@ -18,8 +20,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -35,6 +40,10 @@ public class QuestionImportService {
     @Transactional
     public void importQuestions(MultipartFile file, Long chapterId) throws IOException {
         ImportedQuestionFile importedFile = readImportFile(file);
+        ImportPreviewResponse preview = buildPreview(importedFile);
+        if (preview.getInvalidRows() > 0) {
+            throw new CustomApiException("File import con loi: " + String.join("; ", preview.getErrors()), HttpStatus.BAD_REQUEST);
+        }
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new CustomApiException("Chapter không tồn tại", HttpStatus.NOT_FOUND));
 
@@ -43,6 +52,28 @@ public class QuestionImportService {
                 .toList();
 
         questionRepository.saveAll(questions);
+    }
+
+    public ImportPreviewResponse previewImport(MultipartFile file) throws IOException {
+        return buildPreview(readImportFile(file));
+    }
+
+    private ImportPreviewResponse buildPreview(ImportedQuestionFile importedFile) {
+        List<String> errors = new ArrayList<>();
+        Set<Integer> invalidRows = new HashSet<>();
+        Map<String, byte[]> images = importedFile.images();
+        List<QuestionDto> questions = importedFile.questions();
+
+        for (int i = 0; i < questions.size(); i++) {
+            validateQuestion(questions.get(i), i + 2, images, errors, invalidRows);
+        }
+
+        return ImportPreviewResponse.builder()
+                .totalRows(questions.size())
+                .validRows(questions.size() - invalidRows.size())
+                .invalidRows(invalidRows.size())
+                .errors(errors)
+                .build();
     }
 
     private ImportedQuestionFile readImportFile(MultipartFile file) throws IOException {
@@ -127,6 +158,65 @@ public class QuestionImportService {
 
     private boolean isExternalOrPublicUrl(String value) {
         return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/");
+    }
+
+    private void validateQuestion(
+            QuestionDto question,
+            int rowNumber,
+            Map<String, byte[]> images,
+            List<String> errors,
+            Set<Integer> invalidRows
+    ) {
+        if (question.getContent() == null || question.getContent().trim().isEmpty()) {
+            addRowError(errors, invalidRows, rowNumber, "noi dung cau hoi dang trong.");
+        }
+
+        String difficulty = question.getDifficulty();
+        if (difficulty == null || difficulty.isBlank()) {
+            addRowError(errors, invalidRows, rowNumber, "chua co muc do.");
+        }
+
+        List<AnswerDto> answers = question.getAnswers();
+        if (answers == null || answers.size() < 2 || answers.size() > 4) {
+            addRowError(errors, invalidRows, rowNumber, "can co tu 2 den 4 dap an.");
+        } else {
+            long correctCount = answers.stream().filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect())).count();
+            if (correctCount == 0) {
+                addRowError(errors, invalidRows, rowNumber, "chua chon dap an dung.");
+            }
+            String questionType = question.getQuestionType() == null || question.getQuestionType().isBlank()
+                    ? "SINGLE_CHOICE"
+                    : question.getQuestionType().trim().toUpperCase();
+            if ("SINGLE_CHOICE".equals(questionType) && correctCount > 1) {
+                addRowError(errors, invalidRows, rowNumber, "SINGLE_CHOICE chi duoc co 1 dap an dung.");
+            }
+            if ("MULTIPLE_CHOICE".equals(questionType) && correctCount < 2) {
+                addRowError(errors, invalidRows, rowNumber, "MULTIPLE_CHOICE can it nhat 2 dap an dung.");
+            }
+            if (!"SINGLE_CHOICE".equals(questionType) && !"MULTIPLE_CHOICE".equals(questionType)) {
+                addRowError(errors, invalidRows, rowNumber, "questionType khong hop le: " + questionType + ".");
+            }
+            for (int index = 0; index < answers.size(); index++) {
+                String answerContent = answers.get(index).getContent();
+                if (answerContent == null || answerContent.trim().isEmpty()) {
+                    addRowError(errors, invalidRows, rowNumber, "dap an " + (char) ('A' + index) + " dang trong.");
+                }
+            }
+        }
+
+        String imageUrl = question.getImageUrl();
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            String normalizedImage = imageUrl.trim();
+            boolean foundInZip = images.containsKey(normalizedImage.toLowerCase());
+            if (!foundInZip && !isExternalOrPublicUrl(normalizedImage)) {
+                addRowError(errors, invalidRows, rowNumber, "khong tim thay anh '" + normalizedImage + "' trong ZIP.");
+            }
+        }
+    }
+
+    private void addRowError(List<String> errors, Set<Integer> invalidRows, int rowNumber, String message) {
+        invalidRows.add(rowNumber);
+        errors.add("Dong " + rowNumber + ": " + message);
     }
 
     private record ImportedQuestionFile(List<QuestionDto> questions, Map<String, byte[]> images) {

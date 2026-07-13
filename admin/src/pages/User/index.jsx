@@ -17,6 +17,7 @@ import {
   DeleteOutlined,
   UserOutlined,
   SearchOutlined,
+  SafetyCertificateOutlined,
 } from "@ant-design/icons";
 
 // IMPORT LAYOUT CHUNG
@@ -25,6 +26,7 @@ import ManagementPageLayout from '../../layouts/ManagementPageLayout'; // <-- Th
 // IMPORT CÁC MODAL ĐÃ TÁCH
 import AddUserModal from "../../components/Modal/AddUserModal";
 import UpdateUserModal from "../../components/Modal/UpdateUserModal";
+import SubjectPermissionModal from "../../components/Modal/SubjectPermissionModal";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -38,7 +40,9 @@ export default function UserManager() {
   // --- STATES QUẢN LÝ MODAL ---
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedPermissionUser, setSelectedPermissionUser] = useState(null);
 
   // Lấy role hiện tại
   const currentUserRole = localStorage.getItem("role");
@@ -98,6 +102,15 @@ export default function UserManager() {
     setIsUpdateModalOpen(true);
   };
 
+  const handleOpenPermissions = (user) => {
+    if (user.role !== "MOD") {
+      message.warning("Chi tai khoan MOD moi can phan quyen theo mon.");
+      return;
+    }
+    setSelectedPermissionUser(user);
+    setIsPermissionModalOpen(true);
+  };
+
   // --- 4. LỌC DỮ LIỆU ---
   // Search dùng endpoint BE /admin/users/search?key=..., role vẫn lọc client-side.
   const getFilteredData = () => {
@@ -106,7 +119,9 @@ export default function UserManager() {
 
   const handleModalClose = () => {
     setIsUpdateModalOpen(false);
+    setIsPermissionModalOpen(false);
     setSelectedUserId(null);
+    setSelectedPermissionUser(null);
     setIsAddModalOpen(false);
   };
 
@@ -144,6 +159,14 @@ export default function UserManager() {
               icon={<EditOutlined />}
               disabled={isMod}
               onClick={() => handleEdit(record.userId)}
+            />
+          </Tooltip>
+
+          <Tooltip title={record.role === "MOD" ? "Phan quyen mon hoc" : "Chi ap dung cho MOD"}>
+            <Button
+              icon={<SafetyCertificateOutlined />}
+              disabled={isMod || record.role !== "MOD"}
+              onClick={() => handleOpenPermissions(record)}
             />
           </Tooltip>
 
@@ -246,6 +269,14 @@ export default function UserManager() {
           onCancel={handleModalClose}
           onSuccess={fetchUsers} // Gọi lại API để làm mới bảng
           userId={selectedUserId}
+        />
+      )}
+
+      {isPermissionModalOpen && selectedPermissionUser && (
+        <SubjectPermissionModal
+          isModalOpen={isPermissionModalOpen}
+          onCancel={handleModalClose}
+          user={selectedPermissionUser}
         />
       )}
     </>

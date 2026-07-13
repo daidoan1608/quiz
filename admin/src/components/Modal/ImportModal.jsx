@@ -23,7 +23,10 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const [subjects, setSubjects] = useState([]);
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null); // Lưu file đã chọn
+
+  const [previewResult, setPreviewResult] = useState(null);
 
   // State UI
   const [isChaptersEmpty, setIsChaptersEmpty] = useState(false);
@@ -88,6 +91,50 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
   };
 
   // --- 2. XỬ LÝ UPLOAD ---
+  const buildImportFormData = (values) => {
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("categoryId", values.categoryId);
+    formData.append("subjectId", values.subjectId);
+    formData.append("chapterId", values.chapterId);
+    return formData;
+  };
+
+  const handlePreview = async () => {
+    try {
+      const values = await form.validateFields();
+      if (!selectedFile) {
+        message.error("Vui long chon file de kiem tra!");
+        return;
+      }
+
+      setPreviewLoading(true);
+      const response = await authAxios.post(
+        "admin/questions/import/preview",
+        buildImportFormData(values),
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      const result = response.data?.data || response.data;
+      setPreviewResult(result);
+
+      if (result?.invalidRows > 0) {
+        message.warning("File con loi, vui long kiem tra danh sach ben duoi.");
+      } else {
+        message.success("File hop le, co the import.");
+      }
+    } catch (error) {
+      console.error("Loi khi preview file:", error);
+      notification.error({
+        message: "Kiem tra file that bai",
+        description:
+          error.response?.data?.message ||
+          "Khong the doc file hoac thong tin phan loai chua hop le.",
+      });
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   const handleUpload = async (values) => {
     if (!selectedFile) {
       message.error("Vui lòng chọn file để upload!");
@@ -103,11 +150,7 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
 
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-    formData.append("categoryId", values.categoryId);
-    formData.append("subjectId", values.subjectId);
-    formData.append("chapterId", values.chapterId);
+    const formData = buildImportFormData(values);
 
     try {
       const response = await authAxios.post(
@@ -125,6 +168,7 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
         // Reset form và state
         form.resetFields();
         setSelectedFile(null);
+        setPreviewResult(null);
         setSubjects([]);
         setChapters([]);
         onSuccess(); // Đóng modal và làm mới dữ liệu
@@ -152,6 +196,7 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const handleCancel = () => {
       form.resetFields();
       setSelectedFile(null);
+      setPreviewResult(null);
       setSubjects([]);
       setChapters([]);
       onCancel();
@@ -166,10 +211,12 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
     fileList: selectedFile ? [selectedFile] : [], // Kiểm soát file list thủ công
     beforeUpload: (file) => {
       setSelectedFile(file);
+      setPreviewResult(null);
       return false;
     },
     onRemove: () => {
       setSelectedFile(null);
+      setPreviewResult(null);
       return true;
     },
   };
@@ -314,21 +361,53 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
           </Dragger>
         </Form.Item>
 
+        {previewResult && (
+          <Alert
+            type={previewResult.invalidRows > 0 ? "warning" : "success"}
+            showIcon
+            style={{ marginTop: 16 }}
+            message={`Kiem tra: ${previewResult.validRows}/${previewResult.totalRows} dong hop le`}
+            description={
+              previewResult.errors?.length > 0 ? (
+                <div style={{ maxHeight: 140, overflowY: "auto" }}>
+                  {previewResult.errors.slice(0, 20).map((error, index) => (
+                    <div key={`${error}-${index}`}>{error}</div>
+                  ))}
+                  {previewResult.errors.length > 20 && (
+                    <div>...con {previewResult.errors.length - 20} loi khac</div>
+                  )}
+                </div>
+              ) : (
+                "Khong phat hien loi dinh dang co ban."
+              )
+            }
+          />
+        )}
+
         {/* Upload Button */}
         <div
           style={{
             display: "flex",
             justifyContent: "flex-end",
+            gap: 12,
             marginTop: 30,
           }}
         >
+          <Button
+            icon={<CloudUploadOutlined />}
+            loading={previewLoading}
+            size="large"
+            onClick={handlePreview}
+          >
+            Kiem tra file
+          </Button>
           <Button
             type="primary"
             htmlType="submit"
             icon={<ImportOutlined />}
             loading={loading}
             size="large"
-            disabled={isChaptersEmpty && chapters.length === 0}
+            disabled={(isChaptersEmpty && chapters.length === 0) || previewResult?.invalidRows > 0}
           >
             Bắt đầu Upload
           </Button>

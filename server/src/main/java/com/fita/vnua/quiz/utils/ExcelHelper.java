@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ExcelHelper {
 
@@ -46,17 +48,21 @@ public class ExcelHelper {
                 // Lấy đáp án đúng ký tự ở cột 6 (index 6)
                 Cell correctCell = currentRow.getCell(6, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                 String correctOption = correctCell != null ? formatter.formatCellValue(correctCell).trim().toUpperCase() : "";
+                Set<String> correctOptions = parseCorrectOptions(correctOption);
 
                 String[] options = {"A", "B", "C", "D"};
 
                 // Lấy 4 đáp án từ cột 2,3,4,5 (index 2..5)
                 for (int i = 0; i < 4; i++) {
                     Cell answerCell = currentRow.getCell(i + 2, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                    String answerContent = answerCell != null ? formatter.formatCellValue(answerCell) : "";
+                    String answerContent = answerCell != null ? formatter.formatCellValue(answerCell).trim() : "";
+                    if (answerContent.isBlank()) {
+                        continue;
+                    }
 
                     AnswerDto answerDto = new AnswerDto();
                     answerDto.setContent(answerContent);
-                    answerDto.setIsCorrect(correctOption.contains(options[i]));
+                    answerDto.setIsCorrect(correctOptions.contains(options[i]));
                     answers.add(answerDto);
                 }
 
@@ -79,6 +85,13 @@ public class ExcelHelper {
         } catch (Exception e) {
             throw new CustomApiException("Lỗi khi đọc file Excel: " + e.getMessage(), e);
         }
+    }
+
+    private static Set<String> parseCorrectOptions(String correctOption) {
+        return correctOption.chars()
+                .mapToObj(value -> String.valueOf((char) value))
+                .filter(value -> value.matches("[A-D]"))
+                .collect(Collectors.toSet());
     }
 
 }

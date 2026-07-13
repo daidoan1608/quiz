@@ -3,6 +3,7 @@ package com.fita.vnua.quiz.controller;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
+import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.QuestionService;
@@ -28,6 +29,19 @@ public class QuestionController {
     private final QuestionService questionService;
     private final AvatarStorageService avatarStorageService;
     private final AuthorizationService authorizationService;
+
+    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'CREATE')")
+    @PostMapping("admin/questions/import/preview")
+    @Operation(summary = "Kiem tra file Excel truoc khi import cau hoi")
+    public ResponseEntity<ApiResponse<ImportPreviewResponse>> previewImportQuestions(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam("subjectId") Long subjectId,
+            @RequestParam("chapterId") Long chapterId
+    ) throws Exception {
+        ImportPreviewResponse preview = questionService.previewImportQuestions(file, categoryId, subjectId, chapterId);
+        return ResponseEntity.ok(ApiResponse.success("Import preview fetched successfully", preview));
+    }
 
     @PreAuthorize("hasPermission(#subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/questions/import")

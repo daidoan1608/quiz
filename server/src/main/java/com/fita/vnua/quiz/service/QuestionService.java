@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.QuestionDto;
+import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
 import com.fita.vnua.quiz.model.dto.response.Response;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,4 +43,6 @@ public interface QuestionService {
     Map<String, Object> totalQuestionBySubject(Long subjectId);
 
     void importQuestionsFromExcel(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException;
+
+    ImportPreviewResponse previewImportQuestions(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException;
 }

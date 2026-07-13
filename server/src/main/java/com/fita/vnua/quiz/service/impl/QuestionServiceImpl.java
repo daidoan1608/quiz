@@ -2,6 +2,7 @@ package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
+import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
 import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
@@ -115,12 +116,22 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public void importQuestionsFromExcel(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException {
+        validateImportTarget(subjectId, chapterId);
+        questionImportService.importQuestions(file, chapterId);
+    }
+
+    @Override
+    public ImportPreviewResponse previewImportQuestions(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException {
+        validateImportTarget(subjectId, chapterId);
+        return questionImportService.previewImport(file);
+    }
+
+    private void validateImportTarget(Long subjectId, Long chapterId) {
         Long chapterSubjectId = chapterRepository.findSubjectIdByChapterId(chapterId)
                 .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
         if (!chapterSubjectId.equals(subjectId)) {
             throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
         }
-        questionImportService.importQuestions(file, chapterId);
     }
 
     @Override

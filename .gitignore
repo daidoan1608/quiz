@@ -56,7 +56,17 @@ DESIGN (1).md
 .vs/
 **/.settings/
 **/.vs/
+server/.classpath
+server/.factorypath
+server/.project
+server/.settings/
+server/.vs/
+server/quiz.iml
+server/HELP.md
 
 # Runtime uploads
 server/uploads/
+server/uploads/**
+server/uploads/avatars/
+server/uploads/avatars/**
 !server/uploads/.gitkeep
