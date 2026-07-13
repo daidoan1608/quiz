@@ -19,10 +19,25 @@ const config = {
 const authAxios = axios.create(config);
 const publicAxios = axios.create(config);
 
+const getCookieValue = (name) => {
+  if (typeof document === "undefined") return "";
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${name}=`));
+  return cookie ? decodeURIComponent(cookie.split("=")[1] || "") : "";
+};
+
+const isUnsafeMethod = (method = "get") =>
+  ["post", "put", "patch", "delete"].includes(method.toLowerCase());
+
 const attachLanguageHeader = (requestConfig) => {
   const language = localStorage.getItem("appLanguage") || "vi";
   requestConfig.headers = requestConfig.headers || {};
   requestConfig.headers["Accept-Language"] = language;
+  const xsrfToken = getCookieValue("XSRF-TOKEN");
+  if (xsrfToken && isUnsafeMethod(requestConfig.method)) {
+    requestConfig.headers["X-XSRF-TOKEN"] = xsrfToken;
+  }
   return requestConfig;
 };
 
@@ -54,6 +69,11 @@ const processQueue = (error) => {
   failedQueue = [];
 };
 
+const primeCsrfToken = async () => {
+  await publicAxios.get("/auth/me");
+  return getCookieValue("XSRF-TOKEN");
+};
+
 // 3. Response Interceptor (Logic Refresh Token)
 authAxios.interceptors.response.use(
   (response) => {
@@ -69,6 +89,20 @@ authAxios.interceptors.response.use(
     }
 
     const status = error.response?.status;
+
+    if (status === 403 && isUnsafeMethod(originalRequest.method) && !originalRequest._csrfRetry) {
+      originalRequest._csrfRetry = true;
+      try {
+        const xsrfToken = await primeCsrfToken();
+        if (xsrfToken) {
+          originalRequest.headers = originalRequest.headers || {};
+          originalRequest.headers["X-XSRF-TOKEN"] = xsrfToken;
+          return authAxios(originalRequest);
+        }
+      } catch (csrfError) {
+        return Promise.reject(error);
+      }
+    }
 
     if (status === 403) {
       message.error(getApiErrorMessage(error, "Bạn không có quyền thực hiện thao tác này!"));

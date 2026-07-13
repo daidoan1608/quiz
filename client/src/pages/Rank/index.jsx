@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { publicAxios } from "api/axiosConfig";
+import { examApi } from "api/examApi";
 import { useLanguage } from "context/LanguageProvider";
 import { useAuth } from "context/AuthProvider";
 import { getCurrentUserId } from "utils/storage";
@@ -32,7 +32,7 @@ export default function Rank() {
   const fetchLeaderboardData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await publicAxios.get("/public/user-exam-summaries", {
+      const response = await examApi.getRankings({
         params: { period: timeFilter },
       });
       const result = response.data;

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Form, Input, message } from "antd";
 import { LockOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { publicAxios } from "api/axiosConfig";
+import { authApi } from "api/authApi";
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ const RegisterForm = () => {
     setLoading(true);
     try {
       // Gọi API đăng ký
-      await publicAxios.post("/auth/register", {
+      await authApi.register({
         username: values.username,
         email: values.email,
         password: values.password,

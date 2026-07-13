@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { authAxios, publicAxios } from "api/axiosConfig";
+import { subjectApi } from "api/subjectApi";
 import { useAuth } from "context/AuthProvider";
 import { useFavorites } from "context/FavoritesContext";
 import { useLanguage } from "context/LanguageProvider";
@@ -36,9 +36,9 @@ export default function SubjectDetail() {
     const fetchSubjectDetails = async () => {
       try {
         setIsLoading(true);
-        const resp = await publicAxios.get(`public/subjects/${subjectId}`);
-        if (resp.data.status === "success") {
-          setSubjectData(resp.data.data);
+        const data = await subjectApi.getPublicSubject(subjectId);
+        if (data) {
+          setSubjectData(data);
         } else {
           setError(texts.subjectDataNotFound || "Không tìm thấy dữ liệu môn học.");
         }
@@ -61,8 +61,7 @@ export default function SubjectDetail() {
       }
 
       try {
-        const resp = await authAxios.get(`users/${userId}/exam-attempts/in-progress`);
-        const attempts = resp.data?.data || [];
+        const attempts = await subjectApi.getInProgressAttempts(userId);
         const attemptMap = new Map();
         attempts.forEach((attempt) => {
           if (attempt.examId) attemptMap.set(Number(attempt.examId), attempt);
@@ -97,10 +96,12 @@ export default function SubjectDetail() {
       setShowLoginPrompt(true);
       return;
     }
+    const inProgressAttempt = inProgressExams.get(Number(exam.examId));
     navigate(`/subjects/${subjectId}/exams/${exam.examId}`, {
       state: {
         examId: exam.examId,
         subjectId,
+        userExamId: inProgressAttempt?.userExamId,
         title: exam.title,
         startTime: new Date().toISOString(),
       },

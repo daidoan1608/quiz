@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
-import { publicAxios } from "api/axiosConfig";
+import { subjectApi } from "api/subjectApi";
 import { useFavorites } from "context/FavoritesContext";
 import { useLanguage } from "context/LanguageProvider";
 
@@ -46,13 +46,13 @@ export default function Subject() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [subjectsResp, categoriesResp] = await Promise.all([
-          publicAxios.get("/public/subjects"),
-          publicAxios.get("/public/categories"),
+        const [subjectsData, categoriesData] = await Promise.all([
+          subjectApi.getPublicSubjects(),
+          subjectApi.getPublicCategories(),
         ]);
 
-        setSubjects(subjectsResp.data.data || []);
-        setCategories(categoriesResp.data.data ? categoriesResp.data.data.flat() : []);
+        setSubjects(subjectsData || []);
+        setCategories(categoriesData ? categoriesData.flat() : []);
       } catch (error) {
         console.error("Lỗi khi tải danh sách môn học:", error);
         setSubjects([]);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { authAxios } from "api/axiosConfig";
+import { examApi } from "api/examApi";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useLanguage } from "context/LanguageProvider";
 import { parseMarkdown } from "utils/parseMarkdown";
@@ -58,21 +58,6 @@ export default function Exam() {
   const handleSubmit = useCallback(async () => {
     const endTime = new Date().toISOString();
 
-    const correctAnswersCount = questions.reduce((count, question, index) => {
-      const selectedIndexes = normalizeSelectedIndexes(selectedAnswers[index]);
-      if (!selectedIndexes.length) return count;
-      const selectedAnswerIds = selectedIndexes
-        .map((answerIndex) => question.answers?.[answerIndex])
-        .filter(Boolean)
-        .map((answer) => answer.answerId || answer.optionId)
-        .sort();
-      const correctAnswerIds = (question.answers || [])
-        .filter((answer) => answer.isCorrect)
-        .map((answer) => answer.answerId || answer.optionId)
-        .sort();
-      return selectedAnswerIds.length === correctAnswerIds.length && selectedAnswerIds.every((id, idx) => id === correctAnswerIds[idx]) ? count + 1 : count;
-    }, 0);
-
     const userAnswerDtos = Object.entries(selectedAnswers)
       .flatMap(([questionIndex, answerValue]) => {
         const question = questions[questionIndex];
@@ -87,8 +72,8 @@ export default function Exam() {
 
     try {
       const response = userExamId
-        ? await authAxios.post(`exam-attempts/${userExamId}/submit`)
-        : await authAxios.post("user-exams", {
+        ? await examApi.submitAttempt(userExamId)
+        : await examApi.submitUserExam({
             // Không gửi score từ FE. Backend sẽ tự chấm lại dựa trên userAnswerDtos.
             userExamDto: { userId, examId, startTime, endTime },
             userAnswerDtos,
@@ -102,7 +87,6 @@ export default function Exam() {
             examId,
             subjectId,
             userExamId: response.data.data.userExamId,
-            correctAnswers: correctAnswersCount,
             timeTaken: duration * 60 - (timeLeft || 0),
             totalQuestions: questions.length,
           },
@@ -123,8 +107,8 @@ export default function Exam() {
       try {
         setIsLoading(true);
         const [examResponse, attemptResponse] = await Promise.all([
-          authAxios.get(`public/exams/${examId}`),
-          userId ? authAxios.post("exam-attempts/start", { userId, examId }) : Promise.resolve(null),
+          examApi.getPublicExam(examId),
+          userId ? examApi.startAttempt({ userId, examId }) : Promise.resolve(null),
         ]);
         const data = examResponse.data.data;
         const attempt = attemptResponse?.data?.data;
@@ -145,9 +129,9 @@ export default function Exam() {
           }
         }
 
-        if (attempt?.userAnswerDtos?.length) {
+        if (attempt?.userExamId) {
           const answerIndexByQuestion = {};
-          attempt.userAnswerDtos.forEach((userAnswer) => {
+          (attempt.userAnswerDtos || []).forEach((userAnswer) => {
             const questionIndex = (data.questions || []).findIndex((question) => question.questionId === userAnswer.questionId);
             if (questionIndex < 0) return;
             const question = (data.questions || [])[questionIndex];
@@ -243,7 +227,7 @@ export default function Exam() {
   useEffect(() => {
     if (!isDraftReady || !userExamId || timeLeft === null) return;
     const progressTimer = setTimeout(() => {
-      authAxios.patch(`exam-attempts/${userExamId}/progress`, {
+      examApi.updateProgress(userExamId, {
         currentQuestionIndex,
         remainingTime: timeLeft,
       }).catch((error) => console.error("Lỗi lưu tiến độ bài thi:", error));
@@ -266,7 +250,7 @@ export default function Exam() {
       .map((answer) => answer.answerId || answer.optionId);
 
     try {
-      await authAxios.put(`exam-attempts/${attemptId}/answers`, {
+      await examApi.saveAnswer(attemptId, {
         questionId: question.questionId,
         answerId: answerIds[0],
         answerIds,

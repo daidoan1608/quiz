@@ -6,7 +6,7 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { publicAxios } from "api/axiosConfig";
+import { authApi } from "api/authApi";
 import OtpInput from "react-otp-input";
 
 const ForgotPassword = () => {
@@ -23,7 +23,7 @@ const ForgotPassword = () => {
   const handleApiRequest = async (url, data, onSuccess) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post(url, data);
+      const response = await authApi.requestPasswordReset(url, data);
 
       if (
         response.status === 200 &&

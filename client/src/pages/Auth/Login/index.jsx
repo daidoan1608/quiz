@@ -8,9 +8,8 @@ import {
 } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { publicAxios } from "api/axiosConfig";
+import { authApi } from "api/authApi";
 import { useAuth } from "context/AuthProvider";
-import { authAxios } from "api/axiosConfig";
 import { GoogleLogin } from "@react-oauth/google";
 
 function Login() {
@@ -32,14 +31,14 @@ function Login() {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post("/auth/login", {
+      const response = await authApi.login({
         username: values.username,
         password: values.password,
       });
 
       const { userId, fullName, avatarUrl } = response.data.data;
-      const avatarResponse = await authAxios.get("users/me/avatar");
-      const avatar = avatarResponse.data.data;
+      const avatarResponse = await authApi.getMyAvatar();
+      const avatar = avatarResponse.data?.avatarUrl || avatarUrl || "";
       if (values.remember) {
         localStorage.setItem("savedUsername", values.username);
         localStorage.setItem("fullName", fullName);
@@ -50,7 +49,7 @@ function Login() {
         localStorage.removeItem("avatarUrl");
       }
 
-      login(userId, fullName, avatarUrl);
+      login(userId, fullName, avatar);
       navigate("/");
     } catch (error) {
       const errorMessage =
@@ -66,7 +65,7 @@ function Login() {
     try {
       // Lưu ý: Logic OAuth thường cần redirect sang trang của provider,
       // code này đang giả định luồng gọi API trực tiếp.
-      const response = await publicAxios.post(`/auth/${provider}`);
+      const response = await authApi.loginWithProvider(provider);
       const { userId, fullName, avatarUrl } = response.data?.data || response.data;
       login(userId, fullName, avatarUrl);
       navigate("/");
@@ -78,7 +77,7 @@ function Login() {
   const handleGoogleLoginSuccess = async (idToken) => {
     setLoading(true);
     try {
-      const response = await publicAxios.post("/auth/google", { idToken });
+      const response = await authApi.loginWithGoogle(idToken);
       const { userId, fullName, avatarUrl } = response.data.data;
       login(userId, fullName, avatarUrl);
       message.success("Đăng nhập Google thành công!");

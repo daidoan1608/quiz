@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { authAxios } from "api/axiosConfig";
+import { examApi } from "api/examApi";
 import { parseMarkdown } from "utils/parseMarkdown";
 import { typesetMath } from "utils/typesetMath";
 
@@ -25,8 +25,8 @@ export default function ResultExam() {
     const fetchData = async () => {
       try {
         const [examResponse, userAnswersResponse] = await Promise.all([
-          authAxios.get(`public/exams/${examId}`),
-          authAxios.get(`user-exams/${userExamId}`),
+          examApi.getPublicExam(examId, { includeCorrectAnswers: true, userExamId }),
+          examApi.getExamAttempt(userExamId),
         ]);
         setExamData(examResponse.data.data);
         setUserAnswers(userAnswersResponse.data.data);

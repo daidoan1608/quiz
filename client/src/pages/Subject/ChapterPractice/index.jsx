@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { publicAxios } from "api/axiosConfig";
+import { examApi } from "api/examApi";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "context/LanguageProvider";
 import { message } from "antd";
@@ -27,8 +27,7 @@ export default function ChapterPractice() {
     const getAllQuestionsByChapterId = async () => {
       try {
         setIsLoading(true);
-        const response = await publicAxios.get(`/public/questions/chapter/${chapterId}`);
-        const data = response.data?.data || [];
+        const data = await examApi.getChapterQuestions(chapterId);
         setQuestions(data);
         setTitle(location.state?.chapterName || texts.practiceQuestions || "Câu hỏi ôn tập");
         setSubjectName(location.state?.subjectName || texts.subjects || "Môn học");

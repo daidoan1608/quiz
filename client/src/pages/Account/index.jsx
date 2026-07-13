@@ -23,7 +23,7 @@ const Account = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const [activeSection, setActiveSection] = useState(ACCOUNT_SECTIONS.ROADMAP);
+  const [activeSection, setActiveSection] = useState(ACCOUNT_SECTIONS.PERSONAL);
   const [inProgressAttempts, setInProgressAttempts] = useState([]);
   const [savingProfile, setSavingProfile] = useState(false);
 

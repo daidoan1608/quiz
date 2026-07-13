@@ -125,8 +125,8 @@ export default function ExamHistoryList({ groupedExams, texts }) {
                           <span className="material-symbols-outlined text-[14px]">
                             check_circle
                           </span>
-                          {exam.userExamDto?.correctAnswers}/
-                          {exam.userExamDto?.totalQuestions} {texts?.correctUnit || "câu đúng"}
+                          {exam.userExamDto?.correctAnswers ?? 0}/
+                          {exam.userExamDto?.totalQuestions ?? 0} {texts?.correctUnit || "câu đúng"}
                         </div>
                       </div>
 

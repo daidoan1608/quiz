@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { authAxios } from "api/axiosConfig";
+import { notificationApi } from "api/notificationApi";
 import { useNavigate } from "react-router-dom";
 
 // Helper format thời gian
@@ -25,7 +25,7 @@ export default function Notifications() {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await authAxios.get("/notifications");
+      const response = { data: await notificationApi.getAll() };
       // API trả về mảng trực tiếp hoặc object { data: [...] }
       const data = Array.isArray(response.data) ? response.data : response.data.data || [];
       setNotifications(data);
@@ -45,7 +45,7 @@ export default function Notifications() {
     // 1. Đánh dấu đã đọc nếu chưa đọc
     if (!notif.isRead) {
       try {
-        await authAxios.patch(`/notifications/${notif.id}`);
+        await notificationApi.markOneRead(notif.id);
         setNotifications((prev) =>
           prev.map((item) =>
             item.id === notif.id ? { ...item, isRead: true } : item
@@ -67,7 +67,7 @@ export default function Notifications() {
   // --- 3. ĐÁNH DẤU TẤT CẢ ĐÃ ĐỌC ---
   const handleMarkAllAsRead = async () => {
     try {
-      await authAxios.patch("/notifications");
+      await notificationApi.markAllRead();
       setNotifications((prev) =>
         prev.map((notif) => ({ ...notif, isRead: true }))
       );

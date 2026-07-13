@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
-import { authAxios } from "api/axiosConfig";
+import { favoriteApi } from "api/favoriteApi";
 import { message } from "antd";
 import { useAuth } from "context/AuthProvider";
 
@@ -16,8 +16,8 @@ export const FavoritesProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const resp = await authAxios.get(`/users/${userId}/favorites`);
-      setFavorites(resp.data.data || []);
+      const favoriteList = await favoriteApi.getByUser(userId);
+      setFavorites(favoriteList || []);
     } catch (err) {
       setError("Không thể tải danh sách yêu thích.");
       setFavorites([]);
@@ -40,7 +40,7 @@ export const FavoritesProvider = ({ children }) => {
       return;
     }
     try {
-      await authAxios.post("/favorites", {
+      await favoriteApi.add({
         userId,
         subjectId,
         subjectName,
@@ -55,9 +55,7 @@ export const FavoritesProvider = ({ children }) => {
   const removeFavorite = async (subjectId, subjectName) => {
     if (!userId) return;
     try {
-      await authAxios.delete("/favorites", {
-        data: { userId, subjectId, subjectName },
-      });
+      await favoriteApi.remove({ userId, subjectId, subjectName });
       setFavorites((prev) => prev.filter((fav) => fav.subjectId !== subjectId));
       message.success("Xóa môn yêu thích thành công");
     } catch (error) {

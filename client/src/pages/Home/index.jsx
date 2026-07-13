@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authAxios, publicAxios } from "api/axiosConfig";
+import { subjectApi } from "api/subjectApi";
 import { useLanguage } from "context/LanguageProvider";
 import { useAuth } from "context/AuthProvider";
 import {
@@ -34,8 +34,8 @@ export default function Home() {
 
   const fetchSubjects = useCallback(async () => {
     try {
-      const response = await publicAxios.get("public/subjects");
-      setSubjects(response.data?.data || []);
+      const subjectsData = await subjectApi.getPublicSubjects();
+      setSubjects(subjectsData || []);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách môn học:", error);
       setSubjects([]);
@@ -49,10 +49,8 @@ export default function Home() {
     }
 
     try {
-      const response = await authAxios.get(
-        `users/${userId}/exam-attempts/in-progress`
-      );
-      setInProgressAttempts(response.data?.data || []);
+      const attempts = await subjectApi.getInProgressAttempts(userId);
+      setInProgressAttempts(attempts || []);
     } catch (error) {
       console.error("Lỗi khi lấy bài đang thực hiện:", error);
       setInProgressAttempts([]);
@@ -80,6 +78,7 @@ export default function Home() {
         state: {
           subjectId: attempt.subjectId,
           examId: attempt.examId,
+          userExamId: attempt.userExamId,
           title: attempt.title,
         },
       });

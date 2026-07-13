@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Result, Spin } from "antd";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { publicAxios } from "api/axiosConfig";
+import { authApi } from "api/authApi";
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -19,7 +19,7 @@ const VerifyEmail = () => {
 
     const verify = async () => {
       try {
-        await publicAxios.get(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+        await authApi.verifyEmail(token);
         setStatus("success");
         setMessage("Email đã được xác thực thành công. Bạn có thể đăng nhập ngay.");
       } catch (error) {
