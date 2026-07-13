@@ -6,7 +6,7 @@ import {
 import {
   SaveOutlined, EditOutlined
 } from "@ant-design/icons";
-import { authAxios } from "../../api/axiosConfig"; // Điều chỉnh đường dẫn nếu cần
+import { categoryApi } from "../../api/services"; // Điều chỉnh đường dẫn nếu cần
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -28,8 +28,8 @@ const UpdateCategoryModal = ({ isModalOpen, onCancel, onSuccess, categoryId }) =
     const getCategoryDetails = async () => {
       setLoading(true);
       try {
-        const res = await authAxios.get(`admin/categories/${categoryId}`);
-        form.setFieldsValue(res.data.data);
+        const data = await categoryApi.getById(categoryId);
+        form.setFieldsValue(data);
       } catch (error) {
         console.error("Lỗi:", error);
         message.error("Không thể lấy thông tin thể loại!");
@@ -46,7 +46,7 @@ const UpdateCategoryModal = ({ isModalOpen, onCancel, onSuccess, categoryId }) =
   const onFinish = async (values) => {
     setSubmitting(true);
     try {
-      await authAxios.put(`/admin/categories/${categoryId}`, values);
+      await categoryApi.update(categoryId, values);
       message.success("Cập nhật khoa thành công!");
       onSuccess(); // Đóng modal và làm mới danh sách
     } catch (error) {

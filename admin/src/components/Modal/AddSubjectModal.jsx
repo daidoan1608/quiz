@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { authAxios } from "../../api/axiosConfig";
+import { categoryApi, subjectApi } from "../../api/services";
 import {
   Form, Input, Button, Select,
   Typography, message, Divider, Modal,
@@ -21,12 +21,8 @@ const AddSubjectModal = ({ isModalOpen, onCancel, onSuccess }) => {
   // Lấy danh sách khoa
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await authAxios.get("/public/categories");
-      const data = Array.isArray(response.data.data)
-        ? response.data.data
-        : [response.data.data];
-      const finalData = Array.isArray(data[0]) ? data[0] : data;
-      setCategories(finalData);
+      const data = await categoryApi.getAll();
+      setCategories(data);
     } catch (error) {
       console.error("Lỗi lấy danh sách khoa: ", error);
       message.error("Không thể lấy danh sách khoa!");
@@ -44,7 +40,7 @@ const AddSubjectModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await authAxios.post("/admin/subjects", values);
+      await subjectApi.create(values);
       message.success("Thêm môn học thành công!");
 
       // Reset form và đóng modal

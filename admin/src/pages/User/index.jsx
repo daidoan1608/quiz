@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { authAxios } from "../../api/axiosConfig";
+import { userApi } from "../../api/services";
 import {
   Table,
   Tag,
@@ -49,10 +49,10 @@ export default function UserManager() {
     setLoading(true);
     try {
       const trimmedKeyword = keyword.trim();
-      const response = trimmedKeyword
-        ? await authAxios.get("/admin/users/search", { params: { key: trimmedKeyword } })
-        : await authAxios.get("/admin/users");
-      setUsers(response.data.data || []);
+      const data = trimmedKeyword
+        ? await userApi.search(trimmedKeyword)
+        : await userApi.getAll();
+      setUsers(data);
     } catch (error) {
       console.error("Lỗi API:", error);
       message.error("Không thể lấy danh sách người dùng!");
@@ -77,7 +77,7 @@ export default function UserManager() {
     }
 
     try {
-      await authAxios.delete(`/admin/users/${userId}`);
+      await userApi.remove(userId);
       message.success("Xóa người dùng thành công!");
       setUsers((prev) => prev.filter((user) => user.userId !== userId));
     } catch (error) {

@@ -27,7 +27,7 @@ const ExamViewModal = ({ isModalOpen, onCancel, examId }) => {
         setLoading(true);
         try {
             // Lấy thông tin đề thi và câu hỏi từ API public
-            const response = await authAxios.get(`/public/exams/${examId}`);
+            const response = await authAxios.get(`/public/exams/${examId}?includeCorrectAnswers=true`);
             const data = response.data.data;
 
             setExamDetail(data);

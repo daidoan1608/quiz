@@ -6,7 +6,7 @@ import {
 import {
   SaveOutlined, AppstoreAddOutlined,
 } from "@ant-design/icons";
-import { authAxios } from "../../api/axiosConfig"; 
+import { categoryApi } from "../../api/services"; 
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -18,7 +18,7 @@ const AddCategoryModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await authAxios.post("/admin/categories", values);
+      await categoryApi.create(values);
       message.success("Thêm khoa mới thành công!");
       form.resetFields(); // Reset form sau khi thành công
       onSuccess(); // Đóng modal và làm mới danh sách

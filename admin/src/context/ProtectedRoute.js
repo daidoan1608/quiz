@@ -3,8 +3,8 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 
 const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn } = useAuth();
-  if (!isLoggedIn) {
+  const { isLoggedIn, isAdmin } = useAuth();
+  if (!isLoggedIn || !isAdmin) {
     return <Navigate to="/login" replace />;
   }
   return children;

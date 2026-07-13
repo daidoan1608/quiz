@@ -22,7 +22,7 @@ import {
 import ManagementPageLayout from '../../layouts/ManagementPageLayout';
 
 // --- IMPORT API VÀ MODAL ---
-import { authAxios } from "../../api/axiosConfig";
+import { subjectApi } from "../../api/services";
 import AddSubjectModal from "../../components/Modal/AddSubjectModal";
 import UpdateSubjectModal from "../../components/Modal/UpdateSubjectModal";
 import ChapterListModal from "../../components/Modal/ChapterListModal";
@@ -56,10 +56,10 @@ export default function SubjectManager() {
     setLoading(true);
     try {
       const trimmedKeyword = keyword.trim();
-      const response = trimmedKeyword
-        ? await authAxios.get("public/subjects/search", { params: { q: trimmedKeyword } })
-        : await authAxios.get("public/subjects");
-      setSubjects(response.data.data || response.data || []);
+      const data = trimmedKeyword
+        ? await subjectApi.search(trimmedKeyword)
+        : await subjectApi.getAll();
+      setSubjects(data);
     } catch (error) {
       console.error("Lỗi API:", error);
       message.error("Không thể tải danh sách môn học.");
@@ -83,7 +83,7 @@ export default function SubjectManager() {
       return;
     }
     try {
-      await authAxios.delete(`/admin/subjects/${id}`);
+      await subjectApi.remove(id);
       message.success("Xóa môn học thành công!");
       // Cập nhật state trực tiếp sau khi xoá
       setSubjects(prev => prev.filter(item => item.subjectId !== id));

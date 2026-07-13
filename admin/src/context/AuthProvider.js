@@ -1,35 +1,76 @@
 import { message } from "antd";
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearAuthStorage } from "../api/axiosConfig";
+import { clearAuthStorage, publicAxios } from "../api/axiosConfig";
+
 const AuthContext = createContext();
+
+const cacheAdminUser = (userData) => {
+  if (!userData) return;
+  localStorage.setItem("userId", userData.userId || "");
+  localStorage.setItem("role", userData.role || "");
+  localStorage.setItem("username", userData.username || "");
+  localStorage.setItem("fullName", userData.fullName || userData.username || "Admin");
+  localStorage.setItem("avatarUrl", userData.avatarUrl || "");
+};
+
+const isAdminUser = (userData) => ["ADMIN", "MOD"].includes(userData?.role);
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
-
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
-    const userInfo = localStorage.getItem("userId");
-    if (userInfo) {
-      setIsLoggedIn(true);
-      setUser(userInfo);
-    } else {
-      setIsLoggedIn(false);
-    }
-    setLoading(false);
+    let mounted = true;
+
+    const hydrateCurrentUser = async () => {
+      try {
+        let response;
+        try {
+          response = await publicAxios.get("/auth/me");
+        } catch (error) {
+          await publicAxios.post("/auth/refresh");
+          response = await publicAxios.get("/auth/me");
+        }
+        const currentUser = response?.data?.data;
+        if (!mounted || !currentUser?.userId) return;
+        if (!isAdminUser(currentUser)) {
+          await publicAxios.post("/auth/logout").catch(() => {});
+          clearAuthStorage();
+          if (!mounted) return;
+          setIsLoggedIn(false);
+          setUser(null);
+          return;
+        }
+
+        cacheAdminUser(currentUser);
+        setIsLoggedIn(true);
+        setUser(currentUser);
+      } catch (error) {
+        clearAuthStorage();
+        if (!mounted) return;
+        setIsLoggedIn(false);
+        setUser(null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    hydrateCurrentUser();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const login = (userId, role, username, fullName) => {
-    localStorage.setItem("userId", userId);
-    localStorage.setItem("role", role);
-    localStorage.setItem("username", username);
-    localStorage.setItem("fullName", fullName || username || "Admin");
+    const userData =
+      typeof userId === "object" ? userId : { userId, role, username, fullName };
+
+    cacheAdminUser(userData);
     setIsLoggedIn(true);
-    setUser(userId);
+    setUser(userData);
     navigate("/", { replace: true });
   };
 
@@ -38,12 +79,12 @@ export const AuthProvider = ({ children }) => {
       const { publicAxios } = await import("../api/axiosConfig");
       await publicAxios.post("/auth/logout");
     } catch (error) {
-      // Vẫn xóa session phía client nếu server logout thất bại hoặc token đã hết hạn.
+      // Clear client state even if the server session is already expired.
     } finally {
       clearAuthStorage();
       setIsLoggedIn(false);
       setUser(null);
-      message.success("Đăng xuất thành công!");
+      message.success("Dang xuat thanh cong!");
       navigate("/login", { replace: true });
     }
   };
@@ -55,7 +96,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, clearSession, user }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, clearSession, user, isAdmin: isAdminUser(user) }}>
       {loading ? <div>Loading...</div> : children}
     </AuthContext.Provider>
   );

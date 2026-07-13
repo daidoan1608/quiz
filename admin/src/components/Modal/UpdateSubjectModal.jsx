@@ -9,7 +9,7 @@ import {
   EditOutlined,
   ReloadOutlined
 } from '@ant-design/icons';
-import { authAxios } from '../../api/axiosConfig'; // Điều chỉnh đường dẫn nếu cần
+import { subjectApi } from '../../api/services'; // Điều chỉnh đường dẫn nếu cần
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -29,9 +29,9 @@ const UpdateSubjectModal = ({ isModalOpen, onCancel, onSuccess, subjectId }) => 
     }
     setLoadingData(true);
     try {
-      const res = await authAxios.get(`public/subjects/${subjectId}`);
+      const data = await subjectApi.getById(subjectId);
       // Đổ dữ liệu vào form
-      form.setFieldsValue(res.data.data);
+      form.setFieldsValue(data);
     } catch (error) {
       console.error("Lỗi:", error);
       message.error('Không thể lấy thông tin môn học!');
@@ -51,7 +51,7 @@ const UpdateSubjectModal = ({ isModalOpen, onCancel, onSuccess, subjectId }) => 
   const onFinish = async (values) => {
     setSubmitting(true);
     try {
-      await authAxios.patch(`/admin/subjects/${subjectId}`, values);
+      await subjectApi.update(subjectId, values);
       message.success('Môn học đã được cập nhật thành công!');
       onSuccess(); // Gọi callback để đóng modal và làm mới danh sách
     } catch (error) {

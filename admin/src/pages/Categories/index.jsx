@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { authAxios } from "../../api/axiosConfig";
+import { categoryApi } from "../../api/services";
 import {
     Table,
     Button,
@@ -56,13 +56,10 @@ export default function CategoryManager() {
         setLoading(true);
         try {
             const trimmedKeyword = keyword.trim();
-            const response = trimmedKeyword
-                ? await authAxios.get("/public/categories/search", { params: { q: trimmedKeyword } })
-                : await authAxios.get("/public/categories");
-            const data = Array.isArray(response.data.data)
-                ? response.data.data
-                : [response.data.data];
-            setCategories(Array.isArray(data[0]) ? data[0] : data);
+            const data = trimmedKeyword
+                ? await categoryApi.search(trimmedKeyword)
+                : await categoryApi.getAll();
+            setCategories(data);
         } catch (error) {
             console.error("Error fetching categories:", error);
             message.error("Không thể tải danh sách khoa!");
@@ -79,7 +76,7 @@ export default function CategoryManager() {
             return;
         }
         try {
-            await authAxios.delete(`/admin/categories/${categoryId}`);
+            await categoryApi.remove(categoryId);
             message.success("Xóa khoa thành công!");
             setCategories((prev) => prev.filter((c) => c.categoryId !== categoryId));
         } catch (error) {

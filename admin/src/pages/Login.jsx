@@ -21,7 +21,8 @@ function Login() {
 
       const { userId, role, username, fullName } = response.data.data;
 
-      if (role === "USER") {
+      if (!["ADMIN", "MOD"].includes(role)) {
+        await publicAxios.post("/auth/logout").catch(() => {});
         message.error("Bạn không có quyền truy cập trang quản trị!");
         return;
       }

@@ -4,7 +4,7 @@ import {
   Row, Col, Typography, Divider,
 } from "antd";
 import { UserOutlined, MailOutlined, LockOutlined, SaveOutlined, UserAddOutlined } from "@ant-design/icons";
-import { authAxios } from "../../api/axiosConfig"; // Điều chỉnh đường dẫn nếu cần
+import { userApi } from "../../api/services"; // Điều chỉnh đường dẫn nếu cần
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -16,7 +16,7 @@ const AddUserModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await authAxios.post("/admin/users", values);
+      await userApi.create(values);
       message.success("Thêm người dùng thành công!");
       form.resetFields();
       onSuccess(); // Gọi hàm để đóng modal và làm mới dữ liệu

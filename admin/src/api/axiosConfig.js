@@ -16,6 +16,29 @@ const config = {
 const authAxios = axios.create(config);
 const publicAxios = axios.create(config);
 
+const getCookieValue = (name) => {
+  if (typeof document === "undefined") return "";
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${name}=`));
+  return cookie ? decodeURIComponent(cookie.split("=")[1] || "") : "";
+};
+
+const isUnsafeMethod = (method = "get") =>
+  ["post", "put", "patch", "delete"].includes(method.toLowerCase());
+
+const attachCsrfHeader = (requestConfig) => {
+  requestConfig.headers = requestConfig.headers || {};
+  const xsrfToken = getCookieValue("XSRF-TOKEN");
+  if (xsrfToken && isUnsafeMethod(requestConfig.method)) {
+    requestConfig.headers["X-XSRF-TOKEN"] = xsrfToken;
+  }
+  return requestConfig;
+};
+
+authAxios.interceptors.request.use(attachCsrfHeader);
+publicAxios.interceptors.request.use(attachCsrfHeader);
+
 const getApiErrorMessage = (error, fallback = "Có lỗi xảy ra, vui lòng thử lại!") => {
   const responseData = error?.response?.data;
   if (responseData?.message) return responseData.message;
@@ -60,6 +83,11 @@ const processQueue = (error) => {
   failedQueue = [];
 };
 
+const primeCsrfToken = async () => {
+  await publicAxios.get("/auth/me");
+  return getCookieValue("XSRF-TOKEN");
+};
+
 authAxios.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -70,6 +98,20 @@ authAxios.interceptors.response.use(
     }
 
     const status = error.response?.status;
+    if (status === 403 && isUnsafeMethod(originalRequest.method) && !originalRequest._csrfRetry) {
+      originalRequest._csrfRetry = true;
+      try {
+        const xsrfToken = await primeCsrfToken();
+        if (xsrfToken) {
+          originalRequest.headers = originalRequest.headers || {};
+          originalRequest.headers["X-XSRF-TOKEN"] = xsrfToken;
+          return authAxios(originalRequest);
+        }
+      } catch (csrfError) {
+        return Promise.reject(error);
+      }
+    }
+
     if (status === 403) {
       message.error(getApiErrorMessage(error, "Bạn không có quyền thực hiện thao tác này!"));
       return Promise.reject(error);

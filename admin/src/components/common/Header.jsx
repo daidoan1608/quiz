@@ -7,6 +7,13 @@ import { Dropdown, Space, Avatar, Typography, Button, theme as antTheme, Badge }
 import { BellOutlined, LogoutOutlined, UserOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
+const API_ROOT = (process.env.REACT_APP_API_URL || "http://localhost:8080/api/v1/").replace(/\/api\/v1\/?$/, "");
+
+const resolveAvatarUrl = (url) => {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${API_ROOT}${url.startsWith("/") ? "" : "/"}${url}`;
+};
 
 export const ContentHeader = () => {
   const navigate = useNavigate();
@@ -17,6 +24,7 @@ export const ContentHeader = () => {
   const { token } = antTheme.useToken();
   const username = localStorage.getItem("username") || "Admin";
   const displayName = localStorage.getItem("fullName") || username;
+  const avatarUrl = resolveAvatarUrl(localStorage.getItem("avatarUrl") || "");
 
   const handleLogout = () => {
     logout();
@@ -99,7 +107,7 @@ export const ContentHeader = () => {
           <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight" arrow>
             <Button type="text" style={{ height: 44, padding: "0 8px 0 6px" }}>
               <Space size={10}>
-                <Avatar icon={<UserOutlined />} style={{ background: token.colorPrimary }} />
+                <Avatar src={avatarUrl || undefined} icon={<UserOutlined />} style={{ background: token.colorPrimary }} />
                 <span style={{ fontWeight: 700 }}>{displayName}</span>
               </Space>
             </Button>

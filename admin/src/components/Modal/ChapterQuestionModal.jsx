@@ -38,7 +38,7 @@ export default function ChapterQuestionModal({ isModalOpen, onCancel, chapterId 
     if (!id || !isModalOpen) return;
     setLoading(true);
     try {
-      const response = await authAxios.get(`/public/questions/chapter/${id}`);
+      const response = await authAxios.get(`/public/questions/chapter/${id}?includeCorrectAnswers=true`);
       const data = Array.isArray(response.data.data) ? response.data.data : [];
       setQuestions(data);
     } catch (error) {

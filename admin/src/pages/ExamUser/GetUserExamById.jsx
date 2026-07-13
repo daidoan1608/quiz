@@ -53,7 +53,7 @@ export default function GetUserExamById() {
       const userId = detail.userExamDto.userId;
 
       const [questionRes, userRes] = await Promise.all([
-        authAxios.get(`/public/exams/${examId}`),
+        authAxios.get(`/public/exams/${examId}?includeCorrectAnswers=true`),
         authAxios.get(`/users/${userId}`),
       ]);
 
