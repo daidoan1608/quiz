@@ -8,6 +8,7 @@ import com.fita.vnua.quiz.repository.RefreshTokenRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
 import com.fita.vnua.quiz.service.AuthService;
+import com.fita.vnua.quiz.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
+    private final UserMapper userMapper;
 
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
@@ -37,18 +39,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse createAuthResponse(UserDetails userDetails) {
         User user = getUserByUsername(userDetails.getUsername());
-
-        return AuthResponse.builder()
-                .accessToken(null)
-                .refreshToken(null)
-                .tokenType(null)
-                .userId(user.getUserId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole())
-                .avatarUrl(user.getAvatarUrl())
-                .build();
+        return userMapper.toAuthResponse(user);
     }
 
     @Override

@@ -1,0 +1,2 @@
+ALTER TABLE answer MODIFY COLUMN content TEXT;
+ALTER TABLE question MODIFY COLUMN content TEXT;

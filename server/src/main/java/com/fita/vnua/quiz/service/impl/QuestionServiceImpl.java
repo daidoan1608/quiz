@@ -115,6 +115,11 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public void importQuestionsFromExcel(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException {
+        Long chapterSubjectId = chapterRepository.findSubjectIdByChapterId(chapterId)
+                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+        if (!chapterSubjectId.equals(subjectId)) {
+            throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
+        }
         questionImportService.importQuestions(file, chapterId);
     }
 

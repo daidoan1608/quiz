@@ -16,23 +16,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AdminPermissionServiceImpl implements AdminPermissionService {
+    private static final Set<String> ALLOWED_PERMISSIONS = Set.of("CREATE", "READ", "UPDATE", "DELETE");
+
     private final UserSubjectPermissionRepository permissionRepository;
     private final UserRepository userRepository;
 
     @Override
     @Transactional
     public void assignSubjectPermissions(PermissionAssignmentDto assignment) {
+        if (assignment.getModUserId() == null || assignment.getSubjectId() == null || assignment.getPermissions() == null) {
+            throw new CustomApiException("Invalid permission assignment", HttpStatus.BAD_REQUEST);
+        }
+
         User targetUser = userRepository.findById(assignment.getModUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("User to assign permissions not found."));
 
-        if (targetUser.getRole() == User.Role.ADMIN) {
-            throw new CustomApiException("Cannot assign object-level permissions to an ADMIN account.", HttpStatus.BAD_REQUEST);
+        if (targetUser.getRole() != User.Role.MOD) {
+            throw new CustomApiException("Object-level permissions can only be assigned to a MOD account.", HttpStatus.BAD_REQUEST);
         }
 
         permissionRepository.deleteByUserIdAndSubjectId(assignment.getModUserId(), assignment.getSubjectId());
@@ -72,10 +79,15 @@ public class AdminPermissionServiceImpl implements AdminPermissionService {
     }
 
     private UserSubjectPermission buildPermission(PermissionAssignmentDto assignment, String permission) {
+        String normalizedPermission = permission == null ? "" : permission.trim().toUpperCase();
+        if (!ALLOWED_PERMISSIONS.contains(normalizedPermission)) {
+            throw new CustomApiException("Invalid permission: " + permission, HttpStatus.BAD_REQUEST);
+        }
+
         UserSubjectPermission userSubjectPermission = new UserSubjectPermission();
         userSubjectPermission.setUserId(assignment.getModUserId());
         userSubjectPermission.setSubjectId(assignment.getSubjectId());
-        userSubjectPermission.setPermissionType(permission.toUpperCase());
+        userSubjectPermission.setPermissionType(normalizedPermission);
         return userSubjectPermission;
     }
 }

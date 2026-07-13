@@ -35,6 +35,9 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
+        if (authentication == null || targetId == null || targetType == null || permission == null) {
+            return false;
+        }
 
         // 1. Lấy User ID
         UUID currentUserId;
@@ -69,7 +72,10 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     // Phương thức hỗ trợ tìm Subject ID
     private Long findSubjectIdByTarget(Serializable targetId, String targetType) {
-        Long id = (Long) targetId;
+        Long id = toLong(targetId);
+        if (id == null) {
+            return null;
+        }
 
         return switch (targetType.toUpperCase()) {
             case "SUBJECT" -> id;
@@ -79,5 +85,22 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
             case "ANSWER" -> answerRepository.findSubjectIdByAnswerId(id).orElse(null);
             default -> null;
         };
+    }
+
+    private Long toLong(Serializable targetId) {
+        if (targetId instanceof Long value) {
+            return value;
+        }
+        if (targetId instanceof Integer value) {
+            return value.longValue();
+        }
+        if (targetId instanceof String value) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
     }
 }

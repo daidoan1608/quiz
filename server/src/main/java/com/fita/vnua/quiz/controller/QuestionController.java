@@ -3,6 +3,8 @@ package com.fita.vnua.quiz.controller;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
+import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.QuestionService;
 import com.fita.vnua.quiz.service.impl.AvatarStorageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +27,9 @@ import java.util.Map;
 public class QuestionController {
     private final QuestionService questionService;
     private final AvatarStorageService avatarStorageService;
+    private final AuthorizationService authorizationService;
 
+    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/questions/import")
     @Operation(summary = "Import câu hỏi từ file Excel")
     public ResponseEntity<ApiResponse<String>> importQuestions(
@@ -36,6 +42,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Import câu hỏi thành công", "File imported successfully"));
     }
 
+    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'READ')")
     @GetMapping("/admin/questions/total-questions/{subjectId}")
     @Operation(summary = "Lấy tổng số câu hỏi theo subjectId")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getTotalQuestions(@PathVariable Long subjectId) {
@@ -43,6 +50,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Total questions fetched successfully", data));
     }
 
+    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'READ')")
     @GetMapping("admin/questions/subject/{subjectId}")
     @Operation(summary = "Lấy câu hỏi theo Id môn học")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getQuestionsBySubject(@PathVariable Long subjectId) {
@@ -52,11 +60,21 @@ public class QuestionController {
 
     @GetMapping("public/questions/chapter/{chapterId}")
     @Operation(summary = "Lấy câu hỏi theo Id chương")
-    public ResponseEntity<ApiResponse<List<QuestionDto>>> getQuestionByChapterId(@PathVariable("chapterId") Long chapterId) {
+    public ResponseEntity<ApiResponse<List<QuestionDto>>> getQuestionByChapterId(
+            @PathVariable("chapterId") Long chapterId,
+            @RequestParam(defaultValue = "false") boolean includeCorrectAnswers,
+            @AuthenticationPrincipal User currentUser
+    ) {
         List<QuestionDto> questions = questionService.getQuestionsByChapterId(chapterId);
+        if (includeCorrectAnswers) {
+            authorizationService.requireAuthenticated(currentUser);
+        } else {
+            stripCorrectAnswers(questions);
+        }
         return ResponseEntity.ok(ApiResponse.success("Questions fetched successfully", questions));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/questions")
     @Operation(summary = "Lấy tất cả câu hỏi")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getAllQuestion() {
@@ -64,6 +82,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("All questions fetched successfully", questions));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/questions/deleted")
     @Operation(summary = "Lấy danh sách câu hỏi đã xóa mềm")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getDeletedQuestions() {
@@ -71,6 +90,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Deleted questions fetched successfully", questions));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/questions/search")
     @Operation(summary = "Tìm kiếm câu hỏi theo nội dung")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> searchQuestions(@RequestParam("q") String keyword) {
@@ -78,6 +98,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Questions searched successfully", questions));
     }
 
+    @PreAuthorize("hasPermission(#questionId, 'Question', 'READ')")
     @GetMapping("admin/questions/{questionId}")
     @Operation(summary = "Lấy câu hỏi theo Id")
     public ResponseEntity<ApiResponse<QuestionDto>> getQuestionById(@PathVariable("questionId") Long questionId) {
@@ -86,6 +107,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Question fetched successfully", question));
     }
 
+    @PreAuthorize("hasPermission(#questionDto.chapterId, 'Chapter', 'CREATE')")
     @PostMapping("admin/questions")
     @Operation(summary = "Tạo câu hỏi mới")
     public ResponseEntity<ApiResponse<QuestionDto>> createQuestion(@RequestBody QuestionDto questionDto) {
@@ -93,6 +115,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Question created successfully", createdQuestion));
     }
 
+    @PreAuthorize("hasPermission(#questionId, 'Question', 'UPDATE')")
     @PatchMapping("admin/questions/{questionId}")
     @Operation(summary = "Cập nhật câu hỏi")
     public ResponseEntity<ApiResponse<QuestionDto>> updateQuestion(
@@ -103,6 +126,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Question updated successfully", updatedQuestion));
     }
 
+    @PreAuthorize("hasPermission(#questionId, 'Question', 'DELETE')")
     @DeleteMapping("admin/questions/{questionId}")
     @Operation(summary = "Xóa mềm câu hỏi")
     public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId) {
@@ -110,6 +134,7 @@ public class QuestionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasPermission(#questionId, 'Question', 'UPDATE')")
     @PatchMapping("admin/questions/{questionId}/restore")
     @Operation(summary = "Khôi phục câu hỏi đã xóa mềm")
     public ResponseEntity<ApiResponse<QuestionDto>> restoreQuestion(@PathVariable("questionId") Long questionId) {
@@ -117,10 +142,25 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Question restored successfully", restoredQuestion));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("admin/questions/upload-image")
     @Operation(summary = "Upload ảnh minh họa câu hỏi")
     public ResponseEntity<ApiResponse<Map<String, String>>> uploadQuestionImage(@RequestParam("file") MultipartFile file) throws Exception {
         var uploaded = avatarStorageService.saveQuestionImage(file);
         return ResponseEntity.ok(ApiResponse.success("Upload ảnh thành công", Map.of("imageUrl", uploaded.getUrl())));
+    }
+    private List<QuestionDto> stripCorrectAnswers(List<QuestionDto> questions) {
+        if (questions == null) {
+            return List.of();
+        }
+        questions.forEach(this::stripCorrectAnswers);
+        return questions;
+    }
+
+    private void stripCorrectAnswers(QuestionDto question) {
+        if (question.getAnswers() == null) {
+            return;
+        }
+        question.getAnswers().forEach(answer -> answer.setIsCorrect(null));
     }
 }

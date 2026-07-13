@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -26,9 +25,9 @@ public class FavoriteServiceImpl implements FavoriteService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public FavoriteDto create(FavoriteDto favoriteDto) {
+    public FavoriteDto create(FavoriteDto favoriteDto, UUID currentUserId) {
         // Lấy User hoặc ném ngoại lệ nếu không tìm thấy
-        User user = userRepository.findById(favoriteDto.getUserId())
+        User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Lấy Subject hoặc ném ngoại lệ nếu không tìm thấy
@@ -58,8 +57,8 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
-    public FavoriteDto delete(FavoriteDto favoriteDto) {
-        UUID userId = favoriteDto.getUserId();
+    public FavoriteDto delete(FavoriteDto favoriteDto, UUID currentUserId) {
+        UUID userId = currentUserId;
         Long subjectId = favoriteDto.getSubjectId();
 
         FavoriteId favoriteId = new FavoriteId();
@@ -72,7 +71,11 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         favoriteRepository.delete(favorite);
 
-        return favoriteDto;
+        FavoriteDto resultDto = new FavoriteDto();
+        resultDto.setUserId(userId);
+        resultDto.setSubjectId(subjectId);
+        resultDto.setSubjectName(favorite.getSubject().getName());
+        return resultDto;
     }
 
     @Override

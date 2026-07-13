@@ -21,14 +21,27 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Configuration
 @EnableWebSecurity
@@ -58,6 +71,7 @@ public class SecurityConfig {
                     }
 
                     csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+                    csrf.csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler());
                     securityProperties.getCsrfIgnoredAntMatchers()
                             .forEach(pattern -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher(pattern)));
                 })
@@ -66,7 +80,11 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/v1/auth/**",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/google",
+                                "/api/v1/auth/verify-email",
+                                "/api/v1/auth/refresh",
                                 "/api/v1/otp/**",
                                 "/api/v1/public/**",
                                 "/avatars/**", // Cho phép xem ảnh
@@ -86,6 +104,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler)
                 )
+                .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -128,5 +147,49 @@ public class SecurityConfig {
         DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
         expressionHandler.setPermissionEvaluator(customPermissionEvaluator);
         return expressionHandler;
+    }
+
+    private static class CsrfCookieFilter extends OncePerRequestFilter {
+        @Override
+        protected void doFilterInternal(
+                HttpServletRequest request,
+                HttpServletResponse response,
+                FilterChain filterChain
+        ) throws ServletException, IOException {
+            CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+            if (csrfToken == null) {
+                csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getSimpleName());
+            }
+            if (csrfToken == null) {
+                csrfToken = (CsrfToken) request.getAttribute("_csrf");
+            }
+            if (csrfToken != null) {
+                csrfToken.getToken();
+            }
+            filterChain.doFilter(request, response);
+        }
+    }
+
+    private static final class SpaCsrfTokenRequestHandler implements CsrfTokenRequestHandler {
+        private final CsrfTokenRequestHandler plain = new CsrfTokenRequestAttributeHandler();
+        private final CsrfTokenRequestHandler xor = new XorCsrfTokenRequestAttributeHandler();
+
+        @Override
+        public void handle(
+                HttpServletRequest request,
+                HttpServletResponse response,
+                Supplier<CsrfToken> csrfToken
+        ) {
+            xor.handle(request, response, csrfToken);
+            csrfToken.get();
+        }
+
+        @Override
+        public String resolveCsrfTokenValue(HttpServletRequest request, CsrfToken csrfToken) {
+            if (StringUtils.hasText(request.getHeader(csrfToken.getHeaderName()))) {
+                return plain.resolveCsrfTokenValue(request, csrfToken);
+            }
+            return xor.resolveCsrfTokenValue(request, csrfToken);
+        }
     }
 }

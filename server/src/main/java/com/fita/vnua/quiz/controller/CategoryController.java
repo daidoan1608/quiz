@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class CategoryController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/categories/{id}")
     @Operation(summary = "Lấy danh mục theo Id (admin)")
     public ResponseEntity<ApiResponse<CategoryDto>> getCategoryById(@PathVariable("id") Long id) {
@@ -46,6 +48,7 @@ public class CategoryController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("admin/categories")
     @Operation(summary = "Thêm danh mục (admin)")
     public ResponseEntity<ApiResponse<CategoryDto>> addCategory(@RequestBody CategoryDto categoryDto) {
@@ -55,6 +58,7 @@ public class CategoryController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("admin/categories/{id}")
     @Operation(summary = "Cập nhật danh mục (admin)")
     public ResponseEntity<ApiResponse<CategoryDto>> updateCategory(
@@ -67,6 +71,7 @@ public class CategoryController {
         ));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("admin/categories/{id}")
     @Operation(summary = "Xóa danh mục (admin)")
     public ResponseEntity<Void> deleteCategory(@PathVariable("id") Long id) {

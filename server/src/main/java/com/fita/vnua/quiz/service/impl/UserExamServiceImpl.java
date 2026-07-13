@@ -14,10 +14,12 @@ import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;
 import com.fita.vnua.quiz.service.SubjectService;
 import com.fita.vnua.quiz.service.UserExamService;
+import com.fita.vnua.quiz.exception.CustomApiException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,11 +73,14 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     @Override
-    public UserExamResponse getUserExamById(Long id) {
-        UserExam userExam = userExamRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User exam not found with id: " + id));
+    public UserExamResponse getUserExamByIdForUser(Long id, UUID currentUserId) {
+        UserExam userExam = getUserExamForCurrentUser(id, currentUserId);
+        return buildUserExamResponse(userExam);
+    }
+
+    private UserExamResponse buildUserExamResponse(UserExam userExam) {
         UserExamDto userExamDto = convertUserExamsToUserExamDto(userExam);
-        List<UserAnswer> userAnswer = userAnswerRepository.findUserAnswersByUserExamId(id);
+        List<UserAnswer> userAnswer = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId());
         List<UserAnswerDto> userAnswerDtos = new ArrayList<>();
         for (UserAnswer userAnswer1 : userAnswer) {
             UserAnswerDto userAnswerDto = new UserAnswerDto();
@@ -95,12 +100,15 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     @Transactional
-    public UserExamDto createUserExam(UserExamRequest userExamRequest) {
+    public UserExamDto createUserExam(UserExamRequest userExamRequest, UUID currentUserId) {
         UserExamDto userExamDto = userExamRequest.getUserExamDto();
         List<UserAnswerDto> userAnswerDtos = userExamRequest.getUserAnswerDtos();
 
-        User user = userRepository.findById(userExamDto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userExamDto.getUserId()));
+        if (currentUserId == null) {
+            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+        }
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + currentUserId));
         Exam exam = examRepository.findById(userExamDto.getExamId())
                 .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + userExamDto.getExamId()));
 
@@ -176,7 +184,7 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     @Override
-    public List<UserExamResponse> getAllUserExams() {
+    public List<UserExamResponse> getAllUserExamsForAdmin() {
         List<UserExam> userExams = userExamRepository.findAll();
         return getUserExamResponses(userExams);
     }
@@ -210,22 +218,25 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     @Transactional
-    public synchronized ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request) {
-        List<UserExam> existingAttempts = userExamRepository.findInProgressByUserIdAndExamId(request.getUserId(), request.getExamId());
+    public synchronized ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request, UUID currentUserId) {
+        if (currentUserId == null) {
+            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+        }
+        List<UserExam> existingAttempts = userExamRepository.findInProgressByUserIdAndExamId(currentUserId, request.getExamId());
         if (!existingAttempts.isEmpty()) {
             UserExam latestAttempt = existingAttempts.get(0);
             closeDuplicatedInProgressAttempts(existingAttempts, latestAttempt);
             return buildAttemptResponse(latestAttempt);
         }
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + currentUserId));
         Exam exam = examRepository.findById(request.getExamId())
                 .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + request.getExamId()));
 
         // Kiểm tra lại sau khi load User/Exam để tránh trường hợp 2 request start chạy gần như đồng thời
         // tạo ra 2 bản ghi IN_PROGRESS cho cùng user + exam.
-        existingAttempts = userExamRepository.findInProgressByUserIdAndExamId(request.getUserId(), request.getExamId());
+        existingAttempts = userExamRepository.findInProgressByUserIdAndExamId(currentUserId, request.getExamId());
         if (!existingAttempts.isEmpty()) {
             UserExam latestAttempt = existingAttempts.get(0);
             closeDuplicatedInProgressAttempts(existingAttempts, latestAttempt);
@@ -245,16 +256,35 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     @Override
+    @Transactional
     public List<ExamAttemptResponse> getInProgressAttempts(UUID userId) {
         return userExamRepository.findInProgressByUserId(userId).stream()
+                .filter(this::keepMeaningfulInProgressAttempt)
                 .map(this::buildAttemptResponse)
                 .collect(Collectors.toList());
     }
 
+    private boolean keepMeaningfulInProgressAttempt(UserExam userExam) {
+        if (!userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId()).isEmpty()) {
+            return true;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        userExam.setStatus("CANCELLED");
+        userExam.setEndTime(now);
+        userExam.setUpdatedAt(now);
+        userExamRepository.save(userExam);
+        return false;
+    }
+
     @Override
     @Transactional
-    public ExamAttemptResponse saveAttemptAnswer(Long userExamId, SaveExamAttemptAnswerRequest request) {
-        UserExam userExam = getInProgressUserExam(userExamId);
+    public ExamAttemptResponse saveAttemptAnswer(Long userExamId, SaveExamAttemptAnswerRequest request, UUID currentUserId) {
+        UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
+        return saveAttemptAnswerInternal(userExam, userExamId, request);
+    }
+
+    private ExamAttemptResponse saveAttemptAnswerInternal(UserExam userExam, Long userExamId, SaveExamAttemptAnswerRequest request) {
         Question question = questionRepository.findById(request.getQuestionId())
                 .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + request.getQuestionId()));
 
@@ -280,16 +310,20 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     @Transactional
-    public ExamAttemptResponse updateAttemptProgress(Long userExamId, UpdateExamAttemptProgressRequest request) {
-        UserExam userExam = getInProgressUserExam(userExamId);
+    public ExamAttemptResponse updateAttemptProgress(Long userExamId, UpdateExamAttemptProgressRequest request, UUID currentUserId) {
+        UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
         updateAttemptProgressFields(userExam, request.getCurrentQuestionIndex(), request.getRemainingTime());
         return buildAttemptResponse(userExamRepository.save(userExam));
     }
 
     @Override
     @Transactional
-    public UserExamDto submitAttempt(Long userExamId) {
-        UserExam userExam = getInProgressUserExam(userExamId);
+    public UserExamDto submitAttempt(Long userExamId, UUID currentUserId) {
+        UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
+        return submitAttemptInternal(userExam, userExamId);
+    }
+
+    private UserExamDto submitAttemptInternal(UserExam userExam, Long userExamId) {
         List<Question> questions = questionRepository.findQuestionsByExamId(userExam.getExam().getExamId());
         List<UserAnswer> userAnswers = userAnswerRepository.findUserAnswersByUserExamId(userExamId);
         Map<Long, Set<Long>> userAnswersMap = userAnswers.stream()
@@ -347,13 +381,20 @@ public class UserExamServiceImpl implements UserExamService {
         }
     }
 
-    private UserExam getInProgressUserExam(Long userExamId) {
-        UserExam userExam = userExamRepository.findById(userExamId)
-                .orElseThrow(() -> new EntityNotFoundException("User exam not found with id: " + userExamId));
+    private UserExam getInProgressUserExam(Long userExamId, UUID currentUserId) {
+        UserExam userExam = getUserExamForCurrentUser(userExamId, currentUserId);
         if (!"IN_PROGRESS".equals(userExam.getStatus())) {
             throw new IllegalStateException("Attempt is not in progress");
         }
         return userExam;
+    }
+
+    private UserExam getUserExamForCurrentUser(Long userExamId, UUID currentUserId) {
+        if (currentUserId == null) {
+            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+        }
+        return userExamRepository.findByIdAndUserId(userExamId, currentUserId)
+                .orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN));
     }
 
     private void updateAttemptProgressFields(UserExam userExam, Integer currentQuestionIndex, Integer remainingTime) {
@@ -405,6 +446,32 @@ public class UserExamServiceImpl implements UserExamService {
             userExamDto.setCurrentQuestionIndex(userExam.getCurrentQuestionIndex());
             userExamDto.setUserId(userExam.getUser().getUserId());
             userExamDto.setExamId(userExam.getExam().getExamId());
+            populateAnswerStats(userExam, userExamDto);
         return userExamDto;
+    }
+
+    private void populateAnswerStats(UserExam userExam, UserExamDto userExamDto) {
+        List<Question> questions = questionRepository.findQuestionsByExamId(userExam.getExam().getExamId());
+        userExamDto.setTotalQuestions(questions.size());
+
+        if (questions.isEmpty()) {
+            userExamDto.setCorrectAnswers(0);
+            return;
+        }
+
+        List<UserAnswer> userAnswers = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId());
+        Map<Long, Set<Long>> userAnswersMap = userAnswers.stream()
+                .collect(Collectors.groupingBy(
+                        ua -> ua.getQuestion().getQuestionId(),
+                        Collectors.mapping(ua -> ua.getAnswer().getOptionId(), Collectors.toSet())
+                ));
+
+        int correctAnswers = 0;
+        for (Question question : questions) {
+            if (isQuestionCorrect(question, userAnswersMap.get(question.getQuestionId()))) {
+                correctAnswers++;
+            }
+        }
+        userExamDto.setCorrectAnswers(correctAnswers);
     }
 }

@@ -17,5 +17,7 @@ public class UserExamDto {
     private String status;
     private Integer remainingTime;
     private Integer currentQuestionIndex;
+    private Integer correctAnswers;
+    private Integer totalQuestions;
 
 }

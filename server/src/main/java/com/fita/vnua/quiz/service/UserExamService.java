@@ -17,27 +17,27 @@ import java.util.UUID;
 public interface UserExamService {
     List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate);
 
-    UserExamResponse getUserExamById(Long id);
+    UserExamResponse getUserExamByIdForUser(Long id, UUID currentUserId);
 
-    UserExamDto createUserExam(UserExamRequest userExamRequest);
+    UserExamDto createUserExam(UserExamRequest userExamRequest, UUID currentUserId);
 
     List<UserExamResponse> getUserExamByUserId(UUID userId);
 
     List<Map<Long, Object>> getExamAttemptsByUserId(UUID userId);
 
-    List<UserExamResponse> getAllUserExams();
+    List<UserExamResponse> getAllUserExamsForAdmin();
 
     List<UserExamResponse> getExamsByUserAndSubject(UUID userId, Long subjectId);
 
     List<UserExamResponse> getLast7ExamsByUser(UUID userId);
 
-    ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request);
+    ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request, UUID currentUserId);
 
     List<ExamAttemptResponse> getInProgressAttempts(UUID userId);
 
-    ExamAttemptResponse saveAttemptAnswer(Long userExamId, SaveExamAttemptAnswerRequest request);
+    ExamAttemptResponse saveAttemptAnswer(Long userExamId, SaveExamAttemptAnswerRequest request, UUID currentUserId);
 
-    ExamAttemptResponse updateAttemptProgress(Long userExamId, UpdateExamAttemptProgressRequest request);
+    ExamAttemptResponse updateAttemptProgress(Long userExamId, UpdateExamAttemptProgressRequest request, UUID currentUserId);
 
-    UserExamDto submitAttempt(Long userExamId);
+    UserExamDto submitAttempt(Long userExamId, UUID currentUserId);
 }

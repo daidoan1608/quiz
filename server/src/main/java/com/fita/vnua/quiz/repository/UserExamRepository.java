@@ -11,12 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserExamRepository extends JpaRepository<UserExam, Long> {
 
     @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId")
     List<UserExam> findUserExamsByUserId(UUID userId);
+
+    @Query("SELECT ue FROM UserExam ue WHERE ue.userExamId = :userExamId AND ue.user.userId = :userId")
+    Optional<UserExam> findByIdAndUserId(@Param("userExamId") Long userExamId, @Param("userId") UUID userId);
 
     @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId AND ue.exam.examId = :examId AND ue.status = 'IN_PROGRESS' ORDER BY ue.updatedAt DESC")
     List<UserExam> findInProgressByUserIdAndExamId(@Param("userId") UUID userId, @Param("examId") Long examId);

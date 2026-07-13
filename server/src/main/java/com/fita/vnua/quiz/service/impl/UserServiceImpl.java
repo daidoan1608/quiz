@@ -1,11 +1,14 @@
 package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.model.dto.UserDto;
+import com.fita.vnua.quiz.model.dto.request.UpdateProfileRequest;
 import com.fita.vnua.quiz.model.dto.response.Response;
+import com.fita.vnua.quiz.model.dto.response.UserResponse;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.UserService;
+import com.fita.vnua.quiz.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -27,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -34,9 +38,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserResponse> getAllUserResponses() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public UserDto getUserById(UUID userId) {
         return userRepository.findById(userId)
                 .map(user -> modelMapper.map(user, UserDto.class))
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public UserResponse getUserResponseById(UUID userId) {
+        return userRepository.findById(userId)
+                .map(userMapper::toUserResponse)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
     }
 
@@ -65,6 +83,18 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameContainingOrFullNameContaining(keyword)
                 .stream()
                 .map(user -> modelMapper.map(user, UserDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserResponse> getUserResponsesBySearchKey(String keyword) {
+        log.info("Searching for users with keyword: {}", keyword);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        return userRepository.findByUsernameContainingOrFullNameContaining(keyword)
+                .stream()
+                .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
 
@@ -115,6 +145,51 @@ public class UserServiceImpl implements UserService {
         }
         var updatedUser = userRepository.save(existingUser);
         return modelMapper.map(updatedUser, UserDto.class);
+    }
+
+    @Override
+    public UserDto updateProfile(UUID userId, UpdateProfileRequest request) {
+        var existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+        if (request.getFullName() != null) {
+            existingUser.setFullName(request.getFullName());
+        }
+        if (request.getEmail() != null) {
+            existingUser.setEmail(request.getEmail());
+        }
+        if (request.getAvatarUrl() != null) {
+            existingUser.setAvatarUrl(request.getAvatarUrl());
+        }
+        if (request.getPhone() != null) {
+            existingUser.setPhone(request.getPhone());
+        }
+        if (request.getAddress() != null) {
+            existingUser.setAddress(request.getAddress());
+        }
+        var updatedUser = userRepository.save(existingUser);
+        return modelMapper.map(updatedUser, UserDto.class);
+    }
+
+    @Override
+    public UserResponse updateProfileResponse(UUID userId, UpdateProfileRequest request) {
+        var existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+        if (request.getFullName() != null) {
+            existingUser.setFullName(request.getFullName());
+        }
+        if (request.getEmail() != null) {
+            existingUser.setEmail(request.getEmail());
+        }
+        if (request.getAvatarUrl() != null) {
+            existingUser.setAvatarUrl(request.getAvatarUrl());
+        }
+        if (request.getPhone() != null) {
+            existingUser.setPhone(request.getPhone());
+        }
+        if (request.getAddress() != null) {
+            existingUser.setAddress(request.getAddress());
+        }
+        return userMapper.toUserResponse(userRepository.save(existingUser));
     }
 
     @Override

@@ -49,7 +49,7 @@ public class AdminNotificationController {
     // 3. Gửi thông báo MÔN HỌC thủ công (Optional)
     // Dùng khi muốn nhắc nhở sinh viên về môn học mà không cần tạo đề thi
     @PostMapping("/subject")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
     public ResponseEntity<String> createSubjectManual(@RequestBody SubjectNotificationRequest request) {
         notificationService.sendSubjectNotification(
                 request.getSubjectId(),

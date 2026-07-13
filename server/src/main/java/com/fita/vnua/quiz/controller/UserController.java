@@ -2,15 +2,24 @@ package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.UserDto;
+import com.fita.vnua.quiz.model.dto.request.AdminUserCreateRequest;
+import com.fita.vnua.quiz.model.dto.request.AdminUserUpdateRequest;
 import com.fita.vnua.quiz.model.dto.request.ChangePasswordRequest;
+import com.fita.vnua.quiz.model.dto.request.UpdateProfileRequest;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
+import com.fita.vnua.quiz.model.dto.response.UserResponse;
+import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.UserService;
+import com.fita.vnua.quiz.service.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,17 +33,21 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthorizationService authorizationService;
+    private final UserMapper userMapper;
 
     @PatchMapping("users/{userId}/password")
     @Operation(summary = "API đổi mật khẩu")
     public ResponseEntity<ApiResponse<Object>> changePassword(
             @PathVariable("userId") UUID userId,
-            @RequestBody ChangePasswordRequest request
+            @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal User currentUser
     ) {
+        authorizationService.requireSelf(userId, currentUser);
         UserDto userDto = userService.getUserById(userId);
 
-        if (!passwordEncoder.matches(request.getOldPassword(), userDto.getPassword()) || !userDto.getUserId().equals(userId)) {
-            throw new CustomApiException("You are not authorized to change this password", HttpStatus.FORBIDDEN);
+        if (!passwordEncoder.matches(request.getOldPassword(), currentUser.getPassword())) {
+            throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
         }
 
         userDto.setPassword(request.getNewPassword());
@@ -43,57 +56,67 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/users")
     @Operation(summary = "Lấy danh sách tất cả người dùng", description = "This API fetches all users")
-    public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
-        List<UserDto> users = userService.getAllUsers();
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUserResponses();
         return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", users));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/users/search")
     @Operation(summary = "Lấy danh sách người dùng theo từ khóa tìm kiếm", description = "This API fetches users by search key")
-    public ResponseEntity<ApiResponse<List<UserDto>>> getUserBySearchKey(@RequestParam("key") String keyword) {
-        List<UserDto> users = userService.getUserBySearchKey(keyword);
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getUserBySearchKey(@RequestParam("key") String keyword) {
+        List<UserResponse> users = userService.getUserResponsesBySearchKey(keyword);
         return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", users));
     }
 
     @GetMapping({"users/{userId}", "user/{userId}"})
     @Operation(summary = "Lấy ra người dùng theo ID", description = "This API fetches a user by their ID")
-    public ResponseEntity<ApiResponse<UserDto>> getUserById(
-            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(
+            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
+            @AuthenticationPrincipal User currentUser
     ) {
-        UserDto user = userService.getUserById(userId);
+        authorizationService.requireSelfOrAdminMod(userId, currentUser);
+        UserResponse user = userService.getUserResponseById(userId);
         return ResponseEntity.ok(ApiResponse.success("User fetched successfully", user));
     }
 
     @PatchMapping("users/{userId}")
     @Operation(summary = "Cập nhật thông tin cá nhân", description = "Người dùng cập nhật họ tên, email, số điện thoại, địa chỉ")
-    public ResponseEntity<ApiResponse<UserDto>> updateProfile(
+    public ResponseEntity<ApiResponse<UserResponse>> updateProfile(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
-            @RequestBody UserDto userDto
+            @RequestBody UpdateProfileRequest request,
+            @AuthenticationPrincipal User currentUser
     ) {
-        UserDto updatedUser = userService.update(userId, userDto);
+        authorizationService.requireSelfOrAdminMod(userId, currentUser);
+        UserResponse updatedUser = userService.updateProfileResponse(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", updatedUser));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("admin/users")
     @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
-    public ResponseEntity<ApiResponse<UserDto>> createUser(@RequestBody UserDto userDto) {
-        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody AdminUserCreateRequest request) {
+        UserDto userDto = userMapper.toUserDto(request);
         UserDto saveUser = userService.create(userDto);
-        return ResponseEntity.ok(ApiResponse.success("User created successfully", saveUser));
+        return ResponseEntity.ok(ApiResponse.success("User created successfully", userService.getUserResponseById(saveUser.getUserId())));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("admin/users/{userId}")
     @Operation(summary = "Cập nhập thông tin người dùng", description = "This API update info user")
-    public ResponseEntity<ApiResponse<UserDto>> updateUser(
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
-            @RequestBody UserDto userDto
+            @RequestBody AdminUserUpdateRequest request
     ) {
+        UserDto userDto = userMapper.toUserDto(request);
         UserDto updatedUser = userService.update(userId, userDto);
-        return ResponseEntity.ok(ApiResponse.success("User updated successfully", updatedUser));
+        return ResponseEntity.ok(ApiResponse.success("User updated successfully", userService.getUserResponseById(updatedUser.getUserId())));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("admin/users/{userId}")
     @Operation(summary = "Xóa người dùng", description = "This API deletes a user")
     public ResponseEntity<Void> deleteUser(

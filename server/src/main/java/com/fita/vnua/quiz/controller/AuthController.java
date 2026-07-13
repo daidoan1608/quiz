@@ -23,6 +23,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,6 +58,16 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error("Authentication failed", List.of("Invalid username/email or password")));
         }
+    }
+
+    @GetMapping("me")
+    @Operation(summary = "API láº¥y thÃ´ng tin ngÆ°á»i dÃ¹ng Ä‘ang Ä‘Äƒng nháº­p")
+    public ResponseEntity<ApiResponse<AuthResponse>> me(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+        }
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(currentUser.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("Current user fetched successfully", authService.createAuthResponse(userDetails)));
     }
 
     @PostMapping("refresh")

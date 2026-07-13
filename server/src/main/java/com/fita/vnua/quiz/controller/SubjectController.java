@@ -3,12 +3,15 @@ package com.fita.vnua.quiz.controller;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.SubjectSummaryDto;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
+import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.SubjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.UUID;
 @Tag(name = "Subject API", description = "API thực hiện các chức năng liên quan đến môn học")
 public class SubjectController {
     private final SubjectService subjectService;
+    private final AuthorizationService authorizationService;
 
     @GetMapping("public/subjects")
     @Operation(summary = "Lấy danh sách tất cả các môn học")
@@ -37,7 +41,11 @@ public class SubjectController {
 
     @GetMapping("user/subjects")
     @Operation(summary = "Lấy các môn học mà user đã làm bài thi")
-    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getSubjectsByUser(@RequestParam UUID userId) {
+    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getSubjectsByUser(
+            @RequestParam UUID userId,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        authorizationService.requireSelfOrAdminMod(userId, currentUser);
         List<SubjectSummaryDto> subjects = subjectService.getSubjectsByUser(userId);
         return ResponseEntity.ok(ApiResponse.success("Fetched successfully", subjects));
     }
@@ -56,6 +64,7 @@ public class SubjectController {
         return ResponseEntity.ok(ApiResponse.success("Subject fetched successfully", subject));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("admin/subjects")
     @Operation(summary = "Tạo môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> createSubject(@RequestBody SubjectDto subjectDto) {

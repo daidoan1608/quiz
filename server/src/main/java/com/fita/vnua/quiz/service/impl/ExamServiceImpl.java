@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -188,7 +189,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional // Đảm bảo tính toàn vẹn dữ liệu
-    public ExamDto createExam(ExamRequest examRequest) {
+    public ExamDto createExam(ExamRequest examRequest, UUID currentUserId) {
         // 1. Tạo Exam mới & Lưu thông tin cơ bản
         ExamDto examDto = examRequest.getExamDto();
         Exam exam = new Exam();
@@ -201,7 +202,7 @@ public class ExamServiceImpl implements ExamService {
 
         exam.setDescription(examDto.getDescription());
         exam.setDuration(examDto.getDuration());
-        exam.setCreatedBy(userRepository.findById(examDto.getCreatedBy())
+        exam.setCreatedBy(userRepository.findById(currentUserId)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND)));
         exam.setCreatedTime(LocalDate.now());
 
@@ -209,6 +210,7 @@ public class ExamServiceImpl implements ExamService {
         exam = examRepository.save(exam);
 
         examDto.setExamId(exam.getExamId());
+        examDto.setCreatedBy(exam.getCreatedBy().getUserId());
         examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
 
         // 2. Logic thêm câu hỏi (Giữ nguyên code cũ của bạn)
