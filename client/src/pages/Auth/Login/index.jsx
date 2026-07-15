@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   LockOutlined,
   UserOutlined,
-  FacebookOutlined,
-  GithubOutlined,
   GoogleOutlined,
 } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, message } from "antd";
@@ -31,14 +29,27 @@ function Login() {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      const response = await authApi.login({
+      const userData = await authApi.loginData({
         username: values.username,
         password: values.password,
       });
 
-      const { userId, fullName, avatarUrl } = response.data.data;
-      const avatarResponse = await authApi.getMyAvatar();
-      const avatar = avatarResponse.data?.avatarUrl || avatarUrl || "";
+      const { userId, fullName, avatarUrl } = userData || {};
+      if (!userId) {
+        throw new Error("Login response is missing userId");
+      }
+
+      let avatar = avatarUrl || "";
+      try {
+        const avatarResponse = await authApi.getMyAvatar();
+        avatar =
+          avatarResponse.data?.data?.avatarUrl ||
+          avatarResponse.data?.avatarUrl ||
+          avatarUrl ||
+          "";
+      } catch (avatarError) {
+        avatar = avatarUrl || "";
+      }
       if (values.remember) {
         localStorage.setItem("savedUsername", values.username);
         localStorage.setItem("fullName", fullName);
@@ -61,25 +72,17 @@ function Login() {
     }
   };
 
-  const handleOAuthLogin = async (provider) => {
-    try {
-      // Lưu ý: Logic OAuth thường cần redirect sang trang của provider,
-      // code này đang giả định luồng gọi API trực tiếp.
-      const response = await authApi.loginWithProvider(provider);
-      const { userId, fullName, avatarUrl } = response.data?.data || response.data;
-      login(userId, fullName, avatarUrl);
-      navigate("/");
-    } catch (error) {
-      message.error(`Đăng nhập bằng ${provider} thất bại!`);
-    }
-  };
-
   const handleGoogleLoginSuccess = async (idToken) => {
     setLoading(true);
     try {
-      const response = await authApi.loginWithGoogle(idToken);
-      const { userId, fullName, avatarUrl } = response.data.data;
-      login(userId, fullName, avatarUrl);
+      const userData = await authApi.loginWithGoogle(idToken);
+      const { userId, fullName, avatarUrl } = userData || {};
+      if (!userId) {
+        console.error("Google login response is missing userId", userData);
+        throw new Error("Google login response is missing userId");
+      }
+
+      login(userId, fullName, avatarUrl || "");
       message.success("Đăng nhập Google thành công!");
       navigate("/");
     } catch (error) {
@@ -207,18 +210,6 @@ function Login() {
                 size="large"
               />
             </div>
-            <Button
-              shape="circle"
-              icon={<FacebookOutlined className="text-xl text-blue-600" />}
-              onClick={() => handleOAuthLogin("facebook")}
-              className="social-login-btn"
-            />
-            <Button
-              shape="circle"
-              icon={<GithubOutlined className="text-xl text-gray-800" />}
-              onClick={() => handleOAuthLogin("github")}
-              className="social-login-btn"
-            />
           </div>
         </div>
 

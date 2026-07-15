@@ -114,10 +114,11 @@ public class AuthServiceImpl implements AuthService {
     private User createGoogleUser(String email, String name, String picture) {
         User user = new User();
         user.setEmail(email);
-        user.setUsername(email.split("@")[0]);
+        user.setUsername(generateUniqueGoogleUsername(email));
         user.setFullName(name);
         user.setRole(User.Role.USER);
         user.setAuthProvider(User.AuthProvider.GOOGLE);
+        user.setEmailVerified(true);
         user.setPassword(null);
         user.setAvatarUrl(picture);
         return userRepository.save(user);
@@ -125,6 +126,14 @@ public class AuthServiceImpl implements AuthService {
 
     private User syncGoogleProfile(User user, String name, String picture) {
         boolean changed = false;
+        if (user.getAuthProvider() != User.AuthProvider.GOOGLE) {
+            user.setAuthProvider(User.AuthProvider.GOOGLE);
+            changed = true;
+        }
+        if (!user.isEmailVerified()) {
+            user.setEmailVerified(true);
+            changed = true;
+        }
         if (name != null && !name.equals(user.getFullName())) {
             user.setFullName(name);
             changed = true;
@@ -134,5 +143,22 @@ public class AuthServiceImpl implements AuthService {
             changed = true;
         }
         return changed ? userRepository.save(user) : user;
+    }
+
+    private String generateUniqueGoogleUsername(String email) {
+        String localPart = email.split("@", 2)[0].replaceAll("[^a-zA-Z0-9_]", "_");
+        if (localPart.isBlank()) {
+            localPart = "google_user";
+        }
+
+        String base = localPart.length() > 20 ? localPart.substring(0, 20) : localPart;
+        String username = base;
+        int suffix = 1;
+        while (userRepository.existsUserByUsername(username)) {
+            String suffixText = "_" + suffix++;
+            int maxBaseLength = Math.max(1, 20 - suffixText.length());
+            username = base.substring(0, Math.min(base.length(), maxBaseLength)) + suffixText;
+        }
+        return username;
     }
 }

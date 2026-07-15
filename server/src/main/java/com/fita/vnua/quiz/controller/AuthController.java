@@ -25,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -106,6 +107,7 @@ public class AuthController {
     }
 
     @PostMapping("register")
+    @Transactional
     @Operation(summary = "API đăng ký tài khoản (Gửi email xác thực)")
     public ResponseEntity<ApiResponse<Object>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         User existingByEmail = userService.findEntityByEmail(registerRequest.getEmail());

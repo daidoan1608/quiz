@@ -1,24 +1,21 @@
-# Sử dụng node phiên bản alpine để nhẹ và ổn định hơn
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package.json và cài đặt trước để tận dụng cache của Docker
-COPY package*.json ./
-RUN npm install
+ARG REACT_APP_API_URL=https://api.quizvnua.com/api/v1/
+ARG REACT_APP_ADMIN_BASENAME=/
 
-# Copy toàn bộ code vào
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_ADMIN_BASENAME=$REACT_APP_ADMIN_BASENAME
+
+COPY package.json ./
+RUN npm install --legacy-peer-deps
+
 COPY . .
-
-# --- BƯỚC QUAN TRỌNG: Ép React build với biến môi trường Production ---
-# Cách này đảm bảo các biến REACT_APP_API_URL từ .env.production được dán vào code
 RUN npm run build
 
-# Cài đặt server 'serve' để chạy các file tĩnh sau khi build
 RUN npm install -g serve
 
-# Mở cổng 3001 cho admin
 EXPOSE 3001
 
-# Chạy thư mục build đã được tối ưu hóa
 CMD ["serve", "-s", "build", "-l", "3001"]

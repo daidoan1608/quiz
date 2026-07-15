@@ -1,5 +1,3 @@
-server/target/classes/keys/sa.json
-server/target/classes/keys/*.json
 **/node_modules/
 **/.vscode/
 **/target/
@@ -24,6 +22,9 @@ target/
 .env.*
 !.env.example
 !*.env.example
+!*.env.*.example
+!**/*.env.*.example
+!**/.env.production.example
 !server/.env.example
 .env.local
 .env.development.local

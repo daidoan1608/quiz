@@ -7,7 +7,7 @@ import { Dropdown, Space, Avatar, Typography, Button, theme as antTheme, Badge }
 import { BellOutlined, LogoutOutlined, UserOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
-const API_ROOT = (process.env.REACT_APP_API_URL || "http://localhost:8080/api/v1/").replace(/\/api\/v1\/?$/, "");
+const API_ROOT = (process.env.REACT_APP_API_URL || "/api/v1/").replace(/\/api\/v1\/?$/, "");
 
 const resolveAvatarUrl = (url) => {
   if (!url) return "";

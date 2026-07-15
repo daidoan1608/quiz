@@ -15,6 +15,10 @@ export const authApi = {
     return publicAxios.post("/auth/login", payload);
   },
 
+  loginData(payload) {
+    return publicAxios.post("/auth/login", payload).then((response) => getResponseData(response, null));
+  },
+
   logout() {
     return publicAxios.post("/auth/logout");
   },
@@ -36,7 +40,7 @@ export const authApi = {
   },
 
   loginWithGoogle(idToken) {
-    return publicAxios.post("/auth/google", { idToken });
+    return publicAxios.post("/auth/google", { idToken }).then((response) => getResponseData(response, null));
   },
 
   getMyAvatar() {

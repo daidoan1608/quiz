@@ -104,7 +104,7 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
     const apiRoot = process.env.REACT_APP_API_URL
       ? process.env.REACT_APP_API_URL.replace('/api/v1/', '')
-      : 'http://localhost:8080';
+      : '';
     return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 

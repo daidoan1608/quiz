@@ -7,18 +7,27 @@ services:
     depends_on:
       - db
     env_file:
-      - ./server/.env
+      - ./server/.env.production
     environment:
       - DB_HOST=db
 
   user:
-    build: ./client
+    build:
+      context: ./client
+      args:
+        REACT_APP_API_URL: ${CLIENT_API_URL:-https://api.quizvnua.com/api/v1/}
+        REACT_APP_AVATAR_URL: ${CLIENT_AVATAR_URL:-https://api.quizvnua.com}
+        REACT_APP_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
     restart: always
     expose:
       - "3000"
 
   admin:
-    build: ./admin
+    build:
+      context: ./admin
+      args:
+        REACT_APP_API_URL: ${ADMIN_API_URL:-https://api.quizvnua.com/api/v1/}
+        REACT_APP_ADMIN_BASENAME: ${ADMIN_BASENAME:-/}
     restart: always
     expose:
       - "3001"
@@ -28,7 +37,7 @@ services:
     restart: always
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     env_file:
-      - ./server/.env
+      - ./server/.env.production
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_DATABASE: ${DB_NAME:-quiz}

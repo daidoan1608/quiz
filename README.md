@@ -14,7 +14,7 @@ Tai lieu nay duoc cap nhat theo code hien tai trong `server`, `client` va `admin
 flowchart LR
     User["Nguoi dung"] --> Client["client React"]
     AdminUser["ADMIN / MOD"] --> Admin["admin React"]
-    Client --> API["server Spring Boot :8080"]
+    Client --> API["api.quizvnua.com"]
     Admin --> API
     API --> DB[("MySQL 8")]
     API --> Mail["SMTP Gmail"]
@@ -25,11 +25,15 @@ flowchart LR
     Nginx --> API
 ```
 
-Frontend goi API qua Axios voi base URL mac dinh:
+Production dung subdomain rieng cho tung ung dung:
 
 ```text
-http://localhost:8080/api/v1/
+https://quizvnua.com          -> client
+https://admin.quizvnua.com    -> admin
+https://api.quizvnua.com      -> server API
 ```
+
+Local development van goi API mac dinh qua `http://localhost:8080/api/v1/`.
 
 ## Cong nghe
 
@@ -151,7 +155,7 @@ jwt.secret=<secret>
 jwt.access-token-expiration=900000
 jwt.refresh-token-expiration=604800000
 
-app.cors.allowed-origins=http://localhost:3000,http://localhost:3001
+app.cors.allowed-origins=https://quizvnua.com,https://www.quizvnua.com,https://admin.quizvnua.com
 app.security.csrf-enabled=false
 
 spring.mail.host=smtp.gmail.com
@@ -166,23 +170,50 @@ question.upload-dir=uploads/questions
 cloudinary.enabled=false
 ```
 
-Client:
+Client production:
 
 ```env
-REACT_APP_API_URL=http://localhost:8080/api/v1/
-REACT_APP_AVATAR_URL=http://localhost:8080
+REACT_APP_API_URL=https://api.quizvnua.com/api/v1/
+REACT_APP_AVATAR_URL=https://api.quizvnua.com
 REACT_APP_GOOGLE_CLIENT_ID=<google-client-id>
 ```
 
-Admin:
+Admin production:
 
 ```env
-REACT_APP_API_URL=http://localhost:8080/api/v1/
+REACT_APP_API_URL=https://api.quizvnua.com/api/v1/
+REACT_APP_ADMIN_BASENAME=/
 ```
 
 Khong commit secret that nhu JWT secret, Gmail app password, DB password production hoac Google credential.
 
 ## Chay local
+
+Chay bang script root:
+
+```powershell
+.\run.ps1 local
+```
+
+Neu chay tu Command Prompt hoac Windows mo `.ps1` bang Notepad, dung wrapper:
+
+```bat
+run.cmd local
+```
+
+Lenh nay mo 3 cua so rieng cho backend, client va admin:
+
+```text
+http://localhost:8080  -> server API
+http://localhost:3000  -> client
+http://localhost:3001  -> admin
+```
+
+Neu PowerShell chan script, chay:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run.ps1 local
+```
 
 Tao database:
 
@@ -246,15 +277,73 @@ $env:PORT=3001; npm start
 
 ## Chay Docker Compose
 
+Docker local bang 1 lenh:
+
+```powershell
+.\run.ps1 docker-local
+```
+
+Hoac:
+
+```bat
+run.cmd docker-local
+```
+
+Lenh nay build va expose truc tiep:
+
+```text
+http://localhost:8080  -> server API
+http://localhost:3000  -> client
+http://localhost:3001  -> admin
+```
+
+Production bang 1 lenh:
+
+```powershell
+.\run.ps1 prod
+```
+
+Hoac:
+
+```bat
+run.cmd prod
+```
+
+Lenh nay build backend jar truoc, sau do `docker compose up -d --build`.
+
+Dung stack Docker:
+
+```powershell
+.\run.ps1 down
+```
+
+Xem logs:
+
+```powershell
+.\run.ps1 logs
+```
+
+Kiem tra nhanh Docker containers va URL local:
+
+```powershell
+.\run.ps1 doctor
+```
+
+Neu dung wrapper Windows:
+
+```bat
+run.cmd doctor
+```
+
 `docker-compose.yml` gom:
 
 | Service | Mo ta |
 |---|---|
 | `backend` | Build tu `./server`, API port noi bo `8080` |
-| `user` | Build tu `./client`, port noi bo `3001` |
-| `admin` | Build tu `./admin`, port noi bo `3000` |
+| `user` | Build tu `./client`, port noi bo `3000` |
+| `admin` | Build tu `./admin`, port noi bo `3001` |
 | `db` | MySQL 8, database `quiz`, root password mac dinh `root` |
-| `nginx` | Reverse proxy, publish `80` va `443` |
+| `nginx` | Reverse proxy cho `quizvnua.com`, `admin.quizvnua.com`, `api.quizvnua.com`; publish `80` va `443` |
 
 Chay:
 
@@ -282,7 +371,13 @@ docker compose down -v
 
 ## API chinh
 
-Base URL:
+Production base URL:
+
+```text
+https://api.quizvnua.com/api/v1
+```
+
+Local base URL:
 
 ```text
 http://localhost:8080/api/v1

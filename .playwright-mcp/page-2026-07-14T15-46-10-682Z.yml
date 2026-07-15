@@ -1,0 +1,36 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - img "Logo" [ref=e6] [cursor=pointer]
+    - heading "ĐĂNG NHẬP" [level=2] [ref=e7]
+    - paragraph [ref=e8]: Chào mừng bạn quay trở lại!
+  - generic [ref=e9]:
+    - generic [ref=e15]:
+      - img "user" [ref=e17]
+      - textbox "Tên đăng nhập hoặc email" [ref=e20]
+    - generic [ref=e26]:
+      - img "lock" [ref=e28]
+      - textbox "Mật khẩu" [ref=e31]
+      - img "eye-invisible" [ref=e33] [cursor=pointer]
+    - generic [ref=e42]:
+      - generic [ref=e43] [cursor=pointer]:
+        - checkbox "Ghi nhớ đăng nhập" [ref=e45]
+        - generic [ref=e47]: Ghi nhớ đăng nhập
+      - link "Quên mật khẩu?" [ref=e48] [cursor=pointer]:
+        - /url: /forgot
+    - button "Đăng nhập" [ref=e54] [cursor=pointer]
+  - generic [ref=e56]:
+    - generic [ref=e57]: Hoặc đăng nhập với
+    - generic [ref=e62]:
+      - generic "Đăng nhập với Google" [ref=e63]:
+        - generic [ref=e65]:
+          - button "Đăng nhập bằng GoogleMở trong thẻ mới" [ref=e67] [cursor=pointer]
+          - iframe [ref=e77]:
+            - button "Đăng nhập bằng GoogleMở trong thẻ mới" [ref=f1e3] [cursor=pointer]
+      - button [ref=e78] [cursor=pointer]:
+        - img "facebook" [ref=e80]
+      - button [ref=e83] [cursor=pointer]:
+        - img "github" [ref=e85]
+  - generic [ref=e88]:
+    - text: Chưa có tài khoản?
+    - link "Đăng ký ngay" [ref=e89] [cursor=pointer]:
+      - /url: /register

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { message } from "antd";
 
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api/v1/";
+const BASE_URL = process.env.REACT_APP_API_URL || "/api/v1/";
 
 const config = {
   baseURL: BASE_URL,
@@ -59,9 +59,12 @@ const clearAuthStorage = () => {
   localStorage.removeItem("fullName");
 };
 
-const ADMIN_BASENAME = "/admin";
+const ADMIN_BASENAME = process.env.REACT_APP_ADMIN_BASENAME || "/";
 
-const getAdminLoginPath = () => `${ADMIN_BASENAME}/login`;
+const getAdminLoginPath = () => {
+  const basename = ADMIN_BASENAME === "/" ? "" : ADMIN_BASENAME.replace(/\/$/, "");
+  return `${basename}/login`;
+};
 
 const redirectToLoginOnce = () => {
   clearAuthStorage();

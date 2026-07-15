@@ -14,6 +14,7 @@ function Login() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
+      await publicAxios.post("/auth/logout").catch(() => {});
       const response = await publicAxios.post("/auth/login", {
         username: values.username,
         password: values.password,

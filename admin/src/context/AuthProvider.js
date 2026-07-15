@@ -16,6 +16,8 @@ const cacheAdminUser = (userData) => {
 
 const isAdminUser = (userData) => ["ADMIN", "MOD"].includes(userData?.role);
 
+const hasCachedSession = () => Boolean(localStorage.getItem("userId"));
+
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -31,6 +33,9 @@ export const AuthProvider = ({ children }) => {
         try {
           response = await publicAxios.get("/auth/me");
         } catch (error) {
+          if (error?.response?.status === 401 && !hasCachedSession()) {
+            return;
+          }
           await publicAxios.post("/auth/refresh");
           response = await publicAxios.get("/auth/me");
         }

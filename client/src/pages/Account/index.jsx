@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { accountApi } from "api/accountApi";
+import { authApi } from "api/authApi";
 import { useAuth } from "context/AuthProvider";
 import { useLanguage } from "context/LanguageProvider";
 import ChangePasswordModal from "./components/ChangePasswordModal";
@@ -31,17 +32,33 @@ const Account = () => {
   const navigate = useNavigate();
   const { texts } = useLanguage();
 
-  const requireUserId = useCallback(() => {
-    const userId = getCurrentUserId();
+  const requireUserId = useCallback(async () => {
+    let currentUser = null;
+    try {
+      currentUser = await authApi.getCurrentUser();
+    } catch (error) {
+      localStorage.removeItem("userId");
+      localStorage.removeItem("fullName");
+      localStorage.removeItem("avatarUrl");
+      message.error(texts.noUserId || "Vui lòng đăng nhập lại!");
+      navigate("/login");
+      return null;
+    }
+    const userId = currentUser?.userId || getCurrentUserId();
     if (!userId) {
       message.error(texts.noUserId || "Vui lòng đăng nhập lại!");
       navigate("/login");
+    }
+    if (currentUser?.userId) {
+      localStorage.setItem("userId", currentUser.userId);
+      localStorage.setItem("fullName", currentUser.fullName || "");
+      localStorage.setItem("avatarUrl", currentUser.avatarUrl || "");
     }
     return userId;
   }, [navigate, texts.noUserId]);
 
   const fetchAccountData = useCallback(async () => {
-    const userId = requireUserId();
+    const userId = await requireUserId();
     if (!userId) return;
 
     try {
@@ -71,7 +88,7 @@ const Account = () => {
   }, [fetchAccountData]);
 
   const handleChangePassword = async (values) => {
-    const userId = requireUserId();
+    const userId = await requireUserId();
     if (!userId) return;
 
     try {
@@ -116,7 +133,7 @@ const Account = () => {
   };
 
   const handleUpdateProfile = async (profileValues) => {
-    const userId = requireUserId();
+    const userId = await requireUserId();
     if (!userId) return;
 
     try {
