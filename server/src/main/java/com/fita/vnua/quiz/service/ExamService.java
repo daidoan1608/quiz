@@ -10,9 +10,13 @@ import java.util.UUID;
 public interface ExamService {
     List<ExamSummaryDto> getAllExams();
 
+    List<ExamSummaryDto> getDeletedExams();
+
     List<ExamSummaryDto> getExamsBySubjectId(Long subjectId);
 
     ExamDto getExamById(Long id);
+
+    ExamDto getExamByIdForSubmittedAttempt(Long examId, Long userExamId, UUID currentUserId);
 
 
     ExamDto createExam(ExamRequest examRequest, UUID currentUserId);
@@ -20,4 +24,6 @@ public interface ExamService {
     ExamDto updateExam(Long id, ExamDto examDto);
 
     void deleteExam(Long id);
+
+    ExamDto restoreExam(Long id);
 }

@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,19 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean emailVerified = false;
 
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
+    private UUID deletedBy;
+
+    private UUID deletedCascadeId;
+
+    private String deleteOriginType;
+
+    private Long deleteOriginId;
+
     public enum AuthProvider {
         LOCAL, GOOGLE, FACEBOOK, GITHUB
     }
@@ -75,7 +89,8 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         // Tài khoản quản trị được tạo nội bộ không cần luồng xác thực email như USER đăng ký.
         // Nếu không cho ADMIN/MOD enabled ở đây, Spring Security sẽ chặn đăng nhập dù đúng mật khẩu.
-        return role == Role.ADMIN || role == Role.MOD || emailVerified || authProvider != AuthProvider.LOCAL;
+        return !Boolean.TRUE.equals(deleted)
+                && (role == Role.ADMIN || role == Role.MOD || emailVerified || authProvider != AuthProvider.LOCAL);
     }
 
     public enum Role {

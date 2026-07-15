@@ -2,6 +2,7 @@ package com.fita.vnua.quiz.model.dto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,4 +19,10 @@ public class ExamDto {
     private UUID createdBy;
     private String createdDate;
     private List<QuestionDto> questions;
+    private Boolean deleted;
+    private LocalDateTime deletedAt;
+    private UUID deletedBy;
+    private UUID deletedCascadeId;
+    private String deleteOriginType;
+    private Long deleteOriginId;
 }

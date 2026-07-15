@@ -7,6 +7,11 @@ export const categoryApi = {
     return normalizeList(unwrapApiData(response));
   },
 
+  async getDeleted() {
+    const response = await authAxios.get("/admin/categories/deleted");
+    return normalizeList(unwrapApiData(response));
+  },
+
   async search(keyword) {
     const response = await authAxios.get("/public/categories/search", {
       params: { q: keyword },
@@ -29,5 +34,9 @@ export const categoryApi = {
 
   remove(categoryId) {
     return authAxios.delete(`/admin/categories/${categoryId}`);
+  },
+
+  restore(categoryId) {
+    return authAxios.patch(`/admin/categories/${categoryId}/restore`);
   },
 };

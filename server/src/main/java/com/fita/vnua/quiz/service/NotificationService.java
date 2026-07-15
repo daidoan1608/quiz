@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +23,14 @@ public interface NotificationService {
     @Transactional
     void sendBatchNotification(List<UUID> userIds, String title, String message);
 
-    Page<CampaignResponse> getAllCampaigns(String keyword, Pageable pageable);
+    Page<CampaignResponse> getAllCampaigns(
+            String keyword,
+            String sendType,
+            UUID createdBy,
+            LocalDateTime fromDate,
+            LocalDateTime toDate,
+            Pageable pageable
+    );
 
     Page<RecipientResponse> getRecipientsByHistoryId(Long historyId, Pageable pageable);
 

@@ -11,6 +11,7 @@ import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Exam;
 import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.repository.*;
+import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,10 +32,18 @@ public class SubjectServiceImpl implements SubjectService {
     private final ExamRepository examRepository;
     private final ExamQuestionRepository examQuestionRepository;
     private final ModelMapper modelMapper;
+    private final SoftDeleteService softDeleteService;
 
     @Override
     public List<SubjectSummaryDto> getAllSubject() {
-        return subjectRepository.findAll().stream()
+        return subjectRepository.findByDeletedFalse().stream()
+                .map(this::mapSubjectToSummaryDto)
+                .toList();
+    }
+
+    @Override
+    public List<SubjectSummaryDto> getDeletedSubjects() {
+        return subjectRepository.findByDeletedTrue().stream()
                 .map(this::mapSubjectToSummaryDto)
                 .toList();
     }
@@ -44,7 +53,7 @@ public class SubjectServiceImpl implements SubjectService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllSubject();
         }
-        return subjectRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword.trim(), keyword.trim())
+        return subjectRepository.searchActive(keyword.trim())
                 .stream()
                 .map(this::mapSubjectToSummaryDto)
                 .toList();
@@ -54,7 +63,10 @@ public class SubjectServiceImpl implements SubjectService {
     public List<SubjectSummaryDto> getSubjectsByCategoryId(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
-        return subjectRepository.findSubjectsByCategory(category).stream()
+        if (Boolean.TRUE.equals(category.getDeleted())) {
+            return List.of();
+        }
+        return subjectRepository.findSubjectsByCategoryAndDeletedFalse(category).stream()
                 .map(this::mapSubjectToSummaryDto)
                 .toList();
     }
@@ -63,6 +75,9 @@ public class SubjectServiceImpl implements SubjectService {
     public SubjectDto getSubjectById(Long subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(subject.getDeleted())) {
+            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+        }
 
         // Gọi hàm helper để lấy chi tiết
         return mapSubjectToDetailedDto(subject);
@@ -70,7 +85,13 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public SubjectDto create(SubjectDto subjectDto) {
+        Category category = categoryRepository.findById(subjectDto.getCategoryId())
+                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(category.getDeleted())) {
+            throw new CustomApiException("Category not found", HttpStatus.NOT_FOUND);
+        }
         Subject subject = subjectRepository.save(modelMapper.map(subjectDto, Subject.class));
+        subject.setCategory(category);
         Subject savedSubject = subjectRepository.save(subject);
         return modelMapper.map(savedSubject, SubjectDto.class);
     }
@@ -79,6 +100,9 @@ public class SubjectServiceImpl implements SubjectService {
     public SubjectDto update(Long subjectId, SubjectDto subjectDto) {
         var existingSubject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(existingSubject.getDeleted())) {
+            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+        }
 
         existingSubject.setName(subjectDto.getName());
         existingSubject.setDescription(subjectDto.getDescription());
@@ -87,12 +111,18 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public Response delete(Long subjectId) {
-        var existingSubject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
-        subjectRepository.delete(existingSubject);
+        softDeleteService.deleteSubject(subjectId, null);
         return Response.builder()
                 .responseMessage("Subject deleted successfully")
                 .responseCode("200 OK").build();
+    }
+
+    @Override
+    public SubjectDto restore(Long subjectId) {
+        softDeleteService.restoreSubject(subjectId);
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+        return mapSubjectToDetailedDto(subject);
     }
 
     @Override

@@ -7,12 +7,32 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
-    List<Subject> findSubjectsByCategory(Category category);
+    List<Subject> findByDeletedFalse();
 
-    List<Subject> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description);
+    List<Subject> findByDeletedTrue();
+
+    long countByDeletedFalse();
+
+    List<Subject> findSubjectsByCategoryAndDeletedFalse(Category category);
+
+    List<Subject> findSubjectsByCategoryAndDeletedTrue(Category category);
+
+    @Query("""
+            SELECT s FROM Subject s
+            WHERE s.deleted = false
+            AND (
+                LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(s.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            )
+            """)
+    List<Subject> searchActive(@Param("keyword") String keyword);
+
+    @Query("SELECT s.subjectId FROM Subject s WHERE s.subjectId = :subjectId AND s.deleted = false")
+    Optional<Long> findActiveSubjectId(@Param("subjectId") Long subjectId);
 
     @Query(value = """
     SELECT

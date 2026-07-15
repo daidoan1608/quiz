@@ -47,18 +47,43 @@ export default function GetUserExamById() {
       const response = await authAxios.get(`/user-exams/${userExamId}`);
       const detail = response.data.data;
       setExamDetail(detail);
+      setUserInfo({
+        username: detail.username,
+        fullName: detail.fullName,
+        userId: detail.userExamDto.userId,
+      });
+      setExamQuestions(detail.questions || []);
 
       // 2. Lấy thông tin Đề thi gốc và User song song (Promise.all)
       const examId = detail.userExamDto.examId;
       const userId = detail.userExamDto.userId;
 
-      const [questionRes, userRes] = await Promise.all([
-        authAxios.get(`/public/exams/${examId}?includeCorrectAnswers=true`),
+      const [questionResult, userResult] = await Promise.allSettled([
+        (detail.questions && detail.questions.length > 0)
+          ? Promise.resolve({ data: { data: { questions: detail.questions } } })
+          : authAxios.get(`/public/exams/${examId}`, {
+              params: { includeCorrectAnswers: true, userExamId },
+            }),
         authAxios.get(`/users/${userId}`),
       ]);
 
-      setExamQuestions(questionRes.data.data.questions || []);
-      setUserInfo(userRes.data.data || {});
+      if (questionResult.status === "fulfilled") {
+        setExamQuestions(questionResult.value.data.data.questions || []);
+      } else {
+        console.error("Lá»—i láº¥y cÃ¢u há»i:", questionResult.reason);
+        message.error("KhÃ´ng thá»ƒ táº£i danh sÃ¡ch cÃ¢u há»i.");
+      }
+
+      if (userResult.status === "fulfilled") {
+        setUserInfo(userResult.value.data.data || {});
+      } else {
+        console.error("Lá»—i láº¥y thÃ´ng tin thÃ­ sinh:", userResult.reason);
+        setUserInfo({
+          userId,
+          username: detail.username || String(userId).slice(0, 8),
+          fullName: detail.fullName || "Unknown",
+        });
+      }
     } catch (error) {
       console.error("Lỗi:", error);
       message.error("Không thể tải chi tiết bài thi.");
@@ -94,9 +119,12 @@ export default function GetUserExamById() {
   const isPassed = userExamDto.score >= 50; // Logic đậu/rớt
 
   // Helper: Tìm đáp án user đã chọn
-  const getUserAnswerForQuestion = (questionId) => {
-    return userAnswerDtos.find((ans) => ans.questionId === questionId)
-      ?.answerId;
+  const getUserAnswerIdsForQuestion = (questionId) => {
+    return new Set(
+      (userAnswerDtos || [])
+        .filter((ans) => ans.questionId === questionId)
+        .map((ans) => ans.answerId)
+    );
   };
 
   // Helper: Style cho từng đáp án
@@ -259,8 +287,13 @@ export default function GetUserExamById() {
 
       {/* DANH SÁCH CÂU HỎI */}
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
+        {examQuestions.length === 0 && (
+          <Card bordered={false} className="c-shadow">
+            <Text type="secondary">ChÆ°a cÃ³ dá»¯ liá»‡u cÃ¢u há»i cho bÃ i lÃ m nÃ y.</Text>
+          </Card>
+        )}
         {examQuestions.map((question, index) => {
-          const userAnswerId = getUserAnswerForQuestion(question.questionId);
+          const userAnswerIds = getUserAnswerIdsForQuestion(question.questionId);
 
           return (
             <Card
@@ -277,8 +310,8 @@ export default function GetUserExamById() {
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 12 }}
               >
-                {question.answers.map((ans) => {
-                  const isUserAnswer = ans.optionId === userAnswerId;
+                {(question.answers || []).map((ans) => {
+                  const isUserAnswer = userAnswerIds.has(ans.optionId);
                   const isCorrect = ans.isCorrect;
                   const style = getAnswerStyle(isUserAnswer, isCorrect);
 

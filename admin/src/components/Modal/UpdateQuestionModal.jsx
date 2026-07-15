@@ -13,6 +13,23 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
+const primaryButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "var(--admin-primary)",
+  background: "color-mix(in srgb, var(--admin-primary) 12%, transparent)",
+  color: "var(--admin-primary)",
+  boxShadow: "none",
+};
+
+const cancelButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "#ef4444",
+  background: "rgba(239, 68, 68, 0.1)",
+  color: "#ef4444",
+};
+
 const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) => {
   const [form] = Form.useForm();
   const { token } = theme.useToken();
@@ -66,6 +83,20 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
     color: token.colorTextSecondary,
     marginRight: 8,
   };
+
+  const correctAnswerLabelStyle = {
+    color: token.colorSuccessText || token.colorSuccess,
+  };
+
+  const getAnswerInputStyle = (isCorrect) => (
+    isCorrect
+      ? {
+          borderColor: token.colorSuccessBorder || token.colorSuccess,
+          backgroundColor: token.colorSuccessBg || "rgba(34, 197, 94, 0.14)",
+          color: token.colorText,
+        }
+      : undefined
+  );
 
   useEffect(() => {
     if (window.MathJax && window.MathJax.typesetPromise) {
@@ -210,10 +241,18 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
       open={isModalOpen}
       onCancel={handleCancel}
       footer={[
-        <Button key="back" onClick={handleCancel}>Hủy bỏ</Button>,
+        <Button key="back" style={cancelButtonStyle} onClick={handleCancel}>Hủy bỏ</Button>,
         <Button
+          type="default"
+          style={{
+            minHeight: 40,
+            borderRadius: 10,
+            borderColor: "var(--admin-primary)",
+            background: "color-mix(in srgb, var(--admin-primary) 12%, transparent)",
+            color: "var(--admin-primary)",
+            boxShadow: "none",
+          }}
           key="submit"
-          type="primary"
           icon={<SaveOutlined />}
           loading={submitting}
           onClick={() => form.submit()}
@@ -278,7 +317,7 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                     maxCount={1}
                     showUploadList={false}
                   >
-                    <Button icon={<UploadOutlined />} loading={uploadingImage} type="dashed" style={{ width: '100%' }}>
+                    <Button type="default" icon={<UploadOutlined />} loading={uploadingImage} style={{ ...primaryButtonStyle, width: '100%' }}>
                       {uploadingImage ? 'Đang tải lên...' : 'Chọn ảnh để upload'}
                     </Button>
                   </Upload>
@@ -361,7 +400,7 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
               {[0, 1, 2, 3].map((index) => (
                 <div key={index} style={{ display: "flex", alignItems: "flex-start", marginBottom: 16 }}>
                   <Radio value={index} style={{ marginRight: 12, marginTop: 6 }}>
-                    <Text strong style={{ color: correctAnswers.includes(index) ? "#52c41a" : "inherit" }}>
+                    <Text strong style={correctAnswers.includes(index) ? correctAnswerLabelStyle : undefined}>
                       Đáp án {String.fromCharCode(65 + index)} {correctAnswers.includes(index) && "(Đúng)"}
                     </Text>
                   </Radio>
@@ -375,10 +414,7 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                     <TextArea
                       placeholder={`Nhập đáp án ${String.fromCharCode(65 + index)} (hỗ trợ LaTeX và Markdown, Enter để xuống dòng)`}
                       autoSize={{ minRows: 1, maxRows: 5 }}
-                      style={{
-                        borderColor: correctAnswers.includes(index) ? "#52c41a" : undefined,
-                        backgroundColor: correctAnswers.includes(index) ? "#f6ffed" : undefined,
-                      }}
+                      style={getAnswerInputStyle(correctAnswers.includes(index))}
                     />
                   </Form.Item>
                   {(() => {
@@ -414,7 +450,7 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                           }
                         }}
                       >
-                        <Text strong style={{ color: isChecked ? "#52c41a" : "inherit" }}>
+                        <Text strong style={isChecked ? correctAnswerLabelStyle : undefined}>
                           Đáp án {String.fromCharCode(65 + index)} {isChecked && "(Đúng)"}
                         </Text>
                       </Checkbox>
@@ -429,10 +465,7 @@ const UpdateQuestionModal = ({ isModalOpen, onCancel, onSuccess, questionId }) =
                         <TextArea
                           placeholder={`Nhập đáp án ${String.fromCharCode(65 + index)} (hỗ trợ LaTeX và Markdown, Enter để xuống dòng)`}
                           autoSize={{ minRows: 1, maxRows: 5 }}
-                          style={{
-                            borderColor: isChecked ? "#52c41a" : undefined,
-                            backgroundColor: isChecked ? "#f6ffed" : undefined,
-                          }}
+                          style={getAnswerInputStyle(isChecked)}
                         />
                       </Form.Item>
                       {(() => {

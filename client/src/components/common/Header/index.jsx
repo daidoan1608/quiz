@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useAuth } from "context/AuthProvider";
 import { useLanguage } from "context/LanguageProvider";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,6 +8,7 @@ import { getStoredAvatarUrl } from "utils/storage";
 import { resolveMediaUrl } from "utils/mediaUrl";
 import AppearanceModeToggle from "./AppearanceModeToggle";
 import Logo from "./Logo";
+import { useNotifications } from "context/NotificationProvider";
 
 const BASE_URL_AVATAR = process.env.REACT_APP_AVATAR_URL;
 export default function Header() {
@@ -19,6 +20,10 @@ export default function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const navRef = useRef(null);
+  const navItemRefs = useRef({});
+  const [activePill, setActivePill] = useState({ left: 0, width: 0, opacity: 0 });
+  const { unreadCount } = useNotifications();
 
   const { mode, setMode, colorTheme, setColorTheme } = useTheme();
   const isDarkMode = mode === 'dark';
@@ -36,13 +41,36 @@ export default function Header() {
     setShowUserMenu(false);
   };
 
-  const navItems = [
-    { name: t("nav.home"), link: "/" },
-    { name: t("nav.subjects"), link: "/subjects" },
-    { name: t("nav.rank"), link: "/rank" },
-  ];
+  const navItems = useMemo(
+    () => [
+      { name: t("nav.home"), link: "/" },
+      { name: t("nav.subjects"), link: "/subjects" },
+      { name: t("nav.rank"), link: "/rank" },
+    ],
+    [t]
+  );
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = useCallback((path) => (
+    path === "/" ? location.pathname === "/" : location.pathname === path || location.pathname.startsWith(`${path}/`)
+  ), [location.pathname]);
+
+  useLayoutEffect(() => {
+    const activePath = navItems.find((item) => isActive(item.link))?.link;
+    const activeItem = activePath ? navItemRefs.current[activePath] : null;
+    const nav = navRef.current;
+    if (!activeItem || !nav) {
+      setActivePill((prev) => ({ ...prev, opacity: 0 }));
+      return;
+    }
+
+    const navRect = nav.getBoundingClientRect();
+    const itemRect = activeItem.getBoundingClientRect();
+    setActivePill({
+      left: itemRect.left - navRect.left,
+      width: itemRect.width,
+      opacity: 1,
+    });
+  }, [location.pathname, language, navItems, isActive]);
 
   // Đảm bảo đóng Mobile Menu khi chuyển hướng
   const handleMobileNavClick = (link) => {
@@ -52,21 +80,39 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white/90 dark:bg-surface-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-white/10 shadow-sm transition-all duration-300">
+      <header className="sticky top-0 z-50 w-full border-b border-white/60 bg-gradient-to-r from-white/92 via-blue-50/88 to-indigo-50/86 shadow-lg shadow-blue-900/5 backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:from-slate-950/92 dark:via-blue-950/70 dark:to-indigo-950/72 dark:shadow-black/30">
         <div className="max-w-screen-2xl mx-auto px-4">
           <div className="flex items-center justify-between h-20 md:h-24">
             <Logo onClick={() => navigate("/")} />
 
             {/* MENU DESKTOP (Không đổi) */}
-            <nav className="hidden md:flex items-center gap-1 bg-gray-100/80 dark:bg-gray-700/50 p-1 rounded-full border border-gray-200 dark:border-gray-600">
+            <nav
+              ref={navRef}
+              className="relative hidden md:flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-gradient-to-r from-white/80 via-blue-50/70 to-indigo-50/70 p-1.5 shadow-lg shadow-blue-900/5 ring-1 ring-white/80 backdrop-blur-md dark:border-blue-300/20 dark:from-slate-800/80 dark:via-blue-950/40 dark:to-indigo-950/40 dark:shadow-black/20 dark:ring-white/10"
+            >
+              <span
+                className="pointer-events-none absolute top-1.5 h-[calc(100%-12px)] overflow-hidden rounded-full border border-white/80 bg-white/48 shadow-[inset_0_1px_1px_rgba(255,255,255,0.95),inset_0_-10px_18px_rgba(37,99,235,0.10),0_10px_24px_rgba(37,99,235,0.16)] ring-1 ring-blue-400/25 backdrop-blur-md transition-all duration-300 ease-out dark:border-white/20 dark:bg-white/10 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.18),inset_0_-10px_18px_rgba(96,165,250,0.08),0_10px_24px_rgba(0,0,0,0.34)] dark:ring-blue-300/18"
+                style={{
+                  left: activePill.left,
+                  width: activePill.width,
+                  opacity: activePill.opacity,
+                }}
+              />
               {navItems.map((item, index) => (
                 <a
                   key={index}
+                  ref={(node) => {
+                    navItemRefs.current[item.link] = node;
+                  }}
                   href={item.link}
-                  className={`!no-underline px-5 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                  onClick={(event) => {
+                    event.preventDefault();
+                    navigate(item.link);
+                  }}
+                  className={`relative z-10 inline-flex w-32 justify-center !no-underline px-6 py-2.5 text-base font-semibold rounded-full transition-colors duration-300 ${
                     isActive(item.link)
-                      ? "bg-blue-600 !text-white shadow-md !font-bold"
-                      : "text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-600"
+                      ? "!text-blue-700 dark:!text-blue-100 !font-bold"
+                      : "text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-300"
                   }`}
                 >
                   {item.name}
@@ -106,9 +152,14 @@ export default function Header() {
               {/* --- 3. NÚT THÔNG BÁO (Chỉ hiện khi ĐĂNG NHẬP VÀ TRÊN DESKTOP) --- */}
               {isLoggedIn && (
                 <button
-                  className="hidden md:flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg size-10 bg-gray-100 dark:bg-gray-700/50 text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  className="relative hidden md:flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg size-10 bg-gray-100 dark:bg-gray-700/50 text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => navigate("/notifications")}>
                   <span className="material-symbols-outlined text-xl">notifications</span>
+                  {unreadCount > 0 && (
+                    <span className="absolute right-1 top-1 min-w-4 h-4 rounded-full bg-red-500 px-1 text-[10px] font-bold leading-4 text-white">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
                 </button>
               )}
 
@@ -216,16 +267,6 @@ export default function Header() {
                               isDarkMode={isDarkMode}
                               setMode={setMode}
                               t={t}
-                              lightClassName={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
-                                !isDarkMode
-                                  ? "bg-white text-gray-900 shadow-sm"
-                                  : "text-gray-500 hover:text-gray-300"
-                              }`}
-                              darkClassName={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
-                                isDarkMode
-                                  ? "bg-gray-800 text-white shadow-sm"
-                                  : "text-gray-500 hover:text-gray-900"
-                              }`}
                             />
                           </div>
 
@@ -365,12 +406,6 @@ export default function Header() {
                     isDarkMode={isDarkMode}
                     setMode={setMode}
                     t={t}
-                    lightClassName={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                      !isDarkMode ? "bg-white text-gray-900 shadow-sm" : "text-gray-400"
-                    }`}
-                    darkClassName={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                      isDarkMode ? "bg-gray-800 text-white shadow-sm" : "text-gray-500"
-                    }`}
                   />
                 </div>
 

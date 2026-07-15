@@ -11,6 +11,8 @@ import com.fita.vnua.quiz.repository.*;
 import com.fita.vnua.quiz.service.ExamService;
 import com.fita.vnua.quiz.service.NotificationService;
 import com.fita.vnua.quiz.service.QuestionService;
+import com.fita.vnua.quiz.service.SoftDeleteService;
+import com.fita.vnua.quiz.service.UserExamService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,8 @@ public class ExamServiceImpl implements ExamService {
     private final NotificationService notificationService;
     private final UserAnswerRepository userAnswerRepository;
     private final UserExamRepository userExamRepository;
+    private final SoftDeleteService softDeleteService;
+    private final UserExamService userExamService;
 
     protected List<ExamSummaryDto> mapExamsToSummaryDtos(List<Exam> exams) {
         return exams.stream()
@@ -64,6 +68,11 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    public List<ExamSummaryDto> getDeletedExams() {
+        return mapExamsToSummaryDtos(examRepository.findByDeletedTrue());
+    }
+
+    @Override
     public List<ExamSummaryDto> getExamsBySubjectId(Long subjectId) {
         List<Exam> exams = examRepository.findExamsBySubjectId(subjectId);
         return mapExamsToSummaryDtos(exams);
@@ -71,7 +80,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public ExamDto getExamById(Long id) {
-        Exam exam = examRepository.findById(id)
+        Exam exam = examRepository.findByExamIdAndDeletedFalse(id)
                 .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
         ExamDto examDto = new ExamDto();
         examDto.setExamId(exam.getExamId());
@@ -198,6 +207,9 @@ public class ExamServiceImpl implements ExamService {
         // Lấy đối tượng Subject để dùng sau này cho việc gửi thông báo
         Subject subject = subjectRepository.findById(examDto.getSubjectId())
                 .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(subject.getDeleted())) {
+            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+        }
         exam.setSubject(subject);
 
         exam.setDescription(examDto.getDescription());
@@ -288,7 +300,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public ExamDto updateExam(Long id, ExamDto examDto) {
-        Exam exam = examRepository.findById(id)
+        Exam exam = examRepository.findByExamIdAndDeletedFalse(id)
                 .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
         exam.setTitle(examDto.getTitle());
         exam.setDescription(examDto.getDescription());
@@ -296,6 +308,9 @@ public class ExamServiceImpl implements ExamService {
         if (examDto.getSubjectId() != null) {
             Subject subject = subjectRepository.findById(examDto.getSubjectId())
                     .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+            if (Boolean.TRUE.equals(subject.getDeleted())) {
+                throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+            }
             exam.setSubject(subject);
         }
         Exam updatedExam = examRepository.save(exam);
@@ -315,10 +330,44 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public void deleteExam(Long id) {
-        Exam exam = examRepository.findById(id)
-                .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
+        softDeleteService.deleteExam(id, null);
+    }
 
-        exam.setDeleted(true);
-        examRepository.save(exam);
+    @Override
+    @Transactional
+    public ExamDto restoreExam(Long id) {
+        softDeleteService.restoreExam(id);
+        return getExamById(id);
+    }
+
+    @Override
+    public ExamDto getExamByIdForSubmittedAttempt(Long examId, Long userExamId, UUID currentUserId) {
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN));
+        UserExam userExam = (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MOD)
+                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN))
+                : userExamRepository.findByIdAndUserId(userExamId, currentUserId)
+                        .orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN));
+        if (!examId.equals(userExam.getExam().getExamId()) || !"SUBMITTED".equals(userExam.getStatus())) {
+            throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
+        }
+        List<QuestionDto> questions = userExamService.getAttemptQuestionsForSubmittedAttempt(userExamId, currentUserId).stream()
+                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .toList();
+        return mapExamToDto(userExam.getExam(), questions);
+    }
+
+    private ExamDto mapExamToDto(Exam exam, List<QuestionDto> questions) {
+        ExamDto examDto = new ExamDto();
+        examDto.setExamId(exam.getExamId());
+        examDto.setTitle(exam.getTitle());
+        examDto.setDescription(exam.getDescription());
+        examDto.setDuration(exam.getDuration());
+        examDto.setSubjectId(exam.getSubject().getSubjectId());
+        examDto.setSubjectName(exam.getSubject().getName());
+        examDto.setCreatedBy(exam.getCreatedBy().getUserId());
+        examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
+        examDto.setQuestions(questions);
+        return examDto;
     }
 }

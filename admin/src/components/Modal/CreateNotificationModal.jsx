@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, Form, Input, Select, message ,Spin} from 'antd';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Modal, Form, Input, Select, message, Spin } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import { authAxios } from "../../api/axiosConfig"; // Cần đảm bảo import đúng đường dẫn
+import { authAxios } from "../../api/axiosConfig";
+import { userApi } from "../../api/services/userApi";
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 const CreateNotificationModal = ({ isModalOpen, onCancel, onSuccess, createForm, notificationType, setNotificationType }) => {
-const [subjects, setSubjects] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
-  // --- LOGIC XỬ LÝ GỬI THÔNG BÁO ---
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const userSearchTimerRef = useRef(null);
 
   const fetchSubjects = useCallback(async () => {
     setLoadingSubjects(true);
     try {
-      // **GIẢ ĐỊNH**: API endpoint của bạn trả về danh sách môn học
-      // Ví dụ: [{ id: 101, name: 'Toán Cao Cấp' }, { id: 102, name: 'Vật Lý Đại Cương' }, ...]
       const response = await authAxios.get('/public/subjects');
-      setSubjects(response.data.data);
+      setSubjects(response.data.data || []);
     } catch (error) {
       console.error("Lỗi khi tải danh sách môn học:", error);
       message.error('Không thể tải danh sách môn học.');
@@ -32,33 +33,78 @@ const [subjects, setSubjects] = useState([]);
     }
   }, [isModalOpen, notificationType, subjects.length, fetchSubjects]);
 
+  const fetchUsers = useCallback(async (keyword) => {
+    if (!keyword || keyword.trim().length < 2) {
+      setUsers([]);
+      return;
+    }
+
+    setLoadingUsers(true);
+    try {
+      const result = await userApi.search(keyword.trim(), 20);
+      setUsers(result);
+    } catch (error) {
+      console.error("Lỗi khi tìm người dùng:", error);
+      message.error('Không thể tìm người dùng.');
+    } finally {
+      setLoadingUsers(false);
+    }
+  }, []);
+
+  const searchUsers = useCallback((keyword) => {
+    if (userSearchTimerRef.current) {
+      clearTimeout(userSearchTimerRef.current);
+    }
+    userSearchTimerRef.current = setTimeout(() => {
+      fetchUsers(keyword);
+    }, 400);
+  }, [fetchUsers]);
+
+  useEffect(() => () => {
+    if (userSearchTimerRef.current) {
+      clearTimeout(userSearchTimerRef.current);
+    }
+  }, []);
+
+  const handleTypeChange = (value) => {
+    setNotificationType(value);
+    createForm.setFieldsValue({ targetId: undefined });
+    setUsers([]);
+  };
+
   const handleCreate = async (values) => {
     try {
-      let endpoint = '/admin';
-      let payload = { title: values.title, message: values.message };
+      let endpoint = '/admin/notifications';
+      const payload = { title: values.title, message: values.message };
 
       if (values.type === 'GLOBAL') {
-        endpoint += '/global-notification-campaigns';
+        endpoint += '/global';
       } else if (values.type === 'PERSONAL') {
-        endpoint += '/personal-notification-campaigns';
+        endpoint += '/personal';
         payload.userId = values.targetId;
       } else if (values.type === 'SUBJECT') {
-        endpoint += '/subject-notification-campaigns';
+        endpoint += '/subject';
         payload.subjectId = values.targetId;
-        payload.subjectName = "Thông báo môn học"; // Đã được định nghĩa trong component gốc
+        payload.subjectName = subjects.find((subject) => subject.subjectId === values.targetId)?.name || 'Thông báo môn học';
       } else if (values.type === 'BATCH') {
-        endpoint += '/batch-notification-campaigns';
-        payload.userIds = values.targetId.split(',').map(id => id.trim());
+        endpoint += '/batch';
+        payload.userIds = values.targetId;
       }
 
       await authAxios.post(endpoint, payload);
       message.success('Gửi thông báo thành công!');
-      onSuccess(); // Gọi hàm thành công để đóng modal và làm mới dữ liệu
+      onSuccess();
     } catch (error) {
       console.error(error);
       message.error('Gửi thất bại: ' + (error.response?.data?.message || error.message || 'Lỗi không xác định'));
     }
   };
+
+  const renderUserOptions = () => users.map((user) => (
+    <Option key={user.userId} value={user.userId}>
+      {user.fullName || user.username} - {user.email || user.username}
+    </Option>
+  ));
 
   return (
     <Modal
@@ -77,7 +123,7 @@ const [subjects, setSubjects] = useState([]);
         initialValues={{ type: 'GLOBAL' }}
       >
         <Form.Item name="type" label="Loại thông báo">
-          <Select onChange={setNotificationType}>
+          <Select onChange={handleTypeChange}>
             <Option value="GLOBAL">Toàn hệ thống (Global)</Option>
             <Option value="PERSONAL">Cá nhân (Personal)</Option>
             <Option value="SUBJECT">Theo môn học (Subject)</Option>
@@ -86,42 +132,59 @@ const [subjects, setSubjects] = useState([]);
         </Form.Item>
 
         {notificationType === 'PERSONAL' && (
-          <Form.Item name="targetId" label="User ID (UUID)" rules={[{ required: true, message: 'Vui lòng nhập ID người nhận' }]}>
-            <Input placeholder="Nhập UUID của người nhận" prefix={<UserOutlined />} />
+          <Form.Item name="targetId" label="Người nhận" rules={[{ required: true, message: 'Vui lòng chọn người nhận' }]}>
+            <Select
+              showSearch
+              filterOption={false}
+              placeholder="Nhập tên, username, email hoặc ID..."
+              suffixIcon={<UserOutlined />}
+              loading={loadingUsers}
+              notFoundContent={loadingUsers ? <Spin size="small" /> : 'Không tìm thấy người dùng'}
+              onSearch={searchUsers}
+            >
+              {renderUserOptions()}
+            </Select>
           </Form.Item>
         )}
 
-{notificationType === 'SUBJECT' && (
-      <Form.Item
-        name="targetId"
-        label="Môn học (Tìm kiếm theo Tên)"
-        rules={[{ required: true, message: 'Vui lòng chọn ID môn học' }]}
-      >
-        <Select
-          showSearch // Bật tính năng tìm kiếm
-          placeholder="Chọn môn học..."
-          optionFilterProp="children" // Lọc theo nội dung của Option (tên môn học)
-          loading={loadingSubjects} // Hiển thị trạng thái tải
-          notFoundContent={loadingSubjects ? <Spin size="small" /> : 'Không tìm thấy môn học nào'}
-
-          // Bộ lọc tùy chỉnh: Tìm kiếm không phân biệt chữ hoa/thường
-          filterOption={(input, option) =>
-            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-          }
-        >
-          {/* Lặp qua danh sách môn học đã lấy từ API */}
-          {subjects.map((subject) => (
-            <Option key={subject.subjectId} value={subject.subjectId}>
-              {subject.name} (ID: {subject.subjectId})
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-    )}
+        {notificationType === 'SUBJECT' && (
+          <Form.Item
+            name="targetId"
+            label="Môn học"
+            rules={[{ required: true, message: 'Vui lòng chọn môn học' }]}
+          >
+            <Select
+              showSearch
+              placeholder="Chọn môn học..."
+              optionFilterProp="children"
+              loading={loadingSubjects}
+              notFoundContent={loadingSubjects ? <Spin size="small" /> : 'Không tìm thấy môn học nào'}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {subjects.map((subject) => (
+                <Option key={subject.subjectId} value={subject.subjectId}>
+                  {subject.name} (ID: {subject.subjectId})
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        )}
 
         {notificationType === 'BATCH' && (
-          <Form.Item name="targetId" label="Danh sách User IDs" rules={[{ required: true, message: 'Vui lòng nhập danh sách User IDs' }]}>
-            <TextArea rows={2} placeholder="Nhập các UUID cách nhau bởi dấu phẩy" />
+          <Form.Item name="targetId" label="Danh sách người nhận" rules={[{ required: true, message: 'Vui lòng chọn người nhận' }]}>
+            <Select
+              mode="multiple"
+              showSearch
+              filterOption={false}
+              placeholder="Nhập tên, username, email hoặc ID để thêm người nhận..."
+              loading={loadingUsers}
+              notFoundContent={loadingUsers ? <Spin size="small" /> : 'Không tìm thấy người dùng'}
+              onSearch={searchUsers}
+            >
+              {renderUserOptions()}
+            </Select>
           </Form.Item>
         )}
 

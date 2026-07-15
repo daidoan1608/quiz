@@ -14,6 +14,23 @@ import { subjectApi } from '../../api/services'; // Điều chỉnh đường d�
 const { Title } = Typography;
 const { TextArea } = Input;
 
+const primaryButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "var(--admin-primary)",
+  background: "color-mix(in srgb, var(--admin-primary) 12%, transparent)",
+  color: "var(--admin-primary)",
+  boxShadow: "none",
+};
+
+const cancelButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "#ef4444",
+  background: "rgba(239, 68, 68, 0.1)",
+  color: "#ef4444",
+};
+
 const UpdateSubjectModal = ({ isModalOpen, onCancel, onSuccess, subjectId }) => {
   const [form] = Form.useForm();
 
@@ -87,12 +104,13 @@ const UpdateSubjectModal = ({ isModalOpen, onCancel, onSuccess, subjectId }) => 
         >
           Khôi phục gốc
         </Button>,
-        <Button key="back" onClick={handleCancel}>
+        <Button key="back" style={cancelButtonStyle} onClick={handleCancel}>
           Hủy bỏ
         </Button>,
         <Button
+          type="default"
+          style={primaryButtonStyle}
           key="submit"
-          type="primary"
           icon={<SaveOutlined />}
           loading={submitting}
           onClick={() => form.submit()}

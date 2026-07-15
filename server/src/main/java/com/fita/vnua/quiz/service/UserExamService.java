@@ -2,6 +2,7 @@ package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.UserExamDto;
 import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
+import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.model.dto.request.SaveExamAttemptAnswerRequest;
 import com.fita.vnua.quiz.model.dto.request.StartExamAttemptRequest;
 import com.fita.vnua.quiz.model.dto.request.UpdateExamAttemptProgressRequest;
@@ -18,6 +19,8 @@ public interface UserExamService {
     List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate);
 
     UserExamResponse getUserExamByIdForUser(Long id, UUID currentUserId);
+
+    UserExamResponse getUserExamByIdForAdmin(Long id);
 
     UserExamDto createUserExam(UserExamRequest userExamRequest, UUID currentUserId);
 
@@ -40,4 +43,6 @@ public interface UserExamService {
     ExamAttemptResponse updateAttemptProgress(Long userExamId, UpdateExamAttemptProgressRequest request, UUID currentUserId);
 
     UserExamDto submitAttempt(Long userExamId, UUID currentUserId);
+
+    List<Question> getAttemptQuestionsForSubmittedAttempt(Long userExamId, UUID currentUserId);
 }

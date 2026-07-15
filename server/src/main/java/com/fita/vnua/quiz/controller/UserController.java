@@ -57,6 +57,14 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/users/deleted")
+    @Operation(summary = "Lấy danh sách người dùng đã vô hiệu hóa")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getDeletedUsers() {
+        List<UserResponse> users = userService.getDeletedUserResponses();
+        return ResponseEntity.ok(ApiResponse.success("Deleted users fetched successfully", users));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/users")
     @Operation(summary = "Lấy danh sách tất cả người dùng", description = "This API fetches all users")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
@@ -67,8 +75,11 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/users/search")
     @Operation(summary = "Lấy danh sách người dùng theo từ khóa tìm kiếm", description = "This API fetches users by search key")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getUserBySearchKey(@RequestParam("key") String keyword) {
-        List<UserResponse> users = userService.getUserResponsesBySearchKey(keyword);
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getUserBySearchKey(
+            @RequestParam("key") String keyword,
+            @RequestParam(defaultValue = "20") int limit
+    ) {
+        List<UserResponse> users = userService.searchNotificationRecipients(keyword, limit);
         return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", users));
     }
 
@@ -124,5 +135,14 @@ public class UserController {
     ) {
         userService.delete(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("admin/users/{userId}/restore")
+    @Operation(summary = "Khôi phục người dùng đã vô hiệu hóa")
+    public ResponseEntity<ApiResponse<UserResponse>> restoreUser(
+            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success("User restored successfully", userService.restore(userId)));
     }
 }

@@ -1,84 +1,201 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Modal, Form, Select, Checkbox, Button, Alert, message, Space } from "antd";
-import { SafetyCertificateOutlined } from "@ant-design/icons";
-import { authAxios, publicAxios } from "../../api/axiosConfig";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert, Button, Checkbox, Input, Modal, Space, Table, Tag, Tooltip, Typography, message } from "antd";
+import { SafetyCertificateOutlined, SaveOutlined } from "@ant-design/icons";
+import { authAxios } from "../../api/axiosConfig";
+import { categoryApi, subjectApi } from "../../api/services";
+
+const { Text } = Typography;
 
 const PERMISSIONS = [
-  { label: "Xem", value: "READ" },
-  { label: "Them", value: "CREATE" },
-  { label: "Sua", value: "UPDATE" },
-  { label: "Xoa", value: "DELETE" },
+  { label: "READ", value: "READ", color: "blue" },
+  { label: "CREATE", value: "CREATE", color: "green" },
+  { label: "UPDATE", value: "UPDATE", color: "orange" },
+  { label: "DELETE", value: "DELETE", color: "red" },
 ];
 
+const QUICK_SETS = {
+  readOnly: ["READ"],
+  contentManager: ["READ", "CREATE", "UPDATE"],
+  full: ["READ", "CREATE", "UPDATE", "DELETE"],
+  none: [],
+};
+
+const normalizePermissionMap = (value) => {
+  if (!value || typeof value !== "object") return {};
+  return Object.fromEntries(
+    Object.entries(value).map(([subjectId, permissions]) => [
+      String(subjectId),
+      Array.isArray(permissions) ? permissions : [],
+    ])
+  );
+};
+
 const SubjectPermissionModal = ({ isModalOpen, onCancel, user }) => {
-  const [form] = Form.useForm();
-  const [categories, setCategories] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [permissionMap, setPermissionMap] = useState({});
   const [loading, setLoading] = useState(false);
+  const [savingSubjectId, setSavingSubjectId] = useState(null);
+  const [searchText, setSearchText] = useState("");
 
-  const fetchCategories = useCallback(async () => {
-    const response = await publicAxios.get("/public/categories");
-    const data = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
-    setCategories(Array.isArray(data[0]) ? data[0] : data);
+  const fetchSubjects = useCallback(async () => {
+    const categories = await categoryApi.getAll();
+    const subjectGroups = await Promise.all(
+      categories.map(async (category) => {
+        const categorySubjects = await subjectApi.getByCategory(category.categoryId);
+        return categorySubjects.map((subject) => ({
+          ...subject,
+          categoryId: category.categoryId,
+          categoryName: category.categoryName,
+        }));
+      })
+    );
+    setSubjects(subjectGroups.flat());
   }, []);
 
   const fetchPermissions = useCallback(async () => {
     if (!user?.userId) return;
     const response = await authAxios.get(`/admin/permissions/mod/${user.userId}`);
-    setPermissionMap(response.data || {});
+    setPermissionMap(normalizePermissionMap(response.data));
   }, [user?.userId]);
 
-  useEffect(() => {
-    if (!isModalOpen) return;
-    fetchCategories().catch(() => message.error("Khong the tai danh sach mon hoc."));
-    fetchPermissions().catch(() => message.error("Khong the tai quyen hien tai."));
-  }, [isModalOpen, fetchCategories, fetchPermissions]);
-
-  const handleCategoryChange = (categoryId) => {
-    const category = categories.find((item) => item.categoryId === categoryId);
-    setSubjects(category?.subjects || []);
-    form.setFieldsValue({ subjectId: null, permissions: [] });
-  };
-
-  const handleSubjectChange = (subjectId) => {
-    form.setFieldsValue({ permissions: permissionMap[subjectId] || [] });
-  };
-
-  const handleSubmit = async (values) => {
+  const reload = useCallback(async () => {
     setLoading(true);
     try {
-      await authAxios.post("/admin/permissions/subject-assignment", {
-        modUserId: user.userId,
-        subjectId: values.subjectId,
-        permissions: values.permissions || [],
-      });
-      message.success("Da cap nhat quyen mon hoc.");
-      setPermissionMap((prev) => ({
-        ...prev,
-        [values.subjectId]: values.permissions || [],
-      }));
+      await Promise.all([fetchSubjects(), fetchPermissions()]);
     } catch (error) {
-      message.error(error.response?.data?.message || "Khong the cap nhat quyen.");
+      message.error(error.response?.data?.message || "Không thể tải dữ liệu phân quyền.");
     } finally {
       setLoading(false);
     }
+  }, [fetchPermissions, fetchSubjects]);
+
+  useEffect(() => {
+    if (isModalOpen) reload();
+  }, [isModalOpen, user?.userId, reload]);
+
+  const filteredSubjects = useMemo(() => {
+    const keyword = searchText.trim().toLowerCase();
+    if (!keyword) return subjects;
+    return subjects.filter((subject) =>
+      `${subject.name || ""} ${subject.categoryName || ""} ${subject.subjectId || ""}`
+        .toLowerCase()
+        .includes(keyword)
+    );
+  }, [subjects, searchText]);
+
+  const updateLocalPermissions = (subjectId, permissions) => {
+    setPermissionMap((prev) => ({
+      ...prev,
+      [String(subjectId)]: permissions,
+    }));
   };
 
-  const handleClose = () => {
-    form.resetFields();
-    setSubjects([]);
-    setPermissionMap({});
-    onCancel();
+  const savePermissions = async (subjectId, permissions = permissionMap[String(subjectId)] || []) => {
+    const normalizedPermissions = [...new Set(permissions)].filter(Boolean);
+    setSavingSubjectId(subjectId);
+    try {
+      await authAxios.post("/admin/permissions/subject-assignment", {
+        modUserId: user.userId,
+        subjectId,
+        permissions: normalizedPermissions,
+      });
+      updateLocalPermissions(subjectId, normalizedPermissions);
+      message.success(normalizedPermissions.length ? "Đã lưu quyền môn học." : "Đã xóa quyền môn học.");
+    } catch (error) {
+      message.error(error.response?.data?.message || "Không thể lưu quyền.");
+    } finally {
+      setSavingSubjectId(null);
+    }
   };
+
+  const applyQuickSet = async (subjectId, setName) => {
+    const nextPermissions = [...(QUICK_SETS[setName] || [])];
+    updateLocalPermissions(subjectId, nextPermissions);
+    await savePermissions(subjectId, nextPermissions);
+  };
+
+  const columns = [
+    {
+      title: "Môn học",
+      dataIndex: "name",
+      key: "name",
+      width: 260,
+      render: (text, record) => (
+        <div>
+          <Text strong>{text}</Text>
+          <div>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {record.categoryName || "Không rõ khoa"} · ID {record.subjectId}
+            </Text>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Quyền",
+      key: "permissions",
+      width: 360,
+      render: (_, record) => {
+        const value = permissionMap[String(record.subjectId)] || [];
+        return (
+          <Checkbox.Group
+            value={value}
+            onChange={(nextValue) => updateLocalPermissions(record.subjectId, nextValue)}
+          >
+            <Space wrap>
+              {PERMISSIONS.map((permission) => (
+                <Checkbox key={permission.value} value={permission.value}>
+                  <Tag color={permission.color}>{permission.label}</Tag>
+                </Checkbox>
+              ))}
+            </Space>
+          </Checkbox.Group>
+        );
+      },
+    },
+    {
+      title: "Mẫu nhanh",
+      key: "quick",
+      width: 250,
+      render: (_, record) => (
+        <Space wrap>
+          <Button className="compact-btn" disabled={savingSubjectId === record.subjectId} onClick={() => applyQuickSet(record.subjectId, "readOnly")}>Chỉ đọc</Button>
+          <Button className="compact-btn" disabled={savingSubjectId === record.subjectId} onClick={() => applyQuickSet(record.subjectId, "contentManager")}>Quản lý nội dung</Button>
+          <Button className="compact-btn" disabled={savingSubjectId === record.subjectId} onClick={() => applyQuickSet(record.subjectId, "full")}>Tất cả</Button>
+          <Button className="compact-btn" danger disabled={savingSubjectId === record.subjectId} onClick={() => applyQuickSet(record.subjectId, "none")}>Xóa</Button>
+        </Space>
+      ),
+    },
+    {
+      title: "Lưu",
+      key: "save",
+      width: 90,
+      fixed: "right",
+      render: (_, record) => (
+        <Tooltip title="Lưu quyền cho môn này">
+          <Button
+            className="action-btn is-primary"
+            icon={<SaveOutlined />}
+            loading={savingSubjectId === record.subjectId}
+            onClick={() => savePermissions(record.subjectId)}
+          />
+        </Tooltip>
+      ),
+    },
+  ];
+
+  const grantedSubjectCount = Object.values(permissionMap).filter((permissions) => permissions?.length).length;
 
   return (
     <Modal
-      title={<Space><SafetyCertificateOutlined /> Phan quyen mon hoc</Space>}
+      title={<Space><SafetyCertificateOutlined /> Phân quyền môn học</Space>}
       open={isModalOpen}
-      onCancel={handleClose}
-      footer={null}
-      width={620}
+      onCancel={onCancel}
+      footer={[
+        <Button key="reload" onClick={reload} loading={loading}>Tải lại</Button>,
+        <Button key="close" onClick={onCancel}>Đóng</Button>,
+      ]}
+      width={1080}
       centered
     >
       <Alert
@@ -86,47 +203,25 @@ const SubjectPermissionModal = ({ isModalOpen, onCancel, user }) => {
         showIcon
         style={{ marginBottom: 16 }}
         message={user ? `${user.fullName || user.username} (${user.role})` : ""}
-        description="Chi ap dung cho tai khoan MOD. Chon tung mon de cap nhat nhom quyen rieng."
+        description={`Đang có ${grantedSubjectCount} môn học được cấp quyền. Việc thay đổi vai trò sẽ thu hồi toàn bộ quyền theo môn.`}
       />
 
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <Form.Item label="Khoa" name="categoryId" rules={[{ required: true, message: "Chon khoa" }]}>
-          <Select placeholder="Chon khoa" onChange={handleCategoryChange} showSearch optionFilterProp="children">
-            {categories.map((category) => (
-              <Select.Option key={category.categoryId} value={category.categoryId}>
-                {category.categoryName}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+      <Input.Search
+        placeholder="Tìm môn học, khoa, ID..."
+        allowClear
+        value={searchText}
+        onChange={(event) => setSearchText(event.target.value)}
+        style={{ maxWidth: 360, marginBottom: 16 }}
+      />
 
-        <Form.Item label="Mon hoc" name="subjectId" rules={[{ required: true, message: "Chon mon hoc" }]}>
-          <Select
-            placeholder="Chon mon hoc"
-            disabled={subjects.length === 0}
-            onChange={handleSubjectChange}
-            showSearch
-            optionFilterProp="children"
-          >
-            {subjects.map((subject) => (
-              <Select.Option key={subject.subjectId} value={subject.subjectId}>
-                {subject.name}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-
-        <Form.Item label="Quyen" name="permissions" rules={[{ required: true, message: "Chon it nhat mot quyen" }]}>
-          <Checkbox.Group options={PERMISSIONS} />
-        </Form.Item>
-
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <Button onClick={handleClose}>Dong</Button>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            Luu quyen
-          </Button>
-        </div>
-      </Form>
+      <Table
+        columns={columns}
+        dataSource={filteredSubjects}
+        rowKey="subjectId"
+        loading={loading}
+        pagination={{ pageSize: 6, showSizeChanger: false }}
+        scroll={{ x: 980 }}
+      />
     </Modal>
   );
 };

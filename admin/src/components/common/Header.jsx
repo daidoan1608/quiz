@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
 import { useTheme } from "../../context/ThemeContext";
 import { NotificationSidebar } from "./NotificationSidebar";
-import { Dropdown, Space, Avatar, Typography, Button, theme as antTheme, Badge } from "antd";
-import { BellOutlined, LogoutOutlined, UserOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
+import { Avatar, Badge, Button, Dropdown, Space, Switch, Typography, theme as antTheme } from "antd";
+import { BellOutlined, LogoutOutlined, MoonOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 const API_ROOT = (process.env.REACT_APP_API_URL || "/api/v1/").replace(/\/api\/v1\/?$/, "");
@@ -46,7 +46,9 @@ export const ContentHeader = () => {
         <div style={{ cursor: "default", padding: "6px 4px" }}>
           <Text strong>{displayName}</Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>Quản trị hệ thống</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Quản trị hệ thống
+          </Text>
         </div>
       ),
       disabled: true,
@@ -55,13 +57,15 @@ export const ContentHeader = () => {
     {
       key: "theme-controls",
       label: (
-        <div style={{ padding: "8px 4px", width: 230 }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ padding: "8px 4px", width: 230 }} onClick={(event) => event.stopPropagation()}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <Text strong>Giao diện</Text>
-            <Space.Compact>
-              <Button type={!isDarkMode ? "primary" : "default"} size="small" icon={<SunOutlined />} onClick={() => setMode("light")}>Sáng</Button>
-              <Button type={isDarkMode ? "primary" : "default"} size="small" icon={<MoonOutlined />} onClick={() => setMode("dark")}>Tối</Button>
-            </Space.Compact>
+            <Switch
+              checked={isDarkMode}
+              checkedChildren={<MoonOutlined />}
+              unCheckedChildren={<SunOutlined />}
+              onChange={(checked) => setMode(checked ? "dark" : "light")}
+            />
           </div>
 
           <Text type="secondary" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>

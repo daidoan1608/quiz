@@ -5,7 +5,9 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -37,6 +39,16 @@ public class Exam {
 
     @Column(nullable = false)
     private Boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
+    private UUID deletedBy;
+
+    private UUID deletedCascadeId;
+
+    private String deleteOriginType;
+
+    private Long deleteOriginId;
 
     @OneToMany(mappedBy = "exam")
     private List<ExamQuestion> examQuestions;

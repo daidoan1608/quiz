@@ -91,8 +91,10 @@ public class UserExamController {
     public ResponseEntity<ApiResponse<UserExamResponse>> getUserExamById(
             @PathVariable("userExamId") Long userExamId,
             @AuthenticationPrincipal User currentUser) {
-        authorizationService.requireAuthenticated(currentUser);
-        UserExamResponse userExam = userExamService.getUserExamByIdForUser(userExamId, currentUser.getUserId());
+        User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
+        UserExamResponse userExam = authorizationService.isAdminOrMod(authenticatedUser)
+                ? userExamService.getUserExamByIdForAdmin(userExamId)
+                : userExamService.getUserExamByIdForUser(userExamId, authenticatedUser.getUserId());
         return ResponseEntity.ok(ApiResponse.success("User exam fetched successfully", userExam));
     }
 

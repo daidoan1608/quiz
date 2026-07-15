@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -55,6 +56,9 @@ public class AuthController {
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             return buildAuthenticatedResponse("Login successful", userDetails);
+        } catch (DisabledException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", List.of(e.getMessage())));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error("Authentication failed", List.of("Invalid username/email or password")));
@@ -170,6 +174,9 @@ public class AuthController {
         String name = googleVerifier.extractName(idToken);
         String picture = googleVerifier.extractPicture(idToken);
         User user = authService.findOrCreateGoogleUser(email, name, picture);
+        if (Boolean.TRUE.equals(user.getDeleted())) {
+            throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
+        }
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getUsername());
         return buildAuthenticatedResponse("Google login successful", userDetails);

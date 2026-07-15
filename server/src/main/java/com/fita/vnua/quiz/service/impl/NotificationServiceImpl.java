@@ -3,19 +3,27 @@ package com.fita.vnua.quiz.service.impl;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.response.CampaignResponse;
 import com.fita.vnua.quiz.model.dto.response.NotificationResponse;
+import com.fita.vnua.quiz.model.dto.response.RealtimeNotificationPayload;
 import com.fita.vnua.quiz.model.dto.response.RecipientResponse;
 import com.fita.vnua.quiz.model.entity.GlobalNotificationRead;
 import com.fita.vnua.quiz.model.entity.Notification;
 import com.fita.vnua.quiz.model.entity.NotificationHistory;
-import com.fita.vnua.quiz.repository.*;
+import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.repository.FavoriteRepository;
+import com.fita.vnua.quiz.repository.GlobalNotificationReadRepository;
+import com.fita.vnua.quiz.repository.NotificationHistoryRepository;
+import com.fita.vnua.quiz.repository.NotificationRepository;
 import com.fita.vnua.quiz.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,31 +36,30 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final GlobalNotificationReadRepository globalReadRepository;
     private final FavoriteRepository favoriteRepository;
-
-    // =================================================================
-    // PHẦN 1: GỬI THÔNG BÁO (TẤT CẢ ĐỀU PHẢI TẠO HISTORY)
-    // =================================================================
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
     @Override
     public void sendGlobalNotification(String title, String message) {
-        // 1. Tạo History
         NotificationHistory history = NotificationHistory.builder()
-                .title(title).message(message).sendType("GLOBAL").build();
+                .title(title)
+                .message(message)
+                .sendType("GLOBAL")
+                .createdBy(currentActorId())
+                .build();
         historyRepository.save(history);
 
-        // 2. Tạo Notification
-        Notification noti = Notification.builder()
+        Notification notification = Notification.builder()
                 .title(title)
                 .message(message)
                 .type(Notification.NotificationType.GLOBAL)
-                .userId(null)
                 .relatedType("SYSTEM")
-                .history(history) // Gắn cha
+                .history(history)
                 .isRead(false)
                 .build();
 
-        notificationRepository.save(noti);
+        Notification savedNotification = notificationRepository.save(notification);
+        messagingTemplate.convertAndSend("/topic/notifications/global", RealtimeNotificationPayload.from(savedNotification));
     }
 
     @Override
@@ -61,54 +68,53 @@ public class NotificationServiceImpl implements NotificationService {
         List<UUID> userIds = favoriteRepository.findUserIdsBySubjectId(subjectId);
         if (userIds.isEmpty()) return;
 
-        // 1. Tạo History
         NotificationHistory history = NotificationHistory.builder()
                 .title("Đề thi mới môn " + subjectName)
                 .message("Đã có đề thi mới, hãy vào thử sức ngay!")
                 .sendType("SUBJECT_ID:" + subjectId)
+                .createdBy(currentActorId())
                 .build();
         historyRepository.save(history);
 
-        // 2. Fan-out
         List<Notification> notifications = new ArrayList<>();
-        for (UUID uid : userIds) {
+        for (UUID userId : userIds) {
             notifications.add(Notification.builder()
                     .title(history.getTitle())
                     .message(history.getMessage())
                     .type(Notification.NotificationType.PERSONAL)
-                    .userId(uid)
+                    .userId(userId)
                     .relatedId(examId)
                     .relatedType("EXAM")
-                    .history(history) // Gắn cha
+                    .history(history)
                     .isRead(false)
                     .build());
         }
-        notificationRepository.saveAll(notifications);
+        notificationRepository.saveAll(notifications)
+                .forEach(this::sendPersonalRealtimeNotification);
     }
 
     @Transactional
     @Override
     public void sendPersonalNotification(UUID userId, String title, String message) {
-        // 1. Cần tạo History để Admin quản lý được cả tin nhắn riêng
         NotificationHistory history = NotificationHistory.builder()
                 .title(title)
                 .message(message)
                 .sendType("PERSONAL")
+                .createdBy(currentActorId())
                 .build();
         historyRepository.save(history);
 
-        // 2. Tạo Notification
-        Notification noti = Notification.builder()
+        Notification notification = Notification.builder()
                 .title(title)
                 .message(message)
                 .type(Notification.NotificationType.PERSONAL)
                 .userId(userId)
                 .relatedType("PERSONAL_MSG")
-                .history(history) // Gắn cha
+                .history(history)
                 .isRead(false)
                 .build();
 
-        notificationRepository.save(noti);
+        sendPersonalRealtimeNotification(notificationRepository.save(notification));
     }
 
     @Transactional
@@ -116,39 +122,40 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendBatchNotification(List<UUID> userIds, String title, String message) {
         if (userIds == null || userIds.isEmpty()) return;
 
-        // 1. Tạo History (Quan trọng để Admin biết mình đã gửi Batch này)
         NotificationHistory history = NotificationHistory.builder()
                 .title(title)
                 .message(message)
                 .sendType("BATCH")
+                .createdBy(currentActorId())
                 .build();
         historyRepository.save(history);
 
-        // 2. Fan-out
         List<Notification> notifications = new ArrayList<>();
-        for (UUID uid : userIds) {
-            Notification noti = Notification.builder()
+        for (UUID userId : userIds) {
+            notifications.add(Notification.builder()
                     .title(title)
                     .message(message)
                     .type(Notification.NotificationType.PERSONAL)
-                    .userId(uid)
+                    .userId(userId)
                     .relatedType("BATCH_MSG")
-                    .history(history) // Gắn cha
+                    .history(history)
                     .isRead(false)
-                    .build();
-            notifications.add(noti);
+                    .build());
         }
-        notificationRepository.saveAll(notifications);
+        notificationRepository.saveAll(notifications)
+                .forEach(this::sendPersonalRealtimeNotification);
     }
 
-    // =================================================================
-    // PHẦN 2: ADMIN QUẢN LÝ (DASHBOARD)
-    // =================================================================
-
     @Override
-    public Page<CampaignResponse> getAllCampaigns(String keyword, Pageable pageable) {
-        // Lấy danh sách History để hiển thị lên Dashboard
-        return historyRepository.searchByTitle(keyword, pageable)
+    public Page<CampaignResponse> getAllCampaigns(
+            String keyword,
+            String sendType,
+            UUID createdBy,
+            LocalDateTime fromDate,
+            LocalDateTime toDate,
+            Pageable pageable
+    ) {
+        return historyRepository.searchCampaigns(keyword, sendType, createdBy, fromDate, toDate, pageable)
                 .map(h -> CampaignResponse.builder()
                         .id(h.getId())
                         .title(h.getTitle())
@@ -168,17 +175,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     @Override
     public void deleteHistory(Long historyId) {
-        // Thu hồi thông báo: Xóa History -> Cascade xóa hết con
-        if (historyRepository.existsById(historyId)) {
-            historyRepository.deleteById(historyId);
-        } else {
+        if (!historyRepository.existsById(historyId)) {
             throw new CustomApiException("Chiến dịch không tồn tại", HttpStatus.NOT_FOUND);
         }
+        historyRepository.deleteById(historyId);
     }
-
-    // =================================================================
-    // PHẦN 3: USER CLIENT (XEM & ĐỌC)
-    // =================================================================
 
     @Transactional(readOnly = true)
     @Override
@@ -189,17 +190,19 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     @Override
     public void markAsRead(Long notificationId, UUID currentUserId) {
-        Notification noti = notificationRepository.findById(notificationId)
+        Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy thông báo", HttpStatus.NOT_FOUND));
 
-        if (noti.getType() == Notification.NotificationType.PERSONAL) {
-            if (!noti.getUserId().equals(currentUserId)) {
+        if (notification.getType() == Notification.NotificationType.PERSONAL) {
+            if (!notification.getUserId().equals(currentUserId)) {
                 throw new CustomApiException("Bạn không có quyền đọc thông báo này", HttpStatus.FORBIDDEN);
             }
-            noti.setRead(true);
-            notificationRepository.save(noti);
+            notification.setRead(true);
+            notificationRepository.save(notification);
+            return;
+        }
 
-        } else if (noti.getType() == Notification.NotificationType.GLOBAL) {
+        if (notification.getType() == Notification.NotificationType.GLOBAL) {
             boolean isAlreadyRead = globalReadRepository
                     .existsByUserIdAndNotificationId(currentUserId, notificationId);
 
@@ -223,13 +226,32 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (!allGlobalIds.isEmpty()) {
             List<GlobalNotificationRead> newReads = new ArrayList<>();
-            for (Long notiId : allGlobalIds) {
+            for (Long notificationId : allGlobalIds) {
                 GlobalNotificationRead read = new GlobalNotificationRead();
                 read.setUserId(userId);
-                read.setNotificationId(notiId);
+                read.setNotificationId(notificationId);
                 newReads.add(read);
             }
             globalReadRepository.saveAll(newReads);
         }
+    }
+
+    private UUID currentActorId() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof User user) {
+            return user.getUserId();
+        }
+        return null;
+    }
+
+    private void sendPersonalRealtimeNotification(Notification notification) {
+        if (notification.getUserId() == null) {
+            return;
+        }
+        messagingTemplate.convertAndSendToUser(
+                notification.getUserId().toString(),
+                "/queue/notifications",
+                RealtimeNotificationPayload.from(notification)
+        );
     }
 }

@@ -72,6 +72,7 @@ public class SecurityConfig {
 
                     csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
                     csrf.csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler());
+                    csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/ws/**"));
                     securityProperties.getCsrfIgnoredAntMatchers()
                             .forEach(pattern -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher(pattern)));
                 })

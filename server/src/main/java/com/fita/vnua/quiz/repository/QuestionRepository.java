@@ -14,6 +14,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     List<Question> findByDeletedTrue();
 
+    long countByDeletedFalse();
+
     Optional<Question> findByQuestionIdAndDeletedFalse(Long questionId);
 
     List<Question> findByContentContainingIgnoreCaseAndDeletedFalse(String content);
@@ -60,8 +62,11 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("subjectId") Long subjectId,
             @Param("number") int number);
 
-    @Query(value = "SELECT q.* FROM question q JOIN exam_question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId", nativeQuery = true)
+    @Query(value = "SELECT q.* FROM question q JOIN exam_question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId AND q.deleted = false", nativeQuery = true)
     List<Question> findQuestionsByExamId(Long examId);
+
+    @Query(value = "SELECT q.* FROM question q JOIN exam_question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId", nativeQuery = true)
+    List<Question> findQuestionsByExamIdIncludingDeleted(Long examId);
 
     long countByDifficultyAndDeletedFalse(Question.Difficulty difficulty);
 
@@ -71,6 +76,15 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     @Query("SELECT q.chapter.subject.subjectId FROM Question q WHERE q.questionId = :questionId")
     Optional<Long> findSubjectIdByQuestionId(@Param("questionId") Long questionId);
+
+    @Query("""
+            SELECT q.chapter.subject.subjectId FROM Question q
+            WHERE q.questionId = :questionId
+            AND q.deleted = false
+            AND q.chapter.deleted = false
+            AND q.chapter.subject.deleted = false
+            """)
+    Optional<Long> findActiveSubjectIdByQuestionId(@Param("questionId") Long questionId);
 
     int countByChapterAndDeletedFalse(Chapter chapter);
 

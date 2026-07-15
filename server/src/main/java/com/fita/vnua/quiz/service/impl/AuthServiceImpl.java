@@ -80,6 +80,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = refreshToken.getUser();
+        if (Boolean.TRUE.equals(user.getDeleted())) {
+            refreshToken.setRevoked(true);
+            refreshTokenRepository.save(refreshToken);
+            throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
+        }
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword() != null ? user.getPassword() : "",
@@ -102,13 +107,22 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public User findOrCreateGoogleUser(String email, String name, String picture) {
         return userRepository.findByEmail(email)
-                .map(user -> syncGoogleProfile(user, name, picture))
+                .map(user -> {
+                    if (Boolean.TRUE.equals(user.getDeleted())) {
+                        throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
+                    }
+                    return syncGoogleProfile(user, name, picture);
+                })
                 .orElseGet(() -> createGoogleUser(email, name, picture));
     }
 
     private User getUserByUsername(String username) {
-        return userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        if (Boolean.TRUE.equals(user.getDeleted())) {
+            throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
+        }
+        return user;
     }
 
     private User createGoogleUser(String email, String name, String picture) {

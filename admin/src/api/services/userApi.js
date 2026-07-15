@@ -7,9 +7,14 @@ export const userApi = {
     return normalizeList(unwrapApiData(response));
   },
 
-  async search(keyword) {
+  async getDeleted() {
+    const response = await authAxios.get("/admin/users/deleted");
+    return normalizeList(unwrapApiData(response));
+  },
+
+  async search(keyword, limit = 20) {
     const response = await authAxios.get("/admin/users/search", {
-      params: { key: keyword },
+      params: { key: keyword, limit },
     });
     return normalizeList(unwrapApiData(response));
   },
@@ -25,5 +30,9 @@ export const userApi = {
 
   remove(userId) {
     return authAxios.delete(`/admin/users/${userId}`);
+  },
+
+  restore(userId) {
+    return authAxios.patch(`/admin/users/${userId}/restore`);
   },
 };

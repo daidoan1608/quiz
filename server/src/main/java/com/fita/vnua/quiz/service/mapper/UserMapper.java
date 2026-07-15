@@ -21,6 +21,12 @@ public class UserMapper {
                 .avatarUrl(user.getAvatarUrl())
                 .phone(user.getPhone())
                 .address(user.getAddress())
+                .deleted(user.getDeleted())
+                .deletedAt(user.getDeletedAt())
+                .deletedBy(user.getDeletedBy())
+                .deletedCascadeId(user.getDeletedCascadeId())
+                .deleteOriginType(user.getDeleteOriginType())
+                .deleteOriginId(user.getDeleteOriginId())
                 .build();
     }
 

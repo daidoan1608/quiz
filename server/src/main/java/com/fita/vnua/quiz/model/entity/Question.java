@@ -39,6 +39,12 @@ public class Question {
 
     private UUID deletedBy;
 
+    private UUID deletedCascadeId;
+
+    private String deleteOriginType;
+
+    private Long deleteOriginId;
+
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Answer> answers = new ArrayList<>();
 

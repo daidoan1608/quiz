@@ -16,16 +16,19 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
     private final ExamRepository examRepository;
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
+    private final SubjectRepository subjectRepository;
 
     public CustomPermissionEvaluator(UserSubjectPermissionRepository permissionRepository,
                                      ChapterRepository chapterRepository,
                                      ExamRepository examRepository, QuestionRepository questionRepository,
-                                     AnswerRepository answerRepository) {
+                                     AnswerRepository answerRepository,
+                                     SubjectRepository subjectRepository) {
         this.permissionRepository = permissionRepository;
         this.chapterRepository = chapterRepository;
         this.examRepository = examRepository;
         this.questionRepository = questionRepository;
         this.answerRepository = answerRepository;
+        this.subjectRepository = subjectRepository;
     }
 
     @Override
@@ -43,7 +46,11 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         UUID currentUserId;
         Object principal = authentication.getPrincipal();
         if (principal instanceof User) {
-            currentUserId = ((User) principal).getUserId();
+            User currentUser = (User) principal;
+            if (Boolean.TRUE.equals(currentUser.getDeleted())) {
+                return false;
+            }
+            currentUserId = currentUser.getUserId();
         } else {
             return false;
         }
@@ -78,11 +85,11 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         }
 
         return switch (targetType.toUpperCase()) {
-            case "SUBJECT" -> id;
-            case "CHAPTER" -> chapterRepository.findSubjectIdByChapterId(id).orElse(null);
-            case "EXAM" -> examRepository.findSubjectIdByExamId(id).orElse(null);
-            case "QUESTION" -> questionRepository.findSubjectIdByQuestionId(id).orElse(null);
-            case "ANSWER" -> answerRepository.findSubjectIdByAnswerId(id).orElse(null);
+            case "SUBJECT" -> subjectRepository.findActiveSubjectId(id).orElse(null);
+            case "CHAPTER" -> chapterRepository.findActiveSubjectIdByChapterId(id).orElse(null);
+            case "EXAM" -> examRepository.findActiveSubjectIdByExamId(id).orElse(null);
+            case "QUESTION" -> questionRepository.findActiveSubjectIdByQuestionId(id).orElse(null);
+            case "ANSWER" -> answerRepository.findActiveSubjectIdByAnswerId(id).orElse(null);
             default -> null;
         };
     }

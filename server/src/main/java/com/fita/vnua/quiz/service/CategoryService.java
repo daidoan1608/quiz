@@ -8,6 +8,8 @@ import java.util.List;
 public interface CategoryService {
     List<CategorySummaryDto> getAllCategories();
 
+    List<CategorySummaryDto> getDeletedCategories();
+
     List<CategorySummaryDto> searchCategories(String keyword);
 
     CategoryDto getCategoryById(Long id);
@@ -17,4 +19,6 @@ public interface CategoryService {
     CategoryDto updateCategory(Long id, CategoryDto categoryDto);
 
     void deleteCategory(Long id);
+
+    CategoryDto restoreCategory(Long id);
 }

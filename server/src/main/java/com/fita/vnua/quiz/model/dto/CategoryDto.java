@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -17,5 +19,12 @@ public class CategoryDto {
     private String categoryDescription;
 
     private List<SubjectDto> subjects;
+
+    private Boolean deleted;
+    private LocalDateTime deletedAt;
+    private UUID deletedBy;
+    private UUID deletedCascadeId;
+    private String deleteOriginType;
+    private Long deleteOriginId;
 }
 

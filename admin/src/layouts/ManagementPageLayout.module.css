@@ -51,6 +51,68 @@
   padding: 24px;
 }
 
+.managementFilters :global(.ant-space) {
+  gap: 12px !important;
+  align-items: center;
+}
+
+.managementFilters :global(.ant-input-affix-wrapper),
+.managementFilters :global(.ant-input),
+.managementFilters :global(.ant-select-selector),
+.managementFilters :global(.ant-picker),
+.managementFilters :global(.ant-segmented) {
+  height: 40px;
+  min-height: 40px;
+}
+
+.managementFilters :global(.ant-input-affix-wrapper),
+.managementFilters :global(.ant-select-selector),
+.managementFilters :global(.ant-picker) {
+  border-radius: 10px !important;
+}
+
+.managementFilters :global(.ant-input-affix-wrapper) {
+  display: inline-flex;
+  align-items: center;
+  padding-block: 0;
+}
+
+.managementFilters :global(.ant-input-affix-wrapper .ant-input),
+.managementFilters :global(.ant-input) {
+  height: 38px;
+  min-height: 38px;
+  line-height: 38px;
+  font-size: 14px;
+}
+
+.managementFilters :global(.ant-input::placeholder) {
+  font-size: 14px;
+  line-height: 38px;
+}
+
+.managementFilters :global(.ant-select) {
+  height: 40px;
+}
+
+.managementFilters :global(.ant-select-selector) {
+  display: flex !important;
+  align-items: center !important;
+  padding-block: 0 !important;
+}
+
+.managementFilters :global(.ant-select-selection-item),
+.managementFilters :global(.ant-select-selection-placeholder) {
+  line-height: 38px !important;
+  font-size: 14px;
+}
+
+.managementFilters :global(.ant-input-affix-wrapper-disabled),
+.managementFilters :global(.ant-input-disabled),
+.managementFilters :global(.ant-select-disabled .ant-select-selector) {
+  background: color-mix(in srgb, var(--admin-surface-muted) 80%, transparent) !important;
+  color: var(--admin-subtle) !important;
+}
+
 .managementPagination {
   text-align: right;
   margin-top: 16px;

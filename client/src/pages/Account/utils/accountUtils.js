@@ -8,7 +8,7 @@ export const ACCOUNT_SECTIONS = {
 };
 
 export const normalizeExams = (examData = []) => {
-  return examData.map((exam) => ({
+  return examData.filter((exam) => exam.userExamDto?.status === "SUBMITTED").map((exam) => ({
     ...exam,
     examId: exam.examId || exam.id || exam.userExamDto?.examId,
     subjectName: exam.subjectName || "Chưa xác định",

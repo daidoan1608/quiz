@@ -11,6 +11,8 @@ public interface ChapterService {
 
     List<ChapterDto> getAllChapter();
 
+    List<ChapterDto> getDeletedChapters();
+
     List<ChapterDto> searchChapters(String keyword);
 
     Optional<ChapterDto> getChapterById(Long chapterId);
@@ -20,5 +22,7 @@ public interface ChapterService {
     ChapterDto update(Long chapterId, ChapterDto chapterDto);
 
     Response delete(Long chapterId);
+
+    ChapterDto restore(Long chapterId);
 }
 

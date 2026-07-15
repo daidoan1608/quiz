@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.generator.FavoriteId;
 import com.fita.vnua.quiz.model.dto.FavoriteDto;
 import com.fita.vnua.quiz.model.entity.Favorite;
@@ -11,6 +12,7 @@ import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.FavoriteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,10 +31,16 @@ public class FavoriteServiceImpl implements FavoriteService {
         // Lấy User hoặc ném ngoại lệ nếu không tìm thấy
         User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        if (Boolean.TRUE.equals(user.getDeleted())) {
+            throw new CustomApiException("User not found", HttpStatus.NOT_FOUND);
+        }
 
         // Lấy Subject hoặc ném ngoại lệ nếu không tìm thấy
         Subject subject = subjectRepository.findById(favoriteDto.getSubjectId())
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
+        if (Boolean.TRUE.equals(subject.getDeleted()) || Boolean.TRUE.equals(subject.getCategory().getDeleted())) {
+            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+        }
 
         // Tạo entity Favorite mới
         Favorite favorite = new Favorite();
@@ -85,7 +93,10 @@ public class FavoriteServiceImpl implements FavoriteService {
         user.setUserId(userID);
         List<Favorite> favorites = favoriteRepository.findFavoriteByUser(user);
 
-        return favorites.stream().map(fav -> {
+        return favorites.stream()
+                .filter(fav -> !Boolean.TRUE.equals(fav.getSubject().getDeleted()))
+                .filter(fav -> !Boolean.TRUE.equals(fav.getSubject().getCategory().getDeleted()))
+                .map(fav -> {
             FavoriteDto dto = new FavoriteDto();
             dto.setUserId(fav.getUser().getUserId());
             dto.setSubjectId(fav.getSubject().getSubjectId());

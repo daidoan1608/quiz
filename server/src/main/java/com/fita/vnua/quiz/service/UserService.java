@@ -14,6 +14,8 @@ public interface UserService {
 
     List<UserResponse> getAllUserResponses();
 
+    List<UserResponse> getDeletedUserResponses();
+
     UserDto getUserById(UUID userId);
 
     UserResponse getUserResponseById(UUID userId);
@@ -28,6 +30,8 @@ public interface UserService {
 
     List<UserResponse> getUserResponsesBySearchKey(String keyword);
 
+    List<UserResponse> searchNotificationRecipients(String keyword, int limit);
+
     UserDto create(UserDto userDto);
 
     UserDto update(UUID userId, UserDto userDto);
@@ -37,6 +41,8 @@ public interface UserService {
     UserResponse updateProfileResponse(UUID userId, UpdateProfileRequest request);
 
     Response delete(UUID userId);
+
+    UserResponse restore(UUID userId);
 
     boolean isUsernameExisted(String username);
 

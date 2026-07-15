@@ -30,7 +30,7 @@ public class ExamController {
     private final UserExamService userExamService;
     private final AuthorizationService authorizationService;
 
-    @PreAuthorize("hasPermission(#examRequest.examDto.subjectId, 'Subject', 'CREATE') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#examRequest.examDto.subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/exams")
     @Operation(summary = "Tạo bài thi")
     public ResponseEntity<ApiResponse<ExamDto>> createExam(
@@ -39,6 +39,13 @@ public class ExamController {
     ) {
         ExamDto createdExam = examService.createExam(examRequest, currentUser.getUserId());
         return ResponseEntity.ok(ApiResponse.success("Exam created successfully", createdExam));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/exams/deleted")
+    @Operation(summary = "Lấy danh sách bài thi đã xóa mềm")
+    public ResponseEntity<ApiResponse<List<ExamSummaryDto>>> getDeletedExams() {
+        return ResponseEntity.ok(ApiResponse.success("Deleted exams fetched successfully", examService.getDeletedExams()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -64,16 +71,23 @@ public class ExamController {
             @RequestParam(required = false) Long userExamId,
             @AuthenticationPrincipal User currentUser
     ) {
-        ExamDto exam = examService.getExamById(examId);
+        ExamDto exam;
         if (includeCorrectAnswers) {
             requireCorrectAnswerAccess(examId, userExamId, currentUser);
+            if (userExamId != null) {
+                User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
+                exam = examService.getExamByIdForSubmittedAttempt(examId, userExamId, authenticatedUser.getUserId());
+            } else {
+                exam = examService.getExamById(examId);
+            }
         } else {
+            exam = examService.getExamById(examId);
             stripCorrectAnswers(exam);
         }
         return ResponseEntity.ok(ApiResponse.success("Exam fetched successfully", exam));
     }
 
-    @PreAuthorize("hasPermission(#examId, 'Exam', 'UPDATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'UPDATE')")
     @PutMapping("admin/exams/{examId}")
     @Operation(summary = "Cập nhật bài thi")
     public ResponseEntity<ApiResponse<ExamDto>> updateExam(@PathVariable("examId") Long examId, @RequestBody ExamDto examDto) {
@@ -81,12 +95,19 @@ public class ExamController {
         return ResponseEntity.ok(ApiResponse.success("Exam updated successfully", updatedExam));
     }
 
-    @PreAuthorize("hasPermission(#examId, 'Exam', 'DELETE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'DELETE')")
     @DeleteMapping("admin/exams/{examId}")
     @Operation(summary = "Xóa bài thi")
     public ResponseEntity<Void> deleteExam(@PathVariable("examId") Long examId) {
         examService.deleteExam(examId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'UPDATE')")
+    @PatchMapping("admin/exams/{examId}/restore")
+    @Operation(summary = "Khôi phục bài thi đã xóa mềm")
+    public ResponseEntity<ApiResponse<ExamDto>> restoreExam(@PathVariable("examId") Long examId) {
+        return ResponseEntity.ok(ApiResponse.success("Exam restored successfully", examService.restoreExam(examId)));
     }
     private ExamDto stripCorrectAnswers(ExamDto exam) {
         if (exam.getQuestions() == null) {

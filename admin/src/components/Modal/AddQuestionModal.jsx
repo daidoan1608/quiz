@@ -17,6 +17,23 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
+const primaryButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "var(--admin-primary)",
+  background: "color-mix(in srgb, var(--admin-primary) 12%, transparent)",
+  color: "var(--admin-primary)",
+  boxShadow: "none",
+};
+
+const cancelButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "#ef4444",
+  background: "rgba(239, 68, 68, 0.1)",
+  color: "#ef4444",
+};
+
 const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const [form] = Form.useForm();
   const { token } = theme.useToken();
@@ -240,10 +257,11 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
       open={isModalOpen}
       onCancel={handleCancel}
       footer={[
-        <Button key="back" onClick={handleCancel}>Hủy bỏ</Button>,
+        <Button key="back" style={cancelButtonStyle} onClick={handleCancel}>Hủy bỏ</Button>,
         <Button
           key="submit"
-          type="primary"
+          type="default"
+          style={primaryButtonStyle}
           icon={<SaveOutlined />}
           loading={loading}
           onClick={() => form.submit()}
@@ -368,7 +386,7 @@ const AddQuestionModal = ({ isModalOpen, onCancel, onSuccess }) => {
                   maxCount={1}
                   showUploadList={false}
                 >
-                  <Button icon={<UploadOutlined />} loading={uploadingImage} type="dashed" style={{ width: '100%' }}>
+                  <Button type="default" icon={<UploadOutlined />} loading={uploadingImage} style={{ ...primaryButtonStyle, width: '100%' }}>
                     {uploadingImage ? 'Đang tải lên...' : 'Chọn ảnh để upload'}
                   </Button>
                 </Upload>

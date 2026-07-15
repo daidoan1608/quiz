@@ -1,12 +1,17 @@
 package com.fita.vnua.quiz.controller;
 
+import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.NotificationResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,32 +22,26 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    /**
-     * API lấy danh sách thông báo của User đang đăng nhập.
-     * Kết quả trả về bao gồm cả thông báo riêng và thông báo hệ thống.
-     */
-
-    /**
-     * API đánh dấu một thông báo là ĐÃ ĐỌC.
-     * User bấm vào thông báo nào thì gọi API này với ID của thông báo đó.
-     */
-    @PatchMapping("/{id}")
-    public ResponseEntity<String> markAsRead(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User currentUser) {
-
-        notificationService.markAsRead(id, currentUser.getUserId());
-        return ResponseEntity.ok("Đã đánh dấu đã đọc");
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getNotifications(@AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Notifications fetched successfully",
+                notificationService.getNotifications(currentUser.getUserId())
+        ));
     }
 
-    /**
-     * API: Đánh dấu TẤT CẢ là đã đọc
-     * PUT /api/notifications/read-all
-     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<Object>> markAsRead(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        notificationService.markAsRead(id, currentUser.getUserId());
+        return ResponseEntity.ok(ApiResponse.success("Đã đánh dấu đã đọc", null));
+    }
+
     @PatchMapping
-    public ResponseEntity<String> markAllAsRead(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse<Object>> markAllAsRead(@AuthenticationPrincipal User currentUser) {
         notificationService.markAllAsRead(currentUser.getUserId());
-        return ResponseEntity.ok("Đã đánh dấu tất cả là đã đọc");
+        return ResponseEntity.ok(ApiResponse.success("Đã đánh dấu tất cả là đã đọc", null));
     }
 }
-

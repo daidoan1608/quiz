@@ -131,7 +131,7 @@ export default function Subject() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center bg-[#f9f9ff] dark:bg-background-dark">
+      <div className="flex flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary"></div>
           <p className="text-gray-500 font-medium">{texts.loadingSubjects || "Đang tải danh sách môn học..."}</p>
@@ -141,7 +141,7 @@ export default function Subject() {
   }
 
   return (
-    <div className="bg-[#f9f9ff] dark:bg-background-dark text-[#151c27] dark:text-gray-100 transition-colors duration-300">
+    <div className="bg-background-light dark:bg-background-dark text-[#151c27] dark:text-gray-100 transition-colors duration-300">
       <main className="mx-auto grid w-full max-w-screen-2xl grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:px-8">
         <div className="flex flex-col justify-between gap-4 lg:col-span-2 lg:flex-row lg:items-center">
           <nav className="flex flex-wrap items-center gap-2 text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">

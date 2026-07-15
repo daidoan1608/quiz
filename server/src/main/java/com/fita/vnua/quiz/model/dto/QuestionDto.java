@@ -20,5 +20,8 @@ public class QuestionDto {
     private Boolean deleted; // Trạng thái xóa mềm
     private LocalDateTime deletedAt; // Thời điểm xóa mềm
     private UUID deletedBy; // Người thực hiện xóa mềm
+    private UUID deletedCascadeId;
+    private String deleteOriginType;
+    private Long deleteOriginId;
     private List<AnswerDto> answers; // Danh sách đáp án cho câu hỏi này
 }

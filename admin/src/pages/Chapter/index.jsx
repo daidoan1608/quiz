@@ -1,27 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { authAxios } from "../../api/axiosConfig";
+import React, { useCallback, useEffect, useState } from "react";
+import { Button, Input, Popconfirm, Segmented, Space, Table, Tooltip, Typography, message } from "antd";
 import {
-    Table,
-    Button,
-    Typography,
-    Space,
-    Tooltip,
-    Popconfirm,
-    message,
-    Input,
-} from "antd";
-import {
-    EditOutlined,
-    DeleteOutlined,
-    BookOutlined,
-    SearchOutlined,
-    UnorderedListOutlined,
+  BookOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined,
+  UndoOutlined,
+  UnorderedListOutlined,
 } from "@ant-design/icons";
-
-// --- IMPORT LAYOUT CHUNG ---
-import ManagementPageLayout from '../../layouts/ManagementPageLayout';
-
-// --- IMPORT CÁC MODAL ĐÃ TÁCH ---
+import { chapterApi } from "../../api/services";
+import ManagementPageLayout from "../../layouts/ManagementPageLayout";
 import AddChapterModal from "../../components/Modal/AddChapterModal";
 import UpdateChapterModal from "../../components/Modal/UpdateChapterModal";
 import ChapterQuestionModal from "../../components/Modal/ChapterQuestionModal";
@@ -29,214 +17,156 @@ import ChapterQuestionModal from "../../components/Modal/ChapterQuestionModal";
 const { Text } = Typography;
 
 export default function ChapterManager() {
-    const [chapters, setChapters] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchText, setSearchText] = useState("");
+  const [chapters, setChapters] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [viewMode, setViewMode] = useState("active");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [chapterIdToUpdate, setChapterIdToUpdate] = useState(null);
+  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
+  const [chapterIdToView, setChapterIdToView] = useState(null);
 
-    // --- STATES QUẢN LÝ MODAL ---
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [chapterIdToUpdate, setChapterIdToUpdate] = useState(null);
+  const fetchChapters = useCallback(async (keyword = searchText) => {
+    setLoading(true);
+    try {
+      const trimmedKeyword = keyword.trim();
+      const data =
+        viewMode === "deleted"
+          ? await chapterApi.getDeleted()
+          : trimmedKeyword
+            ? await chapterApi.search(trimmedKeyword)
+            : await chapterApi.getAll();
+      setChapters(data);
+    } catch (error) {
+      message.error(error.response?.data?.message || "Không thể tải danh sách chương.");
+    } finally {
+      setLoading(false);
+    }
+  }, [searchText, viewMode]);
 
-    // --- STATES MỚI: QUẢN LÝ MODAL XEM CÂU HỎI ---
-    const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
-    const [chapterIdToView, setChapterIdToView] = useState(null);
+  useEffect(() => {
+    const timeoutId = setTimeout(() => fetchChapters(searchText), 400);
+    return () => clearTimeout(timeoutId);
+  }, [searchText, viewMode, fetchChapters]);
 
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            fetchChapters(searchText);
-        }, 400);
+  const handleDelete = async (chapterId) => {
+    try {
+      await chapterApi.remove(chapterId);
+      message.success("Đã chuyển chương vào thùng rác.");
+      fetchChapters();
+    } catch (error) {
+      message.error(error.response?.data?.message || "Không thể xóa chương.");
+    }
+  };
 
-        return () => clearTimeout(timeoutId);
-    }, [searchText]);
+  const handleRestore = async (chapterId) => {
+    try {
+      await chapterApi.restore(chapterId);
+      message.success("Khôi phục chương thành công.");
+      fetchChapters();
+    } catch (error) {
+      message.error(error.response?.data?.message || "Cần khôi phục môn cha trước.");
+    }
+  };
 
-    // --- 1. LẤY DỮ LIỆU (Giữ nguyên) ---
-    const fetchChapters = async (keyword = "") => {
-        setLoading(true);
-        try {
-            const trimmedKeyword = keyword.trim();
-            const response = trimmedKeyword
-                ? await authAxios.get("/public/chapters/search", { params: { q: trimmedKeyword } })
-                : await authAxios.get("/public/chapters");
-            const data = Array.isArray(response.data.data) ? response.data.data : [];
-            setChapters(data);
-        } catch (error) {
-            console.error("Lỗi API:", error);
-            message.error("Không thể lấy danh sách chương!");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handleCloseModal = () => {
+    setIsAddModalOpen(false);
+    setIsUpdateModalOpen(false);
+    setChapterIdToUpdate(null);
+    setIsQuestionModalOpen(false);
+    setChapterIdToView(null);
+  };
 
-    // --- 2. HÀNH ĐỘNG (Giữ nguyên) ---
-    const deleteChapter = async (chapterId) => {
-        try {
-            await authAxios.delete(`/admin/chapters/${chapterId}`);
-            setChapters((prev) =>
-                prev.filter((chapter) => chapter.chapterId !== chapterId)
-            );
-            message.success("Xóa chương thành công!");
-        } catch (error) {
-            message.error("Không thể xóa chương (có thể đang chứa câu hỏi)!");
-        }
-    };
+  const columns = [
+    { title: "ID", dataIndex: "chapterId", key: "chapterId", width: 90, sorter: (a, b) => a.chapterId - b.chapterId, render: (text) => <Text type="secondary">{text}</Text> },
+    { title: "Tên chương", dataIndex: "name", key: "name", render: (text) => <Text strong>{text}</Text> },
+    { title: "Mã môn", dataIndex: "subjectId", key: "subjectId", width: 120, render: (text) => <Text code>{text}</Text> },
+    {
+      title: "Chương",
+      dataIndex: "chapterNumber",
+      key: "chapterNumber",
+      width: 130,
+      sorter: (a, b) => a.chapterNumber - b.chapterNumber,
+      render: (text) => <Text style={{ whiteSpace: "nowrap" }}>{text}</Text>,
+    },
+    ...(viewMode === "deleted"
+      ? [
+          { title: "Xóa lúc", dataIndex: "deletedAt", key: "deletedAt", width: 180, render: (value) => value || "-" },
+          { title: "Nguồn xóa", dataIndex: "deleteOriginType", key: "deleteOriginType", width: 120, render: (value) => value || "-" },
+        ]
+      : []),
+    {
+      title: "Hành động",
+      key: "action",
+      width: viewMode === "active" ? 180 : 90,
+      fixed: "right",
+      render: (_, record) =>
+        viewMode === "active" ? (
+          <Space>
+            <Tooltip title="Xem câu hỏi">
+              <Button className="action-btn" icon={<UnorderedListOutlined />} onClick={() => { setChapterIdToView(record.chapterId); setIsQuestionModalOpen(true); }} />
+            </Tooltip>
+            <Button className="action-btn is-primary" icon={<EditOutlined />} onClick={() => { setChapterIdToUpdate(record.chapterId); setIsUpdateModalOpen(true); }} />
+            <Popconfirm
+              title="Chuyển chương vào thùng rác?"
+              description="Các câu hỏi đang hoạt động thuộc chương này sẽ bị xóa mềm theo cascade."
+              onConfirm={() => handleDelete(record.chapterId)}
+              okText="Chuyển vào thùng rác"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+            >
+              <Button className="action-btn is-danger" icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </Space>
+        ) : (
+          <Popconfirm
+            title="Khôi phục chương?"
+            description="Chỉ khôi phục được khi môn cha đang hoạt động."
+            onConfirm={() => handleRestore(record.chapterId)}
+            okText="Khôi phục"
+            cancelText="Hủy"
+          >
+            <Button className="action-btn is-success" icon={<UndoOutlined />} />
+          </Popconfirm>
+        ),
+    },
+  ];
 
-    const handleOpenUpdateModal = (chapterId) => {
-        setChapterIdToUpdate(chapterId);
-        setIsUpdateModalOpen(true);
-    };
+  const filters = (
+    <Space wrap>
+      <Segmented value={viewMode} onChange={setViewMode} options={[{ label: "Đang hoạt động", value: "active" }, { label: "Thùng rác", value: "deleted" }]} />
+      <Input
+        placeholder="Tìm tên chương..."
+        prefix={<SearchOutlined />}
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        disabled={viewMode === "deleted"}
+        allowClear
+        style={{ width: 300 }}
+      />
+    </Space>
+  );
 
-    const handleOpenQuestionModal = (chapterId) => {
-        setChapterIdToView(chapterId);
-        setIsQuestionModalOpen(true);
-    };
+  return (
+    <>
+      <ManagementPageLayout
+        title={<Space><BookOutlined /> Quản lý chương</Space>}
+        filters={filters}
+        table={<Table columns={columns} dataSource={chapters} rowKey="chapterId" loading={loading} pagination={{ pageSize: 7 }} scroll={{ x: 820 }} />}
+        onReload={() => fetchChapters(searchText)}
+        onAdd={viewMode === "active" ? () => setIsAddModalOpen(true) : undefined}
+      />
 
-    const handleCloseModal = () => {
-        setIsAddModalOpen(false);
-        setIsUpdateModalOpen(false);
-        setChapterIdToUpdate(null);
-        setIsQuestionModalOpen(false);
-        setChapterIdToView(null);
-    };
+      <AddChapterModal isModalOpen={isAddModalOpen} onCancel={handleCloseModal} onSuccess={() => { fetchChapters(); handleCloseModal(); }} />
 
-    const handleUpdateSuccess = () => {
-        fetchChapters(); // Làm mới dữ liệu sau khi cập nhật thành công
-        handleCloseModal();
-    };
+      {chapterIdToUpdate && (
+        <UpdateChapterModal isModalOpen={isUpdateModalOpen} onCancel={handleCloseModal} onSuccess={() => { fetchChapters(); handleCloseModal(); }} chapterId={chapterIdToUpdate} />
+      )}
 
-    // Search dùng endpoint BE /public/chapters/search?q=...
-    const getFilteredData = () => chapters;
-
-    // --- 3. CẤU HÌNH CỘT (Giữ nguyên) ---
-    const columns = [
-        {
-            title: "ID", dataIndex: "chapterId", key: "chapterId", width: 100,
-            sorter: (a, b) => a.chapterId - b.chapterId, render: (text) => <Text type="secondary">{text}</Text>,
-        },
-        {
-            title: "Tên chương", dataIndex: "name", key: "name",
-            render: (text) => <Text strong>{text}</Text>,
-        },
-        {
-            title: "Subject ID", dataIndex: "subjectId", key: "subjectId", width: 120,
-            render: (text) => <Text code>{text}</Text>,
-        },
-        {
-            title: "Chương", dataIndex: "chapterNumber", key: "chapterNumber", width: 120,
-            sorter: (a, b) => a.chapterNumber - b.chapterNumber, render: (num) => <Text>{num}</Text>,
-        },
-        {
-            title: "Hành động", key: "action", width: 180,
-            render: (_, record) => (
-                <Space>
-                    <Tooltip title="Xem câu hỏi">
-                        <Button
-                            icon={<UnorderedListOutlined />}
-                            onClick={() => handleOpenQuestionModal(record.chapterId)}
-                            style={{ color: "#faad14", borderColor: "#faad14" }}
-                        />
-                    </Tooltip>
-
-                    <Tooltip title="Sửa chương">
-                        <Button
-                            type="primary"
-                            ghost
-                            icon={<EditOutlined />}
-                            onClick={() => handleOpenUpdateModal(record.chapterId)}
-                        />
-                    </Tooltip>
-
-                    <Tooltip title="Xóa chương">
-                        <Popconfirm
-                            title="Xóa chương này?"
-                            description="Hành động này không thể hoàn tác!"
-                            onConfirm={() => deleteChapter(record.chapterId)}
-                            okText="Xóa"
-                            cancelText="Hủy"
-                            okButtonProps={{ danger: true }}
-                        >
-                            <Button danger icon={<DeleteOutlined />} />
-                        </Popconfirm>
-                    </Tooltip>
-                </Space>
-            ),
-        },
-    ];
-
-    // --- ĐỊNH NGHĨA COMPONENTS CON CHO LAYOUT ---
-
-    // 1. Tiêu đề chính
-    const pageTitle = (
-        <Space>
-            <BookOutlined /> Quản lý Chương
-        </Space>
-    );
-
-    // 2. Bộ lọc/Tìm kiếm (Filters) - Chỉ gồm Input Search
-    const chapterFilters = (
-        <Input
-            placeholder="Tìm tên chương, mã môn..."
-            prefix={<SearchOutlined />}
-            onChange={(e) => setSearchText(e.target.value)}
-            allowClear
-            style={{ maxWidth: 300 }}
-        />
-    );
-
-    // 3. Bảng Dữ liệu (Table)
-    const chapterTable = (
-        <Table
-            columns={columns}
-            dataSource={getFilteredData()}
-            rowKey="chapterId"
-            loading={loading}
-            // Tích hợp phân trang vào Table
-            pagination={{
-                pageSize: 7,
-            }}
-            scroll={{ x: 700 }}
-        />
-    );
-
-
-    return (
-        <>
-            {/* SỬ DỤNG MANAGEMENTPAGELAYOUT THAY CHO CARD VÀ ROW/COL CŨ */}
-            <ManagementPageLayout
-                title={pageTitle}
-                filters={chapterFilters}
-                table={chapterTable}
-                // Nút tải lại
-                onReload={fetchChapters}
-                // Nút thêm mới
-                onAdd={() => setIsAddModalOpen(true)}
-            />
-
-            {/* --- MODAL THÊM CHƯƠNG --- */}
-            <AddChapterModal
-                isModalOpen={isAddModalOpen}
-                onCancel={handleCloseModal}
-                onSuccess={handleUpdateSuccess}
-            />
-
-            {/* --- MODAL CẬP NHẬT CHƯƠNG --- */}
-            {chapterIdToUpdate && (
-                <UpdateChapterModal
-                    isModalOpen={isUpdateModalOpen}
-                    onCancel={handleCloseModal}
-                    onSuccess={handleUpdateSuccess}
-                    chapterId={chapterIdToUpdate}
-                />
-            )}
-
-            {/* --- MODAL XEM CÂU HỎI --- */}
-            {isQuestionModalOpen && chapterIdToView && (
-                <ChapterQuestionModal
-                    isModalOpen={isQuestionModalOpen}
-                    onCancel={handleCloseModal}
-                    chapterId={chapterIdToView}
-                />
-            )}
-        </>
-    );
+      {isQuestionModalOpen && chapterIdToView && (
+        <ChapterQuestionModal isModalOpen={isQuestionModalOpen} onCancel={handleCloseModal} chapterId={chapterIdToView} />
+      )}
+    </>
+  );
 }

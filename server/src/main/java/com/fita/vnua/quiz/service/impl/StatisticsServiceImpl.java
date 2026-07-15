@@ -22,10 +22,10 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public Map<String, Object> getStatistics() {
-        long subjectCount = subjectRepository.count();
-        long questionCount = questionRepository.count();
-        long userCount = userRepository.count();
-        long examCount = examRepository.count();
+        long subjectCount = subjectRepository.countByDeletedFalse();
+        long questionCount = questionRepository.countByDeletedFalse();
+        long userCount = userRepository.countByDeletedFalse();
+        long examCount = examRepository.countByDeletedFalse();
         long questionCountByMedium = questionRepository.countByDifficulty(Question.Difficulty.MEDIUM);
         long questionCountByEasy = questionRepository.countByDifficulty(Question.Difficulty.EASY);
         long questionCountByHard = questionRepository.countByDifficulty(Question.Difficulty.HARD);

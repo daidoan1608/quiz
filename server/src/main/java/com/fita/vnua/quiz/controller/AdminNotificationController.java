@@ -4,17 +4,29 @@ import com.fita.vnua.quiz.model.dto.request.BatchNotificationRequest;
 import com.fita.vnua.quiz.model.dto.request.GlobalNotificationRequest;
 import com.fita.vnua.quiz.model.dto.request.PersonalNotificationRequest;
 import com.fita.vnua.quiz.model.dto.request.SubjectNotificationRequest;
+import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.CampaignResponse;
 import com.fita.vnua.quiz.model.dto.response.RecipientResponse;
 import com.fita.vnua.quiz.service.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/admin/notifications")
@@ -23,77 +35,57 @@ public class AdminNotificationController {
 
     private final NotificationService notificationService;
 
-    // 1. Gửi thông báo TOÀN HỆ THỐNG (VD: Bảo trì server)
     @PostMapping("/global")
-    @PreAuthorize("hasRole('ADMIN')") // Chỉ Admin mới được dùng
-    public ResponseEntity<String> createGlobal(@RequestBody GlobalNotificationRequest request) {
-        notificationService.sendGlobalNotification(
-                request.getTitle(),
-                request.getMessage()
-        );
-        return ResponseEntity.ok("Đã gửi thông báo toàn hệ thống!");
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Object>> createGlobal(@RequestBody GlobalNotificationRequest request) {
+        notificationService.sendGlobalNotification(request.getTitle(), request.getMessage());
+        return ResponseEntity.ok(ApiResponse.success("Đã gửi thông báo toàn hệ thống", null));
     }
 
-    // 2. Gửi thông báo RIÊNG (VD: Cảnh báo sinh viên vi phạm)
     @PostMapping("/personal")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> createPersonal(@RequestBody PersonalNotificationRequest request) {
-        notificationService.sendPersonalNotification(
-                request.getUserId(),
-                request.getTitle(),
-                request.getMessage()
-        );
-        return ResponseEntity.ok("Đã gửi thông báo cá nhân!");
+    public ResponseEntity<ApiResponse<Object>> createPersonal(@RequestBody PersonalNotificationRequest request) {
+        notificationService.sendPersonalNotification(request.getUserId(), request.getTitle(), request.getMessage());
+        return ResponseEntity.ok(ApiResponse.success("Đã gửi thông báo cá nhân", null));
     }
 
-    // 3. Gửi thông báo MÔN HỌC thủ công (Optional)
-    // Dùng khi muốn nhắc nhở sinh viên về môn học mà không cần tạo đề thi
     @PostMapping("/subject")
     @PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
-    public ResponseEntity<String> createSubjectManual(@RequestBody SubjectNotificationRequest request) {
-        notificationService.sendSubjectNotification(
-                request.getSubjectId(),
-                request.getSubjectName(),
-                request.getExamId() // Có thể null
-        );
-        return ResponseEntity.ok("Đã gửi thông báo cho nhóm môn học!");
+    public ResponseEntity<ApiResponse<Object>> createSubjectManual(@RequestBody SubjectNotificationRequest request) {
+        notificationService.sendSubjectNotification(request.getSubjectId(), request.getSubjectName(), request.getExamId());
+        return ResponseEntity.ok(ApiResponse.success("Đã gửi thông báo cho nhóm môn học", null));
     }
 
     @PostMapping("/batch")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> createBatch(@RequestBody BatchNotificationRequest request) {
-        notificationService.sendBatchNotification(
-                request.getUserIds(),
-                request.getTitle(),
-                request.getMessage()
-        );
-        return ResponseEntity.ok("Đã gửi thông báo cho " + request.getUserIds().size() + " người dùng!");
+    @PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
+    public ResponseEntity<ApiResponse<Object>> createBatch(@RequestBody BatchNotificationRequest request) {
+        notificationService.sendBatchNotification(request.getUserIds(), request.getTitle(), request.getMessage());
+        return ResponseEntity.ok(ApiResponse.success("Đã gửi thông báo cho " + request.getUserIds().size() + " người dùng", null));
     }
 
     @GetMapping("/campaigns")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MOD')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
     public ResponseEntity<Page<CampaignResponse>> getAllCampaigns(
             @RequestParam(required = false) String keyword,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(notificationService.getAllCampaigns(keyword, pageable));
+            @RequestParam(required = false) String sendType,
+            @RequestParam(required = false) UUID createdBy,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(notificationService.getAllCampaigns(keyword, sendType, createdBy, fromDate, toDate, pageable));
     }
 
-    // 6. Xem chi tiết NGƯỜI NHẬN của 1 chiến dịch
-    // (Bấm vào 1 dòng lịch sử -> Ra danh sách ai đã nhận/đã đọc)
     @GetMapping("/history/{id}/recipients")
-    @PreAuthorize("hasRole('ADMIN') or hasRole ('MOD')")
-    public ResponseEntity<Page<RecipientResponse>> getRecipients(
-            @PathVariable Long id,
-            Pageable pageable) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
+    public ResponseEntity<Page<RecipientResponse>> getRecipients(@PathVariable Long id, Pageable pageable) {
         return ResponseEntity.ok(notificationService.getRecipientsByHistoryId(id, pageable));
     }
 
-    // 7. THU HỒI thông báo (Xóa History -> Xóa hết con)
     @DeleteMapping("/history/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> recallNotification(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Object>> recallNotification(@PathVariable Long id) {
         notificationService.deleteHistory(id);
-        return ResponseEntity.ok("Đã thu hồi chiến dịch thông báo!");
+        return ResponseEntity.ok(ApiResponse.success("Đã thu hồi chiến dịch thông báo", null));
     }
 }
-

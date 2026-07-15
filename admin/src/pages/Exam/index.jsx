@@ -1,236 +1,132 @@
-import React, { useEffect, useState } from "react";
-import { authAxios } from "../../api/axiosConfig";
+import React, { useCallback, useEffect, useState } from "react";
+import { Button, Input, Popconfirm, Segmented, Space, Table, Tag, Tooltip, Typography, message } from "antd";
 import {
-    Table,
-    Input,
-    Typography,
-    Tag,
-    message,
-    Space,
-    Button,
-    Tooltip,
-    Popconfirm
-} from "antd";
-import {
-    SearchOutlined,
-    FileTextOutlined,
-    ClockCircleOutlined,
-    EyeOutlined, // Import icon Xem
-    DeleteOutlined
+  ClockCircleOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  SearchOutlined,
+  UndoOutlined,
 } from "@ant-design/icons";
-
-// --- IMPORT LAYOUT CHUNG ---
-import ManagementPageLayout from '../../layouts/ManagementPageLayout';
-
-// --- IMPORT MODAL ĐÃ TÁCH ---
+import { examApi } from "../../api/services";
+import ManagementPageLayout from "../../layouts/ManagementPageLayout";
 import AddExamModal from "../../components/Modal/AddExamModal";
-import ExamViewModal from "../../components/Modal/ExamViewModal"; // IMPORT MODAL MỚI
+import ExamViewModal from "../../components/Modal/ExamViewModal";
 
 const { Text } = Typography;
 
 export default function ExamManager() {
-    const [exams, setExams] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchText, setSearchText] = useState("");
+  const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [viewMode, setViewMode] = useState("active");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedExamId, setSelectedExamId] = useState(null);
 
-    // --- STATE QUẢN LÝ MODAL ---
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    // THÊM STATE CHO MODAL XEM CHI TIẾT
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-    const [selectedExamId, setSelectedExamId] = useState(null);
+  const fetchExams = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = viewMode === "deleted" ? await examApi.getDeleted() : await examApi.getAll();
+      setExams(data);
+    } catch (error) {
+      message.error(error.response?.data?.message || "Không thể tải danh sách đề thi.");
+    } finally {
+      setLoading(false);
+    }
+  }, [viewMode]);
 
-    // --- API FETCH DỮ LIỆU ---
-    const getAllExams = async () => {
-        setLoading(true);
-        try {
-            const response = await authAxios.get("/admin/exams");
-            setExams(response.data.data);
-        } catch (error) {
-            console.error("Error fetching exams: ", error);
-            message.error("Không thể tải danh sách bài thi");
-        } finally {
-            setLoading(false);
-        }
-    };
+  useEffect(() => {
+    fetchExams();
+  }, [viewMode, fetchExams]);
 
-    useEffect(() => {
-        getAllExams();
-    }, []);
+  const filteredExams = exams.filter((item) => {
+    if (!searchText) return true;
+    const q = searchText.toLowerCase();
+    return item.title?.toLowerCase().includes(q) || item.subjectId?.toString().includes(q) || item.description?.toLowerCase().includes(q);
+  });
 
-    // Hàm lọc dữ liệu theo từ khóa tìm kiếm
-    const getFilteredData = () => {
-        if (!searchText) return exams;
-        const lowerSearch = searchText.toLowerCase();
-        return exams.filter(
-            (item) =>
-                item.title?.toLowerCase().includes(lowerSearch) ||
-                item.subjectId?.toString().toLowerCase().includes(lowerSearch) ||
-                item.description?.toLowerCase().includes(lowerSearch)
-        );
-    };
+  const handleDelete = async (examId) => {
+    try {
+      await examApi.remove(examId);
+      message.success("Đã chuyển đề thi vào thùng rác.");
+      fetchExams();
+    } catch (error) {
+      message.error(error.response?.data?.message || "Không thể xóa đề thi.");
+    }
+  };
 
-    // --- HANDLERS MODAL THÊM MỚI ---
-    const handleOpenAddModal = () => {
-        setIsAddModalOpen(true);
-    };
+  const handleRestore = async (examId) => {
+    try {
+      await examApi.restore(examId);
+      message.success("Khôi phục đề thi thành công.");
+      fetchExams();
+    } catch (error) {
+      message.error(error.response?.data?.message || "Cần khôi phục môn cha trước.");
+    }
+  };
 
-    const handleCloseAddModal = () => {
-        setIsAddModalOpen(false);
-    };
+  const columns = [
+    { title: "Mã môn", dataIndex: "subjectId", key: "subjectId", width: 120, render: (text) => <Text strong>{text}</Text>, sorter: (a, b) => a.subjectId - b.subjectId },
+    { title: "Tên đề thi", dataIndex: "title", key: "title", render: (text) => <Space><FileTextOutlined /> <Text strong>{text}</Text></Space> },
+    { title: "Mô tả", dataIndex: "description", key: "description", responsive: ["md"], render: (text) => text || <Text type="secondary">Không có</Text> },
+    { title: "Thời gian", dataIndex: "duration", key: "duration", width: 120, render: (duration) => <Tag icon={<ClockCircleOutlined />} color="blue">{duration} phút</Tag> },
+    { title: "Số câu", dataIndex: "questionCount", key: "questionCount", width: 100, render: (count, record) => <Tag>{count ?? record.questions?.length ?? 0} câu</Tag> },
+    ...(viewMode === "deleted"
+      ? [
+          { title: "Xóa lúc", dataIndex: "deletedAt", key: "deletedAt", width: 180, render: (value) => value || "-" },
+          { title: "Nguồn xóa", dataIndex: "deleteOriginType", key: "deleteOriginType", width: 120, render: (value) => value || "-" },
+        ]
+      : []),
+    {
+      title: "Hành động",
+      key: "action",
+      width: viewMode === "active" ? 130 : 90,
+      fixed: "right",
+      render: (_, record) =>
+        viewMode === "active" ? (
+          <Space>
+            <Tooltip title="Xem đề thi">
+              <Button className="action-btn" icon={<EyeOutlined />} onClick={() => { setSelectedExamId(record.examId); setIsViewModalOpen(true); }} />
+            </Tooltip>
+            <Popconfirm
+              title="Chuyển đề thi vào thùng rác?"
+              description="Lịch sử bài làm và attempt đang làm vẫn được giữ."
+              onConfirm={() => handleDelete(record.examId)}
+              okText="Chuyển vào thùng rác"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+            >
+              <Button className="action-btn is-danger" icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </Space>
+        ) : (
+          <Popconfirm title="Khôi phục đề thi?" onConfirm={() => handleRestore(record.examId)} okText="Khôi phục" cancelText="Hủy">
+            <Button className="action-btn is-success" icon={<UndoOutlined />} />
+          </Popconfirm>
+        ),
+    },
+  ];
 
-    // --- HANDLERS MODAL XEM CHI TIẾT ---
-    const handleViewExam = (examId) => {
-        setSelectedExamId(examId);
-        setIsViewModalOpen(true);
-    };
+  const filters = (
+    <Space wrap>
+      <Segmented value={viewMode} onChange={setViewMode} options={[{ label: "Đang hoạt động", value: "active" }, { label: "Thùng rác", value: "deleted" }]} />
+      <Input placeholder="Tìm tên đề, mã môn..." prefix={<SearchOutlined />} value={searchText} onChange={(e) => setSearchText(e.target.value)} allowClear style={{ width: 300 }} />
+    </Space>
+  );
 
-    const handleCloseViewModal = () => {
-        setIsViewModalOpen(false);
-        setSelectedExamId(null);
-    };
+  return (
+    <>
+      <ManagementPageLayout
+        title={<Space><FileTextOutlined /> Quản lý đề thi</Space>}
+        filters={filters}
+        table={<Table columns={columns} dataSource={filteredExams} rowKey="examId" loading={loading} pagination={{ pageSize: 7 }} scroll={{ x: 1000 }} />}
+        onReload={fetchExams}
+        onAdd={viewMode === "active" ? () => setIsAddModalOpen(true) : undefined}
+      />
 
-    const handleDeleteExam = async (examId) => {
-        try {
-            await authAxios.delete(`/admin/exams/${examId}`);
-            message.success("Xóa đề thi thành công");
-            getAllExams();
-        } catch (error) {
-            console.error("Error deleting exam: ", error);
-            message.error("Không thể xóa đề thi!");
-        }
-    };
-
-    // Cấu hình cột cho bảng
-    const columns = [
-        {
-            title: "Subject ID", dataIndex: "subjectId", key: "subjectId", width: 130,
-            render: (text) => <Text strong>{text}</Text>, sorter: (a, b) => a.subjectId - b.subjectId,
-        },
-        {
-            title: "Tên đề thi", dataIndex: "title", key: "title",
-            render: (text) => (
-                <Space>
-                    <FileTextOutlined style={{ color: "#1890ff" }} />
-                    <Text strong>{text}</Text>
-                </Space>
-            ),
-        },
-        {
-            title: "Mô tả", dataIndex: "description", key: "description",
-            render: (text) =>
-                text ? (
-                    text
-                ) : (
-                    <Text type="secondary" italic>
-                        Không có
-                    </Text>
-                ),
-            responsive: ["md"],
-        },
-        {
-            title: "Thời gian", dataIndex: "duration", key: "duration", width: 120,
-            sorter: (a, b) => a.duration - b.duration,
-            render: (duration) => (
-                <Tag icon={<ClockCircleOutlined />} color="blue">
-                    {duration} phút
-                </Tag>
-            ),
-        },
-        {
-            title: "Số câu hỏi", key: "questions", width: 120,
-            render: (_, record) => (
-                <Tag color={record.questions?.length > 0 ? "geekblue" : "default"}>
-                    {record.questions?.length || 0} câu
-                </Tag>
-            ),
-        },
-        // CỘT HÀNH ĐỘNG
-        {
-            title: "Hành động",
-            width: 140,
-            fixed: 'right', // Cố định cột hành động khi scroll ngang
-            render: (_, record) => (
-                <Space size="middle">
-                    {record.sendType !== 'GLOBAL' && (
-                        <Tooltip title="Xem người nhận">
-                            <Button icon={<EyeOutlined /> } onClick={() => handleViewExam(record.examId)} />
-                        </Tooltip>
-                    )}
-                    <Popconfirm
-                        title="Bạn có chắc chắn muốn xóa đề thi này?"
-                        onConfirm={() => handleDeleteExam(record.examId)}
-                        okText="Có"
-                        cancelText="Không"
-                    >
-                        <Tooltip title="Xóa đề thi">
-                            <Button danger icon={<DeleteOutlined />} />
-                        </Tooltip>
-                    </Popconfirm>
-                </Space>
-            ),
-        },
-    ];
-
-    // --- ĐỊNH NGHĨA COMPONENTS CON CHO LAYOUT ---
-
-    // 1. Tiêu đề chính
-    const pageTitle = (
-        <Space>
-            <FileTextOutlined /> Quản lý đề thi
-        </Space>
-    );
-
-    // 2. Bộ lọc/Tìm kiếm (Filters)
-    const examFilters = (
-        <Input
-            placeholder="Tìm tên đề, mã môn..."
-            prefix={<SearchOutlined />}
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ maxWidth: 300 }}
-            allowClear
-        />
-    );
-
-    // 3. Bảng Dữ liệu (Table)
-    const examTable = (
-        <Table
-            columns={columns}
-            dataSource={getFilteredData()}
-            rowKey={(record) => record.examId || Math.random()}
-            loading={loading}
-            // Tích hợp phân trang vào Table
-            pagination={{
-                pageSize: 7,
-            }}
-            scroll={{ x: 900 }} // Điều chỉnh scroll x để chứa cột Action
-        />
-    );
-
-
-    return (
-        <>
-            {/* SỬ DỤNG MANAGEMENTPAGELAYOUT */}
-            <ManagementPageLayout
-                title={pageTitle}
-                filters={examFilters}
-                table={examTable}
-                onReload={getAllExams}
-                onAdd={handleOpenAddModal}
-            />
-
-            {/* --- MODAL TẠO ĐỀ THI --- */}
-            <AddExamModal
-                isModalOpen={isAddModalOpen}
-                onCancel={handleCloseAddModal}
-                onSuccess={getAllExams}
-            />
-
-            {/* --- MODAL XEM CHI TIẾT ĐỀ THI --- */}
-            <ExamViewModal
-                isModalOpen={isViewModalOpen}
-                onCancel={handleCloseViewModal}
-                examId={selectedExamId} // Truyền ID của đề thi được chọn
-            />
-        </>
-    );
+      <AddExamModal isModalOpen={isAddModalOpen} onCancel={() => setIsAddModalOpen(false)} onSuccess={fetchExams} />
+      <ExamViewModal isModalOpen={isViewModalOpen} onCancel={() => { setIsViewModalOpen(false); setSelectedExamId(null); }} examId={selectedExamId} />
+    </>
+  );
 }

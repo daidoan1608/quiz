@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.dto.AnswerDto;
+import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.UserAnswerDto;
 import com.fita.vnua.quiz.model.dto.UserExamDto;
@@ -43,6 +45,7 @@ public class UserExamServiceImpl implements UserExamService {
     private final ExamRepository examRepository;
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
+    private final UserExamQuestionRepository userExamQuestionRepository;
     private final ModelMapper modelMapper;
     private final SubjectService subjectService;
 
@@ -78,6 +81,13 @@ public class UserExamServiceImpl implements UserExamService {
         return buildUserExamResponse(userExam);
     }
 
+    @Override
+    public UserExamResponse getUserExamByIdForAdmin(Long id) {
+        UserExam userExam = userExamRepository.findById(id)
+                .orElseThrow(() -> new CustomApiException("User exam not found", HttpStatus.NOT_FOUND));
+        return buildUserExamResponse(userExam);
+    }
+
     private UserExamResponse buildUserExamResponse(UserExam userExam) {
         UserExamDto userExamDto = convertUserExamsToUserExamDto(userExam);
         List<UserAnswer> userAnswer = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId());
@@ -89,12 +99,14 @@ public class UserExamServiceImpl implements UserExamService {
             userAnswerDto.setUserExamId(userAnswer1.getUserExam().getUserExamId());
             userAnswerDtos.add(userAnswerDto);
         }
-        SubjectDto subject = subjectService.getSubjectById(userExam.getExam().getSubject().getSubjectId());
         return UserExamResponse.builder()
                 .userExamDto(userExamDto)
                 .userAnswerDtos(userAnswerDtos)
-                .subjectName(subject.getName())
+                .subjectName(userExam.getExam().getSubject().getName())
                 .title(userExam.getExam().getTitle())
+                .username(userExam.getUser().getUsername())
+                .fullName(userExam.getUser().getFullName())
+                .questions(getAttemptQuestions(userExam).stream().map(this::mapQuestionToDto).toList())
                 .build();
     }
 
@@ -109,8 +121,7 @@ public class UserExamServiceImpl implements UserExamService {
         }
         User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + currentUserId));
-        Exam exam = examRepository.findById(userExamDto.getExamId())
-                .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + userExamDto.getExamId()));
+        Exam exam = findActiveExam(userExamDto.getExamId());
 
         // Tự động tính điểm ở Backend
         float score = 0;
@@ -204,12 +215,13 @@ public class UserExamServiceImpl implements UserExamService {
     private List<UserExamResponse> getUserExamResponses(List<UserExam> userExams) {
         List<UserExamResponse> userExamResponses = new ArrayList<>();
         for (UserExam userExam : userExams) {
-            SubjectDto subject = subjectService.getSubjectById(userExam.getExam().getSubject().getSubjectId());
             UserExamResponse userExamResponse = UserExamResponse
                     .builder()
                     .userExamDto(convertUserExamsToUserExamDto(userExam))
-                    .subjectName(subject.getName())
+                    .subjectName(userExam.getExam().getSubject().getName())
                     .title(userExam.getExam().getTitle())
+                    .username(userExam.getUser().getUsername())
+                    .fullName(userExam.getUser().getFullName())
                     .build();
             userExamResponses.add(userExamResponse);
         }
@@ -231,8 +243,7 @@ public class UserExamServiceImpl implements UserExamService {
 
         User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + currentUserId));
-        Exam exam = examRepository.findById(request.getExamId())
-                .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + request.getExamId()));
+        Exam exam = findActiveExam(request.getExamId());
 
         // Kiểm tra lại sau khi load User/Exam để tránh trường hợp 2 request start chạy gần như đồng thời
         // tạo ra 2 bản ghi IN_PROGRESS cho cùng user + exam.
@@ -252,7 +263,9 @@ public class UserExamServiceImpl implements UserExamService {
         userExam.setCurrentQuestionIndex(0);
         userExam.setUpdatedAt(LocalDateTime.now());
 
-        return buildAttemptResponse(userExamRepository.save(userExam));
+        UserExam savedAttempt = userExamRepository.save(userExam);
+        saveAttemptQuestionSnapshot(savedAttempt, questionRepository.findQuestionsByExamId(exam.getExamId()));
+        return buildAttemptResponse(savedAttempt);
     }
 
     @Override
@@ -287,6 +300,9 @@ public class UserExamServiceImpl implements UserExamService {
     private ExamAttemptResponse saveAttemptAnswerInternal(UserExam userExam, Long userExamId, SaveExamAttemptAnswerRequest request) {
         Question question = questionRepository.findById(request.getQuestionId())
                 .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + request.getQuestionId()));
+        if (getAttemptQuestions(userExam).stream().noneMatch(q -> q.getQuestionId().equals(question.getQuestionId()))) {
+            throw new CustomApiException("Question is not part of this attempt", HttpStatus.BAD_REQUEST);
+        }
 
         List<Long> answerIds = request.getAnswerIds() != null ? request.getAnswerIds() : new ArrayList<>();
         if (answerIds.isEmpty() && request.getAnswerId() != null) {
@@ -323,8 +339,21 @@ public class UserExamServiceImpl implements UserExamService {
         return submitAttemptInternal(userExam, userExamId);
     }
 
+    @Override
+    public List<Question> getAttemptQuestionsForSubmittedAttempt(Long userExamId, UUID currentUserId) {
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN));
+        UserExam userExam = (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MOD)
+                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN))
+                : getUserExamForCurrentUser(userExamId, currentUserId);
+        if (!"SUBMITTED".equals(userExam.getStatus())) {
+            throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
+        }
+        return getAttemptQuestions(userExam);
+    }
+
     private UserExamDto submitAttemptInternal(UserExam userExam, Long userExamId) {
-        List<Question> questions = questionRepository.findQuestionsByExamId(userExam.getExam().getExamId());
+        List<Question> questions = getAttemptQuestions(userExam);
         List<UserAnswer> userAnswers = userAnswerRepository.findUserAnswersByUserExamId(userExamId);
         Map<Long, Set<Long>> userAnswersMap = userAnswers.stream()
                 .collect(Collectors.groupingBy(
@@ -414,7 +443,7 @@ public class UserExamServiceImpl implements UserExamService {
                     return dto;
                 })
                 .collect(Collectors.toList());
-        int totalQuestions = questionRepository.findQuestionsByExamId(userExam.getExam().getExamId()).size();
+        int totalQuestions = getAttemptQuestions(userExam).size();
 
         return ExamAttemptResponse.builder()
                 .userExamId(userExam.getUserExamId())
@@ -451,7 +480,7 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     private void populateAnswerStats(UserExam userExam, UserExamDto userExamDto) {
-        List<Question> questions = questionRepository.findQuestionsByExamId(userExam.getExam().getExamId());
+        List<Question> questions = getAttemptQuestions(userExam);
         userExamDto.setTotalQuestions(questions.size());
 
         if (questions.isEmpty()) {
@@ -473,5 +502,70 @@ public class UserExamServiceImpl implements UserExamService {
             }
         }
         userExamDto.setCorrectAnswers(correctAnswers);
+    }
+
+    private void saveAttemptQuestionSnapshot(UserExam userExam, List<Question> questions) {
+        if (userExamQuestionRepository == null) {
+            return;
+        }
+        if (userExamQuestionRepository.existsByUserExamUserExamId(userExam.getUserExamId())) {
+            return;
+        }
+        for (int i = 0; i < questions.size(); i++) {
+            UserExamQuestion snapshot = new UserExamQuestion();
+            snapshot.setUserExam(userExam);
+            snapshot.setQuestion(questions.get(i));
+            snapshot.setPosition(i);
+            userExamQuestionRepository.save(snapshot);
+        }
+    }
+
+    private List<Question> getAttemptQuestions(UserExam userExam) {
+        if (userExamQuestionRepository == null) {
+            return getExamQuestionsIncludingDeleted(userExam.getExam().getExamId());
+        }
+        List<UserExamQuestion> snapshots = userExamQuestionRepository.findByUserExamUserExamIdOrderByPositionAsc(userExam.getUserExamId());
+        if (!snapshots.isEmpty()) {
+            return snapshots.stream().map(UserExamQuestion::getQuestion).toList();
+        }
+        return getExamQuestionsIncludingDeleted(userExam.getExam().getExamId());
+    }
+
+    private List<Question> getExamQuestionsIncludingDeleted(Long examId) {
+        List<Question> questions = questionRepository.findQuestionsByExamIdIncludingDeleted(examId);
+        if (questions != null && !questions.isEmpty()) {
+            return questions;
+        }
+        return questionRepository.findQuestionsByExamId(examId);
+    }
+
+    private QuestionDto mapQuestionToDto(Question question) {
+        QuestionDto dto = modelMapper.map(question, QuestionDto.class);
+        dto.setQuestionType(question.getQuestionType() == null ? null : question.getQuestionType().name());
+        dto.setDifficulty(question.getDifficulty() == null ? null : question.getDifficulty().name());
+        if (question.getChapter() != null) {
+            dto.setChapterId(question.getChapter().getChapterId());
+            dto.setChapterName(question.getChapter().getName());
+        }
+        dto.setAnswers(question.getAnswers().stream().map(answer -> {
+            AnswerDto answerDto = new AnswerDto();
+            answerDto.setOptionId(answer.getOptionId());
+            answerDto.setQuestionId(question.getQuestionId());
+            answerDto.setContent(answer.getContent());
+            answerDto.setIsCorrect(answer.getIsCorrect());
+            return answerDto;
+        }).toList());
+        return dto;
+    }
+
+    private Exam findActiveExam(Long examId) {
+        Exam exam = examRepository.findByExamIdAndDeletedFalse(examId)
+                .or(() -> examRepository.findById(examId)
+                        .filter(found -> !Boolean.TRUE.equals(found.getDeleted())))
+                .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + examId));
+        if (exam.getSubject() != null && Boolean.TRUE.equals(exam.getSubject().getDeleted())) {
+            throw new EntityNotFoundException("Exam not found with id: " + examId);
+        }
+        return exam;
     }
 }

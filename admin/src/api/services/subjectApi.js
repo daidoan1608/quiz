@@ -7,6 +7,11 @@ export const subjectApi = {
     return normalizeList(unwrapApiData(response));
   },
 
+  async getDeleted() {
+    const response = await authAxios.get("/admin/subjects/deleted");
+    return normalizeList(unwrapApiData(response));
+  },
+
   async search(keyword) {
     const response = await authAxios.get("/public/subjects/search", {
       params: { q: keyword },
@@ -34,5 +39,9 @@ export const subjectApi = {
 
   remove(subjectId) {
     return authAxios.delete(`/admin/subjects/${subjectId}`);
+  },
+
+  restore(subjectId) {
+    return authAxios.patch(`/admin/subjects/${subjectId}/restore`);
   },
 };

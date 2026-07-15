@@ -17,53 +17,36 @@ import java.util.UUID;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    /**
-     * Lấy danh sách thông báo cho 1 User cụ thể.
-     * Logic:
-     * 1. Lấy thông báo PERSONAL gửi riêng cho User.
-     * 2. HOẶC lấy thông báo GLOBAL toàn hệ thống.
-     * 3. Tính toán cột isRead dựa trên việc JOIN với bảng global_notification_read.
-     */
-    @Query(value = """
-            SELECT 
-                n.id AS id,
-                n.title AS title,
-                n.message AS message,
-                n.type AS type,
-                n.related_id AS relatedId,
-                n.related_type AS relatedType,
-                n.created_at AS createdAt,
-            
-                -- FIX LỖI Ở ĐÂY: Ép kiểu về số nguyên (UNSIGNED) để Hibernate đọc được
-                CAST(
-                    CASE 
-                        -- Nếu là tin cá nhân: Kiểm tra bit 1 (true)
-                        WHEN n.type = 'PERSONAL' AND n.is_read = 1 THEN 1 
-            
-                        -- Nếu là tin Global: Check tồn tại trong bảng phụ
-                        WHEN n.type = 'GLOBAL' AND gnr.id IS NOT NULL THEN 1 
-            
-                        -- Còn lại là chưa đọc (0)
-                        ELSE 0 
-                    END 
-                AS UNSIGNED) AS isReadRaw
-            
-            FROM notifications n
-            
-            LEFT JOIN global_notification_read gnr 
-                ON n.id = gnr.notification_id AND gnr.user_id = :userId
-            
-            WHERE 
-                (n.type = 'PERSONAL' AND n.user_id = :userId)
-                OR 
-                (n.type = 'GLOBAL')
-            
-            ORDER BY n.created_at DESC
-            """, nativeQuery = true)
+    @Query("""
+            SELECT new com.fita.vnua.quiz.model.dto.response.NotificationResponseDto(
+                n.id,
+                n.title,
+                n.message,
+                n.type,
+                n.relatedId,
+                n.relatedType,
+                CASE
+                    WHEN n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.PERSONAL
+                         AND n.isRead = true THEN 1L
+                    WHEN n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL
+                         AND gnr.id IS NOT NULL THEN 1L
+                    ELSE 0L
+                END,
+                n.createdAt
+            )
+            FROM Notification n
+            LEFT JOIN GlobalNotificationRead gnr
+                ON n.id = gnr.notificationId AND gnr.userId = :userId
+            WHERE
+                (n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.PERSONAL AND n.userId = :userId)
+                OR
+                (n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL)
+            ORDER BY n.createdAt DESC
+            """)
     List<NotificationResponse> findAllNotificationsForUser(@Param("userId") UUID userId);
 
     @Modifying
-    @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = :userId AND n.type = 'PERSONAL'")
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = :userId AND n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.PERSONAL")
     void markAllPersonalAsRead(@Param("userId") UUID userId);
 
     @Query("""
@@ -79,7 +62,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             """)
     Page<RecipientResponse> findRecipientsByHistoryId(@Param("historyId") Long historyId, Pageable pageable);
 
-    // 2. Lấy danh sách ID của tất cả thông báo Global
-    @Query("SELECT n.id FROM Notification n WHERE n.type = 'GLOBAL'")
+    @Query("SELECT n.id FROM Notification n WHERE n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL")
     List<Long> findAllGlobalNotificationIds();
 }

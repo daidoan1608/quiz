@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -21,4 +22,10 @@ public class UserResponse {
     private String avatarUrl;
     private String phone;
     private String address;
+    private Boolean deleted;
+    private LocalDateTime deletedAt;
+    private UUID deletedBy;
+    private UUID deletedCascadeId;
+    private String deleteOriginType;
+    private Long deleteOriginId;
 }

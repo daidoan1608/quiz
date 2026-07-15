@@ -9,6 +9,23 @@ import { userApi } from "../../api/services"; // Điều chỉnh đường dẫn
 const { Title } = Typography;
 const { Option } = Select;
 
+const primaryButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "var(--admin-primary)",
+  background: "color-mix(in srgb, var(--admin-primary) 12%, transparent)",
+  color: "var(--admin-primary)",
+  boxShadow: "none",
+};
+
+const cancelButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "#ef4444",
+  background: "rgba(239, 68, 68, 0.1)",
+  color: "#ef4444",
+};
+
 const AddUserModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
@@ -43,10 +60,11 @@ const AddUserModal = ({ isModalOpen, onCancel, onSuccess }) => {
         onCancel();
       }}
       footer={[
-        <Button key="back" onClick={onCancel}>Hủy bỏ</Button>,
+        <Button key="back" style={cancelButtonStyle} onClick={onCancel}>Hủy bỏ</Button>,
         <Button
           key="submit"
-          type="primary"
+          type="default"
+          style={primaryButtonStyle}
           icon={<SaveOutlined />}
           loading={loading}
           onClick={() => form.submit()}

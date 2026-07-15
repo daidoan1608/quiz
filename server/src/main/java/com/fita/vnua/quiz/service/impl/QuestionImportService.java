@@ -47,6 +47,10 @@ public class QuestionImportService {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new CustomApiException("Chapter không tồn tại", HttpStatus.NOT_FOUND));
 
+        if (Boolean.TRUE.equals(chapter.getDeleted())) {
+            throw new CustomApiException("Chapter khÃ´ng tá»“n táº¡i", HttpStatus.NOT_FOUND);
+        }
+
         List<Question> questions = importedFile.questions().stream()
                 .map(dto -> toQuestion(dto, chapter, importedFile.images()))
                 .toList();

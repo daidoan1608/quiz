@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -19,4 +20,10 @@ public class ExamSummaryDto {
     private UUID createdBy;
     private String createdDate;
     private Integer questionCount;
+    private Boolean deleted;
+    private LocalDateTime deletedAt;
+    private UUID deletedBy;
+    private UUID deletedCascadeId;
+    private String deleteOriginType;
+    private Long deleteOriginId;
 }

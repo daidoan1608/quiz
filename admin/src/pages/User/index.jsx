@@ -1,29 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { userApi } from "../../api/services";
+import React, { useCallback, useEffect, useState } from "react";
 import {
+  Button,
+  Input,
+  Popconfirm,
+  Segmented,
+  Select,
+  Space,
   Table,
   Tag,
-  Button,
-  Select,
-  Popconfirm,
-  Space,
-  Typography,
   Tooltip,
+  Typography,
   message,
-  Input,
 } from "antd";
 import {
   EditOutlined,
-  DeleteOutlined,
-  UserOutlined,
   SearchOutlined,
   SafetyCertificateOutlined,
+  StopOutlined,
+  UndoOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-
-// IMPORT LAYOUT CHUNG
-import ManagementPageLayout from '../../layouts/ManagementPageLayout'; // <-- Thay đổi đường dẫn nếu cần
-
-// IMPORT CÁC MODAL ĐÃ TÁCH
+import { userApi } from "../../api/services";
+import ManagementPageLayout from "../../layouts/ManagementPageLayout";
 import AddUserModal from "../../components/Modal/AddUserModal";
 import UpdateUserModal from "../../components/Modal/UpdateUserModal";
 import SubjectPermissionModal from "../../components/Modal/SubjectPermissionModal";
@@ -36,63 +34,63 @@ export default function UserManager() {
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("all");
   const [searchText, setSearchText] = useState("");
-
-  // --- STATES QUẢN LÝ MODAL ---
+  const [viewMode, setViewMode] = useState("active");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedPermissionUser, setSelectedPermissionUser] = useState(null);
 
-  // Lấy role hiện tại
   const currentUserRole = localStorage.getItem("role");
   const isMod = currentUserRole === "MOD";
 
-  // --- 1. CALL API ---
-  const fetchUsers = async (keyword = "") => {
+  const fetchUsers = useCallback(async (keyword = searchText) => {
     setLoading(true);
     try {
       const trimmedKeyword = keyword.trim();
-      const data = trimmedKeyword
-        ? await userApi.search(trimmedKeyword)
-        : await userApi.getAll();
+      const data =
+        viewMode === "deleted"
+          ? await userApi.getDeleted()
+          : trimmedKeyword
+            ? await userApi.search(trimmedKeyword)
+            : await userApi.getAll();
       setUsers(data);
     } catch (error) {
-      console.error("Lỗi API:", error);
-      message.error("Không thể lấy danh sách người dùng!");
+      message.error(error.response?.data?.message || "Không thể tải danh sách người dùng.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchText, viewMode]);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchUsers(searchText);
-    }, 400);
-
+    const timeoutId = setTimeout(() => fetchUsers(searchText), 400);
     return () => clearTimeout(timeoutId);
-  }, [searchText]);
+  }, [searchText, viewMode, fetchUsers]);
 
-  // --- 2. XỬ LÝ XÓA USER (Giữ nguyên) ---
-  const handleDelete = async (userId) => {
+  const handleDisable = async (userId) => {
     if (isMod) {
       message.warning("Bạn không có quyền thực hiện hành động này.");
       return;
     }
-
     try {
       await userApi.remove(userId);
-      message.success("Xóa người dùng thành công!");
-      setUsers((prev) => prev.filter((user) => user.userId !== userId));
+      message.success("Đã vô hiệu hóa người dùng.");
+      fetchUsers();
     } catch (error) {
-      message.error(
-        "Không thể xóa người dùng: " +
-          (error.response?.data?.message || error.message)
-      );
+      message.error(error.response?.data?.message || "Không thể vô hiệu hóa người dùng.");
     }
   };
 
-  // --- 3. XỬ LÝ MỞ MODAL SỬA USER (Giữ nguyên) ---
+  const handleRestore = async (userId) => {
+    try {
+      await userApi.restore(userId);
+      message.success("Khôi phục người dùng thành công.");
+      fetchUsers();
+    } catch (error) {
+      message.error(error.response?.data?.message || "Không thể khôi phục người dùng.");
+    }
+  };
+
   const handleEdit = (userId) => {
     if (isMod) {
       message.warning("Bạn không có quyền chỉnh sửa.");
@@ -104,17 +102,11 @@ export default function UserManager() {
 
   const handleOpenPermissions = (user) => {
     if (user.role !== "MOD") {
-      message.warning("Chi tai khoan MOD moi can phan quyen theo mon.");
+      message.warning("Chỉ tài khoản MOD mới cần phân quyền theo môn.");
       return;
     }
     setSelectedPermissionUser(user);
     setIsPermissionModalOpen(true);
-  };
-
-  // --- 4. LỌC DỮ LIỆU ---
-  // Search dùng endpoint BE /admin/users/search?key=..., role vẫn lọc client-side.
-  const getFilteredData = () => {
-    return users.filter((user) => selectedRole === "all" || user.role === selectedRole);
   };
 
   const handleModalClose = () => {
@@ -125,13 +117,19 @@ export default function UserManager() {
     setIsAddModalOpen(false);
   };
 
-  // --- CẤU HÌNH CỘT CHO TABLE (Giữ nguyên) ---
+  const filteredUsers = users.filter((user) => selectedRole === "all" || user.role === selectedRole);
+
   const columns = [
     {
-      title: "UUID", dataIndex: "userId", key: "userId", width: 80,
+      title: "UUID",
+      dataIndex: "userId",
+      key: "userId",
+      width: 120,
       render: (text) => (
         <Tooltip title={text}>
-          <Text style={{ width: 50 }} ellipsis copyable>{text}</Text>
+          <Text style={{ width: 90 }} ellipsis copyable>
+            {text}
+          </Text>
         </Tooltip>
       ),
     },
@@ -139,135 +137,129 @@ export default function UserManager() {
     { title: "Họ và tên", dataIndex: "fullName", key: "fullName" },
     { title: "Email", dataIndex: "email", key: "email" },
     {
-      title: "Vai trò", dataIndex: "role", key: "role",
+      title: "Vai trò",
+      dataIndex: "role",
+      key: "role",
+      width: 110,
       render: (role) => {
-        let color = "blue";
-        if (role === "ADMIN") color = "red";
-        if (role === "MOD") color = "orange";
-        if (role === "USER") color = "green";
+        const color = role === "ADMIN" ? "red" : role === "MOD" ? "orange" : "green";
         return <Tag color={color}>{role}</Tag>;
       },
     },
+    ...(viewMode === "deleted"
+      ? [
+          {
+            title: "Thời điểm xóa",
+            dataIndex: "deletedAt",
+            key: "deletedAt",
+            width: 180,
+            render: (value) => value || <Text type="secondary">-</Text>,
+          },
+        ]
+      : []),
     {
-      title: "Hành động", key: "action", width: 120,
-      render: (_, record) => (
-        <Space>
-          <Tooltip title={isMod ? "Không có quyền sửa" : "Sửa thông tin"}>
-            <Button
-              type="primary"
-              ghost
-              icon={<EditOutlined />}
-              disabled={isMod}
-              onClick={() => handleEdit(record.userId)}
-            />
-          </Tooltip>
-
-          <Tooltip title={record.role === "MOD" ? "Phan quyen mon hoc" : "Chi ap dung cho MOD"}>
-            <Button
-              icon={<SafetyCertificateOutlined />}
-              disabled={isMod || record.role !== "MOD"}
-              onClick={() => handleOpenPermissions(record)}
-            />
-          </Tooltip>
-
-          <Tooltip title={isMod ? "Không có quyền xóa" : "Xóa người dùng"}>
-            <Popconfirm
-              title="Xóa người dùng này?"
-              description={`Bạn có chắc muốn xóa ${record.username}?`}
-              onConfirm={() => handleDelete(record.userId)}
-              okText="Xóa"
-              cancelText="Hủy"
-              okButtonProps={{ danger: true }}
-              disabled={isMod}
-            >
-              <Button danger icon={<DeleteOutlined />} disabled={isMod} />
-            </Popconfirm>
-          </Tooltip>
-        </Space>
-      ),
+      title: "Hành động",
+      key: "action",
+      width: viewMode === "active" ? 160 : 90,
+      fixed: "right",
+      render: (_, record) =>
+        viewMode === "active" ? (
+          <Space>
+            <Tooltip title={isMod ? "Không có quyền sửa" : "Sửa thông tin"}>
+              <Button className="action-btn is-primary" icon={<EditOutlined />} disabled={isMod} onClick={() => handleEdit(record.userId)} />
+            </Tooltip>
+            <Tooltip title={record.role === "MOD" ? "Phân quyền môn học" : "Chỉ áp dụng cho MOD"}>
+              <Button
+                className="action-btn"
+                icon={<SafetyCertificateOutlined />}
+                disabled={isMod || record.role !== "MOD"}
+                onClick={() => handleOpenPermissions(record)}
+              />
+            </Tooltip>
+            <Tooltip title={isMod ? "Không có quyền" : "Vô hiệu hóa"}>
+              <Popconfirm
+                title="Vô hiệu hóa người dùng?"
+                description="Người dùng sẽ không đăng nhập được, refresh token và quyền MOD hiện có sẽ bị thu hồi."
+                onConfirm={() => handleDisable(record.userId)}
+                okText="Vô hiệu hóa"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                disabled={isMod}
+              >
+                <Button className="action-btn is-danger" icon={<StopOutlined />} disabled={isMod} />
+              </Popconfirm>
+            </Tooltip>
+          </Space>
+        ) : (
+          <Popconfirm
+            title="Khôi phục người dùng?"
+            description="Người dùng đăng nhập lại được nếu tài khoản hợp lệ, quyền MOD cần cấp lại thủ công."
+            onConfirm={() => handleRestore(record.userId)}
+            okText="Khôi phục"
+            cancelText="Hủy"
+          >
+            <Button className="action-btn is-success" icon={<UndoOutlined />} disabled={isMod} />
+          </Popconfirm>
+        ),
     },
   ];
 
-  // --- ĐỊNH NGHĨA COMPONENTS CON CHO LAYOUT ---
-
-  // 1. Tiêu đề chính
-  const pageTitle = (
-    <Space>
-      <UserOutlined /> Quản lý người dùng
-    </Space>
-  );
-
-  // 2. Bộ lọc/Tìm kiếm (Filters)
-  const userFilters = (
+  const filters = (
     <Space size="middle" wrap>
-      {/* Lọc theo Role */}
-      <div>
-        <Select
-          defaultValue="all"
-          style={{ width: 150 }}
-          onChange={setSelectedRole}
-        >
-          <Option value="all">Tất cả</Option>
-          <Option value="ADMIN">ADMIN</Option>
-          <Option value="MOD">MOD</Option>
-          <Option value="USER">USER</Option>
-        </Select>
-      </div>
-
-      {/* Tìm kiếm */}
-      <div>
-        <Input
-          placeholder="Nhập tên, email hoặc username..."
-          prefix={<SearchOutlined />}
-          onChange={(e) => setSearchText(e.target.value)}
-          allowClear
-          style={{ width: 300 }}
-        />
-      </div>
+      <Segmented
+        value={viewMode}
+        onChange={setViewMode}
+        options={[
+          { label: "Đang hoạt động", value: "active" },
+          { label: "Đã vô hiệu hóa", value: "deleted" },
+        ]}
+      />
+      <Select value={selectedRole} style={{ width: 150 }} onChange={setSelectedRole}>
+        <Option value="all">Tất cả</Option>
+        <Option value="ADMIN">ADMIN</Option>
+        <Option value="MOD">MOD</Option>
+        <Option value="USER">USER</Option>
+      </Select>
+      <Input
+        placeholder="Tìm username, tên..."
+        prefix={<SearchOutlined />}
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        disabled={viewMode === "deleted"}
+        allowClear
+        style={{ width: 300 }}
+      />
     </Space>
   );
 
-  // 3. Bảng Dữ liệu (Table)
-  const userTable = (
+  const table = (
     <Table
       columns={columns}
-      dataSource={getFilteredData()}
+      dataSource={filteredUsers}
       rowKey="userId"
       loading={loading}
-      pagination={{
-        pageSize: 7,
-      }}
-      scroll={{ x: 800 }}
+      pagination={{ pageSize: 7 }}
+      scroll={{ x: 900 }}
     />
   );
 
   return (
     <>
-      {/* SỬ DỤNG MANAGEMENTPAGELAYOUT THAY CHO CARD CŨ */}
       <ManagementPageLayout
-        title={pageTitle}
-        filters={userFilters}
-        table={userTable}
-        onReload={fetchUsers}
-        onAdd={() => setIsAddModalOpen(true)}
-
-        // Thêm nút phụ nếu cần (ví dụ: nút "Thêm User mới" có thể được coi là extra nếu không dùng onAdd)
-        // extra={isMod ? null : <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsAddModalOpen(true)}>Thêm User mới</Button>}
+        title={<Space><UserOutlined /> Quản lý người dùng</Space>}
+        filters={filters}
+        table={table}
+        onReload={() => fetchUsers(searchText)}
+        onAdd={!isMod && viewMode === "active" ? () => setIsAddModalOpen(true) : undefined}
       />
 
-      {/* MODAL THÊM NGƯỜI DÙNG */}
-      <AddUserModal
-        isModalOpen={isAddModalOpen}
-        onCancel={handleModalClose}
-        onSuccess={fetchUsers} // Gọi lại API để làm mới bảng
-      />
+      <AddUserModal isModalOpen={isAddModalOpen} onCancel={handleModalClose} onSuccess={fetchUsers} />
 
-      {/* MODAL CẬP NHẬT NGƯỜI DÙNG */}
       {isUpdateModalOpen && selectedUserId && (
         <UpdateUserModal
           isModalOpen={isUpdateModalOpen}
           onCancel={handleModalClose}
-          onSuccess={fetchUsers} // Gọi lại API để làm mới bảng
+          onSuccess={fetchUsers}
           userId={selectedUserId}
         />
       )}

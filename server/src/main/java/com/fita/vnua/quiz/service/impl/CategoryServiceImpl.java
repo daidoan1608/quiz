@@ -9,6 +9,7 @@ import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.repository.CategoryRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.CategoryService;
+import com.fita.vnua.quiz.service.SoftDeleteService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -23,10 +24,18 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final SubjectRepository subjectRepository;
     private final ModelMapper modelMapper;
+    private final SoftDeleteService softDeleteService;
 
     @Override
     public List<CategorySummaryDto> getAllCategories() {
-        return categoryRepository.findAll().stream()
+        return categoryRepository.findByDeletedFalse().stream()
+                .map(this::mapCategoryToSummaryDto)
+                .toList();
+    }
+
+    @Override
+    public List<CategorySummaryDto> getDeletedCategories() {
+        return categoryRepository.findByDeletedTrue().stream()
                 .map(this::mapCategoryToSummaryDto)
                 .toList();
     }
@@ -36,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllCategories();
         }
-        return categoryRepository.findByCategoryNameContainingIgnoreCaseOrCategoryDescriptionContainingIgnoreCase(keyword.trim(), keyword.trim())
+        return categoryRepository.searchActive(keyword.trim())
                 .stream()
                 .map(this::mapCategoryToSummaryDto)
                 .toList();
@@ -46,8 +55,11 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(category.getDeleted())) {
+            throw new CustomApiException("Category not found", HttpStatus.NOT_FOUND);
+        }
         CategoryDto categoryDto = modelMapper.map(category, CategoryDto.class);
-        List<SubjectDto> subjectDtos = subjectRepository.findSubjectsByCategory(category).stream()
+        List<SubjectDto> subjectDtos = subjectRepository.findSubjectsByCategoryAndDeletedFalse(category).stream()
                 .map(subject -> modelMapper.map(subject, SubjectDto.class))
                 .toList();
         categoryDto.setSubjects(subjectDtos);
@@ -65,6 +77,9 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(category.getDeleted())) {
+            throw new CustomApiException("Category not found", HttpStatus.NOT_FOUND);
+        }
         category.setCategoryName((categoryDto.getCategoryName()));
         category.setCategoryDescription(categoryDto.getCategoryDescription());
         Category savedCategory = categoryRepository.save(category);
@@ -73,14 +88,20 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Long id) {
+        softDeleteService.deleteCategory(id, null);
+    }
+
+    @Override
+    public CategoryDto restoreCategory(Long id) {
+        softDeleteService.restoreCategory(id);
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
-        categoryRepository.delete(category);
+        return modelMapper.map(category, CategoryDto.class);
     }
 
     private CategorySummaryDto mapCategoryToSummaryDto(Category category) {
         CategorySummaryDto categoryDto = modelMapper.map(category, CategorySummaryDto.class);
-        categoryDto.setTotalSubjects(subjectRepository.findSubjectsByCategory(category).size());
+        categoryDto.setTotalSubjects(subjectRepository.findSubjectsByCategoryAndDeletedFalse(category).size());
         return categoryDto;
     }
 }

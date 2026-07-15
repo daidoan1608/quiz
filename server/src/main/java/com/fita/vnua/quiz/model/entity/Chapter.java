@@ -3,6 +3,9 @@ package com.fita.vnua.quiz.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Entity
 @Data
 public class Chapter {
@@ -19,4 +22,17 @@ public class Chapter {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
+    private UUID deletedBy;
+
+    private UUID deletedCascadeId;
+
+    private String deleteOriginType;
+
+    private Long deleteOriginId;
 }

@@ -6,6 +6,8 @@ import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.dto.response.UserResponse;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.repository.RefreshTokenRepository;
+import com.fita.vnua.quiz.repository.UserSubjectPermissionRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.UserService;
 import com.fita.vnua.quiz.service.mapper.UserMapper;
@@ -14,10 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,15 +37,24 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserSubjectPermissionRepository userSubjectPermissionRepository;
 
     @Override
     public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(user -> modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
+        return userRepository.findByDeletedFalse().stream().map(user -> modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
     }
 
     @Override
     public List<UserResponse> getAllUserResponses() {
-        return userRepository.findAll().stream()
+        return userRepository.findByDeletedFalse().stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserResponse> getDeletedUserResponses() {
+        return userRepository.findByDeletedTrue().stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
@@ -47,6 +62,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserById(UUID userId) {
         return userRepository.findById(userId)
+                .filter(user -> !Boolean.TRUE.equals(user.getDeleted()))
                 .map(user -> modelMapper.map(user, UserDto.class))
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
     }
@@ -54,6 +70,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUserResponseById(UUID userId) {
         return userRepository.findById(userId)
+                .filter(user -> !Boolean.TRUE.equals(user.getDeleted()))
                 .map(userMapper::toUserResponse)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
     }
@@ -98,6 +115,18 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<UserResponse> searchNotificationRecipients(String keyword, int limit) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        int normalizedLimit = Math.max(1, Math.min(limit, 50));
+        return userRepository.searchActiveUsersForNotification(keyword.trim(), PageRequest.of(0, normalizedLimit))
+                .stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public UserDto create(UserDto userDto) {
@@ -122,6 +151,7 @@ public class UserServiceImpl implements UserService {
     public UserDto update(UUID userId, UserDto userDto) {
         var existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+        ensureActiveUser(existingUser);
         if (userDto.getFullName() != null) {
             existingUser.setFullName(userDto.getFullName());
         }
@@ -151,6 +181,7 @@ public class UserServiceImpl implements UserService {
     public UserDto updateProfile(UUID userId, UpdateProfileRequest request) {
         var existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+        ensureActiveUser(existingUser);
         if (request.getFullName() != null) {
             existingUser.setFullName(request.getFullName());
         }
@@ -174,6 +205,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateProfileResponse(UUID userId, UpdateProfileRequest request) {
         var existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+        ensureActiveUser(existingUser);
         if (request.getFullName() != null) {
             existingUser.setFullName(request.getFullName());
         }
@@ -193,13 +225,38 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Response delete(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
-        userRepository.delete(user);
+        if (!Boolean.TRUE.equals(user.getDeleted())) {
+            user.setDeleted(true);
+            user.setDeletedAt(LocalDateTime.now());
+            user.setDeletedBy(currentActorId());
+            user.setDeletedCascadeId(UUID.randomUUID());
+            user.setDeleteOriginType("USER");
+            user.setDeleteOriginId(null);
+            userRepository.save(user);
+        }
+        refreshTokenRepository.revokeAllByUserId(userId);
+        userSubjectPermissionRepository.deleteByUserId(userId);
         return Response.builder()
                 .responseMessage("User deleted successfully")
                 .responseCode("200 OK").build();
+    }
+
+    @Override
+    @Transactional
+    public UserResponse restore(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+        user.setDeleted(false);
+        user.setDeletedAt(null);
+        user.setDeletedBy(null);
+        user.setDeletedCascadeId(null);
+        user.setDeleteOriginType(null);
+        user.setDeleteOriginId(null);
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @Override
@@ -221,8 +278,23 @@ public class UserServiceImpl implements UserService {
     public boolean updateAvatar(UUID userId, String avatarUrl) {
         var existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND));
+        ensureActiveUser(existingUser);
         existingUser.setAvatarUrl(avatarUrl);
         userRepository.save(existingUser);
         return true;
+    }
+
+    private UUID currentActorId() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof User user) {
+            return user.getUserId();
+        }
+        return null;
+    }
+
+    private void ensureActiveUser(User user) {
+        if (Boolean.TRUE.equals(user.getDeleted())) {
+            throw new CustomApiException("User not found", HttpStatus.NOT_FOUND);
+        }
     }
 }

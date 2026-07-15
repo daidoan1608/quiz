@@ -5,6 +5,7 @@ import com.fita.vnua.quiz.model.dto.PermissionAssignmentDto;
 import com.fita.vnua.quiz.model.dto.request.RoleUpdateRequest;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.model.entity.UserSubjectPermission;
+import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.repository.UserSubjectPermissionRepository;
 import com.fita.vnua.quiz.service.AdminPermissionService;
@@ -27,6 +28,7 @@ public class AdminPermissionServiceImpl implements AdminPermissionService {
 
     private final UserSubjectPermissionRepository permissionRepository;
     private final UserRepository userRepository;
+    private final SubjectRepository subjectRepository;
 
     @Override
     @Transactional
@@ -37,14 +39,29 @@ public class AdminPermissionServiceImpl implements AdminPermissionService {
 
         User targetUser = userRepository.findById(assignment.getModUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("User to assign permissions not found."));
+        if (Boolean.TRUE.equals(targetUser.getDeleted())) {
+            throw new CustomApiException("User to assign permissions not found.", HttpStatus.NOT_FOUND);
+        }
 
         if (targetUser.getRole() != User.Role.MOD) {
             throw new CustomApiException("Object-level permissions can only be assigned to a MOD account.", HttpStatus.BAD_REQUEST);
         }
+        var subject = subjectRepository.findById(assignment.getSubjectId())
+                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(subject.getDeleted())) {
+            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+        }
+
+        List<String> normalizedPermissions = assignment.getPermissions()
+                .stream()
+                .map(this::normalizePermission)
+                .distinct()
+                .toList();
 
         permissionRepository.deleteByUserIdAndSubjectId(assignment.getModUserId(), assignment.getSubjectId());
+        permissionRepository.flush();
 
-        List<UserSubjectPermission> newPermissions = assignment.getPermissions().stream()
+        List<UserSubjectPermission> newPermissions = normalizedPermissions.stream()
                 .map(permission -> buildPermission(assignment, permission))
                 .collect(Collectors.toList());
 
@@ -67,11 +84,15 @@ public class AdminPermissionServiceImpl implements AdminPermissionService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với ID: " + userId));
 
+        if (Boolean.TRUE.equals(user.getDeleted())) {
+            throw new CustomApiException("User not found", HttpStatus.NOT_FOUND);
+        }
+
         User.Role newRole = request.getRole();
         user.setRole(newRole);
         userRepository.save(user);
 
-        if (newRole == User.Role.USER) {
+        if (newRole != User.Role.MOD) {
             permissionRepository.deleteByUserId(userId);
         }
 
@@ -79,15 +100,18 @@ public class AdminPermissionServiceImpl implements AdminPermissionService {
     }
 
     private UserSubjectPermission buildPermission(PermissionAssignmentDto assignment, String permission) {
+        UserSubjectPermission userSubjectPermission = new UserSubjectPermission();
+        userSubjectPermission.setUserId(assignment.getModUserId());
+        userSubjectPermission.setSubjectId(assignment.getSubjectId());
+        userSubjectPermission.setPermissionType(permission);
+        return userSubjectPermission;
+    }
+
+    private String normalizePermission(String permission) {
         String normalizedPermission = permission == null ? "" : permission.trim().toUpperCase();
         if (!ALLOWED_PERMISSIONS.contains(normalizedPermission)) {
             throw new CustomApiException("Invalid permission: " + permission, HttpStatus.BAD_REQUEST);
         }
-
-        UserSubjectPermission userSubjectPermission = new UserSubjectPermission();
-        userSubjectPermission.setUserId(assignment.getModUserId());
-        userSubjectPermission.setSubjectId(assignment.getSubjectId());
-        userSubjectPermission.setPermissionType(normalizedPermission);
-        return userSubjectPermission;
+        return normalizedPermission;
     }
 }

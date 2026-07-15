@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fita.vnua.quiz.model.entity.User;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -22,4 +23,10 @@ public class UserDto {
     private String avatarUrl;
     private String phone;
     private String address;
+    private Boolean deleted;
+    private LocalDateTime deletedAt;
+    private UUID deletedBy;
+    private UUID deletedCascadeId;
+    private String deleteOriginType;
+    private Long deleteOriginId;
 }

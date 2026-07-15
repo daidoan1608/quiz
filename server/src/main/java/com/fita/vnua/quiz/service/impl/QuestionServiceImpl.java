@@ -10,6 +10,7 @@ import com.fita.vnua.quiz.repository.AnswerRepository;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.service.QuestionService;
+import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.mapper.QuestionMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -19,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +35,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final ModelMapper modelMapper;
     private final QuestionImportService questionImportService;
     private final QuestionMapper questionMapper;
+    private final SoftDeleteService softDeleteService;
 
     @Override
     public Optional<QuestionDto> getQuestionById(Long questionId) {
@@ -129,6 +130,11 @@ public class QuestionServiceImpl implements QuestionService {
     private void validateImportTarget(Long subjectId, Long chapterId) {
         Long chapterSubjectId = chapterRepository.findSubjectIdByChapterId(chapterId)
                 .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(chapter.getDeleted())) {
+            throw new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND);
+        }
         if (!chapterSubjectId.equals(subjectId)) {
             throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
         }
@@ -139,6 +145,9 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionDto create(QuestionDto questionDto) {
         Chapter chapter = chapterRepository.findById(questionDto.getChapterId())
                 .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(chapter.getDeleted())) {
+            throw new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND);
+        }
 
         Question question = questionMapper.toEntity(questionDto, chapter);
         question = questionRepository.save(question);
@@ -150,7 +159,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional
     public QuestionDto update(Long questionId, QuestionDto questionDto) {
         // Tìm câu hỏi hiện tại
-        var existingQuestion = questionRepository.findById(questionId)
+        var existingQuestion = questionRepository.findByQuestionIdAndDeletedFalse(questionId)
                 .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
 
         questionMapper.updateEntity(existingQuestion, questionDto);
@@ -172,19 +181,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Response delete(Long questionId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
-
-        if (Boolean.TRUE.equals(question.getDeleted())) {
-            return Response.builder()
-                    .responseMessage("Question already deleted")
-                    .responseCode("200 OK").build();
-        }
-
-        question.setDeleted(true);
-        question.setDeletedAt(LocalDateTime.now());
-        question.setDeletedBy(null);
-        questionRepository.save(question);
+        softDeleteService.deleteQuestion(questionId, null);
 
         return Response.builder()
                 .responseMessage("Question soft deleted successfully")
@@ -193,14 +190,9 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public QuestionDto restore(Long questionId) {
-        Question question = questionRepository.findById(questionId)
+        softDeleteService.restoreQuestion(questionId);
+        Question restoredQuestion = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
-
-        question.setDeleted(false);
-        question.setDeletedAt(null);
-        question.setDeletedBy(null);
-
-        Question restoredQuestion = questionRepository.save(question);
         return modelMapper.map(restoredQuestion, QuestionDto.class);
     }
 

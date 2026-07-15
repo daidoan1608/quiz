@@ -75,8 +75,8 @@ export default function GetUserExam() {
           key: exam.userExamId || index,
           ...item,
           ...exam,
-          username: user.username,
-          fullName: user.fullName,
+          username: user.username || item.username,
+          fullName: user.fullName || item.fullName,
         };
       });
 

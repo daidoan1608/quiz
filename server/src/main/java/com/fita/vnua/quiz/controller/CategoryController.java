@@ -39,6 +39,16 @@ public class CategoryController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/categories/deleted")
+    @Operation(summary = "Lấy danh sách danh mục đã xóa mềm")
+    public ResponseEntity<ApiResponse<List<CategorySummaryDto>>> getDeletedCategories() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Deleted categories fetched successfully",
+                categoryService.getDeletedCategories()
+        ));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/categories/{id}")
     @Operation(summary = "Lấy danh mục theo Id (admin)")
     public ResponseEntity<ApiResponse<CategoryDto>> getCategoryById(@PathVariable("id") Long id) {
@@ -77,5 +87,15 @@ public class CategoryController {
     public ResponseEntity<Void> deleteCategory(@PathVariable("id") Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("admin/categories/{id}/restore")
+    @Operation(summary = "Khôi phục danh mục đã xóa mềm")
+    public ResponseEntity<ApiResponse<CategoryDto>> restoreCategory(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Category restored successfully",
+                categoryService.restoreCategory(id)
+        ));
     }
 }

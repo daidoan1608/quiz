@@ -16,22 +16,22 @@
   --primary-color: 0, 88, 190; /* #0058be */
   --primary-hover: 33, 112, 228; /* #2170e4 */
   --primary-light: 239, 246, 255;
-  --bg-page: 247, 249, 251; /* #f7f9fb */
+  --bg-page: 233, 238, 246; /* #e9eef6 */
   --bg-card: 255, 255, 255;
 
   /* Semantic CSS tokens */
-  --aura-bg: #f7f9fb;
-  --aura-canvas: #ffffff;
-  --aura-surface: #f8fafc;
-  --aura-surface-2: #f2f4f6;
+  --aura-bg: #e9eef6;
+  --aura-canvas: #f6f9fd;
+  --aura-surface: #ffffff;
+  --aura-surface-2: #eef3f8;
   --aura-text: #191c1e;
   --aura-muted: #424754;
   --aura-subtle: #64748b;
   --aura-primary: #0058be;
   --aura-primary-hover: #2170e4;
   --aura-primary-soft: #eaf2ff;
-  --aura-border: #e2e8f0;
-  --aura-border-strong: #c2c6d6;
+  --aura-border: #d5deeb;
+  --aura-border-strong: #aeb8ca;
   --aura-error: #ba1a1a;
   --aura-success: #15803d;
   --aura-warning: #b45309;
@@ -39,8 +39,8 @@
   --aura-radius: 12px;
   --aura-radius-lg: 18px;
   --aura-radius-xl: 24px;
-  --aura-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.05);
-  --aura-shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.08);
+  --aura-shadow: 0 12px 22px -10px rgba(15, 23, 42, 0.16);
+  --aura-shadow-lg: 0 24px 34px -12px rgba(15, 23, 42, 0.18);
 }
 
 .theme-blue {
@@ -93,23 +93,23 @@
   --primary-color: 96, 165, 250; /* #60a5fa */
   --primary-hover: 164, 201, 255;
   --primary-light: 30, 41, 59;
-  --bg-page: 15, 23, 42; /* #0f172a */
-  --bg-card: 30, 41, 59; /* #1e293b */
+  --bg-page: 8, 13, 28; /* #080d1c */
+  --bg-card: 24, 34, 52; /* #182234 */
 
-  --aura-bg: #0f172a;
-  --aura-canvas: #101415;
-  --aura-surface: #1e293b;
-  --aura-surface-2: #334155;
+  --aura-bg: #080d1c;
+  --aura-canvas: #0d1424;
+  --aura-surface: #182234;
+  --aura-surface-2: #26364f;
   --aura-text: #f8fafc;
   --aura-muted: #c1c7d3;
   --aura-subtle: #94a3b8;
   --aura-primary: #60a5fa;
   --aura-primary-hover: #a4c9ff;
   --aura-primary-soft: rgba(96, 165, 250, 0.14);
-  --aura-border: #334155;
-  --aura-border-strong: #414751;
-  --aura-shadow: none;
-  --aura-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+  --aura-border: #314158;
+  --aura-border-strong: #526178;
+  --aura-shadow: 0 16px 28px -14px rgba(0, 0, 0, 0.58);
+  --aura-shadow-lg: 0 26px 40px -12px rgba(0, 0, 0, 0.62);
 }
 
 .dark.theme-blue {
@@ -175,7 +175,7 @@
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background:
       radial-gradient(circle at top left, rgba(var(--primary-color), 0.08), transparent 34rem),
-      linear-gradient(180deg, var(--aura-canvas) 0%, var(--aura-bg) 40%, var(--aura-bg) 100%);
+      linear-gradient(180deg, var(--aura-canvas) 0%, var(--aura-bg) 34%, var(--aura-bg) 100%);
     color: var(--aura-text);
     font-size: 16px;
     line-height: 24px;
@@ -210,10 +210,31 @@
     color: var(--aura-text);
   }
 
+  .theme-blue header,
+  .theme-emerald header,
+  .theme-cyberpunk header,
+  .theme-sunset header,
+  .theme-slate header {
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .dark header {
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
+  }
+
+  footer {
+    background: var(--aura-surface) !important;
+    border-color: var(--aura-border) !important;
+  }
+
+  .dark footer {
+    background: color-mix(in srgb, var(--aura-surface) 90%, black) !important;
+  }
+
   .aura-card {
     border: 1px solid var(--aura-border);
     border-radius: var(--aura-radius-lg);
-    background: color-mix(in srgb, var(--aura-canvas) 92%, transparent);
+    background: color-mix(in srgb, var(--aura-surface) 96%, transparent);
     box-shadow: var(--aura-shadow);
   }
 
@@ -301,7 +322,7 @@
     position: relative;
     z-index: 1;
     border: 1px solid var(--aura-border);
-    background: color-mix(in srgb, var(--aura-canvas) 92%, transparent);
+    background: color-mix(in srgb, var(--aura-surface) 96%, transparent);
     color: var(--aura-text);
     box-shadow: var(--aura-shadow-lg);
     backdrop-filter: blur(18px);
@@ -390,7 +411,7 @@
   }
 
   .auth-divider-label {
-    background: color-mix(in srgb, var(--aura-canvas) 92%, transparent);
+    background: color-mix(in srgb, var(--aura-surface) 96%, transparent);
     color: var(--aura-subtle);
   }
 

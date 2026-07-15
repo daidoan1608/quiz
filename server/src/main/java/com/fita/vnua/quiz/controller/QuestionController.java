@@ -30,7 +30,7 @@ public class QuestionController {
     private final AvatarStorageService avatarStorageService;
     private final AuthorizationService authorizationService;
 
-    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'CREATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/questions/import/preview")
     @Operation(summary = "Kiem tra file Excel truoc khi import cau hoi")
     public ResponseEntity<ApiResponse<ImportPreviewResponse>> previewImportQuestions(
@@ -43,7 +43,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Import preview fetched successfully", preview));
     }
 
-    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'CREATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/questions/import")
     @Operation(summary = "Import câu hỏi từ file Excel")
     public ResponseEntity<ApiResponse<String>> importQuestions(
@@ -56,7 +56,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Import câu hỏi thành công", "File imported successfully"));
     }
 
-    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'READ')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'READ')")
     @GetMapping("/admin/questions/total-questions/{subjectId}")
     @Operation(summary = "Lấy tổng số câu hỏi theo subjectId")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getTotalQuestions(@PathVariable Long subjectId) {
@@ -64,7 +64,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Total questions fetched successfully", data));
     }
 
-    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'READ')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'READ')")
     @GetMapping("admin/questions/subject/{subjectId}")
     @Operation(summary = "Lấy câu hỏi theo Id môn học")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getQuestionsBySubject(@PathVariable Long subjectId) {
@@ -112,7 +112,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Questions searched successfully", questions));
     }
 
-    @PreAuthorize("hasPermission(#questionId, 'Question', 'READ')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'READ')")
     @GetMapping("admin/questions/{questionId}")
     @Operation(summary = "Lấy câu hỏi theo Id")
     public ResponseEntity<ApiResponse<QuestionDto>> getQuestionById(@PathVariable("questionId") Long questionId) {
@@ -121,7 +121,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Question fetched successfully", question));
     }
 
-    @PreAuthorize("hasPermission(#questionDto.chapterId, 'Chapter', 'CREATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionDto.chapterId, 'Chapter', 'CREATE')")
     @PostMapping("admin/questions")
     @Operation(summary = "Tạo câu hỏi mới")
     public ResponseEntity<ApiResponse<QuestionDto>> createQuestion(@RequestBody QuestionDto questionDto) {
@@ -129,7 +129,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Question created successfully", createdQuestion));
     }
 
-    @PreAuthorize("hasPermission(#questionId, 'Question', 'UPDATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'UPDATE')")
     @PatchMapping("admin/questions/{questionId}")
     @Operation(summary = "Cập nhật câu hỏi")
     public ResponseEntity<ApiResponse<QuestionDto>> updateQuestion(
@@ -140,7 +140,7 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Question updated successfully", updatedQuestion));
     }
 
-    @PreAuthorize("hasPermission(#questionId, 'Question', 'DELETE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'DELETE')")
     @DeleteMapping("admin/questions/{questionId}")
     @Operation(summary = "Xóa mềm câu hỏi")
     public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId) {
@@ -148,7 +148,7 @@ public class QuestionController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasPermission(#questionId, 'Question', 'UPDATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'UPDATE')")
     @PatchMapping("admin/questions/{questionId}/restore")
     @Operation(summary = "Khôi phục câu hỏi đã xóa mềm")
     public ResponseEntity<ApiResponse<QuestionDto>> restoreQuestion(@PathVariable("questionId") Long questionId) {

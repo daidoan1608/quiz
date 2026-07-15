@@ -93,7 +93,7 @@ function Login() {
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>
-            <Button type="primary" htmlType="submit" block loading={loading} icon={<LoginOutlined />} style={{ height: 44 }}>
+            <Button type="default" htmlType="submit" block loading={loading} icon={<LoginOutlined />} style={{ height: 44 }}>
               Đăng nhập
             </Button>
           </Form.Item>

@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface SubjectService {
     List<SubjectSummaryDto> getAllSubject();
 
+    List<SubjectSummaryDto> getDeletedSubjects();
+
     List<SubjectSummaryDto> searchSubjects(String keyword);
 
     List<SubjectSummaryDto> getSubjectsByCategoryId(Long categoryId);
@@ -21,6 +23,8 @@ public interface SubjectService {
     SubjectDto update(Long subjectId, SubjectDto subjectDto);
 
     Response delete(Long subjectId);
+
+    SubjectDto restore(Long subjectId);
 
     List<SubjectSummaryDto> getSubjectsByUser(UUID userId);
 

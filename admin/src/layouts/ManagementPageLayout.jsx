@@ -20,13 +20,13 @@ const ManagementPageLayout = ({
         {extra}
 
         {showReloadButton && typeof onReload === 'function' && (
-          <Button icon={<ReloadOutlined />} onClick={onReload}>
+          <Button className="toolbar-btn" icon={<ReloadOutlined />} onClick={onReload}>
             Tải lại
           </Button>
         )}
 
         {typeof onAdd === 'function' && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
+          <Button className="toolbar-btn" icon={<PlusOutlined />} onClick={onAdd}>
             Thêm mới
           </Button>
         )}

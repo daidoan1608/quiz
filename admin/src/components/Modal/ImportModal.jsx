@@ -15,6 +15,15 @@ const { Title } = Typography;
 const { Option } = Select;
 const { Dragger } = Upload;
 
+const primaryButtonStyle = {
+  minHeight: 40,
+  borderRadius: 10,
+  borderColor: "var(--admin-primary)",
+  background: "color-mix(in srgb, var(--admin-primary) 12%, transparent)",
+  color: "var(--admin-primary)",
+  boxShadow: "none",
+};
+
 const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const [form] = Form.useForm();
 
@@ -104,7 +113,7 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
     try {
       const values = await form.validateFields();
       if (!selectedFile) {
-        message.error("Vui long chon file de kiem tra!");
+        message.error("Vui lòng chọn file để kiểm tra!");
         return;
       }
 
@@ -118,17 +127,17 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
       setPreviewResult(result);
 
       if (result?.invalidRows > 0) {
-        message.warning("File con loi, vui long kiem tra danh sach ben duoi.");
+        message.warning("File còn lỗi, vui lòng kiểm tra danh sách bên dưới.");
       } else {
-        message.success("File hop le, co the import.");
+        message.success("File hợp lệ, có thể import.");
       }
     } catch (error) {
-      console.error("Loi khi preview file:", error);
+      console.error("Lỗi khi preview file:", error);
       notification.error({
-        message: "Kiem tra file that bai",
+        message: "Kiểm tra file thất bại",
         description:
           error.response?.data?.message ||
-          "Khong the doc file hoac thong tin phan loai chua hop le.",
+          "Không thể đọc file hoặc thông tin phân loại chưa hợp lệ.",
       });
     } finally {
       setPreviewLoading(false);
@@ -366,7 +375,7 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
             type={previewResult.invalidRows > 0 ? "warning" : "success"}
             showIcon
             style={{ marginTop: 16 }}
-            message={`Kiem tra: ${previewResult.validRows}/${previewResult.totalRows} dong hop le`}
+            message={`Kiểm tra: ${previewResult.validRows}/${previewResult.totalRows} dòng hợp lệ`}
             description={
               previewResult.errors?.length > 0 ? (
                 <div style={{ maxHeight: 140, overflowY: "auto" }}>
@@ -374,11 +383,11 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
                     <div key={`${error}-${index}`}>{error}</div>
                   ))}
                   {previewResult.errors.length > 20 && (
-                    <div>...con {previewResult.errors.length - 20} loi khac</div>
+                    <div>...còn {previewResult.errors.length - 20} lỗi khác</div>
                   )}
                 </div>
               ) : (
-                "Khong phat hien loi dinh dang co ban."
+                "Không phát hiện lỗi định dạng cơ bản."
               )
             }
           />
@@ -399,10 +408,11 @@ const ImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
             size="large"
             onClick={handlePreview}
           >
-            Kiem tra file
+            Kiểm tra file
           </Button>
           <Button
-            type="primary"
+            type="default"
+            style={primaryButtonStyle}
             htmlType="submit"
             icon={<ImportOutlined />}
             loading={loading}

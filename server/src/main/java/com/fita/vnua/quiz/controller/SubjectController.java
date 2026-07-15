@@ -65,6 +65,13 @@ public class SubjectController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/subjects/deleted")
+    @Operation(summary = "Lấy danh sách môn học đã xóa mềm")
+    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getDeletedSubjects() {
+        return ResponseEntity.ok(ApiResponse.success("Deleted subjects fetched successfully", subjectService.getDeletedSubjects()));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("admin/subjects")
     @Operation(summary = "Tạo môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> createSubject(@RequestBody SubjectDto subjectDto) {
@@ -72,7 +79,7 @@ public class SubjectController {
         return ResponseEntity.ok(ApiResponse.success("Subject created successfully", createdSubject));
     }
 
-    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'UPDATE') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'UPDATE')")
     @PatchMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Cập nhật môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> updateSubject(
@@ -83,11 +90,18 @@ public class SubjectController {
         return ResponseEntity.ok(ApiResponse.success("Subject updated successfully", updatedSubject));
     }
 
-    @PreAuthorize("hasPermission(#subjectId, 'Subject', 'DELETE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'DELETE')")
     @DeleteMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Xóa môn học (admin)")
     public ResponseEntity<Void> deleteSubject(@PathVariable("subjectId") Long subjectId) {
         subjectService.delete(subjectId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'UPDATE')")
+    @PatchMapping("admin/subjects/{subjectId}/restore")
+    @Operation(summary = "Khôi phục môn học đã xóa mềm")
+    public ResponseEntity<ApiResponse<SubjectDto>> restoreSubject(@PathVariable("subjectId") Long subjectId) {
+        return ResponseEntity.ok(ApiResponse.success("Subject restored successfully", subjectService.restore(subjectId)));
     }
 }

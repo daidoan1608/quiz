@@ -50,7 +50,14 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Chapter fetched successfully", chapter));
     }
 
-    @PreAuthorize("hasPermission(#chapterDto.subjectId, 'Subject', 'CREATE') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/chapters/deleted")
+    @Operation(summary = "Lấy danh sách chương đã xóa mềm")
+    public ResponseEntity<ApiResponse<List<ChapterDto>>> getDeletedChapters() {
+        return ResponseEntity.ok(ApiResponse.success("Deleted chapters fetched successfully", chapterService.getDeletedChapters()));
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterDto.subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/chapters")
     @Operation(summary = "Tạo chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> createChapter(@RequestBody ChapterDto chapterDto) {
@@ -58,7 +65,7 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Chapter created successfully", createdChapter));
     }
 
-    @PreAuthorize("hasPermission(#chapterId, 'Chapter', 'UPDATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterId, 'Chapter', 'UPDATE')")
     @PatchMapping("admin/chapters/{chapterId}")
     @Operation(summary = "Cập nhật chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> updateChapter(
@@ -69,11 +76,18 @@ public class ChapterController {
         return ResponseEntity.ok(ApiResponse.success("Chapter updated successfully", updatedChapter));
     }
 
-    @PreAuthorize("hasPermission(#chapterId, 'Chapter', 'DELETE')")
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterId, 'Chapter', 'DELETE')")
     @DeleteMapping("admin/chapters/{chapterId}")
     @Operation(summary = "Xóa chương (admin)")
     public ResponseEntity<Void> deleteChapter(@PathVariable("chapterId") Long chapterId) {
         chapterService.delete(chapterId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterId, 'Chapter', 'UPDATE')")
+    @PatchMapping("admin/chapters/{chapterId}/restore")
+    @Operation(summary = "Khôi phục chương đã xóa mềm")
+    public ResponseEntity<ApiResponse<ChapterDto>> restoreChapter(@PathVariable("chapterId") Long chapterId) {
+        return ResponseEntity.ok(ApiResponse.success("Chapter restored successfully", chapterService.restore(chapterId)));
     }
 }

@@ -4,15 +4,18 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { AuthProvider } from "./AuthProvider"; // Đường dẫn tuỳ chỉnh lại theo file của bạn
 import { FavoritesProvider } from "./FavoritesContext";
 import { LanguageProvider } from "./LanguageProvider";
+import { NotificationProvider } from "./NotificationProvider";
 
 export const AppProviders = ({ children }) => {
   return (
     <LanguageProvider>
       <AuthProvider>
         <FavoritesProvider>
-          <Router>
-            {children}
-          </Router>
+          <NotificationProvider>
+            <Router>
+              {children}
+            </Router>
+          </NotificationProvider>
         </FavoritesProvider>
       </AuthProvider>
     </LanguageProvider>
