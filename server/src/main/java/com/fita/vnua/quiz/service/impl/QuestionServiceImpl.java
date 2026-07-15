@@ -7,6 +7,7 @@ import com.fita.vnua.quiz.model.dto.response.Response;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.repository.AnswerRepository;
+import com.fita.vnua.quiz.repository.AuditLogRepository;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.service.QuestionService;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +38,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionImportService questionImportService;
     private final QuestionMapper questionMapper;
     private final SoftDeleteService softDeleteService;
+    private final AuditLogRepository auditLogRepository;
 
     @Override
     public Optional<QuestionDto> getQuestionById(Long questionId) {
@@ -119,6 +122,33 @@ public class QuestionServiceImpl implements QuestionService {
     public void importQuestionsFromExcel(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException {
         validateImportTarget(subjectId, chapterId);
         questionImportService.importQuestions(file, chapterId);
+    }
+
+    @Override
+    public List<QuestionDto> filterQuestions(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId) {
+        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
+        Question.Difficulty normalizedDifficulty = difficulty == null || difficulty.isBlank()
+                ? null
+                : questionMapper.parseDifficulty(difficulty);
+        List<Question> questions = questionRepository.filterQuestions(normalizedKeyword, subjectId, chapterId, normalizedDifficulty, deleted);
+        if (creatorId != null) {
+            var createdQuestionIds = auditLogRepository.findByEntityTypeAndActionAndActorId("QUESTION", "CREATE", creatorId).stream()
+                    .map(log -> {
+                        try {
+                            return Long.valueOf(log.getEntityId());
+                        } catch (NumberFormatException ignored) {
+                            return null;
+                        }
+                    })
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toSet());
+            questions = questions.stream()
+                    .filter(question -> createdQuestionIds.contains(question.getQuestionId()))
+                    .toList();
+        }
+        return questions.stream()
+                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .toList();
     }
 
     @Override

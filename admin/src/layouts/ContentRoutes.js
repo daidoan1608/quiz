@@ -10,6 +10,7 @@ import GetUserExam from "../pages/ExamUser/GetUserExam.jsx";
 import GetUserExamById from "../pages/ExamUser/GetUserExamById.jsx";
 import GetCategories from "../pages/Categories/index.jsx";
 import NotificationManager from "../pages/NotificationManager.jsx";
+import AuditLog from "../pages/AuditLog.jsx";
 
 export default function ContentRoutes() {
   return (
@@ -24,6 +25,7 @@ export default function ContentRoutes() {
       <Route path="/userexams" element={<GetUserExam />} />
       <Route path="/userexam/:userExamId" element={<GetUserExamById />} />
       <Route path="/notifications" element={<NotificationManager />} />
+      <Route path="/audit-logs" element={<AuditLog />} />
     </Routes>
   );
 }

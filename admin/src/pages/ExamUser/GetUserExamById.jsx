@@ -70,14 +70,14 @@ export default function GetUserExamById() {
       if (questionResult.status === "fulfilled") {
         setExamQuestions(questionResult.value.data.data.questions || []);
       } else {
-        console.error("Lá»—i láº¥y cÃ¢u há»i:", questionResult.reason);
-        message.error("KhÃ´ng thá»ƒ táº£i danh sÃ¡ch cÃ¢u há»i.");
+        console.error("Lỗi lấy câu hỏi:", questionResult.reason);
+        message.error("Không thể tải danh sách câu hỏi.");
       }
 
       if (userResult.status === "fulfilled") {
         setUserInfo(userResult.value.data.data || {});
       } else {
-        console.error("Lá»—i láº¥y thÃ´ng tin thÃ­ sinh:", userResult.reason);
+        console.error("Lỗi lấy thông tin thí sinh:", userResult.reason);
         setUserInfo({
           userId,
           username: detail.username || String(userId).slice(0, 8),
@@ -289,7 +289,7 @@ export default function GetUserExamById() {
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         {examQuestions.length === 0 && (
           <Card bordered={false} className="c-shadow">
-            <Text type="secondary">ChÆ°a cÃ³ dá»¯ liá»‡u cÃ¢u há»i cho bÃ i lÃ m nÃ y.</Text>
+            <Text type="secondary">Chưa có dữ liệu câu hỏi cho bài làm này.</Text>
           </Card>
         )}
         {examQuestions.map((question, index) => {

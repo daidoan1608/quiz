@@ -8,6 +8,7 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.AuthorizationService;
+import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.ExamService;
 import com.fita.vnua.quiz.service.UserExamService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,7 @@ public class ExamController {
     private final ExamService examService;
     private final UserExamService userExamService;
     private final AuthorizationService authorizationService;
+    private final AuditLogService auditLogService;
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#examRequest.examDto.subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/exams")
@@ -38,6 +40,7 @@ public class ExamController {
             @AuthenticationPrincipal User currentUser
     ) {
         ExamDto createdExam = examService.createExam(examRequest, currentUser.getUserId());
+        auditLogService.record("CREATE", "EXAM", createdExam.getExamId(), currentUser, createdExam.getTitle());
         return ResponseEntity.ok(ApiResponse.success("Exam created successfully", createdExam));
     }
 
@@ -90,16 +93,18 @@ public class ExamController {
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'UPDATE')")
     @PutMapping("admin/exams/{examId}")
     @Operation(summary = "Cập nhật bài thi")
-    public ResponseEntity<ApiResponse<ExamDto>> updateExam(@PathVariable("examId") Long examId, @RequestBody ExamDto examDto) {
+    public ResponseEntity<ApiResponse<ExamDto>> updateExam(@PathVariable("examId") Long examId, @RequestBody ExamDto examDto, @AuthenticationPrincipal User currentUser) {
         ExamDto updatedExam = examService.updateExam(examId, examDto);
+        auditLogService.record("UPDATE", "EXAM", examId, currentUser, updatedExam.getTitle());
         return ResponseEntity.ok(ApiResponse.success("Exam updated successfully", updatedExam));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'DELETE')")
     @DeleteMapping("admin/exams/{examId}")
     @Operation(summary = "Xóa bài thi")
-    public ResponseEntity<Void> deleteExam(@PathVariable("examId") Long examId) {
+    public ResponseEntity<Void> deleteExam(@PathVariable("examId") Long examId, @AuthenticationPrincipal User currentUser) {
         examService.deleteExam(examId);
+        auditLogService.record("DELETE", "EXAM", examId, currentUser, "Soft delete exam");
         return ResponseEntity.noContent().build();
     }
 

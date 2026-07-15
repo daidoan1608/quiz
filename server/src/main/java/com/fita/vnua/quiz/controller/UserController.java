@@ -10,6 +10,7 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.UserResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.AuthorizationService;
+import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.UserService;
 import com.fita.vnua.quiz.service.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +36,7 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService;
     private final UserMapper userMapper;
+    private final AuditLogService auditLogService;
 
     @PatchMapping("users/{userId}/password")
     @Operation(summary = "API đổi mật khẩu")
@@ -109,9 +111,10 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("admin/users")
     @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
-    public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody AdminUserCreateRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody AdminUserCreateRequest request, @AuthenticationPrincipal User currentUser) {
         UserDto userDto = userMapper.toUserDto(request);
         UserDto saveUser = userService.create(userDto);
+        auditLogService.record("CREATE", "USER", saveUser.getUserId(), currentUser, saveUser.getUsername());
         return ResponseEntity.ok(ApiResponse.success("User created successfully", userService.getUserResponseById(saveUser.getUserId())));
     }
 
@@ -120,10 +123,12 @@ public class UserController {
     @Operation(summary = "Cập nhập thông tin người dùng", description = "This API update info user")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
-            @RequestBody AdminUserUpdateRequest request
+            @RequestBody AdminUserUpdateRequest request,
+            @AuthenticationPrincipal User currentUser
     ) {
         UserDto userDto = userMapper.toUserDto(request);
         UserDto updatedUser = userService.update(userId, userDto);
+        auditLogService.record("UPDATE", "USER", userId, currentUser, updatedUser.getUsername());
         return ResponseEntity.ok(ApiResponse.success("User updated successfully", userService.getUserResponseById(updatedUser.getUserId())));
     }
 
@@ -131,9 +136,11 @@ public class UserController {
     @DeleteMapping("admin/users/{userId}")
     @Operation(summary = "Xóa người dùng", description = "This API deletes a user")
     public ResponseEntity<Void> deleteUser(
-            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
+            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
+            @AuthenticationPrincipal User currentUser
     ) {
         userService.delete(userId);
+        auditLogService.record("DELETE", "USER", userId, currentUser, "Disable user");
         return ResponseEntity.noContent().build();
     }
 

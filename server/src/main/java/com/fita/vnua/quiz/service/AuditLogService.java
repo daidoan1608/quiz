@@ -1,0 +1,43 @@
+package com.fita.vnua.quiz.service;
+
+import com.fita.vnua.quiz.model.dto.response.AuditLogResponse;
+import com.fita.vnua.quiz.model.entity.AuditLog;
+import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.repository.AuditLogRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class AuditLogService {
+    private final AuditLogRepository auditLogRepository;
+
+    public void record(String action, String entityType, Object entityId, User actor, String description) {
+        AuditLog log = new AuditLog();
+        log.setAction(action);
+        log.setEntityType(entityType);
+        log.setEntityId(String.valueOf(entityId));
+        log.setDescription(description);
+        if (actor != null) {
+            log.setActorId(actor.getUserId());
+            log.setActorUsername(actor.getUsername());
+        }
+        auditLogRepository.save(log);
+    }
+
+    public List<AuditLogResponse> latest() {
+        return auditLogRepository.findTop200ByOrderByCreatedAtDesc().stream()
+                .map(log -> new AuditLogResponse(
+                        log.getAuditLogId(),
+                        log.getAction(),
+                        log.getEntityType(),
+                        log.getEntityId(),
+                        log.getActorId(),
+                        log.getActorUsername(),
+                        log.getDescription(),
+                        log.getCreatedAt()))
+                .toList();
+    }
+}

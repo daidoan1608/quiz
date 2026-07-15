@@ -104,4 +104,20 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            "AND q.deleted = false " +
            "GROUP BY q.chapter.chapterId, q.difficulty")
     List<Object[]> countQuestionsBySubjectGroupedByChapterAndDifficulty(@Param("subjectId") Long subjectId);
+
+    @Query("""
+            SELECT q FROM Question q
+            WHERE (:keyword IS NULL OR LOWER(q.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND (:subjectId IS NULL OR q.chapter.subject.subjectId = :subjectId)
+              AND (:chapterId IS NULL OR q.chapter.chapterId = :chapterId)
+              AND (:difficulty IS NULL OR q.difficulty = :difficulty)
+              AND (:deleted IS NULL OR q.deleted = :deleted)
+            ORDER BY q.questionId DESC
+            """)
+    List<Question> filterQuestions(
+            @Param("keyword") String keyword,
+            @Param("subjectId") Long subjectId,
+            @Param("chapterId") Long chapterId,
+            @Param("difficulty") Question.Difficulty difficulty,
+            @Param("deleted") Boolean deleted);
 }

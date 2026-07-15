@@ -6,6 +6,7 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.AuthorizationService;
+import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.QuestionService;
 import com.fita.vnua.quiz.service.impl.AvatarStorageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class QuestionController {
     private final QuestionService questionService;
     private final AvatarStorageService avatarStorageService;
     private final AuthorizationService authorizationService;
+    private final AuditLogService auditLogService;
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/questions/import/preview")
@@ -112,6 +115,21 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Questions searched successfully", questions));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/questions/filter")
+    @Operation(summary = "Lọc câu hỏi nâng cao")
+    public ResponseEntity<ApiResponse<List<QuestionDto>>> filterQuestions(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) Long chapterId,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) Boolean deleted,
+            @RequestParam(required = false) UUID creatorId
+    ) {
+        List<QuestionDto> questions = questionService.filterQuestions(keyword, subjectId, chapterId, difficulty, deleted, creatorId);
+        return ResponseEntity.ok(ApiResponse.success("Questions filtered successfully", questions));
+    }
+
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'READ')")
     @GetMapping("admin/questions/{questionId}")
     @Operation(summary = "Lấy câu hỏi theo Id")
@@ -124,8 +142,9 @@ public class QuestionController {
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionDto.chapterId, 'Chapter', 'CREATE')")
     @PostMapping("admin/questions")
     @Operation(summary = "Tạo câu hỏi mới")
-    public ResponseEntity<ApiResponse<QuestionDto>> createQuestion(@RequestBody QuestionDto questionDto) {
+    public ResponseEntity<ApiResponse<QuestionDto>> createQuestion(@RequestBody QuestionDto questionDto, @AuthenticationPrincipal User currentUser) {
         QuestionDto createdQuestion = questionService.create(questionDto);
+        auditLogService.record("CREATE", "QUESTION", createdQuestion.getQuestionId(), currentUser, createdQuestion.getContent());
         return ResponseEntity.ok(ApiResponse.success("Question created successfully", createdQuestion));
     }
 
@@ -134,17 +153,20 @@ public class QuestionController {
     @Operation(summary = "Cập nhật câu hỏi")
     public ResponseEntity<ApiResponse<QuestionDto>> updateQuestion(
             @PathVariable("questionId") Long questionId,
-            @RequestBody QuestionDto questionDto
+            @RequestBody QuestionDto questionDto,
+            @AuthenticationPrincipal User currentUser
     ) {
         QuestionDto updatedQuestion = questionService.update(questionId, questionDto);
+        auditLogService.record("UPDATE", "QUESTION", questionId, currentUser, updatedQuestion.getContent());
         return ResponseEntity.ok(ApiResponse.success("Question updated successfully", updatedQuestion));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'DELETE')")
     @DeleteMapping("admin/questions/{questionId}")
     @Operation(summary = "Xóa mềm câu hỏi")
-    public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId) {
+    public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId, @AuthenticationPrincipal User currentUser) {
         questionService.delete(questionId);
+        auditLogService.record("DELETE", "QUESTION", questionId, currentUser, "Soft delete question");
         return ResponseEntity.noContent().build();
     }
 

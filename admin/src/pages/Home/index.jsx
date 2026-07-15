@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Statistic, theme, Typography } from "antd";
+import { Row, Col, Card, Statistic, theme, Typography, Table } from "antd";
 import { authAxios } from "../../api/axiosConfig";
 import StatisticsChart from "../../components/common/StatisticsChart";
 import { ReadOutlined, QuestionCircleOutlined, FileTextOutlined, UserOutlined } from "@ant-design/icons";
@@ -13,6 +13,10 @@ export default function ContentHome() {
     totalQuestions: 0,
     totalUsers: 0,
     totalExams: 0,
+    attemptsByDay: [],
+    hotSubjects: [],
+    mostWrongQuestions: [],
+    activeUsers: [],
   });
   const { token } = theme.useToken();
 
@@ -21,7 +25,7 @@ export default function ContentHome() {
       try {
         setLoading(true);
         const response = await authAxios.get("/admin/statistics");
-        setStatistics(response.data.data);
+        setStatistics((prev) => ({ ...prev, ...response.data.data }));
       } catch (error) {
         console.error("Error fetching statistics:", error);
       } finally {
@@ -39,11 +43,17 @@ export default function ContentHome() {
     { title: "Người dùng", value: statistics.totalUsers, icon: <UserOutlined />, color: token.colorError },
   ];
 
+  const tableProps = {
+    size: "small",
+    pagination: false,
+    scroll: { x: true },
+  };
+
   return (
     <div>
       <div style={{ marginBottom: 22 }}>
-        <Title level={2} style={{ margin: 0, letterSpacing: "-0.04em" }}>Dashboard</Title>
-        <Text type="secondary">Tổng quan nhanh về dữ liệu và hoạt động của hệ thống.</Text>
+        <Title level={2} style={{ margin: 0 }}>Dashboard</Title>
+        <Text type="secondary">Tổng quan vận hành hệ thống quiz.</Text>
       </div>
 
       <Row gutter={[18, 18]}>
@@ -58,7 +68,7 @@ export default function ContentHome() {
                     style={{
                       width: 38,
                       height: 38,
-                      borderRadius: 14,
+                      borderRadius: 8,
                       display: "inline-grid",
                       placeItems: "center",
                       marginRight: 6,
@@ -78,6 +88,63 @@ export default function ContentHome() {
       <Card title="Thống kê tổng quan" bordered={false} loading={loading} className="modern-card" style={{ marginTop: 22 }}>
         <StatisticsChart statistics={statistics} />
       </Card>
+
+      <Row gutter={[18, 18]} style={{ marginTop: 22 }}>
+        <Col xs={24} lg={12}>
+          <Card title="Lượt thi theo ngày" bordered={false} loading={loading} className="modern-card">
+            <Table
+              {...tableProps}
+              columns={[
+                { title: "Ngày", dataIndex: "date" },
+                { title: "Lượt thi", dataIndex: "attempts", width: 120 },
+              ]}
+              dataSource={statistics.attemptsByDay || []}
+              rowKey="date"
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Môn hot" bordered={false} loading={loading} className="modern-card">
+            <Table
+              {...tableProps}
+              columns={[
+                { title: "Môn học", dataIndex: "subjectName" },
+                { title: "Lượt thi", dataIndex: "attempts", width: 120 },
+              ]}
+              dataSource={statistics.hotSubjects || []}
+              rowKey="subjectName"
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={14}>
+          <Card title="Câu sai nhiều nhất" bordered={false} loading={loading} className="modern-card">
+            <Table
+              {...tableProps}
+              columns={[
+                { title: "ID", dataIndex: "questionId", width: 80 },
+                { title: "Câu hỏi", dataIndex: "content", ellipsis: true },
+                { title: "Sai", dataIndex: "wrongCount", width: 90 },
+              ]}
+              dataSource={statistics.mostWrongQuestions || []}
+              rowKey="questionId"
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={10}>
+          <Card title="User hoạt động" bordered={false} loading={loading} className="modern-card">
+            <Table
+              {...tableProps}
+              columns={[
+                { title: "User", dataIndex: "username" },
+                { title: "Họ tên", dataIndex: "fullName", ellipsis: true },
+                { title: "Lượt thi", dataIndex: "attempts", width: 120 },
+              ]}
+              dataSource={statistics.activeUsers || []}
+              rowKey="userId"
+            />
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }

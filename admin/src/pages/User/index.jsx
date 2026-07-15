@@ -19,8 +19,9 @@ import {
   StopOutlined,
   UndoOutlined,
   UserOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
-import { userApi } from "../../api/services";
+import { exportApi, userApi } from "../../api/services";
 import ManagementPageLayout from "../../layouts/ManagementPageLayout";
 import AddUserModal from "../../components/Modal/AddUserModal";
 import UpdateUserModal from "../../components/Modal/UpdateUserModal";
@@ -248,6 +249,7 @@ export default function UserManager() {
       <ManagementPageLayout
         title={<Space><UserOutlined /> Quản lý người dùng</Space>}
         filters={filters}
+        extra={<Button className="toolbar-btn" icon={<DownloadOutlined />} onClick={() => exportApi.downloadUsers()}>Export CSV</Button>}
         table={table}
         onReload={() => fetchUsers(searchText)}
         onAdd={!isMod && viewMode === "active" ? () => setIsAddModalOpen(true) : undefined}

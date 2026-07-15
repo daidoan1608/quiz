@@ -117,7 +117,7 @@ const UpdateUserModal = ({ isModalOpen, onCancel, onSuccess, userId }) => {
       <Divider style={{ margin: "16px 0" }} />
       {loadingUser ? (
         <div style={{ textAlign: "center", padding: "48px 0" }}>
-          <Text type="secondary">Dang tai du lieu...</Text>
+          <Text type="secondary">Đang tải dữ liệu...</Text>
         </div>
       ) : (
         <>

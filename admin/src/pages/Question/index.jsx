@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Input, Popconfirm, Segmented, Space, Table, Tag, Tooltip, Typography, message } from "antd";
+import { Button, Input, Popconfirm, Segmented, Select, Space, Table, Tag, Tooltip, Typography, message } from "antd";
 import {
   DeleteOutlined,
   EditOutlined,
   ImportOutlined,
+  DownloadOutlined,
   QuestionCircleOutlined,
   SearchOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
-import { questionApi } from "../../api/services";
+import { chapterApi, exportApi, questionApi, subjectApi, userApi } from "../../api/services";
 import ManagementPageLayout from "../../layouts/ManagementPageLayout";
 import AddQuestionModal from "../../components/Modal/AddQuestionModal";
 import UpdateQuestionModal from "../../components/Modal/UpdateQuestionModal";
@@ -22,6 +23,15 @@ export default function QuestionManager() {
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [viewMode, setViewMode] = useState("active");
+  const [subjects, setSubjects] = useState([]);
+  const [chapters, setChapters] = useState([]);
+  const [creators, setCreators] = useState([]);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    subjectId: undefined,
+    chapterId: undefined,
+    difficulty: undefined,
+    creatorId: undefined,
+  });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -31,19 +41,35 @@ export default function QuestionManager() {
     setLoading(true);
     try {
       const trimmedKeyword = keyword.trim();
-      const data =
-        viewMode === "deleted"
-          ? await questionApi.getDeleted()
-          : trimmedKeyword
-            ? await questionApi.search(trimmedKeyword)
-            : await questionApi.getAll();
+      const params = {
+        keyword: trimmedKeyword || undefined,
+        subjectId: advancedFilters.subjectId,
+        chapterId: advancedFilters.chapterId,
+        difficulty: advancedFilters.difficulty,
+        creatorId: advancedFilters.creatorId,
+        deleted: viewMode === "deleted",
+      };
+      const hasAdvancedFilter = Object.values(params).some((value) => value !== undefined && value !== "");
+      const data = hasAdvancedFilter
+        ? await questionApi.filter(params)
+        : await questionApi.getAll();
       setQuestions(data);
     } catch (error) {
       message.error(error.response?.data?.message || "Không thể tải danh sách câu hỏi.");
     } finally {
       setLoading(false);
     }
-  }, [searchText, viewMode]);
+  }, [searchText, viewMode, advancedFilters]);
+
+  useEffect(() => {
+    Promise.all([subjectApi.getAll(), chapterApi.getAll(), userApi.getAll()])
+      .then(([subjectData, chapterData, userData]) => {
+        setSubjects(subjectData);
+        setChapters(chapterData);
+        setCreators(userData.filter((user) => ["ADMIN", "MOD"].includes(user.role)));
+      })
+      .catch(() => message.warning("Không thể tải dữ liệu bộ lọc nâng cao."));
+  }, []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => fetchQuestions(searchText), 400);
@@ -80,6 +106,14 @@ export default function QuestionManager() {
   const handleSuccess = () => {
     fetchQuestions();
     handleCloseModal();
+  };
+
+  const updateFilter = (key, value) => {
+    setAdvancedFilters((prev) => ({
+      ...prev,
+      [key]: value,
+      ...(key === "subjectId" ? { chapterId: undefined } : {}),
+    }));
   };
 
   const renderAnswerContent = (answers, index) => {
@@ -174,19 +208,60 @@ export default function QuestionManager() {
         prefix={<SearchOutlined />}
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-        disabled={viewMode === "deleted"}
         allowClear
         style={{ width: 300 }}
+      />
+      <Select
+        placeholder="Môn học"
+        value={advancedFilters.subjectId}
+        onChange={(value) => updateFilter("subjectId", value)}
+        allowClear
+        style={{ width: 180 }}
+        options={subjects.map((subject) => ({ value: subject.subjectId, label: subject.name }))}
+      />
+      <Select
+        placeholder="Chương"
+        value={advancedFilters.chapterId}
+        onChange={(value) => updateFilter("chapterId", value)}
+        allowClear
+        style={{ width: 180 }}
+        options={chapters
+          .filter((chapter) => !advancedFilters.subjectId || chapter.subjectId === advancedFilters.subjectId)
+          .map((chapter) => ({ value: chapter.chapterId, label: chapter.name }))}
+      />
+      <Select
+        placeholder="Mức độ"
+        value={advancedFilters.difficulty}
+        onChange={(value) => updateFilter("difficulty", value)}
+        allowClear
+        style={{ width: 130 }}
+        options={["EASY", "MEDIUM", "HARD"].map((value) => ({ value, label: value }))}
+      />
+      <Select
+        placeholder="Người tạo"
+        value={advancedFilters.creatorId}
+        onChange={(value) => updateFilter("creatorId", value)}
+        allowClear
+        showSearch
+        optionFilterProp="label"
+        style={{ width: 180 }}
+        options={creators.map((user) => ({ value: user.userId, label: user.username }))}
       />
     </Space>
   );
 
-  const extraActions =
-    viewMode === "active" ? (
+  const extraActions = (
+    <Space>
+      <Button className="toolbar-btn" icon={<DownloadOutlined />} onClick={() => exportApi.downloadQuestions()}>
+        Export CSV
+      </Button>
+      {viewMode === "active" ? (
       <Button className="toolbar-btn" icon={<ImportOutlined />} onClick={() => setIsImportModalOpen(true)}>
         Import
       </Button>
-    ) : null;
+      ) : null}
+    </Space>
+  );
 
   return (
     <>

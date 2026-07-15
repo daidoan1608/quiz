@@ -66,7 +66,7 @@ public class AuthController {
     }
 
     @GetMapping("me")
-    @Operation(summary = "API láº¥y thÃ´ng tin ngÆ°á»i dÃ¹ng Ä‘ang Ä‘Äƒng nháº­p")
+    @Operation(summary = "API lấy thông tin người dùng đang đăng nhập")
     public ResponseEntity<ApiResponse<AuthResponse>> me(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);

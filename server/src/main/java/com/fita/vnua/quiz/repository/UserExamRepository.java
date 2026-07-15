@@ -99,4 +99,29 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
     @Transactional
     @Query("DELETE FROM UserExam ue WHERE ue.exam.examId = :examId")
     void deleteByExamId(@Param("examId") Long examId);
+
+    @Query("""
+            SELECT FUNCTION('DATE', ue.startTime), COUNT(ue)
+            FROM UserExam ue
+            WHERE ue.startTime >= :fromDate
+            GROUP BY FUNCTION('DATE', ue.startTime)
+            ORDER BY FUNCTION('DATE', ue.startTime)
+            """)
+    List<Object[]> countAttemptsByDay(@Param("fromDate") LocalDateTime fromDate);
+
+    @Query("""
+            SELECT ue.exam.subject.name, COUNT(ue)
+            FROM UserExam ue
+            GROUP BY ue.exam.subject.subjectId, ue.exam.subject.name
+            ORDER BY COUNT(ue) DESC
+            """)
+    List<Object[]> countAttemptsBySubject();
+
+    @Query("""
+            SELECT ue.user.userId, ue.user.username, ue.user.fullName, COUNT(ue), MAX(ue.startTime)
+            FROM UserExam ue
+            GROUP BY ue.user.userId, ue.user.username, ue.user.fullName
+            ORDER BY COUNT(ue) DESC, MAX(ue.startTime) DESC
+            """)
+    List<Object[]> findActiveUsersByAttemptCount();
 }

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface QuestionService {
 
@@ -21,6 +22,8 @@ public interface QuestionService {
     List<QuestionDto> getDeletedQuestions();
 
     List<QuestionDto> searchQuestions(String keyword);
+
+    List<QuestionDto> filterQuestions(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId);
 
     List<QuestionDto> getQuestionsBySubject(Long subjectId);
 

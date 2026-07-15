@@ -48,7 +48,7 @@ public class QuestionImportService {
                 .orElseThrow(() -> new CustomApiException("Chapter không tồn tại", HttpStatus.NOT_FOUND));
 
         if (Boolean.TRUE.equals(chapter.getDeleted())) {
-            throw new CustomApiException("Chapter khÃ´ng tá»“n táº¡i", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Chapter không tồn tại", HttpStatus.NOT_FOUND);
         }
 
         List<Question> questions = importedFile.questions().stream()

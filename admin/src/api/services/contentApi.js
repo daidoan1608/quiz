@@ -66,6 +66,11 @@ export const questionApi = {
     return normalizeList(unwrapApiData(response));
   },
 
+  async filter(params) {
+    const response = await authAxios.get("/admin/questions/filter", { params });
+    return normalizeList(unwrapApiData(response));
+  },
+
   remove(questionId) {
     return authAxios.delete(`/admin/questions/${questionId}`);
   },

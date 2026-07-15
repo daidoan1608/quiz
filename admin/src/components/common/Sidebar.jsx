@@ -14,6 +14,7 @@ import {
   UserOutlined,
   TableOutlined,
   QuestionCircleOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 
 const { Sider } = Layout;
@@ -21,6 +22,7 @@ const { Sider } = Layout;
 const items = [
   { key: "/", icon: <HomeOutlined />, label: "Dashboard" },
   { key: "/notifications", icon: <MessageOutlined />, label: "Thông báo" },
+  { key: "/audit-logs", icon: <HistoryOutlined />, label: "Audit log" },
   { key: "/userexams", icon: <ReadOutlined />, label: "Bài thi" },
   { key: "/users", icon: <UserOutlined />, label: "Người dùng" },
   { key: "/exams", icon: <FileTextOutlined />, label: "Đề thi" },

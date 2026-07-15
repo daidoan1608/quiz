@@ -25,4 +25,13 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
     @Transactional
     @Query("DELETE FROM UserAnswer ua WHERE ua.userExam.exam.examId = :examId")
     void deleteByExamId(@Param("examId") Long examId);
+
+    @Query("""
+            SELECT ua.question.questionId, ua.question.content, COUNT(ua)
+            FROM UserAnswer ua
+            WHERE ua.answer.isCorrect = false
+            GROUP BY ua.question.questionId, ua.question.content
+            ORDER BY COUNT(ua) DESC
+            """)
+    List<Object[]> findMostWrongQuestions();
 }

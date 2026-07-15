@@ -11,7 +11,8 @@ import {
   message,
   Space,
 } from "antd";
-import { EyeOutlined, SearchOutlined, ReadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, EyeOutlined, SearchOutlined, ReadOutlined } from "@ant-design/icons";
+import { exportApi } from "../../api/services";
 import ManagementPageLayout from '../../layouts/ManagementPageLayout'; // <-- IMPORT LAYOUT CHUNG
 
 const { Text } = Typography;
@@ -217,6 +218,7 @@ export default function GetUserExam() {
     <ManagementPageLayout
       title={pageTitle}
       filters={examFilters}
+      extra={<Button className="toolbar-btn" icon={<DownloadOutlined />} onClick={() => exportApi.downloadExamResults()}>Export CSV</Button>}
       table={examTable}
       // Không cần truyền 'pagination' riêng biệt vì đã tích hợp vào 'table' (Cách 1)
       onReload={handleReload}
