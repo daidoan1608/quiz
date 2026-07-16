@@ -80,9 +80,13 @@ public class QuestionController {
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getQuestionByChapterId(
             @PathVariable("chapterId") Long chapterId,
             @RequestParam(defaultValue = "false") boolean includeCorrectAnswers,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(defaultValue = "all") String mode,
             @AuthenticationPrincipal User currentUser
     ) {
-        List<QuestionDto> questions = questionService.getQuestionsByChapterId(chapterId);
+        UUID currentUserId = currentUser == null ? null : currentUser.getUserId();
+        List<QuestionDto> questions = questionService.getPracticeQuestionsByChapter(chapterId, limit, difficulty, mode, currentUserId);
         if (includeCorrectAnswers) {
             authorizationService.requireAuthenticated(currentUser);
         } else {

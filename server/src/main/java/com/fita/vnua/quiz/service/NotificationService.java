@@ -41,6 +41,9 @@ public interface NotificationService {
     @Transactional(readOnly = true)
     List<NotificationResponse> getNotifications(UUID currentUserId);
 
+    @Transactional(readOnly = true)
+    long getUnreadCount(UUID currentUserId);
+
     @Transactional
     void markAsRead(Long notificationId, UUID currentUserId);
 

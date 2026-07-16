@@ -64,4 +64,23 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     @Query("SELECT n.id FROM Notification n WHERE n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL")
     List<Long> findAllGlobalNotificationIds();
+
+    @Query("""
+            SELECT COUNT(n)
+            FROM Notification n
+            LEFT JOIN GlobalNotificationRead gnr
+                ON n.id = gnr.notificationId AND gnr.userId = :userId
+            WHERE
+                (
+                    n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.PERSONAL
+                    AND n.userId = :userId
+                    AND n.isRead = false
+                )
+                OR
+                (
+                    n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL
+                    AND gnr.id IS NULL
+                )
+            """)
+    long countUnreadForUser(@Param("userId") UUID userId);
 }

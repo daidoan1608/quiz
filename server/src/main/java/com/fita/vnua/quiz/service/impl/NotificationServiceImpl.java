@@ -59,7 +59,10 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
 
         Notification savedNotification = notificationRepository.save(notification);
-        messagingTemplate.convertAndSend("/topic/notifications/global", RealtimeNotificationPayload.from(savedNotification));
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/global",
+                RealtimeNotificationPayload.from(savedNotification)
+        );
     }
 
     @Override
@@ -185,6 +188,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public List<NotificationResponse> getNotifications(UUID currentUserId) {
         return notificationRepository.findAllNotificationsForUser(currentUserId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public long getUnreadCount(UUID currentUserId) {
+        return notificationRepository.countUnreadForUser(currentUserId);
     }
 
     @Transactional

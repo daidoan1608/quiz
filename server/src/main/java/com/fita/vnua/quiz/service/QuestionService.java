@@ -17,6 +17,8 @@ public interface QuestionService {
 
     List<QuestionDto> getQuestionsByChapterId(Long chapterId);
 
+    List<QuestionDto> getPracticeQuestionsByChapter(Long chapterId, Integer limit, String difficulty, String mode, UUID userId);
+
     List<QuestionDto> getAllQuestion();
 
     List<QuestionDto> getDeletedQuestions();

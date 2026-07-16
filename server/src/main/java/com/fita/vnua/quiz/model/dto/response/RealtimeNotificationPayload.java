@@ -17,8 +17,13 @@ public class RealtimeNotificationPayload {
     private String relatedType;
     private Boolean isRead;
     private LocalDateTime createdAt;
+    private Integer unreadDelta;
 
     public static RealtimeNotificationPayload from(Notification notification) {
+        return from(notification, 1);
+    }
+
+    public static RealtimeNotificationPayload from(Notification notification, int unreadDelta) {
         return RealtimeNotificationPayload.builder()
                 .id(notification.getId())
                 .title(notification.getTitle())
@@ -28,6 +33,7 @@ public class RealtimeNotificationPayload {
                 .relatedType(notification.getRelatedType())
                 .isRead(notification.isRead())
                 .createdAt(notification.getCreatedAt())
+                .unreadDelta(unreadDelta)
                 .build();
     }
 }

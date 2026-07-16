@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Button,
   Input,
@@ -11,7 +11,7 @@ import {
   Tooltip,
   Typography,
   message,
-} from "antd";
+} from 'antd';
 import {
   EditOutlined,
   SearchOutlined,
@@ -20,12 +20,12 @@ import {
   UndoOutlined,
   UserOutlined,
   DownloadOutlined,
-} from "@ant-design/icons";
-import { exportApi, userApi } from "../../api/services";
-import ManagementPageLayout from "../../layouts/ManagementPageLayout";
-import AddUserModal from "../../components/Modal/AddUserModal";
-import UpdateUserModal from "../../components/Modal/UpdateUserModal";
-import SubjectPermissionModal from "../../components/Modal/SubjectPermissionModal";
+} from '@ant-design/icons';
+import { exportApi, userApi } from '../../api/services';
+import ManagementPageLayout from '../../layouts/ManagementPageLayout';
+import AddUserModal from '../../components/Modal/AddUserModal';
+import UpdateUserModal from '../../components/Modal/UpdateUserModal';
+import SubjectPermissionModal from '../../components/Modal/SubjectPermissionModal';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -33,35 +33,38 @@ const { Option } = Select;
 export default function UserManager() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("all");
-  const [searchText, setSearchText] = useState("");
-  const [viewMode, setViewMode] = useState("active");
+  const [selectedRole, setSelectedRole] = useState('all');
+  const [searchText, setSearchText] = useState('');
+  const [viewMode, setViewMode] = useState('active');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedPermissionUser, setSelectedPermissionUser] = useState(null);
 
-  const currentUserRole = localStorage.getItem("role");
-  const isMod = currentUserRole === "MOD";
+  const currentUserRole = localStorage.getItem('role');
+  const isMod = currentUserRole === 'MOD';
 
-  const fetchUsers = useCallback(async (keyword = searchText) => {
-    setLoading(true);
-    try {
-      const trimmedKeyword = keyword.trim();
-      const data =
-        viewMode === "deleted"
-          ? await userApi.getDeleted()
-          : trimmedKeyword
-            ? await userApi.search(trimmedKeyword)
-            : await userApi.getAll();
-      setUsers(data);
-    } catch (error) {
-      message.error(error.response?.data?.message || "Không thể tải danh sách người dùng.");
-    } finally {
-      setLoading(false);
-    }
-  }, [searchText, viewMode]);
+  const fetchUsers = useCallback(
+    async (keyword = searchText) => {
+      setLoading(true);
+      try {
+        const trimmedKeyword = keyword.trim();
+        const data =
+          viewMode === 'deleted'
+            ? await userApi.getDeleted()
+            : trimmedKeyword
+              ? await userApi.search(trimmedKeyword)
+              : await userApi.getAll();
+        setUsers(data);
+      } catch (error) {
+        message.error(error.response?.data?.message || 'Không thể tải danh sách người dùng.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [searchText, viewMode]
+  );
 
   useEffect(() => {
     const timeoutId = setTimeout(() => fetchUsers(searchText), 400);
@@ -70,31 +73,31 @@ export default function UserManager() {
 
   const handleDisable = async (userId) => {
     if (isMod) {
-      message.warning("Bạn không có quyền thực hiện hành động này.");
+      message.warning('Bạn không có quyền thực hiện hành động này.');
       return;
     }
     try {
       await userApi.remove(userId);
-      message.success("Đã vô hiệu hóa người dùng.");
+      message.success('Đã vô hiệu hóa người dùng.');
       fetchUsers();
     } catch (error) {
-      message.error(error.response?.data?.message || "Không thể vô hiệu hóa người dùng.");
+      message.error(error.response?.data?.message || 'Không thể vô hiệu hóa người dùng.');
     }
   };
 
   const handleRestore = async (userId) => {
     try {
       await userApi.restore(userId);
-      message.success("Khôi phục người dùng thành công.");
+      message.success('Khôi phục người dùng thành công.');
       fetchUsers();
     } catch (error) {
-      message.error(error.response?.data?.message || "Không thể khôi phục người dùng.");
+      message.error(error.response?.data?.message || 'Không thể khôi phục người dùng.');
     }
   };
 
   const handleEdit = (userId) => {
     if (isMod) {
-      message.warning("Bạn không có quyền chỉnh sửa.");
+      message.warning('Bạn không có quyền chỉnh sửa.');
       return;
     }
     setSelectedUserId(userId);
@@ -102,8 +105,8 @@ export default function UserManager() {
   };
 
   const handleOpenPermissions = (user) => {
-    if (user.role !== "MOD") {
-      message.warning("Chỉ tài khoản MOD mới cần phân quyền theo môn.");
+    if (user.role !== 'MOD') {
+      message.warning('Chỉ tài khoản MOD mới cần phân quyền theo môn.');
       return;
     }
     setSelectedPermissionUser(user);
@@ -118,13 +121,15 @@ export default function UserManager() {
     setIsAddModalOpen(false);
   };
 
-  const filteredUsers = users.filter((user) => selectedRole === "all" || user.role === selectedRole);
+  const filteredUsers = users.filter(
+    (user) => selectedRole === 'all' || user.role === selectedRole
+  );
 
   const columns = [
     {
-      title: "UUID",
-      dataIndex: "userId",
-      key: "userId",
+      title: 'UUID',
+      dataIndex: 'userId',
+      key: 'userId',
       width: 120,
       render: (text) => (
         <Tooltip title={text}>
@@ -134,50 +139,60 @@ export default function UserManager() {
         </Tooltip>
       ),
     },
-    { title: "Tài khoản", dataIndex: "username", key: "username", render: (text) => <Text strong>{text}</Text> },
-    { title: "Họ và tên", dataIndex: "fullName", key: "fullName" },
-    { title: "Email", dataIndex: "email", key: "email" },
     {
-      title: "Vai trò",
-      dataIndex: "role",
-      key: "role",
+      title: 'Tài khoản',
+      dataIndex: 'username',
+      key: 'username',
+      render: (text) => <Text strong>{text}</Text>,
+    },
+    { title: 'Họ và tên', dataIndex: 'fullName', key: 'fullName' },
+    { title: 'Email', dataIndex: 'email', key: 'email' },
+    {
+      title: 'Vai trò',
+      dataIndex: 'role',
+      key: 'role',
       width: 110,
       render: (role) => {
-        const color = role === "ADMIN" ? "red" : role === "MOD" ? "orange" : "green";
+        const color = role === 'ADMIN' ? 'red' : role === 'MOD' ? 'orange' : 'green';
         return <Tag color={color}>{role}</Tag>;
       },
     },
-    ...(viewMode === "deleted"
+    ...(viewMode === 'deleted'
       ? [
           {
-            title: "Thời điểm xóa",
-            dataIndex: "deletedAt",
-            key: "deletedAt",
+            title: 'Thời điểm xóa',
+            dataIndex: 'deletedAt',
+            key: 'deletedAt',
             width: 180,
             render: (value) => value || <Text type="secondary">-</Text>,
           },
         ]
       : []),
     {
-      title: "Hành động",
-      key: "action",
-      width: viewMode === "active" ? 160 : 90,
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: viewMode === 'active' ? 160 : 90,
+      fixed: 'right',
       render: (_, record) =>
-        viewMode === "active" ? (
+        viewMode === 'active' ? (
           <Space>
-            <Tooltip title={isMod ? "Không có quyền sửa" : "Sửa thông tin"}>
-              <Button className="action-btn is-primary" icon={<EditOutlined />} disabled={isMod} onClick={() => handleEdit(record.userId)} />
+            <Tooltip title={isMod ? 'Không có quyền sửa' : 'Sửa thông tin'}>
+              <Button
+                className="action-btn is-primary"
+                icon={<EditOutlined />}
+                disabled={isMod}
+                onClick={() => handleEdit(record.userId)}
+              />
             </Tooltip>
-            <Tooltip title={record.role === "MOD" ? "Phân quyền môn học" : "Chỉ áp dụng cho MOD"}>
+            <Tooltip title={record.role === 'MOD' ? 'Phân quyền môn học' : 'Chỉ áp dụng cho MOD'}>
               <Button
                 className="action-btn"
                 icon={<SafetyCertificateOutlined />}
-                disabled={isMod || record.role !== "MOD"}
+                disabled={isMod || record.role !== 'MOD'}
                 onClick={() => handleOpenPermissions(record)}
               />
             </Tooltip>
-            <Tooltip title={isMod ? "Không có quyền" : "Vô hiệu hóa"}>
+            <Tooltip title={isMod ? 'Không có quyền' : 'Vô hiệu hóa'}>
               <Popconfirm
                 title="Vô hiệu hóa người dùng?"
                 description="Người dùng sẽ không đăng nhập được, refresh token và quyền MOD hiện có sẽ bị thu hồi."
@@ -211,8 +226,8 @@ export default function UserManager() {
         value={viewMode}
         onChange={setViewMode}
         options={[
-          { label: "Đang hoạt động", value: "active" },
-          { label: "Đã vô hiệu hóa", value: "deleted" },
+          { label: 'Đang hoạt động', value: 'active' },
+          { label: 'Đã vô hiệu hóa', value: 'deleted' },
         ]}
       />
       <Select value={selectedRole} style={{ width: 150 }} onChange={setSelectedRole}>
@@ -226,7 +241,7 @@ export default function UserManager() {
         prefix={<SearchOutlined />}
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-        disabled={viewMode === "deleted"}
+        disabled={viewMode === 'deleted'}
         allowClear
         style={{ width: 300 }}
       />
@@ -247,15 +262,31 @@ export default function UserManager() {
   return (
     <>
       <ManagementPageLayout
-        title={<Space><UserOutlined /> Quản lý người dùng</Space>}
+        title={
+          <Space>
+            <UserOutlined /> Quản lý người dùng
+          </Space>
+        }
         filters={filters}
-        extra={<Button className="toolbar-btn" icon={<DownloadOutlined />} onClick={() => exportApi.downloadUsers()}>Export CSV</Button>}
+        extra={
+          <Button
+            className="toolbar-btn"
+            icon={<DownloadOutlined />}
+            onClick={() => exportApi.downloadUsers()}
+          >
+            Export CSV
+          </Button>
+        }
         table={table}
         onReload={() => fetchUsers(searchText)}
-        onAdd={!isMod && viewMode === "active" ? () => setIsAddModalOpen(true) : undefined}
+        onAdd={!isMod && viewMode === 'active' ? () => setIsAddModalOpen(true) : undefined}
       />
 
-      <AddUserModal isModalOpen={isAddModalOpen} onCancel={handleModalClose} onSuccess={fetchUsers} />
+      <AddUserModal
+        isModalOpen={isAddModalOpen}
+        onCancel={handleModalClose}
+        onSuccess={fetchUsers}
+      />
 
       {isUpdateModalOpen && selectedUserId && (
         <UpdateUserModal

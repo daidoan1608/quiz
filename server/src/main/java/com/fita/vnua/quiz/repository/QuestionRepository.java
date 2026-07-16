@@ -46,11 +46,17 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             "JOIN chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.chapter_id = :chapterId " +
             "AND q.deleted = false " +
+            "AND (:difficulty IS NULL OR q.difficulty = :difficulty) " +
             "ORDER BY RAND() " +
             "LIMIT :number", nativeQuery = true)
-    List<Question> findQuestionsByChapter(
+    List<Question> findQuestionsByChapterAndDifficulty(
             @Param("chapterId") Long chapterId,
+            @Param("difficulty") String difficulty,
             @Param("number") int number);
+
+    default List<Question> findQuestionsByChapter(Long chapterId, int number) {
+        return findQuestionsByChapterAndDifficulty(chapterId, null, number);
+    }
 
     // Lấy ngẫu nhiên số lượng câu hỏi theo subjectId
     @Query(value = "SELECT q.* FROM question q " +

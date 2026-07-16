@@ -30,6 +30,14 @@ public class NotificationController {
         ));
     }
 
+    @GetMapping("/unread-count")
+    public ResponseEntity<ApiResponse<Long>> getUnreadCount(@AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Unread count fetched successfully",
+                notificationService.getUnreadCount(currentUser.getUserId())
+        ));
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> markAsRead(
             @PathVariable Long id,

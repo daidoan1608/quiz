@@ -10,6 +10,7 @@ import com.fita.vnua.quiz.repository.AnswerRepository;
 import com.fita.vnua.quiz.repository.AuditLogRepository;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
+import com.fita.vnua.quiz.repository.UserAnswerRepository;
 import com.fita.vnua.quiz.service.QuestionService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.mapper.QuestionMapper;
@@ -22,9 +23,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionMapper questionMapper;
     private final SoftDeleteService softDeleteService;
     private final AuditLogRepository auditLogRepository;
+    private final UserAnswerRepository userAnswerRepository;
 
     @Override
     public Optional<QuestionDto> getQuestionById(Long questionId) {
@@ -49,6 +53,47 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public List<QuestionDto> getQuestionsByChapterId(Long chapterId) {
         return questionRepository.findByChapter(chapterId).stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+    }
+
+    @Override
+    public List<QuestionDto> getPracticeQuestionsByChapter(Long chapterId, Integer limit, String difficulty, String mode, UUID userId) {
+        int safeLimit = limit == null || limit <= 0 ? 50 : Math.min(limit, 100);
+        String normalizedDifficulty = difficulty == null || difficulty.isBlank() || "ALL".equalsIgnoreCase(difficulty)
+                ? null
+                : questionMapper.parseDifficulty(difficulty).name();
+
+        List<Question> questions = questionRepository.findQuestionsByChapterAndDifficulty(chapterId, normalizedDifficulty, safeLimit);
+        if ("wrong".equalsIgnoreCase(mode)) {
+            if (userId == null) {
+                throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+            }
+            Set<Long> wrongQuestionIds = findWrongQuestionIds(userId, chapterId);
+            questions = questions.stream()
+                    .filter(question -> wrongQuestionIds.contains(question.getQuestionId()))
+                    .toList();
+        }
+        return questions.stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+    }
+
+    private Set<Long> findWrongQuestionIds(UUID userId, Long chapterId) {
+        Map<Long, Set<Long>> chosenByQuestion = userAnswerRepository.findSubmittedAnswersByUserAndChapter(userId, chapterId).stream()
+                .collect(Collectors.groupingBy(
+                        answer -> answer.getQuestion().getQuestionId(),
+                        Collectors.mapping(answer -> answer.getAnswer().getOptionId(), Collectors.toSet())
+                ));
+
+        Set<Long> wrongQuestionIds = new HashSet<>();
+        questionRepository.findByChapter(chapterId).forEach(question -> {
+            Set<Long> correctAnswerIds = question.getAnswers().stream()
+                    .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
+                    .map(answer -> answer.getOptionId())
+                    .collect(Collectors.toSet());
+            Set<Long> chosenAnswerIds = chosenByQuestion.get(question.getQuestionId());
+            if (chosenAnswerIds != null && !correctAnswerIds.equals(chosenAnswerIds)) {
+                wrongQuestionIds.add(question.getQuestionId());
+            }
+        });
+        return wrongQuestionIds;
     }
 
     @Override

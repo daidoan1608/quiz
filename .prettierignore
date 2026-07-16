@@ -1,0 +1,33 @@
+# Version control and IDEs
+.git
+.idea
+.vscode
+.gemini
+
+# Dependency directories
+node_modules/
+**/node_modules/
+
+# Build outputs
+build/
+dist/
+target/
+out/
+output/
+
+# Lock files and system files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+*.log
+
+# Nginx and docker config if you don't want them formatted
+nginx/
+mysql.init/
+node_modules
+build
+dist
+coverage
+.next
+package-lock.json
+yarn.lock

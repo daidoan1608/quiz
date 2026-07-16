@@ -7,6 +7,10 @@ export const notificationApi = {
     return authAxios.get("/notifications").then((response) => getResponseData(response, []));
   },
 
+  getUnreadCount() {
+    return authAxios.get("/notifications/unread-count").then((response) => getResponseData(response, 0));
+  },
+
   markOneRead(notificationId) {
     return authAxios.patch(`/notifications/${notificationId}`);
   },

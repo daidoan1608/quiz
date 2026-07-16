@@ -34,4 +34,14 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
             ORDER BY COUNT(ua) DESC
             """)
     List<Object[]> findMostWrongQuestions();
+
+    @Query("""
+            SELECT ua FROM UserAnswer ua
+            WHERE ua.userExam.user.userId = :userId
+              AND ua.userExam.status = 'SUBMITTED'
+              AND ua.question.chapter.chapterId = :chapterId
+            """)
+    List<UserAnswer> findSubmittedAnswersByUserAndChapter(
+            @Param("userId") java.util.UUID userId,
+            @Param("chapterId") Long chapterId);
 }

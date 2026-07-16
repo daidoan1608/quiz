@@ -4,6 +4,7 @@ import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -30,6 +31,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService customUserDetailsService;
 
+    @Value("${app.cors.allowed-origins}")
+    private String[] allowedOrigins;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic", "/queue");
@@ -40,9 +44,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns(allowedOrigins)
                 .addInterceptors(new CookieJwtHandshakeInterceptor(jwtTokenUtil, customUserDetailsService))
-                .setHandshakeHandler(new UserIdHandshakeHandler());
+                .setHandshakeHandler(new UserIdHandshakeHandler())
+                .withSockJS();
     }
 
     private static class CookieJwtHandshakeInterceptor implements HandshakeInterceptor {

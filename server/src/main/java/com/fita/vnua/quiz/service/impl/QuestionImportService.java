@@ -19,8 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,13 +42,13 @@ public class QuestionImportService {
         ImportedQuestionFile importedFile = readImportFile(file);
         ImportPreviewResponse preview = buildPreview(importedFile);
         if (preview.getInvalidRows() > 0) {
-            throw new CustomApiException("File import con loi: " + String.join("; ", preview.getErrors()), HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("File import còn lỗi: " + String.join("; ", preview.getErrors()), HttpStatus.BAD_REQUEST);
         }
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new CustomApiException("Chapter không tồn tại", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Chương không tồn tại", HttpStatus.NOT_FOUND));
 
         if (Boolean.TRUE.equals(chapter.getDeleted())) {
-            throw new CustomApiException("Chapter không tồn tại", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Chương không tồn tại", HttpStatus.NOT_FOUND);
         }
 
         List<Question> questions = importedFile.questions().stream()
@@ -172,38 +172,38 @@ public class QuestionImportService {
             Set<Integer> invalidRows
     ) {
         if (question.getContent() == null || question.getContent().trim().isEmpty()) {
-            addRowError(errors, invalidRows, rowNumber, "noi dung cau hoi dang trong.");
+            addRowError(errors, invalidRows, rowNumber, "nội dung câu hỏi đang trống.");
         }
 
         String difficulty = question.getDifficulty();
         if (difficulty == null || difficulty.isBlank()) {
-            addRowError(errors, invalidRows, rowNumber, "chua co muc do.");
+            addRowError(errors, invalidRows, rowNumber, "chưa có mức độ.");
         }
 
         List<AnswerDto> answers = question.getAnswers();
         if (answers == null || answers.size() < 2 || answers.size() > 4) {
-            addRowError(errors, invalidRows, rowNumber, "can co tu 2 den 4 dap an.");
+            addRowError(errors, invalidRows, rowNumber, "cần có từ 2 đến 4 đáp án.");
         } else {
             long correctCount = answers.stream().filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect())).count();
             if (correctCount == 0) {
-                addRowError(errors, invalidRows, rowNumber, "chua chon dap an dung.");
+                addRowError(errors, invalidRows, rowNumber, "chưa chọn đáp án đúng.");
             }
             String questionType = question.getQuestionType() == null || question.getQuestionType().isBlank()
                     ? "SINGLE_CHOICE"
                     : question.getQuestionType().trim().toUpperCase();
             if ("SINGLE_CHOICE".equals(questionType) && correctCount > 1) {
-                addRowError(errors, invalidRows, rowNumber, "SINGLE_CHOICE chi duoc co 1 dap an dung.");
+                addRowError(errors, invalidRows, rowNumber, "SINGLE_CHOICE chỉ được có 1 đáp án đúng.");
             }
             if ("MULTIPLE_CHOICE".equals(questionType) && correctCount < 2) {
-                addRowError(errors, invalidRows, rowNumber, "MULTIPLE_CHOICE can it nhat 2 dap an dung.");
+                addRowError(errors, invalidRows, rowNumber, "MULTIPLE_CHOICE cần ít nhất 2 đáp án đúng.");
             }
             if (!"SINGLE_CHOICE".equals(questionType) && !"MULTIPLE_CHOICE".equals(questionType)) {
-                addRowError(errors, invalidRows, rowNumber, "questionType khong hop le: " + questionType + ".");
+                addRowError(errors, invalidRows, rowNumber, "questionType không hợp lệ: " + questionType + ".");
             }
             for (int index = 0; index < answers.size(); index++) {
                 String answerContent = answers.get(index).getContent();
                 if (answerContent == null || answerContent.trim().isEmpty()) {
-                    addRowError(errors, invalidRows, rowNumber, "dap an " + (char) ('A' + index) + " dang trong.");
+                    addRowError(errors, invalidRows, rowNumber, "đáp án " + (char) ('A' + index) + " đang trống.");
                 }
             }
         }
@@ -213,14 +213,14 @@ public class QuestionImportService {
             String normalizedImage = imageUrl.trim();
             boolean foundInZip = images.containsKey(normalizedImage.toLowerCase());
             if (!foundInZip && !isExternalOrPublicUrl(normalizedImage)) {
-                addRowError(errors, invalidRows, rowNumber, "khong tim thay anh '" + normalizedImage + "' trong ZIP.");
+                addRowError(errors, invalidRows, rowNumber, "không tìm thấy ảnh '" + normalizedImage + "' trong ZIP.");
             }
         }
     }
 
     private void addRowError(List<String> errors, Set<Integer> invalidRows, int rowNumber, String message) {
         invalidRows.add(rowNumber);
-        errors.add("Dong " + rowNumber + ": " + message);
+        errors.add("Dòng " + rowNumber + ": " + message);
     }
 
     private record ImportedQuestionFile(List<QuestionDto> questions, Map<String, byte[]> images) {

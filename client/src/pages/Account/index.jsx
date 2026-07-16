@@ -11,6 +11,7 @@ import PersonalInfo from "./components/PersonalInfo";
 import Roadmap from "./components/Roadmap";
 import {
   ACCOUNT_SECTIONS,
+  buildLearningStats,
   buildExamAttemptLocation,
   buildProfilePayload,
   getCurrentUserId,
@@ -161,6 +162,7 @@ const Account = () => {
   };
 
   const groupedExams = useMemo(() => groupExamsBySubject(exams), [exams]);
+  const learningStats = useMemo(() => buildLearningStats(exams), [exams]);
   const isPersonalSection = activeSection === ACCOUNT_SECTIONS.PERSONAL;
 
   if (loading) {
@@ -206,6 +208,7 @@ const Account = () => {
               <Roadmap
                 groupedExams={groupedExams}
                 inProgressAttempts={inProgressAttempts}
+                learningStats={learningStats}
                 texts={texts}
                 onContinueAttempt={handleContinueAttempt}
               />
