@@ -4,7 +4,7 @@ const InfoItem = ({ label, value, texts }) => (
       {label}
     </p>
     <p className="mt-1 break-words text-sm font-medium text-gray-900 dark:text-white">
-      {value || texts?.notUpdated || "Chưa cập nhật"}
+      {value || texts?.notUpdated || 'Chưa cập nhật'}
     </p>
   </div>
 );

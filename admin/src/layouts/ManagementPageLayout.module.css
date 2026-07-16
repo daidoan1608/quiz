@@ -28,7 +28,7 @@
 }
 
 .pageTitle::after {
-  content: "Quản lý dữ liệu hệ thống";
+  content: 'Quản lý dữ liệu hệ thống';
   display: block;
   margin-top: 6px;
   color: var(--admin-subtle);
@@ -109,7 +109,11 @@
 .managementFilters :global(.ant-input-affix-wrapper-disabled),
 .managementFilters :global(.ant-input-disabled),
 .managementFilters :global(.ant-select-disabled .ant-select-selector) {
-  background: color-mix(in srgb, var(--admin-surface-muted) 80%, transparent) !important;
+  background: color-mix(
+    in srgb,
+    var(--admin-surface-muted) 80%,
+    transparent
+  ) !important;
   color: var(--admin-subtle) !important;
 }
 

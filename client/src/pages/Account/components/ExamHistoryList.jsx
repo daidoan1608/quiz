@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import ScoreChart from "./ScoreChart";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ScoreChart from './ScoreChart';
 
 export default function ExamHistoryList({ groupedExams, texts }) {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
   const [expandedSubjects, setExpandedSubjects] = useState({});
 
   const handleShowDetail = (exam) => {
-    navigate("/account/detail", {
+    navigate('/account/detail', {
       state: {
         examId: exam.examId,
         userExamId: exam.userExamDto?.userExamId || exam.userExamDto?.id,
@@ -19,8 +19,8 @@ export default function ExamHistoryList({ groupedExams, texts }) {
   };
 
   const formatDate = (isoString) => {
-    if (!isoString) return "--/--";
-    return new Date(isoString).toLocaleDateString("vi-VN");
+    if (!isoString) return '--/--';
+    return new Date(isoString).toLocaleDateString('vi-VN');
   };
 
   // Hàm toggle trạng thái
@@ -36,7 +36,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
   if (Object.keys(groupedExams).length === 0) {
     return (
       <div className="text-center py-10 text-gray-500">
-        {texts?.noExamHistory || "Chưa có lịch sử làm bài."}
+        {texts?.noExamHistory || 'Chưa có lịch sử làm bài.'}
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   {subject}
                   <span className="ml-2 text-sm font-normal text-gray-500">
-                    ({exams.length} {texts?.examAttemptUnit || "bài"})
+                    ({exams.length} {texts?.examAttemptUnit || 'bài'})
                   </span>
                 </h3>
               </div>
@@ -72,7 +72,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
               {/* Icon Chevron xoay khi đóng mở */}
               <span
                 className={`material-symbols-outlined text-gray-500 transition-transform duration-300 ${
-                  isExpanded ? "rotate-180" : ""
+                  isExpanded ? 'rotate-180' : ''
                 }`}
               >
                 expand_more
@@ -106,11 +106,11 @@ export default function ExamHistoryList({ groupedExams, texts }) {
                           className={`shrink-0 px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap
                           ${
                             exam.score >= 50
-                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                           }`}
                         >
-                          {exam.score.toFixed(1)} {texts?.score || "đ"}
+                          {exam.score.toFixed(1)} {texts?.score || 'đ'}
                         </span>
                       </div>
 
@@ -126,7 +126,8 @@ export default function ExamHistoryList({ groupedExams, texts }) {
                             check_circle
                           </span>
                           {exam.userExamDto?.correctAnswers ?? 0}/
-                          {exam.userExamDto?.totalQuestions ?? 0} {texts?.correctUnit || "câu đúng"}
+                          {exam.userExamDto?.totalQuestions ?? 0}{' '}
+                          {texts?.correctUnit || 'câu đúng'}
                         </div>
                       </div>
 
@@ -137,7 +138,7 @@ export default function ExamHistoryList({ groupedExams, texts }) {
                         }}
                         className="mt-auto w-full py-2 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all shadow-sm"
                       >
-                        {texts?.showDetail || "Xem chi tiết"}
+                        {texts?.showDetail || 'Xem chi tiết'}
                       </button>
                     </div>
                   ))}

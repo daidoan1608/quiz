@@ -15,7 +15,9 @@ export default function AuditLog() {
     try {
       setLogs(await auditLogApi.getLatest());
     } catch (error) {
-      message.error(error.response?.data?.message || 'Không thể tải audit log.');
+      message.error(
+        error.response?.data?.message || 'Không thể tải audit log.'
+      );
     } finally {
       setLoading(false);
     }
@@ -37,7 +39,11 @@ export default function AuditLog() {
       dataIndex: 'action',
       width: 110,
       render: (value) => (
-        <Tag color={value === 'DELETE' ? 'red' : value === 'UPDATE' ? 'blue' : 'green'}>
+        <Tag
+          color={
+            value === 'DELETE' ? 'red' : value === 'UPDATE' ? 'blue' : 'green'
+          }
+        >
           {value}
         </Tag>
       ),
@@ -56,7 +62,9 @@ export default function AuditLog() {
       title: 'Người thực hiện',
       key: 'actor',
       width: 220,
-      render: (_, record) => <Text>{record.actorUsername || record.actorId || 'System'}</Text>,
+      render: (_, record) => (
+        <Text>{record.actorUsername || record.actorId || 'System'}</Text>
+      ),
     },
     {
       title: 'Mô tả',

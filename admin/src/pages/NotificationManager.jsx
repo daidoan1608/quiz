@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Table, Button, Tag, Form, message, Space, Tooltip, Popconfirm, Input, Select, DatePicker,
+  Table,
+  Button,
+  Tag,
+  Form,
+  message,
+  Space,
+  Tooltip,
+  Popconfirm,
+  Input,
+  Select,
+  DatePicker,
 } from 'antd';
 import {
   DeleteOutlined,
@@ -9,7 +19,7 @@ import {
   SearchOutlined,
   ClearOutlined,
 } from '@ant-design/icons';
-import { authAxios } from "../api/axiosConfig";
+import { authAxios } from '../api/axiosConfig';
 import moment from 'moment';
 
 import ManagementPageLayout from '../layouts/ManagementPageLayout';
@@ -21,7 +31,11 @@ const { RangePicker } = DatePicker;
 const NotificationManager = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
   const [filters, setFilters] = useState({});
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -44,7 +58,9 @@ const NotificationManager = () => {
         fromDate: nextFilters.fromDate,
         toDate: nextFilters.toDate,
       };
-      const response = await authAxios.get('/admin/notifications/campaigns', { params });
+      const response = await authAxios.get('/admin/notifications/campaigns', {
+        params,
+      });
       setCampaigns(response.data.content);
       setPagination((prev) => ({
         ...prev,
@@ -104,7 +120,11 @@ const NotificationManager = () => {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', width: 60 },
-    { title: 'Tiêu đề', dataIndex: 'title', render: (text) => <span style={{ fontWeight: 500 }}>{text}</span> },
+    {
+      title: 'Tiêu đề',
+      dataIndex: 'title',
+      render: (text) => <span style={{ fontWeight: 500 }}>{text}</span>,
+    },
     {
       title: 'Loại gửi',
       dataIndex: 'sendType',
@@ -117,8 +137,16 @@ const NotificationManager = () => {
         return <Tag color={color}>{type}</Tag>;
       },
     },
-    { title: 'Người tạo', dataIndex: 'createdBy', render: (value) => value || '-' },
-    { title: 'Thời gian gửi', dataIndex: 'createdAt', render: (date) => moment(date).format('HH:mm DD/MM/YYYY') },
+    {
+      title: 'Người tạo',
+      dataIndex: 'createdBy',
+      render: (value) => value || '-',
+    },
+    {
+      title: 'Thời gian gửi',
+      dataIndex: 'createdAt',
+      render: (date) => moment(date).format('HH:mm DD/MM/YYYY'),
+    },
     {
       title: 'Hành động',
       key: 'action',
@@ -126,7 +154,11 @@ const NotificationManager = () => {
         <Space size="middle">
           {record.sendType !== 'GLOBAL' && (
             <Tooltip title="Xem người nhận">
-              <Button className="action-btn" icon={<EyeOutlined />} onClick={() => handleViewRecipients(record.id)} />
+              <Button
+                className="action-btn"
+                icon={<EyeOutlined />}
+                onClick={() => handleViewRecipients(record.id)}
+              />
             </Tooltip>
           )}
           <Popconfirm
@@ -137,7 +169,10 @@ const NotificationManager = () => {
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
           >
-            <Button className="action-btn is-danger" icon={<DeleteOutlined />} />
+            <Button
+              className="action-btn is-danger"
+              icon={<DeleteOutlined />}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -147,7 +182,11 @@ const NotificationManager = () => {
   const notificationFilters = (
     <Form form={filterForm} layout="inline" onFinish={handleFilter}>
       <Form.Item name="keyword">
-        <Input allowClear placeholder="Tìm tiêu đề/nội dung" prefix={<SearchOutlined />} />
+        <Input
+          allowClear
+          placeholder="Tìm tiêu đề/nội dung"
+          prefix={<SearchOutlined />}
+        />
       </Form.Item>
       <Form.Item name="sendType">
         <Select allowClear placeholder="Loại gửi" style={{ width: 180 }}>
@@ -158,15 +197,23 @@ const NotificationManager = () => {
         </Select>
       </Form.Item>
       <Form.Item name="createdBy">
-        <Input allowClear placeholder="User ID người tạo" style={{ width: 240 }} />
+        <Input
+          allowClear
+          placeholder="User ID người tạo"
+          style={{ width: 240 }}
+        />
       </Form.Item>
       <Form.Item name="dateRange">
         <RangePicker format="DD/MM/YYYY" />
       </Form.Item>
       <Form.Item>
         <Space>
-          <Button htmlType="submit" icon={<SearchOutlined />}>Lọc</Button>
-          <Button icon={<ClearOutlined />} onClick={handleClearFilters}>Xóa lọc</Button>
+          <Button htmlType="submit" icon={<SearchOutlined />}>
+            Lọc
+          </Button>
+          <Button icon={<ClearOutlined />} onClick={handleClearFilters}>
+            Xóa lọc
+          </Button>
         </Space>
       </Form.Item>
     </Form>

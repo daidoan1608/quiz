@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { message } from "antd";
-import { accountApi } from "api/accountApi";
-import { authApi } from "api/authApi";
-import { useAuth } from "context/AuthProvider";
-import { useLanguage } from "context/LanguageProvider";
-import ChangePasswordModal from "./components/ChangePasswordModal";
-import UserProfileCard from "./components/UserProfileCard";
-import PersonalInfo from "./components/PersonalInfo";
-import Roadmap from "./components/Roadmap";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { message } from 'antd';
+import { accountApi } from 'api/accountApi';
+import { authApi } from 'api/authApi';
+import { useAuth } from 'context/AuthProvider';
+import { useLanguage } from 'context/LanguageProvider';
+import ChangePasswordModal from './components/ChangePasswordModal';
+import UserProfileCard from './components/UserProfileCard';
+import PersonalInfo from './components/PersonalInfo';
+import Roadmap from './components/Roadmap';
 import {
   ACCOUNT_SECTIONS,
   buildLearningStats,
@@ -18,7 +18,7 @@ import {
   groupExamsBySubject,
   normalizeExams,
   resolveAvatarUrl,
-} from "./utils/accountUtils";
+} from './utils/accountUtils';
 
 const Account = () => {
   const [user, setUser] = useState(null);
@@ -38,22 +38,22 @@ const Account = () => {
     try {
       currentUser = await authApi.getCurrentUser();
     } catch (error) {
-      localStorage.removeItem("userId");
-      localStorage.removeItem("fullName");
-      localStorage.removeItem("avatarUrl");
-      message.error(texts.noUserId || "Vui lòng đăng nhập lại!");
-      navigate("/login");
+      localStorage.removeItem('userId');
+      localStorage.removeItem('fullName');
+      localStorage.removeItem('avatarUrl');
+      message.error(texts.noUserId || 'Vui lòng đăng nhập lại!');
+      navigate('/login');
       return null;
     }
     const userId = currentUser?.userId || getCurrentUserId();
     if (!userId) {
-      message.error(texts.noUserId || "Vui lòng đăng nhập lại!");
-      navigate("/login");
+      message.error(texts.noUserId || 'Vui lòng đăng nhập lại!');
+      navigate('/login');
     }
     if (currentUser?.userId) {
-      localStorage.setItem("userId", currentUser.userId);
-      localStorage.setItem("fullName", currentUser.fullName || "");
-      localStorage.setItem("avatarUrl", currentUser.avatarUrl || "");
+      localStorage.setItem('userId', currentUser.userId);
+      localStorage.setItem('fullName', currentUser.fullName || '');
+      localStorage.setItem('avatarUrl', currentUser.avatarUrl || '');
     }
     return userId;
   }, [navigate, texts.noUserId]);
@@ -77,8 +77,8 @@ const Account = () => {
       setExams(normalizeExams(accountData.exams));
       setInProgressAttempts(accountData.inProgressAttempts);
     } catch (error) {
-      console.error("Lỗi tải dữ liệu:", error);
-      message.error("Không thể tải thông tin tài khoản.");
+      console.error('Lỗi tải dữ liệu:', error);
+      message.error('Không thể tải thông tin tài khoản.');
     } finally {
       setLoading(false);
     }
@@ -94,23 +94,25 @@ const Account = () => {
 
     try {
       const result = await accountApi.changePassword(userId, values);
-      if (result === "Mật khẩu không đúng") {
-        message.error(texts.wrongPassword || "Mật khẩu cũ không đúng!");
+      if (result === 'Mật khẩu không đúng') {
+        message.error(texts.wrongPassword || 'Mật khẩu cũ không đúng!');
         return;
       }
 
-      message.success(texts.changePasswordSuccess || "Đổi mật khẩu thành công!");
+      message.success(
+        texts.changePasswordSuccess || 'Đổi mật khẩu thành công!'
+      );
       setShowChangePassword(false);
       logout();
-      navigate("/login");
+      navigate('/login');
     } catch (error) {
-      message.error("Lỗi đổi mật khẩu.");
+      message.error('Lỗi đổi mật khẩu.');
     }
   };
 
   const handleUploadAvatar = async (fileInput) => {
     const formData = new FormData();
-    formData.append("file", fileInput);
+    formData.append('file', fileInput);
 
     try {
       setLoading(true);
@@ -124,10 +126,12 @@ const Account = () => {
       if (newAvatarUrl) {
         updateAvatar(newAvatarUrl);
       }
-      message.success(texts.uploadAvatarSuccess || "Tải lên avatar thành công!");
+      message.success(
+        texts.uploadAvatarSuccess || 'Tải lên avatar thành công!'
+      );
     } catch (error) {
       console.error(error);
-      message.error("Lỗi tải ảnh lên.");
+      message.error('Lỗi tải ảnh lên.');
     } finally {
       setLoading(false);
     }
@@ -147,10 +151,10 @@ const Account = () => {
         ...updatedUser,
         avatarUrl: updatedUser.avatarUrl || prevUser?.avatarUrl,
       }));
-      message.success("Cập nhật thông tin cá nhân thành công!");
+      message.success('Cập nhật thông tin cá nhân thành công!');
     } catch (error) {
-      console.error("Lỗi cập nhật thông tin:", error);
-      message.error("Không thể cập nhật thông tin cá nhân.");
+      console.error('Lỗi cập nhật thông tin:', error);
+      message.error('Không thể cập nhật thông tin cá nhân.');
       throw error;
     } finally {
       setSavingProfile(false);
@@ -188,7 +192,9 @@ const Account = () => {
             user={user}
             avatarUrl={avatarUrl}
             onUploadAvatar={handleUploadAvatar}
-            onPersonalInfoClick={() => setActiveSection(ACCOUNT_SECTIONS.PERSONAL)}
+            onPersonalInfoClick={() =>
+              setActiveSection(ACCOUNT_SECTIONS.PERSONAL)
+            }
             onRoadmapClick={() => setActiveSection(ACCOUNT_SECTIONS.ROADMAP)}
             onChangePasswordClick={() => setShowChangePassword(true)}
             texts={texts}
@@ -199,11 +205,18 @@ const Account = () => {
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
               <h2 className="text-2xl font-bold">
-                {isPersonalSection ? texts.personalInfo || "Thông tin cá nhân" : texts.learningRoadmap || "Lộ trình học tập"}
+                {isPersonalSection
+                  ? texts.personalInfo || 'Thông tin cá nhân'
+                  : texts.learningRoadmap || 'Lộ trình học tập'}
               </h2>
             </div>
             {isPersonalSection ? (
-              <PersonalInfo user={user} onSave={handleUpdateProfile} saving={savingProfile} texts={texts} />
+              <PersonalInfo
+                user={user}
+                onSave={handleUpdateProfile}
+                saving={savingProfile}
+                texts={texts}
+              />
             ) : (
               <Roadmap
                 groupedExams={groupedExams}

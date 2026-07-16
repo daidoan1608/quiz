@@ -95,6 +95,31 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Questions fetched successfully", questions));
     }
 
+    @GetMapping("questions/practice/wrong")
+    @Operation(summary = "Lấy câu hỏi ôn tập thông minh theo câu sai")
+    public ResponseEntity<ApiResponse<List<QuestionDto>>> getSmartWrongPracticeQuestions(
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) Long chapterId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(defaultValue = "recent") String strategy,
+            @RequestParam(defaultValue = "true") boolean includeCorrectAnswers,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        authorizationService.requireAuthenticated(currentUser);
+        List<QuestionDto> questions = questionService.getSmartWrongPracticeQuestions(
+                subjectId,
+                chapterId,
+                limit,
+                difficulty,
+                strategy,
+                currentUser.getUserId());
+        if (!includeCorrectAnswers) {
+            stripCorrectAnswers(questions);
+        }
+        return ResponseEntity.ok(ApiResponse.success("Smart wrong practice questions fetched successfully", questions));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/questions")
     @Operation(summary = "Lấy tất cả câu hỏi")

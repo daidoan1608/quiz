@@ -21,7 +21,13 @@ import {
   SearchOutlined,
   UndoOutlined,
 } from '@ant-design/icons';
-import { chapterApi, exportApi, questionApi, subjectApi, userApi } from '../../api/services';
+import {
+  chapterApi,
+  exportApi,
+  questionApi,
+  subjectApi,
+  userApi,
+} from '../../api/services';
 import ManagementPageLayout from '../../layouts/ManagementPageLayout';
 import AddQuestionModal from '../../components/Modal/AddQuestionModal';
 import UpdateQuestionModal from '../../components/Modal/UpdateQuestionModal';
@@ -70,7 +76,9 @@ export default function QuestionManager() {
           : await questionApi.getAll();
         setQuestions(data);
       } catch (error) {
-        message.error(error.response?.data?.message || 'Không thể tải danh sách câu hỏi.');
+        message.error(
+          error.response?.data?.message || 'Không thể tải danh sách câu hỏi.'
+        );
       } finally {
         setLoading(false);
       }
@@ -83,7 +91,9 @@ export default function QuestionManager() {
       .then(([subjectData, chapterData, userData]) => {
         setSubjects(subjectData);
         setChapters(chapterData);
-        setCreators(userData.filter((user) => ['ADMIN', 'MOD'].includes(user.role)));
+        setCreators(
+          userData.filter((user) => ['ADMIN', 'MOD'].includes(user.role))
+        );
       })
       .catch(() => message.warning('Không thể tải dữ liệu bộ lọc nâng cao.'));
   }, []);
@@ -109,7 +119,9 @@ export default function QuestionManager() {
       message.success('Khôi phục câu hỏi thành công.');
       fetchQuestions();
     } catch (error) {
-      message.error(error.response?.data?.message || 'Cần khôi phục chương cha trước.');
+      message.error(
+        error.response?.data?.message || 'Cần khôi phục chương cha trước.'
+      );
     }
   };
 
@@ -138,7 +150,9 @@ export default function QuestionManager() {
     if (!answer) return <Text type="secondary">-</Text>;
     return (
       <Tooltip
-        title={<MarkdownLatex content={answer.content} style={{ maxWidth: 300 }} />}
+        title={
+          <MarkdownLatex content={answer.content} style={{ maxWidth: 300 }} />
+        }
         overlayStyle={{ maxWidth: 320 }}
       >
         <MarkdownLatex
@@ -156,7 +170,13 @@ export default function QuestionManager() {
   };
 
   const columns = [
-    { title: 'ID', dataIndex: 'questionId', key: 'questionId', width: 70, fixed: 'left' },
+    {
+      title: 'ID',
+      dataIndex: 'questionId',
+      key: 'questionId',
+      width: 70,
+      fixed: 'left',
+    },
     {
       title: 'Nội dung câu hỏi',
       dataIndex: 'content',
@@ -174,7 +194,12 @@ export default function QuestionManager() {
         >
           <MarkdownLatex
             content={text}
-            style={{ maxWidth: 250, maxHeight: 80, overflow: 'hidden', fontWeight: 'bold' }}
+            style={{
+              maxWidth: 250,
+              maxHeight: 80,
+              overflow: 'hidden',
+              fontWeight: 'bold',
+            }}
           />
         </Tooltip>
       ),
@@ -185,10 +210,19 @@ export default function QuestionManager() {
       key: 'difficulty',
       width: 100,
       render: (diff) => (
-        <Tag color={diff === 'HARD' ? 'red' : diff === 'EASY' ? 'green' : 'blue'}>{diff}</Tag>
+        <Tag
+          color={diff === 'HARD' ? 'red' : diff === 'EASY' ? 'green' : 'blue'}
+        >
+          {diff}
+        </Tag>
       ),
     },
-    { title: 'Chương', dataIndex: 'chapterName', key: 'chapterName', width: 150 },
+    {
+      title: 'Chương',
+      dataIndex: 'chapterName',
+      key: 'chapterName',
+      width: 150,
+    },
     {
       title: 'Đáp án A',
       key: 'ansA',
@@ -255,7 +289,10 @@ export default function QuestionManager() {
               cancelText="Hủy"
               okButtonProps={{ danger: true }}
             >
-              <Button className="action-btn is-danger" icon={<DeleteOutlined />} />
+              <Button
+                className="action-btn is-danger"
+                icon={<DeleteOutlined />}
+              />
             </Popconfirm>
           </Space>
         ) : (
@@ -296,7 +333,10 @@ export default function QuestionManager() {
         onChange={(value) => updateFilter('subjectId', value)}
         allowClear
         style={{ width: 180 }}
-        options={subjects.map((subject) => ({ value: subject.subjectId, label: subject.name }))}
+        options={subjects.map((subject) => ({
+          value: subject.subjectId,
+          label: subject.name,
+        }))}
       />
       <Select
         placeholder="Chương"
@@ -307,9 +347,13 @@ export default function QuestionManager() {
         options={chapters
           .filter(
             (chapter) =>
-              !advancedFilters.subjectId || chapter.subjectId === advancedFilters.subjectId
+              !advancedFilters.subjectId ||
+              chapter.subjectId === advancedFilters.subjectId
           )
-          .map((chapter) => ({ value: chapter.chapterId, label: chapter.name }))}
+          .map((chapter) => ({
+            value: chapter.chapterId,
+            label: chapter.name,
+          }))}
       />
       <Select
         placeholder="Mức độ"
@@ -317,7 +361,10 @@ export default function QuestionManager() {
         onChange={(value) => updateFilter('difficulty', value)}
         allowClear
         style={{ width: 130 }}
-        options={['EASY', 'MEDIUM', 'HARD'].map((value) => ({ value, label: value }))}
+        options={['EASY', 'MEDIUM', 'HARD'].map((value) => ({
+          value,
+          label: value,
+        }))}
       />
       <Select
         placeholder="Người tạo"
@@ -327,7 +374,10 @@ export default function QuestionManager() {
         showSearch
         optionFilterProp="label"
         style={{ width: 180 }}
-        options={creators.map((user) => ({ value: user.userId, label: user.username }))}
+        options={creators.map((user) => ({
+          value: user.userId,
+          label: user.username,
+        }))}
       />
     </Space>
   );
@@ -374,7 +424,9 @@ export default function QuestionManager() {
           />
         }
         onReload={() => fetchQuestions(searchText)}
-        onAdd={viewMode === 'active' ? () => setIsAddModalOpen(true) : undefined}
+        onAdd={
+          viewMode === 'active' ? () => setIsAddModalOpen(true) : undefined
+        }
       />
 
       <AddQuestionModal

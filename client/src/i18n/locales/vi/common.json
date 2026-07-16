@@ -12,6 +12,7 @@
   "nav": {
     "home": "Trang chủ",
     "subjects": "Môn học",
+    "documents": "Tài liệu",
     "rank": "Xếp hạng",
     "account": "Thông tin tài khoản",
     "favorites": "Yêu thích"
@@ -120,6 +121,7 @@
   "showDetail": "Xem chi tiết",
   "totalExam": "Tổng bài thi",
   "noFavorites": "Bạn chưa có môn học yêu thích nào",
+  "favoriteSubjectsTitle": "Môn học yêu thích",
   "chapter": "Chương",
   "delete": "Xóa",
   "favorites": "Yêu thích",

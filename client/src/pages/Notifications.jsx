@@ -1,34 +1,37 @@
-import React, { useState } from "react";
-import { useNotifications } from "context/NotificationProvider";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNotifications } from 'context/NotificationProvider';
+import { useNavigate } from 'react-router-dom';
 
 const formatTime = (dateString) => {
-  if (!dateString) return "";
+  if (!dateString) return '';
   const date = new Date(dateString);
   const now = new Date();
   const diffInSeconds = Math.floor((now - date) / 1000);
 
-  if (diffInSeconds < 60) return "Vừa xong";
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+  if (diffInSeconds < 60) return 'Vừa xong';
+  if (diffInSeconds < 3600)
+    return `${Math.floor(diffInSeconds / 60)} phút trước`;
+  if (diffInSeconds < 86400)
+    return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
   return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
 };
 
 export default function Notifications() {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState("all");
-  const { notifications, loading, markOneRead, markAllRead } = useNotifications();
+  const [filter, setFilter] = useState('all');
+  const { notifications, loading, markOneRead, markAllRead } =
+    useNotifications();
 
   const handleNotificationClick = async (notif) => {
     if (!notif.isRead) {
       try {
         await markOneRead(notif.id);
       } catch (error) {
-        console.error("Lỗi đánh dấu đã đọc:", error);
+        console.error('Lỗi đánh dấu đã đọc:', error);
       }
     }
 
-    if (notif.relatedType === "EXAM" && notif.relatedId) {
+    if (notif.relatedType === 'EXAM' && notif.relatedId) {
       navigate(`/exams/${notif.relatedId}`);
     }
   };
@@ -37,40 +40,61 @@ export default function Notifications() {
     try {
       await markAllRead();
     } catch (error) {
-      console.error("Lỗi mark all read:", error);
+      console.error('Lỗi mark all read:', error);
     }
   };
 
   const filteredNotifications = notifications.filter((notif) => {
-    if (filter === "all") return true;
-    if (filter === "unread") return !notif.isRead;
-    if (filter === "EXAM") return notif.relatedType === "EXAM";
-    if (filter === "SYSTEM") return notif.relatedType === "SYSTEM";
-    if (filter === "MSG") return ["PERSONAL_MSG", "BATCH_MSG"].includes(notif.relatedType);
+    if (filter === 'all') return true;
+    if (filter === 'unread') return !notif.isRead;
+    if (filter === 'EXAM') return notif.relatedType === 'EXAM';
+    if (filter === 'SYSTEM') return notif.relatedType === 'SYSTEM';
+    if (filter === 'MSG')
+      return ['PERSONAL_MSG', 'BATCH_MSG'].includes(notif.relatedType);
     return true;
   });
 
   const getIconInfo = (relatedType) => {
     switch (relatedType) {
-      case "EXAM":
-        return { icon: "assignment", color: "text-blue-600 bg-blue-100 dark:bg-blue-900/30", label: "Đề thi" };
-      case "SYSTEM":
-        return { icon: "dns", color: "text-purple-600 bg-purple-100 dark:bg-purple-900/30", label: "Hệ thống" };
-      case "PERSONAL_MSG":
-        return { icon: "person", color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30", label: "Cá nhân" };
-      case "BATCH_MSG":
-        return { icon: "groups", color: "text-green-600 bg-green-100 dark:bg-green-900/30", label: "Thông báo lớp" };
+      case 'EXAM':
+        return {
+          icon: 'assignment',
+          color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
+          label: 'Đề thi',
+        };
+      case 'SYSTEM':
+        return {
+          icon: 'dns',
+          color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30',
+          label: 'Hệ thống',
+        };
+      case 'PERSONAL_MSG':
+        return {
+          icon: 'person',
+          color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30',
+          label: 'Cá nhân',
+        };
+      case 'BATCH_MSG':
+        return {
+          icon: 'groups',
+          color: 'text-green-600 bg-green-100 dark:bg-green-900/30',
+          label: 'Thông báo lớp',
+        };
       default:
-        return { icon: "notifications", color: "text-gray-600 bg-gray-200 dark:bg-gray-800", label: "Thông báo" };
+        return {
+          icon: 'notifications',
+          color: 'text-gray-600 bg-gray-200 dark:bg-gray-800',
+          label: 'Thông báo',
+        };
     }
   };
 
   const filterTabs = [
-    { id: "all", label: "Tất cả" },
-    { id: "unread", label: "Chưa đọc" },
-    { id: "EXAM", label: "Đề thi" },
-    { id: "SYSTEM", label: "Hệ thống" },
-    { id: "MSG", label: "Tin nhắn" },
+    { id: 'all', label: 'Tất cả' },
+    { id: 'unread', label: 'Chưa đọc' },
+    { id: 'EXAM', label: 'Đề thi' },
+    { id: 'SYSTEM', label: 'Hệ thống' },
+    { id: 'MSG', label: 'Tin nhắn' },
   ];
 
   return (
@@ -96,8 +120,8 @@ export default function Notifications() {
               onClick={() => setFilter(tab.id)}
               className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                 filter === tab.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
               {tab.label}
@@ -107,10 +131,14 @@ export default function Notifications() {
 
         <div className="flex flex-col bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
           {loading ? (
-            <div className="p-10 text-center text-gray-500">Đang tải dữ liệu...</div>
+            <div className="p-10 text-center text-gray-500">
+              Đang tải dữ liệu...
+            </div>
           ) : filteredNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-10 text-gray-400 gap-2">
-              <span className="material-symbols-outlined text-5xl opacity-50">notifications_off</span>
+              <span className="material-symbols-outlined text-5xl opacity-50">
+                notifications_off
+              </span>
               <p>Không có thông báo nào.</p>
             </div>
           ) : (
@@ -121,18 +149,24 @@ export default function Notifications() {
               return (
                 <div key={notif.id}>
                   <div
-                    className={`relative flex gap-4 p-4 transition-all cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 ${isUnread ? "bg-blue-50/50 dark:bg-blue-900/10" : ""}`}
+                    className={`relative flex gap-4 p-4 transition-all cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 ${isUnread ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
                     onClick={() => handleNotificationClick(notif)}
                   >
-                    {isUnread && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600"></div>}
+                    {isUnread && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600"></div>
+                    )}
 
-                    <div className={`shrink-0 flex items-center justify-center size-12 rounded-full ${color}`}>
+                    <div
+                      className={`shrink-0 flex items-center justify-center size-12 rounded-full ${color}`}
+                    >
                       <span className="material-symbols-outlined">{icon}</span>
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-2 mb-1">
-                        <p className={`text-base truncate pr-2 text-gray-900 dark:text-white ${isUnread ? "font-bold" : "font-medium"}`}>
+                        <p
+                          className={`text-base truncate pr-2 text-gray-900 dark:text-white ${isUnread ? 'font-bold' : 'font-medium'}`}
+                        >
                           {notif.title}
                         </p>
                         <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">
@@ -140,7 +174,9 @@ export default function Notifications() {
                         </span>
                       </div>
 
-                      <p className={`text-sm text-gray-600 dark:text-gray-300 line-clamp-2 ${isUnread ? "font-medium" : "font-normal"}`}>
+                      <p
+                        className={`text-sm text-gray-600 dark:text-gray-300 line-clamp-2 ${isUnread ? 'font-medium' : 'font-normal'}`}
+                      >
                         {notif.message}
                       </p>
 

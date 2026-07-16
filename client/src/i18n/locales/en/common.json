@@ -12,6 +12,7 @@
   "nav": {
     "home": "Home",
     "subjects": "Subjects",
+    "documents": "Documents",
     "rank": "Ranking",
     "account": "Account information",
     "favorites": "Favorites"
@@ -128,6 +129,7 @@
   "showDetail": "View details",
   "totalExam": "Total exams",
   "noFavorites": "You do not have any favorite subjects yet.",
+  "favoriteSubjectsTitle": "Favorite subjects",
   "chapter": "Chapter",
   "delete": "Delete",
   "favorites": "Favorites",

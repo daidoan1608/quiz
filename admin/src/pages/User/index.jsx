@@ -58,7 +58,9 @@ export default function UserManager() {
               : await userApi.getAll();
         setUsers(data);
       } catch (error) {
-        message.error(error.response?.data?.message || 'Không thể tải danh sách người dùng.');
+        message.error(
+          error.response?.data?.message || 'Không thể tải danh sách người dùng.'
+        );
       } finally {
         setLoading(false);
       }
@@ -81,7 +83,9 @@ export default function UserManager() {
       message.success('Đã vô hiệu hóa người dùng.');
       fetchUsers();
     } catch (error) {
-      message.error(error.response?.data?.message || 'Không thể vô hiệu hóa người dùng.');
+      message.error(
+        error.response?.data?.message || 'Không thể vô hiệu hóa người dùng.'
+      );
     }
   };
 
@@ -91,7 +95,9 @@ export default function UserManager() {
       message.success('Khôi phục người dùng thành công.');
       fetchUsers();
     } catch (error) {
-      message.error(error.response?.data?.message || 'Không thể khôi phục người dùng.');
+      message.error(
+        error.response?.data?.message || 'Không thể khôi phục người dùng.'
+      );
     }
   };
 
@@ -106,7 +112,7 @@ export default function UserManager() {
 
   const handleOpenPermissions = (user) => {
     if (user.role !== 'MOD') {
-      message.warning('Chỉ tài khoản MOD mới cần phân quyền theo môn.');
+      message.warning('Cho tài khoản MOD mới có thể phân quyền theo môn.');
       return;
     }
     setSelectedPermissionUser(user);
@@ -153,7 +159,8 @@ export default function UserManager() {
       key: 'role',
       width: 110,
       render: (role) => {
-        const color = role === 'ADMIN' ? 'red' : role === 'MOD' ? 'orange' : 'green';
+        const color =
+          role === 'ADMIN' ? 'red' : role === 'MOD' ? 'orange' : 'green';
         return <Tag color={color}>{role}</Tag>;
       },
     },
@@ -184,7 +191,13 @@ export default function UserManager() {
                 onClick={() => handleEdit(record.userId)}
               />
             </Tooltip>
-            <Tooltip title={record.role === 'MOD' ? 'Phân quyền môn học' : 'Chỉ áp dụng cho MOD'}>
+            <Tooltip
+              title={
+                record.role === 'MOD'
+                  ? 'Phân quyền môn học'
+                  : 'Chỉ áp dụng cho MOD'
+              }
+            >
               <Button
                 className="action-btn"
                 icon={<SafetyCertificateOutlined />}
@@ -202,7 +215,11 @@ export default function UserManager() {
                 okButtonProps={{ danger: true }}
                 disabled={isMod}
               >
-                <Button className="action-btn is-danger" icon={<StopOutlined />} disabled={isMod} />
+                <Button
+                  className="action-btn is-danger"
+                  icon={<StopOutlined />}
+                  disabled={isMod}
+                />
               </Popconfirm>
             </Tooltip>
           </Space>
@@ -214,7 +231,11 @@ export default function UserManager() {
             okText="Khôi phục"
             cancelText="Hủy"
           >
-            <Button className="action-btn is-success" icon={<UndoOutlined />} disabled={isMod} />
+            <Button
+              className="action-btn is-success"
+              icon={<UndoOutlined />}
+              disabled={isMod}
+            />
           </Popconfirm>
         ),
     },
@@ -230,7 +251,11 @@ export default function UserManager() {
           { label: 'Đã vô hiệu hóa', value: 'deleted' },
         ]}
       />
-      <Select value={selectedRole} style={{ width: 150 }} onChange={setSelectedRole}>
+      <Select
+        value={selectedRole}
+        style={{ width: 150 }}
+        onChange={setSelectedRole}
+      >
         <Option value="all">Tất cả</Option>
         <Option value="ADMIN">ADMIN</Option>
         <Option value="MOD">MOD</Option>
@@ -279,7 +304,11 @@ export default function UserManager() {
         }
         table={table}
         onReload={() => fetchUsers(searchText)}
-        onAdd={!isMod && viewMode === 'active' ? () => setIsAddModalOpen(true) : undefined}
+        onAdd={
+          !isMod && viewMode === 'active'
+            ? () => setIsAddModalOpen(true)
+            : undefined
+        }
       />
 
       <AddUserModal

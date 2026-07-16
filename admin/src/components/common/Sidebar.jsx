@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { useTheme } from "../../context/ThemeContext";
-import { Layout, Menu, Button } from "antd";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import { Layout, Menu, Button } from 'antd';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -15,21 +15,23 @@ import {
   TableOutlined,
   QuestionCircleOutlined,
   HistoryOutlined,
-} from "@ant-design/icons";
+  FolderOpenOutlined,
+} from '@ant-design/icons';
 
 const { Sider } = Layout;
 
 const items = [
-  { key: "/", icon: <HomeOutlined />, label: "Dashboard" },
-  { key: "/notifications", icon: <MessageOutlined />, label: "Thông báo" },
-  { key: "/audit-logs", icon: <HistoryOutlined />, label: "Audit log" },
-  { key: "/userexams", icon: <ReadOutlined />, label: "Bài thi" },
-  { key: "/users", icon: <UserOutlined />, label: "Người dùng" },
-  { key: "/exams", icon: <FileTextOutlined />, label: "Đề thi" },
-  { key: "/categories", icon: <AppstoreOutlined />, label: "Khoa" },
-  { key: "/subjects", icon: <TableOutlined />, label: "Môn học" },
-  { key: "/chapters", icon: <BookOutlined />, label: "Chương" },
-  { key: "/questions", icon: <QuestionCircleOutlined />, label: "Câu hỏi" },
+  { key: '/', icon: <HomeOutlined />, label: 'Dashboard' },
+  { key: '/notifications', icon: <MessageOutlined />, label: 'Thông báo' },
+  { key: '/documents', icon: <FolderOpenOutlined />, label: 'Tài liệu' },
+  { key: '/audit-logs', icon: <HistoryOutlined />, label: 'Audit log' },
+  { key: '/userexams', icon: <ReadOutlined />, label: 'Bài thi' },
+  { key: '/users', icon: <UserOutlined />, label: 'Người dùng' },
+  { key: '/exams', icon: <FileTextOutlined />, label: 'Đề thi' },
+  { key: '/categories', icon: <AppstoreOutlined />, label: 'Khoa' },
+  { key: '/subjects', icon: <TableOutlined />, label: 'Môn học' },
+  { key: '/chapters', icon: <BookOutlined />, label: 'Chương' },
+  { key: '/questions', icon: <QuestionCircleOutlined />, label: 'Câu hỏi' },
 ];
 
 export default function Sidebar() {
@@ -44,15 +46,15 @@ export default function Sidebar() {
       collapsed={collapsed}
       onCollapse={setCollapsed}
       trigger={null}
-      theme={mode === "dark" ? "dark" : "light"}
+      theme={mode === 'dark' ? 'dark' : 'light'}
       width={270}
       className="admin-sidebar"
       style={{
-        height: "100vh",
-        position: "sticky",
+        height: '100vh',
+        position: 'sticky',
         top: 0,
         left: 0,
-        overflow: "auto",
+        overflow: 'auto',
       }}
     >
       <div className="admin-sidebar-logo">
@@ -75,7 +77,7 @@ export default function Sidebar() {
       </div>
 
       <Menu
-        theme={mode === "dark" ? "dark" : "light"}
+        theme={mode === 'dark' ? 'dark' : 'light'}
         mode="inline"
         selectedKeys={[location.pathname]}
         onClick={({ key }) => navigate(key)}

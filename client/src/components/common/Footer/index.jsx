@@ -1,5 +1,5 @@
-import React from "react";
-import { useLanguage } from "context/LanguageProvider";
+import React from 'react';
+import { useLanguage } from 'context/LanguageProvider';
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -29,7 +29,7 @@ const Footer = () => {
               </h2>
             </div>
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs">
-              {t("footer.description")}
+              {t('footer.description')}
             </p>
             <div className="mt-6 flex gap-4">
               <a
@@ -56,7 +56,7 @@ const Footer = () => {
 
           <div className="lg:col-span-3 lg:pl-8">
             <h3 className="mt-1.5 text-sm font-bold tracking-wider uppercase text-gray-900 dark:text-white mb-4 h-6 flex items-center">
-              {t("footer.menu")}
+              {t('footer.menu')}
             </h3>
             <ul className="space-y-3">
               <li>
@@ -64,7 +64,7 @@ const Footer = () => {
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
                   href="/"
                 >
-                  {t("nav.home")}
+                  {t('nav.home')}
                 </a>
               </li>
               <li>
@@ -72,7 +72,7 @@ const Footer = () => {
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
                   href="/subjects"
                 >
-                  {t("nav.subjects")}
+                  {t('nav.subjects')}
                 </a>
               </li>
               <li>
@@ -80,7 +80,7 @@ const Footer = () => {
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 !no-underline transition"
                   href="/rank"
                 >
-                  {t("nav.rank")}
+                  {t('nav.rank')}
                 </a>
               </li>
             </ul>
@@ -88,7 +88,7 @@ const Footer = () => {
 
           <div className="lg:col-span-5">
             <h3 className="mt-1.5 text-sm font-bold tracking-wider uppercase text-gray-900 dark:text-white mb-4 h-6 flex items-center">
-              {t("footer.contact")}
+              {t('footer.contact')}
             </h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
@@ -113,7 +113,7 @@ const Footer = () => {
                 </svg>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {t("footer.address")}: {" "}
+                    {t('footer.address')}:{' '}
                   </span>
                   P316, Tầng 3 Nhà Hành chính, Học viện Nông nghiệp Việt Nam
                 </div>
@@ -135,7 +135,7 @@ const Footer = () => {
                 </svg>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {t("footer.hotline")}: {" "}
+                    {t('footer.hotline')}:{' '}
                   </span>
                   (024) 62617701
                 </div>
@@ -157,7 +157,7 @@ const Footer = () => {
                 </svg>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    Email:{" "}
+                    Email:{' '}
                   </span>
                   cntt@vnua.edu.vn
                 </div>
@@ -168,21 +168,20 @@ const Footer = () => {
 
         <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-800 text-center md:flex md:justify-between md:items-center md:text-left">
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            &copy; {currentYear} {" "}
-            {t("footer.copyright")}
+            &copy; {currentYear} {t('footer.copyright')}
           </p>
           <div className="mt-2 md:mt-0 flex justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
             <a
               href="/terms"
               className="hover:text-blue-600 !no-underline transition-colors dark:hover:text-blue-400"
             >
-              {t("footer.terms")}
+              {t('footer.terms')}
             </a>
             <a
               href="/privacy"
               className="hover:text-blue-600 !no-underline transition-colors dark:hover:text-blue-400"
             >
-              {t("footer.privacy")}
+              {t('footer.privacy')}
             </a>
           </div>
         </div>

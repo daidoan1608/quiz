@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   BarChart,
   Bar,
@@ -11,37 +11,36 @@ import {
   Pie,
   ResponsiveContainer,
   Cell,
-} from "recharts";
-import { Card, Row, Col, theme } from "antd";
-import { BarChartOutlined, PieChartOutlined } from "@ant-design/icons";
-
+} from 'recharts';
+import { Card, Row, Col, theme } from 'antd';
+import { BarChartOutlined, PieChartOutlined } from '@ant-design/icons';
 
 export default function StatisticsChart({ statistics }) {
   // 1. Lấy bộ màu từ Theme hiện tại (Sáng/Tối)
   const { token } = theme.useToken();
 
   const barData = [
-    { name: "Câu hỏi", value: statistics.totalQuestions },
-    { name: "Đề thi", value: statistics.totalExams },
-    { name: "Người dùng", value: statistics.totalUsers },
-    { name: "Môn học", value: statistics.totalSubjects },
+    { name: 'Câu hỏi', value: statistics.totalQuestions },
+    { name: 'Đề thi', value: statistics.totalExams },
+    { name: 'Người dùng', value: statistics.totalUsers },
+    { name: 'Môn học', value: statistics.totalSubjects },
   ];
 
   // 2. Map màu từ Token vào dữ liệu biểu đồ
   // Thay vì dùng var(--color...), ta dùng mã màu trực tiếp từ Antd
   const pieData = [
     {
-      name: "MEDIUM",
+      name: 'MEDIUM',
       value: statistics.questionCountByMedium,
       color: token.colorWarning, // Màu vàng cam
     },
     {
-      name: "EASY",
+      name: 'EASY',
       value: statistics.questionCountByEasy,
       color: token.colorSuccess, // Màu xanh lá
     },
     {
-      name: "HARD",
+      name: 'HARD',
       value: statistics.questionCountByHard,
       color: token.colorError, // Màu đỏ
     },

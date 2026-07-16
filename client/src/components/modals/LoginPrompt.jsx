@@ -4,10 +4,8 @@ const LoginPrompt = ({ onLoginRedirect, onClose }) => {
   return (
     // Overlay: Phủ kín màn hình, nền đen mờ, căn giữa nội dung
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity duration-300">
-
       {/* Modal Box */}
       <div className="w-full max-w-sm transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left shadow-2xl transition-all border border-gray-100 dark:border-gray-700">
-
         {/* Icon & Title */}
         <div className="flex flex-col items-center text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
@@ -41,7 +39,6 @@ const LoginPrompt = ({ onLoginRedirect, onClose }) => {
             Đăng nhập ngay
           </button>
         </div>
-
       </div>
     </div>
   );

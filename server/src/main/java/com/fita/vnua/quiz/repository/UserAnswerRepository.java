@@ -44,4 +44,25 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
     List<UserAnswer> findSubmittedAnswersByUserAndChapter(
             @Param("userId") java.util.UUID userId,
             @Param("chapterId") Long chapterId);
+
+    @Query("""
+            SELECT ua FROM UserAnswer ua
+            JOIN FETCH ua.question q
+            JOIN FETCH q.chapter c
+            JOIN FETCH c.subject s
+            JOIN FETCH ua.answer
+            JOIN FETCH ua.userExam ue
+            WHERE ue.user.userId = :userId
+              AND ue.status = 'SUBMITTED'
+              AND q.deleted = false
+              AND c.deleted = false
+              AND s.deleted = false
+              AND (:subjectId IS NULL OR s.subjectId = :subjectId)
+              AND (:chapterId IS NULL OR c.chapterId = :chapterId)
+            ORDER BY COALESCE(ue.endTime, ue.updatedAt, ue.startTime) DESC
+            """)
+    List<UserAnswer> findSubmittedAnswersByUserForPractice(
+            @Param("userId") java.util.UUID userId,
+            @Param("subjectId") Long subjectId,
+            @Param("chapterId") Long chapterId);
 }

@@ -1,30 +1,30 @@
-import React from "react";
+import React from 'react';
 
 const privacySections = [
   {
-    title: "1. Thông tin chúng tôi thu thập",
+    title: '1. Thông tin chúng tôi thu thập',
     content:
-      "QuizVNUA có thể lưu trữ các thông tin cần thiết như họ tên, email, tài khoản đăng nhập, lịch sử làm bài, điểm số và tiến độ học tập để vận hành các tính năng của nền tảng.",
+      'QuizVNUA có thể lưu trữ các thông tin cần thiết như họ tên, email, tài khoản đăng nhập, lịch sử làm bài, điểm số và tiến độ học tập để vận hành các tính năng của nền tảng.',
   },
   {
-    title: "2. Mục đích sử dụng dữ liệu",
+    title: '2. Mục đích sử dụng dữ liệu',
     content:
-      "Dữ liệu được sử dụng để xác thực người dùng, cá nhân hóa trải nghiệm học tập, hiển thị kết quả, thống kê tiến độ, cải thiện chất lượng câu hỏi và hỗ trợ kỹ thuật khi cần thiết.",
+      'Dữ liệu được sử dụng để xác thực người dùng, cá nhân hóa trải nghiệm học tập, hiển thị kết quả, thống kê tiến độ, cải thiện chất lượng câu hỏi và hỗ trợ kỹ thuật khi cần thiết.',
   },
   {
-    title: "3. Bảo vệ thông tin cá nhân",
+    title: '3. Bảo vệ thông tin cá nhân',
     content:
-      "Chúng tôi áp dụng các biện pháp hợp lý để hạn chế truy cập trái phép, mất mát hoặc lạm dụng dữ liệu. Mật khẩu được xử lý theo cơ chế bảo mật của hệ thống và người dùng nên tự bảo vệ thông tin đăng nhập của mình.",
+      'Chúng tôi áp dụng các biện pháp hợp lý để hạn chế truy cập trái phép, mất mát hoặc lạm dụng dữ liệu. Mật khẩu được xử lý theo cơ chế bảo mật của hệ thống và người dùng nên tự bảo vệ thông tin đăng nhập của mình.',
   },
   {
-    title: "4. Chia sẻ thông tin",
+    title: '4. Chia sẻ thông tin',
     content:
-      "QuizVNUA không bán hoặc trao đổi thông tin cá nhân của người dùng cho bên thứ ba. Thông tin chỉ có thể được chia sẻ khi cần phục vụ vận hành hệ thống, yêu cầu hỗ trợ hoặc theo quy định pháp luật.",
+      'QuizVNUA không bán hoặc trao đổi thông tin cá nhân của người dùng cho bên thứ ba. Thông tin chỉ có thể được chia sẻ khi cần phục vụ vận hành hệ thống, yêu cầu hỗ trợ hoặc theo quy định pháp luật.',
   },
   {
-    title: "5. Quyền của người dùng",
+    title: '5. Quyền của người dùng',
     content:
-      "Bạn có thể kiểm tra, cập nhật thông tin cá nhân trong tài khoản và liên hệ quản trị viên nếu cần hỗ trợ chỉnh sửa, khóa hoặc xử lý dữ liệu liên quan đến tài khoản.",
+      'Bạn có thể kiểm tra, cập nhật thông tin cá nhân trong tài khoản và liên hệ quản trị viên nếu cần hỗ trợ chỉnh sửa, khóa hoặc xử lý dữ liệu liên quan đến tài khoản.',
   },
 ];
 
@@ -40,13 +40,17 @@ export default function Privacy() {
             Chính sách bảo mật
           </h1>
           <p className="mt-4 text-sm leading-6 text-gray-500 dark:text-gray-400">
-            Cập nhật lần cuối: {new Date().getFullYear()}. Chính sách này mô tả cách QuizVNUA thu thập, sử dụng và bảo vệ dữ liệu của bạn.
+            Cập nhật lần cuối: {new Date().getFullYear()}. Chính sách này mô tả
+            cách QuizVNUA thu thập, sử dụng và bảo vệ dữ liệu của bạn.
           </p>
         </div>
 
         <div className="space-y-6">
           {privacySections.map((section) => (
-            <section key={section.title} className="rounded-xl bg-gray-50 p-5 dark:bg-gray-800/60">
+            <section
+              key={section.title}
+              className="rounded-xl bg-gray-50 p-5 dark:bg-gray-800/60"
+            >
               <h2 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">
                 {section.title}
               </h2>
@@ -58,7 +62,8 @@ export default function Privacy() {
         </div>
 
         <div className="mt-8 rounded-xl border border-emerald-100 bg-emerald-50 p-5 text-sm font-medium leading-7 text-emerald-900 dark:border-emerald-700/60 dark:bg-emerald-900/40 dark:text-emerald-50">
-          Nếu phát hiện rủi ro bảo mật hoặc cần hỗ trợ về dữ liệu cá nhân, vui lòng liên hệ cntt@vnua.edu.vn.
+          Nếu phát hiện rủi ro bảo mật hoặc cần hỗ trợ về dữ liệu cá nhân, vui
+          lòng liên hệ cntt@vnua.edu.vn.
         </div>
       </div>
     </main>

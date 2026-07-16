@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { authAxios } from "../../api/axiosConfig";
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { authAxios } from '../../api/axiosConfig';
 import {
   Card,
   Typography,
@@ -15,7 +15,7 @@ import {
   message,
   Space,
   Avatar,
-} from "antd";
+} from 'antd';
 import {
   ArrowLeftOutlined,
   TrophyOutlined,
@@ -25,7 +25,7 @@ import {
   CheckCircleFilled,
   CloseCircleFilled,
   CalendarOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
@@ -59,7 +59,7 @@ export default function GetUserExamById() {
       const userId = detail.userExamDto.userId;
 
       const [questionResult, userResult] = await Promise.allSettled([
-        (detail.questions && detail.questions.length > 0)
+        detail.questions && detail.questions.length > 0
           ? Promise.resolve({ data: { data: { questions: detail.questions } } })
           : authAxios.get(`/public/exams/${examId}`, {
               params: { includeCorrectAnswers: true, userExamId },
@@ -67,26 +67,26 @@ export default function GetUserExamById() {
         authAxios.get(`/users/${userId}`),
       ]);
 
-      if (questionResult.status === "fulfilled") {
+      if (questionResult.status === 'fulfilled') {
         setExamQuestions(questionResult.value.data.data.questions || []);
       } else {
-        console.error("Lỗi lấy câu hỏi:", questionResult.reason);
-        message.error("Không thể tải danh sách câu hỏi.");
+        console.error('Lỗi lấy câu hỏi:', questionResult.reason);
+        message.error('Không thể tải danh sách câu hỏi.');
       }
 
-      if (userResult.status === "fulfilled") {
+      if (userResult.status === 'fulfilled') {
         setUserInfo(userResult.value.data.data || {});
       } else {
-        console.error("Lỗi lấy thông tin thí sinh:", userResult.reason);
+        console.error('Lỗi lấy thông tin thí sinh:', userResult.reason);
         setUserInfo({
           userId,
           username: detail.username || String(userId).slice(0, 8),
-          fullName: detail.fullName || "Unknown",
+          fullName: detail.fullName || 'Unknown',
         });
       }
     } catch (error) {
-      console.error("Lỗi:", error);
-      message.error("Không thể tải chi tiết bài thi.");
+      console.error('Lỗi:', error);
+      message.error('Không thể tải chi tiết bài thi.');
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ export default function GetUserExamById() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", marginTop: 50 }}>
+      <div style={{ textAlign: 'center', marginTop: 50 }}>
         <Spin size="large" tip="Đang tải kết quả..." />
       </div>
     );
@@ -107,7 +107,7 @@ export default function GetUserExamById() {
   if (!examDetail) {
     return (
       <Card>
-        <div style={{ textAlign: "center", padding: 20 }}>
+        <div style={{ textAlign: 'center', padding: 20 }}>
           <Title level={4}>Không tìm thấy dữ liệu bài thi</Title>
           <Button onClick={() => navigate(-1)}>Quay lại</Button>
         </div>
@@ -148,7 +148,7 @@ export default function GetUserExamById() {
     // 3. Đáp án ĐÚNG (mà user KHÔNG chọn) -> Highlight để user biết
     if (!isUserAnswer && isCorrect) {
       return {
-        background: "transparent",
+        background: 'transparent',
         border: `1px dashed ${token.colorSuccess}`,
         color: token.colorSuccess,
       };
@@ -162,7 +162,7 @@ export default function GetUserExamById() {
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", paddingBottom: 40 }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto', paddingBottom: 40 }}>
       {/* HEADER + BACK BUTTON */}
       <div style={{ marginBottom: 16 }}>
         <Button
@@ -182,7 +182,7 @@ export default function GetUserExamById() {
           <Card
             bordered={false}
             className="c-shadow"
-            style={{ height: "100%", textAlign: "center" }}
+            style={{ height: '100%', textAlign: 'center' }}
           >
             <Statistic
               title="Điểm số đạt được"
@@ -195,10 +195,10 @@ export default function GetUserExamById() {
               suffix="/ 100"
             />
             <Tag
-              color={isPassed ? "success" : "error"}
-              style={{ marginTop: 10, fontSize: 16, padding: "5px 20px" }}
+              color={isPassed ? 'success' : 'error'}
+              style={{ marginTop: 10, fontSize: 16, padding: '5px 20px' }}
             >
-              {isPassed ? "ĐẠT (PASSED)" : "CHƯA ĐẠT (FAILED)"}
+              {isPassed ? 'ĐẠT (PASSED)' : 'CHƯA ĐẠT (FAILED)'}
             </Tag>
           </Card>
         </Col>
@@ -213,17 +213,17 @@ export default function GetUserExamById() {
             }
             bordered={false}
             className="c-shadow"
-            style={{ height: "100%" }}
+            style={{ height: '100%' }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div>
-                <Text type="secondary">Môn học:</Text>{" "}
+                <Text type="secondary">Môn học:</Text>{' '}
                 <div>
                   <Text strong>{subjectName}</Text>
                 </div>
               </div>
               <div>
-                <Text type="secondary">Đề thi:</Text>{" "}
+                <Text type="secondary">Đề thi:</Text>{' '}
                 <div>
                   <Text strong>{title}</Text>
                 </div>
@@ -237,7 +237,7 @@ export default function GetUserExamById() {
                     (new Date(userExamDto.endTime) -
                       new Date(userExamDto.startTime)) /
                     60000
-                  ).toFixed(1)}{" "}
+                  ).toFixed(1)}{' '}
                   phút
                 </div>
               </div>
@@ -255,18 +255,18 @@ export default function GetUserExamById() {
             }
             bordered={false}
             className="c-shadow"
-            style={{ height: "100%" }}
+            style={{ height: '100%' }}
           >
-            <div style={{ textAlign: "center", marginBottom: 10 }}>
+            <div style={{ textAlign: 'center', marginBottom: 10 }}>
               <Avatar
                 size={64}
                 icon={<UserOutlined />}
                 style={{ backgroundColor: token.colorPrimary }}
               />
             </div>
-            <div style={{ textAlign: "center" }}>
+            <div style={{ textAlign: 'center' }}>
               <Title level={5} style={{ margin: 0 }}>
-                {userInfo?.fullName || "Unknown"}
+                {userInfo?.fullName || 'Unknown'}
               </Title>
               <Text type="secondary">@{userInfo?.username}</Text>
               <div style={{ marginTop: 10 }}>
@@ -286,14 +286,18 @@ export default function GetUserExamById() {
       </Divider>
 
       {/* DANH SÁCH CÂU HỎI */}
-      <Space direction="vertical" size="large" style={{ width: "100%" }}>
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
         {examQuestions.length === 0 && (
           <Card bordered={false} className="c-shadow">
-            <Text type="secondary">Chưa có dữ liệu câu hỏi cho bài làm này.</Text>
+            <Text type="secondary">
+              Chưa có dữ liệu câu hỏi cho bài làm này.
+            </Text>
           </Card>
         )}
         {examQuestions.map((question, index) => {
-          const userAnswerIds = getUserAnswerIdsForQuestion(question.questionId);
+          const userAnswerIds = getUserAnswerIdsForQuestion(
+            question.questionId
+          );
 
           return (
             <Card
@@ -308,7 +312,7 @@ export default function GetUserExamById() {
 
               {/* Danh sách đáp án */}
               <div
-                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+                style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
               >
                 {(question.answers || []).map((ans) => {
                   const isUserAnswer = userAnswerIds.has(ans.optionId);
@@ -319,12 +323,12 @@ export default function GetUserExamById() {
                     <div
                       key={ans.optionId}
                       style={{
-                        padding: "12px 16px",
+                        padding: '12px 16px',
                         borderRadius: 8,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        transition: "all 0.3s",
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        transition: 'all 0.3s',
                         ...style,
                       }}
                     >

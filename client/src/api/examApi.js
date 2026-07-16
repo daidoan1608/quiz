@@ -37,6 +37,12 @@ export const examApi = {
       .then((response) => getResponseData(response, []));
   },
 
+  getSmartWrongPracticeQuestions(params = { includeCorrectAnswers: true }) {
+    return authAxios
+      .get("/questions/practice/wrong", { params })
+      .then((response) => getResponseData(response, []));
+  },
+
   getRankings(config) {
     return publicAxios.get("/public/user-exam-summaries", config);
   },

@@ -1,4 +1,11 @@
-const EditableInfoItem = ({ label, value, onChange, type = "text", placeholder, required = false }) => (
+const EditableInfoItem = ({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  placeholder,
+  required = false,
+}) => (
   <label className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
     <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
       {label}

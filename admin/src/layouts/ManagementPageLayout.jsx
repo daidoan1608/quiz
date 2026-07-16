@@ -4,13 +4,13 @@ import { ReloadOutlined, PlusOutlined } from '@ant-design/icons';
 import styles from './ManagementPageLayout.module.css';
 
 const ManagementPageLayout = ({
-    title,
-    extra,
-    filters,
-    table,
-    onReload,
-    onAdd,
-    showReloadButton = true,
+  title,
+  extra,
+  filters,
+  table,
+  onReload,
+  onAdd,
+  showReloadButton = true,
 }) => {
   // --- Logic hiển thị nút bấm ---
   const renderActionButtons = () => {
@@ -20,13 +20,21 @@ const ManagementPageLayout = ({
         {extra}
 
         {showReloadButton && typeof onReload === 'function' && (
-          <Button className="toolbar-btn" icon={<ReloadOutlined />} onClick={onReload}>
+          <Button
+            className="toolbar-btn"
+            icon={<ReloadOutlined />}
+            onClick={onReload}
+          >
             Tải lại
           </Button>
         )}
 
         {typeof onAdd === 'function' && (
-          <Button className="toolbar-btn" icon={<PlusOutlined />} onClick={onAdd}>
+          <Button
+            className="toolbar-btn"
+            icon={<PlusOutlined />}
+            onClick={onAdd}
+          >
             Thêm mới
           </Button>
         )}
@@ -41,16 +49,15 @@ const ManagementPageLayout = ({
         {renderActionButtons()}
       </div>
       {filters && (
-          <Card className={styles.managementFilters} bordered={false}>
-              {filters}
-          </Card>
+        <Card className={styles.managementFilters} bordered={false}>
+          {filters}
+        </Card>
       )}
 
       {/* 3. Phần Bảng Dữ Liệu (Table) */}
       <Card className={styles.managementContent} bordered={false}>
         {table}
       </Card>
-
     </div>
   );
 };

@@ -1,18 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { subjectApi } from "api/subjectApi";
-import { useLanguage } from "context/LanguageProvider";
-import { useAuth } from "context/AuthProvider";
-import {
-  MAX_DISPLAYED_ATTEMPTS,
-  MAX_DISPLAYED_SUBJECTS,
-} from "./constants";
-import HeroSection from "./components/HeroSection";
-import InProgressSidebar from "./components/InProgressSidebar";
-import LearningPathSection from "./components/LearningPathSection";
-import SubjectsSection from "./components/SubjectsSection";
-import TeamSection from "./components/TeamSection";
-import { getCurrentUserId } from "utils/storage";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { subjectApi } from 'api/subjectApi';
+import { useLanguage } from 'context/LanguageProvider';
+import { useAuth } from 'context/AuthProvider';
+import { MAX_DISPLAYED_ATTEMPTS, MAX_DISPLAYED_SUBJECTS } from './constants';
+import HeroSection from './components/HeroSection';
+import InProgressSidebar from './components/InProgressSidebar';
+import LearningPathSection from './components/LearningPathSection';
+import SubjectsSection from './components/SubjectsSection';
+import TeamSection from './components/TeamSection';
+import { getCurrentUserId } from 'utils/storage';
 
 export default function Home() {
   const [subjects, setSubjects] = useState([]);
@@ -37,7 +34,7 @@ export default function Home() {
       const subjectsData = await subjectApi.getPublicSubjects();
       setSubjects(subjectsData || []);
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách môn học:", error);
+      console.error('Lỗi khi lấy danh sách môn học:', error);
       setSubjects([]);
     }
   }, []);
@@ -52,7 +49,7 @@ export default function Home() {
       const attempts = await subjectApi.getInProgressAttempts(userId);
       setInProgressAttempts(attempts || []);
     } catch (error) {
-      console.error("Lỗi khi lấy bài đang thực hiện:", error);
+      console.error('Lỗi khi lấy bài đang thực hiện:', error);
       setInProgressAttempts([]);
     }
   }, [isLoggedIn, userId]);
@@ -87,7 +84,7 @@ export default function Home() {
   );
 
   const handleStartLearning = useCallback(() => {
-    navigate("/subjects");
+    navigate('/subjects');
   }, [navigate]);
 
   return (

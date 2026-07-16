@@ -1,12 +1,12 @@
-import { SUBJECT_ICON_PATHS } from "pages/Home/constants";
-import SvgIcon from "./SvgIcon";
+import { SUBJECT_ICON_PATHS } from 'pages/Home/constants';
+import SvgIcon from './SvgIcon';
 
 export default function SubjectsSection({ subjects, t, onSelectSubject }) {
   return (
     <section>
       <div className="flex items-center justify-between px-2 pb-5 pt-2">
         <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-          {t("home.subjectsTitle")}
+          {t('home.subjectsTitle')}
         </h2>
       </div>
 
@@ -44,7 +44,7 @@ function SubjectCard({ subject, iconPath, t, onClick }) {
           {subject.name}
         </h3>
         <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          {t("home.questionCount", { count: subject.totalQuestions })}
+          {t('home.questionCount', { count: subject.totalQuestions })}
         </p>
       </div>
     </button>
@@ -54,7 +54,7 @@ function SubjectCard({ subject, iconPath, t, onClick }) {
 function EmptySubjectsMessage({ t }) {
   return (
     <div className="col-span-full py-12 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
-      {t("home.noSubjects")}
+      {t('home.noSubjects')}
     </div>
   );
 }

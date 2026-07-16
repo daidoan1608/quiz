@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from "react";
-import {
-  LockOutlined,
-  UserOutlined,
-  GoogleOutlined,
-} from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, message } from "antd";
-import { useNavigate } from "react-router-dom";
-import { authApi } from "api/authApi";
-import { useAuth } from "context/AuthProvider";
-import { GoogleLogin } from "@react-oauth/google";
+import React, { useState, useEffect } from 'react';
+import { LockOutlined, UserOutlined, GoogleOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Form, Input, message } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from 'api/authApi';
+import { useAuth } from 'context/AuthProvider';
+import { GoogleLogin } from '@react-oauth/google';
 
 function Login() {
   const [loading, setLoading] = useState(false);
@@ -17,7 +13,7 @@ function Login() {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    const savedUsername = localStorage.getItem("savedUsername");
+    const savedUsername = localStorage.getItem('savedUsername');
     if (savedUsername) {
       form.setFieldsValue({
         username: savedUsername,
@@ -36,36 +32,36 @@ function Login() {
 
       const { userId, fullName, avatarUrl } = userData || {};
       if (!userId) {
-        throw new Error("Login response is missing userId");
+        throw new Error('Login response is missing userId');
       }
 
-      let avatar = avatarUrl || "";
+      let avatar = avatarUrl || '';
       try {
         const avatarResponse = await authApi.getMyAvatar();
         avatar =
           avatarResponse.data?.data?.avatarUrl ||
           avatarResponse.data?.avatarUrl ||
           avatarUrl ||
-          "";
+          '';
       } catch (avatarError) {
-        avatar = avatarUrl || "";
+        avatar = avatarUrl || '';
       }
       if (values.remember) {
-        localStorage.setItem("savedUsername", values.username);
-        localStorage.setItem("fullName", fullName);
-        localStorage.setItem("avatarUrl", avatar);
+        localStorage.setItem('savedUsername', values.username);
+        localStorage.setItem('fullName', fullName);
+        localStorage.setItem('avatarUrl', avatar);
       } else {
-        localStorage.removeItem("savedUsername");
-        localStorage.removeItem("fullName");
-        localStorage.removeItem("avatarUrl");
+        localStorage.removeItem('savedUsername');
+        localStorage.removeItem('fullName');
+        localStorage.removeItem('avatarUrl');
       }
 
       login(userId, fullName, avatar);
-      navigate("/");
+      navigate('/');
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
-        "Đăng nhập thất bại. Vui lòng thử lại!";
+        'Đăng nhập thất bại. Vui lòng thử lại!';
       message.error(errorMessage);
     } finally {
       setLoading(false);
@@ -78,16 +74,16 @@ function Login() {
       const userData = await authApi.loginWithGoogle(idToken);
       const { userId, fullName, avatarUrl } = userData || {};
       if (!userId) {
-        console.error("Google login response is missing userId", userData);
-        throw new Error("Google login response is missing userId");
+        console.error('Google login response is missing userId', userData);
+        throw new Error('Google login response is missing userId');
       }
 
-      login(userId, fullName, avatarUrl || "");
-      message.success("Đăng nhập Google thành công!");
-      navigate("/");
+      login(userId, fullName, avatarUrl || '');
+      message.success('Đăng nhập Google thành công!');
+      navigate('/');
     } catch (error) {
       console.error(error);
-      message.error("Xác thực tài khoản Google thất bại!");
+      message.error('Xác thực tài khoản Google thất bại!');
     } finally {
       setLoading(false);
     }
@@ -102,12 +98,15 @@ function Login() {
             src="/logoschool.png"
             alt="Logo"
             className="mx-auto h-16 w-auto mb-4 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => navigate("/")}
+            onClick={() => navigate('/')}
           />
-          <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--aura-primary)" }}>
+          <h2
+            className="text-3xl font-extrabold tracking-tight"
+            style={{ color: 'var(--aura-primary)' }}
+          >
             ĐĂNG NHẬP
           </h2>
-          <p className="mt-2 text-sm" style={{ color: "var(--aura-subtle)" }}>
+          <p className="mt-2 text-sm" style={{ color: 'var(--aura-subtle)' }}>
             Chào mừng bạn quay trở lại!
           </p>
         </div>
@@ -124,7 +123,10 @@ function Login() {
           <Form.Item
             name="username"
             rules={[
-              { required: true, message: "Vui lòng nhập tên đăng nhập hoặc email!" },
+              {
+                required: true,
+                message: 'Vui lòng nhập tên đăng nhập hoặc email!',
+              },
             ]}
             className="mb-4"
           >
@@ -137,7 +139,7 @@ function Login() {
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
             className="mb-4"
           >
             <Input.Password
@@ -149,14 +151,12 @@ function Login() {
 
           <Form.Item name="remember" valuePropName="checked" className="mb-4">
             <div className="flex items-center justify-between">
-              <Checkbox className="auth-checkbox">
-                Ghi nhớ đăng nhập
-              </Checkbox>
+              <Checkbox className="auth-checkbox">Ghi nhớ đăng nhập</Checkbox>
               <a
                 href="/forgot"
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate("/forgot");
+                  navigate('/forgot');
                 }}
                 className="auth-link text-sm font-medium hover:underline"
               >
@@ -192,7 +192,10 @@ function Login() {
           </div>
 
           <div className="mt-6 flex justify-center gap-4">
-            <div className="social-login-btn google-login-btn relative overflow-hidden" aria-label="Đăng nhập với Google">
+            <div
+              className="social-login-btn google-login-btn relative overflow-hidden"
+              aria-label="Đăng nhập với Google"
+            >
               <span className="google-login-fallback" aria-hidden="true">
                 <GoogleOutlined />
               </span>
@@ -202,7 +205,7 @@ function Login() {
                   await handleGoogleLoginSuccess(idToken);
                 }}
                 onError={() => {
-                  message.error("Đăng nhập Google thất bại!");
+                  message.error('Đăng nhập Google thất bại!');
                 }}
                 useOneTap
                 type="icon"
@@ -268,12 +271,14 @@ function Login() {
 
         {/* Footer Link */}
         <div className="text-center mt-6">
-          <span style={{ color: "var(--aura-muted)" }}>Chưa có tài khoản? </span>
+          <span style={{ color: 'var(--aura-muted)' }}>
+            Chưa có tài khoản?{' '}
+          </span>
           <a
             href="/register"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/register");
+              navigate('/register');
             }}
             className="auth-link font-medium hover:underline transition-colors"
           >

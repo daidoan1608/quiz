@@ -1,9 +1,6 @@
-import React from "react";
-import { Drawer, List, Typography, Avatar, theme } from "antd";
-import {
-  BellOutlined,
-  ClockCircleOutlined,
-} from "@ant-design/icons";
+import React from 'react';
+import { Drawer, List, Typography, Avatar, theme } from 'antd';
+import { BellOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -15,25 +12,25 @@ export const NotificationSidebar = ({ isOpen, onClose }) => {
   const notifications = [
     {
       id: 1,
-      title: "Kết quả bài thi mới",
-      description: "Bạn vừa hoàn thành bài thi Java Basic với số điểm 9/10.",
-      time: "5 phút trước",
-      type: "exam",
+      title: 'Kết quả bài thi mới',
+      description: 'Bạn vừa hoàn thành bài thi Java Basic với số điểm 9/10.',
+      time: '5 phút trước',
+      type: 'exam',
     },
     {
       id: 2,
-      title: "Môn học cập nhật",
+      title: 'Môn học cập nhật',
       description:
-        "Chương 3: OOP đã được thêm vào môn Lập trình hướng đối tượng.",
-      time: "1 giờ trước",
-      type: "course",
+        'Chương 3: OOP đã được thêm vào môn Lập trình hướng đối tượng.',
+      time: '1 giờ trước',
+      type: 'course',
     },
     {
       id: 3,
-      title: "Nhắc nhở ôn tập",
-      description: "Đừng quên hoàn thành bài tập về nhà trước 12h đêm nay.",
-      time: "2 giờ trước",
-      type: "reminder",
+      title: 'Nhắc nhở ôn tập',
+      description: 'Đừng quên hoàn thành bài tập về nhà trước 12h đêm nay.',
+      time: '2 giờ trước',
+      type: 'reminder',
     },
   ];
 
@@ -54,9 +51,9 @@ export const NotificationSidebar = ({ isOpen, onClose }) => {
         renderItem={(item) => (
           <List.Item
             style={{
-              padding: "16px 24px",
-              cursor: "pointer",
-              transition: "background 0.3s",
+              padding: '16px 24px',
+              cursor: 'pointer',
+              transition: 'background 0.3s',
             }}
             // Hiệu ứng hover nhẹ (tùy chọn)
             className="notification-item-hover"
@@ -67,7 +64,7 @@ export const NotificationSidebar = ({ isOpen, onClose }) => {
                   icon={<BellOutlined />}
                   style={{
                     backgroundColor:
-                      item.type === "exam"
+                      item.type === 'exam'
                         ? token.colorError
                         : token.colorPrimary,
                   }}
@@ -84,7 +81,7 @@ export const NotificationSidebar = ({ isOpen, onClose }) => {
                     {item.description}
                   </div>
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: 4 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 4 }}
                   >
                     <ClockCircleOutlined
                       style={{

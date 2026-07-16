@@ -24,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,6 +77,91 @@ public class QuestionServiceImpl implements QuestionService {
         return questions.stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuestionDto> getSmartWrongPracticeQuestions(Long subjectId, Long chapterId, Integer limit, String difficulty, String strategy, UUID userId) {
+        if (userId == null) {
+            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+        }
+        int safeLimit = limit == null || limit <= 0 ? 10 : Math.min(limit, 100);
+        Question.Difficulty normalizedDifficulty = difficulty == null || difficulty.isBlank() || "ALL".equalsIgnoreCase(difficulty)
+                ? null
+                : questionMapper.parseDifficulty(difficulty);
+        String normalizedStrategy = strategy == null || strategy.isBlank() ? "recent" : strategy.trim().toLowerCase();
+
+        Map<AttemptQuestionKey, List<com.fita.vnua.quiz.model.entity.UserAnswer>> answersByAttemptQuestion =
+                userAnswerRepository.findSubmittedAnswersByUserForPractice(userId, subjectId, chapterId).stream()
+                        .filter(userAnswer -> normalizedDifficulty == null || normalizedDifficulty.equals(userAnswer.getQuestion().getDifficulty()))
+                        .collect(Collectors.groupingBy(
+                                userAnswer -> new AttemptQuestionKey(
+                                        userAnswer.getUserExam().getUserExamId(),
+                                        userAnswer.getQuestion().getQuestionId()
+                                ),
+                                LinkedHashMap::new,
+                                Collectors.toList()
+                        ));
+
+        Map<Long, WrongQuestionStat> statsByQuestion = new HashMap<>();
+        answersByAttemptQuestion.values().forEach(userAnswers -> {
+            if (userAnswers.isEmpty()) {
+                return;
+            }
+            Question question = userAnswers.get(0).getQuestion();
+            Set<Long> correctAnswerIds = question.getAnswers().stream()
+                    .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
+                    .map(answer -> answer.getOptionId())
+                    .collect(Collectors.toSet());
+            Set<Long> chosenAnswerIds = userAnswers.stream()
+                    .map(userAnswer -> userAnswer.getAnswer().getOptionId())
+                    .collect(Collectors.toSet());
+            if (!correctAnswerIds.equals(chosenAnswerIds)) {
+                var submittedAt = Optional.ofNullable(userAnswers.get(0).getUserExam().getEndTime())
+                        .orElse(Optional.ofNullable(userAnswers.get(0).getUserExam().getUpdatedAt())
+                                .orElse(userAnswers.get(0).getUserExam().getStartTime()));
+                WrongQuestionStat currentStat = statsByQuestion.computeIfAbsent(
+                        question.getQuestionId(),
+                        id -> new WrongQuestionStat(question)
+                );
+                statsByQuestion.put(question.getQuestionId(), currentStat.recordWrong(submittedAt));
+            }
+        });
+
+        List<WrongQuestionStat> wrongStats = statsByQuestion.values().stream()
+                .filter(stat -> stat.question() != null)
+                .toList();
+
+        if ("weak-chapter".equals(normalizedStrategy)) {
+            Optional<Long> weakestChapterId = wrongStats.stream()
+                    .collect(Collectors.groupingBy(
+                            stat -> stat.question().getChapter().getChapterId(),
+                            Collectors.summingInt(WrongQuestionStat::wrongCount)
+                    ))
+                    .entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey);
+            if (weakestChapterId.isPresent()) {
+                wrongStats = wrongStats.stream()
+                        .filter(stat -> weakestChapterId.get().equals(stat.question().getChapter().getChapterId()))
+                        .toList();
+            }
+        }
+
+        Comparator<WrongQuestionStat> comparator = switch (normalizedStrategy) {
+            case "frequent", "most-wrong" -> Comparator
+                    .comparingInt(WrongQuestionStat::wrongCount)
+                    .reversed()
+                    .thenComparing(WrongQuestionStat::lastWrongAt, Comparator.reverseOrder());
+            default -> Comparator.comparing(WrongQuestionStat::lastWrongAt, Comparator.reverseOrder());
+        };
+
+        return wrongStats.stream()
+                .sorted(comparator)
+                .limit(safeLimit)
+                .map(WrongQuestionStat::question)
+                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .toList();
+    }
+
     private Set<Long> findWrongQuestionIds(UUID userId, Long chapterId) {
         Map<Long, Set<Long>> chosenByQuestion = userAnswerRepository.findSubmittedAnswersByUserAndChapter(userId, chapterId).stream()
                 .collect(Collectors.groupingBy(
@@ -94,6 +181,19 @@ public class QuestionServiceImpl implements QuestionService {
             }
         });
         return wrongQuestionIds;
+    }
+
+    private record AttemptQuestionKey(Long userExamId, Long questionId) {
+    }
+
+    private record WrongQuestionStat(Question question, int wrongCount, java.time.LocalDateTime lastWrongAt) {
+        private WrongQuestionStat(Question question) {
+            this(question, 0, java.time.LocalDateTime.MIN);
+        }
+
+        private WrongQuestionStat recordWrong(java.time.LocalDateTime submittedAt) {
+            return new WrongQuestionStat(question, wrongCount + 1, submittedAt.isAfter(lastWrongAt) ? submittedAt : lastWrongAt);
+        }
     }
 
     @Override

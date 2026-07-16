@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   LineChart,
   Line,
@@ -8,7 +8,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Label,
-} from "recharts";
+} from 'recharts';
 
 const ScoreChart = ({ data }) => {
   const formattedData = data.map((exam, index) => ({
@@ -17,7 +17,7 @@ const ScoreChart = ({ data }) => {
   }));
 
   return (
-    <div style={{ width: "100%", height: 300, marginBottom: 20 }}>
+    <div style={{ width: '100%', height: 300, marginBottom: 20 }}>
       <ResponsiveContainer>
         <LineChart data={formattedData}>
           <CartesianGrid stroke="#ccc" strokeDasharray="3 3" />
@@ -30,7 +30,7 @@ const ScoreChart = ({ data }) => {
               value="Điểm số"
               angle={-90}
               position="insideLeft"
-              style={{ textAnchor: "middle" }}
+              style={{ textAnchor: 'middle' }}
               offset={10}
             />
           </YAxis>

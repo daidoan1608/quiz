@@ -1,16 +1,16 @@
-import { TEAM_MEMBERS } from "pages/Home/constants";
-import SocialLinks from "./SocialLinks";
-import SvgIcon from "./SvgIcon";
+import { TEAM_MEMBERS } from 'pages/Home/constants';
+import SocialLinks from './SocialLinks';
+import SvgIcon from './SvgIcon';
 
 export default function TeamSection({ t }) {
   return (
     <section className="flex flex-col items-center justify-center pt-10 pb-6">
       <div className="text-center max-w-3xl mx-auto mb-12">
         <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
-          {t("home.team.title")}
+          {t('home.team.title')}
         </h2>
         <p className="text-gray-500 dark:text-gray-400 text-lg">
-          {t("home.team.description")}
+          {t('home.team.description')}
         </p>
       </div>
 
@@ -38,7 +38,11 @@ function TeamMemberCard({ member }) {
             />
           </div>
           <div className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full border-2 border-white dark:border-gray-800">
-            <SvgIcon path="M5 13l4 4L19 7" className="w-3 h-3" strokeWidth={3} />
+            <SvgIcon
+              path="M5 13l4 4L19 7"
+              className="w-3 h-3"
+              strokeWidth={3}
+            />
           </div>
         </div>
 

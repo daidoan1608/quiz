@@ -1,21 +1,21 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from 'react';
 
 const CAT_QUOTES = [
   // Nhóm động viên
-  "Hôm nay bạn đã học được gì mới chưa? 📚",
-  "Cố lên! Top 1 server đang chờ bạn đó! 🏆",
-  "Kiến thức là sức mạnh, còn Pate là chân ái! 🐟",
-  "Đừng nhìn người khác, hãy vượt qua chính mình hôm qua! 💪",
+  'Hôm nay bạn đã học được gì mới chưa? 📚',
+  'Cố lên! Top 1 server đang chờ bạn đó! 🏆',
+  'Kiến thức là sức mạnh, còn Pate là chân ái! 🐟',
+  'Đừng nhìn người khác, hãy vượt qua chính mình hôm qua! 💪',
 
   // Nhóm hài hước/IT
-  "Code không bug, đời không nể! 🐛",
-  "Đang loading nhân phẩm... vui lòng chờ 😼",
-  "Meow! Nhìn bảng xếp hạng áp lực quá nhỉ? 😹",
-  "Sen ơi, nhớ uống nước và giữ lưng thẳng nhé! 💧",
+  'Code không bug, đời không nể! 🐛',
+  'Đang loading nhân phẩm... vui lòng chờ 😼',
+  'Meow! Nhìn bảng xếp hạng áp lực quá nhỉ? 😹',
+  'Sen ơi, nhớ uống nước và giữ lưng thẳng nhé! 💧',
 
   // Nhóm "cà khịa" nhẹ
-  "Sao hôm nay tụt hạng thế? Lười biếng à? 🤨",
-  "Bạn ở đâu trong cái danh sách dài dằng dặc này? 🧐",
+  'Sao hôm nay tụt hạng thế? Lười biếng à? 🤨',
+  'Bạn ở đâu trong cái danh sách dài dằng dặc này? 🧐',
 ];
 
 export default function CatMascot() {
@@ -51,7 +51,9 @@ export default function CatMascot() {
       className="group relative flex w-full max-w-[480px] mt-4 cursor-pointer items-center gap-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-gray-100 transition-all hover:scale-[1.02] hover:shadow-xl dark:bg-gray-800 dark:ring-gray-700"
     >
       {/* 1. Phần Avatar Mèo (Có hiệu ứng rung khi click) */}
-      <div className={`relative shrink-0 ${isAnimating ? "animate-bounce" : ""}`}>
+      <div
+        className={`relative shrink-0 ${isAnimating ? 'animate-bounce' : ''}`}
+      >
         <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-orange-200 bg-orange-50 dark:border-orange-900/30 dark:bg-gray-700">
           {/* Bạn có thể thay link ảnh GIF khác nếu muốn */}
           <img

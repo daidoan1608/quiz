@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Button, Form, Input, message } from "antd";
-import { LockOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
-import { authApi } from "api/authApi";
+import React, { useState } from 'react';
+import { Button, Form, Input, message } from 'antd';
+import { LockOutlined, UserOutlined, MailOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from 'api/authApi';
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,10 @@ const RegisterForm = () => {
         fullName: values.fullName,
       });
 
-      message.success("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.", 6);
+      message.success(
+        'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
+        6
+      );
       form.resetFields();
     } catch (error) {
       // Xử lý lỗi từ server trả về
@@ -28,12 +31,12 @@ const RegisterForm = () => {
       const validationErrors = error.response?.data?.errors;
       const errorMessage =
         Array.isArray(validationErrors) && validationErrors.length > 0
-          ? validationErrors.join(". ")
-          : serverMessage === "Username is already existed"
-            ? "Tên đăng nhập đã tồn tại!"
-            : serverMessage === "Email is already existed"
-              ? "Email đã tồn tại!"
-              : serverMessage || "Đăng ký thất bại. Vui lòng thử lại!";
+          ? validationErrors.join('. ')
+          : serverMessage === 'Username is already existed'
+            ? 'Tên đăng nhập đã tồn tại!'
+            : serverMessage === 'Email is already existed'
+              ? 'Email đã tồn tại!'
+              : serverMessage || 'Đăng ký thất bại. Vui lòng thử lại!';
       message.error(errorMessage);
     } finally {
       setLoading(false);
@@ -49,12 +52,15 @@ const RegisterForm = () => {
             src="/logoschool.png"
             alt="Logo"
             className="mx-auto h-16 w-auto mb-4 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => navigate("/")}
+            onClick={() => navigate('/')}
           />
-          <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--aura-primary)" }}>
+          <h2
+            className="text-3xl font-extrabold tracking-tight"
+            style={{ color: 'var(--aura-primary)' }}
+          >
             ĐĂNG KÝ TÀI KHOẢN
           </h2>
-          <p className="mt-2 text-sm" style={{ color: "var(--aura-subtle)" }}>
+          <p className="mt-2 text-sm" style={{ color: 'var(--aura-subtle)' }}>
             Tạo tài khoản để bắt đầu hành trình học tập
           </p>
         </div>
@@ -71,12 +77,13 @@ const RegisterForm = () => {
           <Form.Item
             name="username"
             rules={[
-              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
-              { min: 3, message: "Tên đăng nhập phải có ít nhất 3 ký tự!" },
-              { max: 20, message: "Tên đăng nhập không được quá 20 ký tự!" },
+              { required: true, message: 'Vui lòng nhập tên đăng nhập!' },
+              { min: 3, message: 'Tên đăng nhập phải có ít nhất 3 ký tự!' },
+              { max: 20, message: 'Tên đăng nhập không được quá 20 ký tự!' },
               {
                 pattern: /^[a-zA-Z0-9_]+$/,
-                message: "Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới!",
+                message:
+                  'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới!',
               },
             ]}
             className="mb-4"
@@ -90,7 +97,7 @@ const RegisterForm = () => {
 
           <Form.Item
             name="fullName"
-            rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
+            rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
             className="mb-4"
           >
             <Input
@@ -103,8 +110,8 @@ const RegisterForm = () => {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: "Vui lòng nhập email!" },
-              { type: "email", message: "Email không hợp lệ!" },
+              { required: true, message: 'Vui lòng nhập email!' },
+              { type: 'email', message: 'Email không hợp lệ!' },
             ]}
             className="mb-4"
           >
@@ -118,8 +125,8 @@ const RegisterForm = () => {
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu!" },
-              { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+              { required: true, message: 'Vui lòng nhập mật khẩu!' },
+              { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
             ]}
             className="mb-4"
           >
@@ -132,16 +139,16 @@ const RegisterForm = () => {
 
           <Form.Item
             name="confirmPassword" // Đổi tên thành confirmPassword cho rõ nghĩa (giống logic cũ là password2)
-            dependencies={["password"]}
+            dependencies={['password']}
             rules={[
-              { required: true, message: "Vui lòng xác nhận mật khẩu!" },
+              { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
+                  if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
                   return Promise.reject(
-                    new Error("Mật khẩu xác nhận không khớp!")
+                    new Error('Mật khẩu xác nhận không khớp!')
                   );
                 },
               }),
@@ -170,12 +177,12 @@ const RegisterForm = () => {
 
         {/* Footer Link */}
         <div className="auth-footer text-center mt-6 pt-4">
-          <span style={{ color: "var(--aura-muted)" }}>Đã có tài khoản? </span>
+          <span style={{ color: 'var(--aura-muted)' }}>Đã có tài khoản? </span>
           <a
             href="/login"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/login");
+              navigate('/login');
             }}
             className="auth-link font-medium hover:underline transition-colors"
           >
