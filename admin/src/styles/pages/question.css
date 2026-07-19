@@ -1,0 +1,19 @@
+.question-answer-input.is-correct,
+.question-answer-input.is-correct:hover,
+.question-answer-input.is-correct:focus {
+  background: color-mix(in srgb, var(--admin-success) 10%, var(--admin-surface-solid)) !important;
+  color: var(--admin-text) !important;
+  border-color: var(--admin-success) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-success) 16%, transparent) !important;
+}
+
+.question-answer-input.is-correct::placeholder {
+  color: color-mix(in srgb, var(--admin-success) 42%, var(--admin-subtle)) !important;
+}
+
+body.dark .question-answer-input.is-correct,
+body.dark .question-answer-input.is-correct:hover,
+body.dark .question-answer-input.is-correct:focus {
+  background: color-mix(in srgb, var(--admin-success) 18%, var(--admin-surface-solid)) !important;
+  color: var(--admin-text) !important;
+}

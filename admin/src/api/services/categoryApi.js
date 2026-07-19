@@ -19,6 +19,11 @@ export const categoryApi = {
     return normalizeList(unwrapApiData(response));
   },
 
+  async filter(params) {
+    const response = await authAxios.get("/admin/categories/filter", { params });
+    return normalizeList(unwrapApiData(response));
+  },
+
   async getById(categoryId) {
     const response = await authAxios.get(`/admin/categories/${categoryId}`);
     return unwrapApiData(response, null);

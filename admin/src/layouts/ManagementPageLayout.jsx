@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Space, Button } from 'antd';
 import { ReloadOutlined, PlusOutlined } from '@ant-design/icons';
-import styles from './ManagementPageLayout.module.css';
+import styles from '../styles/layouts/ManagementPageLayout.module.css';
 
 const ManagementPageLayout = ({
   title,

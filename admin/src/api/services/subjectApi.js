@@ -19,6 +19,11 @@ export const subjectApi = {
     return normalizeList(unwrapApiData(response));
   },
 
+  async filter(params) {
+    const response = await authAxios.get("/admin/subjects/filter", { params });
+    return normalizeList(unwrapApiData(response));
+  },
+
   async getById(subjectId) {
     const response = await authAxios.get(`/public/subjects/${subjectId}`);
     return unwrapApiData(response, null);

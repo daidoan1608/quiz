@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --admin-bg: #e9eef6;
+  --admin-canvas: #f2f6fb;
+  --admin-surface: rgba(255, 255, 255, 0.96);
+  --admin-surface-solid: #ffffff;
+  --admin-surface-muted: #eef3f8;
+  --admin-border: #d5deeb;
+  --admin-border-strong: #aeb8ca;
+  --admin-text: #191c1e;
+  --admin-muted: #424754;
+  --admin-subtle: #64748b;
+  --admin-primary: #0058be;
+  --admin-primary-hover: #2170e4;
+  --admin-primary-soft: #eaf2ff;
+  --admin-error: #ba1a1a;
+  --admin-success: #15803d;
+  --admin-warning: #b45309;
+  --admin-shadow: 0 12px 22px -10px rgba(15, 23, 42, 0.16);
+  --admin-shadow-soft: 0 14px 34px rgba(15, 23, 42, 0.11);
+  --admin-shadow-lg: 0 24px 34px -12px rgba(15, 23, 42, 0.16);
+  --admin-radius-sm: 6px;
+  --admin-radius: 12px;
+  --admin-radius-lg: 18px;
+  --admin-radius-xl: 24px;
+}
+
+body:has(.ant-layout .ant-layout-sider-dark),
+body.dark {
+  --admin-bg: #0f172a;
+  --admin-canvas: #101415;
+  --admin-surface: rgba(30, 41, 59, 0.88);
+  --admin-surface-solid: #1e293b;
+  --admin-surface-muted: #334155;
+  --admin-border: #334155;
+  --admin-border-strong: #414751;
+  --admin-text: #f8fafc;
+  --admin-muted: #c1c7d3;
+  --admin-subtle: #94a3b8;
+  --admin-primary: #60a5fa;
+  --admin-primary-hover: #a4c9ff;
+  --admin-primary-soft: rgba(96, 165, 250, 0.14);
+  --admin-shadow: none;
+  --admin-shadow-soft: none;
+  --admin-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+}

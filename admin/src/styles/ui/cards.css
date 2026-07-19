@@ -1,0 +1,6 @@
+.c-shadow,
+.modern-card {
+  border-radius: var(--admin-radius-lg) !important;
+  border: 1px solid var(--admin-border) !important;
+  box-shadow: var(--admin-shadow-soft) !important;
+}

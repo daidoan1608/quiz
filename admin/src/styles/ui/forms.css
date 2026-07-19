@@ -1,0 +1,21 @@
+.management-filter-control {
+  min-height: 40px;
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker,
+.ant-upload-drag {
+  min-height: 40px;
+  border-radius: var(--admin-radius) !important;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-primary) 18%, transparent) !important;
+}

@@ -39,6 +39,7 @@ export const ContentHeader = () => {
   const { mode, setMode, colorTheme, setColorTheme } = useTheme();
   const isDarkMode = mode === 'dark';
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [adminAlertCount, setAdminAlertCount] = useState(0);
   const { token } = antTheme.useToken();
   const username = localStorage.getItem('username') || 'Admin';
   const displayName = localStorage.getItem('fullName') || username;
@@ -148,7 +149,7 @@ export const ContentHeader = () => {
         </div>
 
         <Space size="middle">
-          <Badge count={0} size="small">
+          <Badge count={adminAlertCount} size="small">
             <Button
               type="text"
               shape="circle"
@@ -180,6 +181,7 @@ export const ContentHeader = () => {
       <NotificationSidebar
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
+        onCountChange={setAdminAlertCount}
       />
     </>
   );

@@ -1,7 +1,17 @@
 import { message } from "antd";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearAuthStorage, publicAxios } from "../api/axiosConfig";
+import {
+  canGlobal as policyCanGlobal,
+  canMenu as policyCanMenu,
+  canOnSubject as policyCanOnSubject,
+  canAnySubject as policyCanAnySubject,
+  canAny as policyCanAny,
+  getAllowedSubjectIds as policyGetAllowedSubjectIds,
+  normalizeCapabilities,
+} from "../utils/adminAccessPolicy";
+import { getFirstAllowedAdminPath } from "../utils/adminNavigationPolicy";
 
 const AuthContext = createContext();
 
@@ -22,7 +32,13 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [capabilities, setCapabilities] = useState(normalizeCapabilities());
   const [loading, setLoading] = useState(true);
+
+  const applyCapabilities = (currentUser) => {
+    const nextCapabilities = normalizeCapabilities(currentUser?.capabilities);
+    setCapabilities(nextCapabilities);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -51,6 +67,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         cacheAdminUser(currentUser);
+        applyCapabilities(currentUser);
         setIsLoggedIn(true);
         setUser(currentUser);
       } catch (error) {
@@ -58,6 +75,7 @@ export const AuthProvider = ({ children }) => {
         if (!mounted) return;
         setIsLoggedIn(false);
         setUser(null);
+        setCapabilities(normalizeCapabilities());
       } finally {
         if (mounted) setLoading(false);
       }
@@ -73,10 +91,31 @@ export const AuthProvider = ({ children }) => {
     const userData =
       typeof userId === "object" ? userId : { userId, role, username, fullName };
 
+    if (!isAdminUser(userData)) {
+      clearAuthStorage();
+      setIsLoggedIn(false);
+      setUser(null);
+      message.error("Tài khoản người dùng không có quyền truy cập trang quản trị!");
+      return false;
+    }
+
     cacheAdminUser(userData);
     setIsLoggedIn(true);
     setUser(userData);
-    navigate("/", { replace: true });
+    applyCapabilities(userData);
+    const nextCapabilities = normalizeCapabilities(userData?.capabilities);
+    const nextCanMenu = (menu) => policyCanMenu(userData, nextCapabilities, menu);
+    const firstAllowedPath = getFirstAllowedAdminPath(userData, nextCanMenu);
+    if (!firstAllowedPath) {
+      clearAuthStorage();
+      setIsLoggedIn(false);
+      setUser(null);
+      setCapabilities(normalizeCapabilities());
+      message.error("Tài khoản MOD chưa được gán quyền truy cập trang quản trị.");
+      return false;
+    }
+    navigate(firstAllowedPath, { replace: true });
+    return true;
   };
 
   const logout = async () => {
@@ -89,7 +128,8 @@ export const AuthProvider = ({ children }) => {
       clearAuthStorage();
       setIsLoggedIn(false);
       setUser(null);
-      message.success("Dang xuat thanh cong!");
+      setCapabilities(normalizeCapabilities());
+      message.success("Đăng xuất thành công!");
       navigate("/login", { replace: true });
     }
   };
@@ -98,10 +138,51 @@ export const AuthProvider = ({ children }) => {
     clearAuthStorage();
     setIsLoggedIn(false);
     setUser(null);
+    setCapabilities(normalizeCapabilities());
   };
 
+  const canMenu = useCallback((menu) => {
+    return policyCanMenu(user, capabilities, menu);
+  }, [capabilities, user]);
+
+  const canGlobal = useCallback((resource, action) => {
+    return policyCanGlobal(user, capabilities, resource, action);
+  }, [capabilities, user]);
+
+  const canOnSubject = useCallback((subjectId, resource, action) => {
+    return policyCanOnSubject(user, capabilities, subjectId, resource, action);
+  }, [capabilities, user]);
+
+  const canAnySubject = useCallback((resource, action) => {
+    return policyCanAnySubject(user, capabilities, resource, action);
+  }, [capabilities, user]);
+
+  const canAny = useCallback((resource, action) => {
+    return policyCanAny(user, capabilities, resource, action);
+  }, [capabilities, user]);
+
+  const getAllowedSubjectIds = useCallback((resource, action) => {
+    return policyGetAllowedSubjectIds(user, capabilities, resource, action);
+  }, [capabilities, user]);
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, clearSession, user, isAdmin: isAdminUser(user) }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn,
+        login,
+        logout,
+        clearSession,
+        user,
+        isAdmin: isAdminUser(user),
+        capabilities,
+        canMenu,
+        canGlobal,
+        canOnSubject,
+        canAnySubject,
+        canAny,
+        getAllowedSubjectIds,
+      }}
+    >
       {loading ? <div>Loading...</div> : children}
     </AuthContext.Provider>
   );

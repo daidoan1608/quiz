@@ -1,0 +1,17 @@
+.admin-table-text {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.admin-table-title-cell {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  gap: 8px;
+}
+
+.admin-table-title-cell .anticon {
+  flex: 0 0 auto;
+}

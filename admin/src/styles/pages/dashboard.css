@@ -1,0 +1,36 @@
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.dashboard-widget {
+  height: 100%;
+}
+
+.dashboard-widget .ant-card-body {
+  min-height: 112px;
+}
+
+.dashboard-widget.is-dragging {
+  opacity: 0.82;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18) !important;
+}
+
+.dashboard-drag-handle {
+  color: var(--admin-subtle) !important;
+  cursor: grab;
+}
+
+.dashboard-drag-handle:active {
+  cursor: grabbing;
+}
+
+@media (max-width: 575px) {
+  .dashboard-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

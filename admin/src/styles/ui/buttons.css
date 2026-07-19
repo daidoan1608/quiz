@@ -1,0 +1,196 @@
+.ant-btn {
+  min-height: 40px;
+  border-radius: var(--admin-radius) !important;
+  font-weight: 700;
+  box-shadow: none !important;
+}
+
+.ant-btn-primary {
+  min-height: 44px;
+  background: color-mix(in srgb, var(--admin-primary) 12%, transparent) !important;
+  border-color: var(--admin-primary) !important;
+  color: var(--admin-primary) !important;
+}
+
+body.dark .ant-btn-primary {
+  color: var(--admin-primary-hover) !important;
+}
+
+.ant-btn.toolbar-btn {
+  height: 40px;
+  min-height: 40px;
+  line-height: 38px;
+  padding-inline: 14px;
+  border-radius: 10px !important;
+  border-color: color-mix(in srgb, var(--admin-primary) 34%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-primary) 6%, var(--admin-surface-solid)) !important;
+  color: var(--admin-primary) !important;
+}
+
+.ant-btn.toolbar-btn:hover {
+  border-color: var(--admin-primary) !important;
+  color: var(--admin-primary) !important;
+  background: color-mix(in srgb, var(--admin-primary) 12%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.toolbar-btn.is-primary,
+.ant-btn.toolbar-btn.ant-btn-primary {
+  height: 40px;
+  min-height: 40px;
+  line-height: 38px;
+  background: color-mix(in srgb, var(--admin-primary) 12%, var(--admin-surface-solid)) !important;
+  border-color: var(--admin-primary) !important;
+  color: var(--admin-primary) !important;
+}
+
+.ant-btn.toolbar-btn > span {
+  line-height: 1;
+}
+
+.ant-btn.toolbar-btn .anticon {
+  font-size: 15px;
+}
+
+body.dark .ant-btn.toolbar-btn.is-primary,
+body.dark .ant-btn.toolbar-btn.ant-btn-primary {
+  color: #0f172a !important;
+}
+
+body.dark .ant-btn.toolbar-btn {
+  border-color: var(--admin-border) !important;
+  background: var(--admin-surface-muted) !important;
+  color: var(--admin-primary-hover) !important;
+}
+
+body.dark .ant-btn.toolbar-btn:hover {
+  border-color: var(--admin-primary) !important;
+  background: var(--admin-primary-soft) !important;
+}
+
+.action-btn,
+.ant-btn.action-btn {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0 !important;
+  border: 1px solid color-mix(in srgb, #0891b2 28%, var(--admin-border)) !important;
+  border-radius: 10px !important;
+  background: color-mix(in srgb, #0891b2 9%, var(--admin-surface-solid)) !important;
+  color: #0e7490 !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.action-btn:hover,
+.ant-btn.action-btn:hover {
+  border-color: #0891b2 !important;
+  color: #0e7490 !important;
+  background: color-mix(in srgb, #0891b2 16%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-primary {
+  color: var(--admin-primary) !important;
+  border-color: color-mix(in srgb, var(--admin-primary) 34%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-primary) 10%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-primary:hover {
+  color: var(--admin-primary) !important;
+  border-color: var(--admin-primary) !important;
+  background: color-mix(in srgb, var(--admin-primary) 17%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-danger {
+  color: var(--admin-error) !important;
+  border-color: color-mix(in srgb, var(--admin-error) 28%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-error) 8%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-danger:hover {
+  color: var(--admin-error) !important;
+  border-color: var(--admin-error) !important;
+  background: color-mix(in srgb, var(--admin-error) 14%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-success {
+  color: var(--admin-success) !important;
+  border-color: color-mix(in srgb, var(--admin-success) 30%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-success) 9%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-success:hover {
+  color: var(--admin-success) !important;
+  border-color: var(--admin-success) !important;
+  background: color-mix(in srgb, var(--admin-success) 15%, var(--admin-surface-solid)) !important;
+}
+
+body.dark .ant-btn.action-btn {
+  border-color: color-mix(in srgb, #22d3ee 24%, var(--admin-border)) !important;
+  background: color-mix(in srgb, #22d3ee 9%, var(--admin-surface-muted)) !important;
+  color: #67e8f9 !important;
+}
+
+body.dark .ant-btn.action-btn:hover {
+  border-color: #67e8f9 !important;
+  color: #a5f3fc !important;
+  background: color-mix(in srgb, #22d3ee 16%, var(--admin-surface-muted)) !important;
+}
+
+body.dark .ant-btn.action-btn.is-primary {
+  background: color-mix(in srgb, var(--admin-primary) 14%, var(--admin-surface-muted)) !important;
+}
+
+body.dark .ant-btn.action-btn.is-danger {
+  background: color-mix(in srgb, var(--admin-error) 14%, var(--admin-surface-muted)) !important;
+}
+
+body.dark .ant-btn.action-btn.is-success {
+  background: color-mix(in srgb, var(--admin-success) 14%, var(--admin-surface-muted)) !important;
+}
+
+.ant-btn.compact-btn {
+  min-height: 32px;
+  height: auto;
+  border-radius: 9px !important;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: normal;
+  padding: 6px 10px;
+}
+
+.modal-primary-btn,
+.ant-btn.modal-primary-btn {
+  height: 40px;
+  min-height: 40px;
+  border-radius: 10px !important;
+  border-color: var(--admin-primary) !important;
+  background: color-mix(in srgb, var(--admin-primary) 12%, transparent) !important;
+  color: var(--admin-primary) !important;
+  box-shadow: none !important;
+}
+
+.modal-primary-btn:hover,
+.modal-primary-btn:focus,
+.ant-btn.modal-primary-btn:hover,
+.ant-btn.modal-primary-btn:focus {
+  border-color: var(--admin-primary-hover) !important;
+  background: color-mix(in srgb, var(--admin-primary) 18%, transparent) !important;
+  color: var(--admin-primary-hover) !important;
+}
+
+.modal-primary-btn > span,
+.ant-btn.modal-primary-btn > span,
+.modal-primary-btn .anticon,
+.ant-btn.modal-primary-btn .anticon {
+  color: inherit !important;
+}
+
+body.dark .modal-primary-btn,
+body.dark .ant-btn.modal-primary-btn {
+  color: var(--admin-primary-hover) !important;
+}

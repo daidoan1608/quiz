@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Layout, Menu, Button } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthProvider';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -12,11 +13,13 @@ import {
   HomeOutlined,
   ReadOutlined,
   UserOutlined,
+  SafetyCertificateOutlined,
   TableOutlined,
   QuestionCircleOutlined,
   HistoryOutlined,
   FolderOpenOutlined,
 } from '@ant-design/icons';
+import { ADMIN_ROUTES } from '../../utils/adminNavigationPolicy';
 
 const { Sider } = Layout;
 
@@ -27,6 +30,7 @@ const items = [
   { key: '/audit-logs', icon: <HistoryOutlined />, label: 'Audit log' },
   { key: '/userexams', icon: <ReadOutlined />, label: 'Bài thi' },
   { key: '/users', icon: <UserOutlined />, label: 'Người dùng' },
+  { key: '/groups', icon: <SafetyCertificateOutlined />, label: 'Nhóm quyền' },
   { key: '/exams', icon: <FileTextOutlined />, label: 'Đề thi' },
   { key: '/categories', icon: <AppstoreOutlined />, label: 'Khoa' },
   { key: '/subjects', icon: <TableOutlined />, label: 'Môn học' },
@@ -34,11 +38,19 @@ const items = [
   { key: '/questions', icon: <QuestionCircleOutlined />, label: 'Câu hỏi' },
 ];
 
+const menuPermissions = Object.fromEntries(ADMIN_ROUTES.map((route) => [route.path, route.menu]));
+
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { mode } = useTheme();
+  const { user, canMenu } = useAuth();
+
+  const visibleItems = items.filter((item) => {
+    if (user?.role !== 'MOD') return true;
+    return canMenu(menuPermissions[item.key]);
+  });
 
   return (
     <Sider
@@ -81,7 +93,7 @@ export default function Sidebar() {
         mode="inline"
         selectedKeys={[location.pathname]}
         onClick={({ key }) => navigate(key)}
-        items={items}
+        items={visibleItems}
       />
     </Sider>
   );

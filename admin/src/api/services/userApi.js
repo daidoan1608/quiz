@@ -19,6 +19,11 @@ export const userApi = {
     return normalizeList(unwrapApiData(response));
   },
 
+  async filter(params) {
+    const response = await authAxios.get("/admin/users/filter", { params });
+    return normalizeList(unwrapApiData(response));
+  },
+
   async getById(userId) {
     const response = await authAxios.get(`/users/${userId}`);
     return unwrapApiData(response, null);

@@ -14,6 +14,16 @@ export const chapterApi = {
     return normalizeList(unwrapApiData(response));
   },
 
+  async filter(params) {
+    const response = await authAxios.get("/admin/chapters/filter", { params });
+    return normalizeList(unwrapApiData(response));
+  },
+
+  async getBySubject(subjectId) {
+    const response = await authAxios.get(`/public/chapters/subject/${subjectId}`);
+    return normalizeList(unwrapApiData(response));
+  },
+
   async getDeleted() {
     const response = await authAxios.get("/admin/chapters/deleted");
     return normalizeList(unwrapApiData(response));
@@ -37,6 +47,30 @@ export const examApi = {
   async getDeleted() {
     const response = await authAxios.get("/admin/exams/deleted");
     return normalizeList(unwrapApiData(response));
+  },
+
+  async filter(params) {
+    const response = await authAxios.get("/admin/exams/filter", { params });
+    return normalizeList(unwrapApiData(response));
+  },
+
+  async getBySubject(subjectId) {
+    const response = await authAxios.get(`/public/exams/subject/${subjectId}`);
+    return normalizeList(unwrapApiData(response));
+  },
+
+  async filterPage(params) {
+    const response = await authAxios.get("/admin/exams/page", { params });
+    return unwrapApiData(response, { content: [], totalElements: 0 });
+  },
+
+  async getQuestionLimits(subjectId) {
+    const response = await authAxios.get(`/admin/questions/total-questions/${subjectId}`);
+    return unwrapApiData(response, {});
+  },
+
+  create(payload) {
+    return authAxios.post("/admin/exams", payload);
   },
 
   remove(examId) {
@@ -69,6 +103,29 @@ export const questionApi = {
   async filter(params) {
     const response = await authAxios.get("/admin/questions/filter", { params });
     return normalizeList(unwrapApiData(response));
+  },
+
+  async getBySubject(subjectId) {
+    const response = await authAxios.get(`/admin/questions/subject/${subjectId}`);
+    return normalizeList(unwrapApiData(response));
+  },
+
+  async filterPage(params) {
+    const response = await authAxios.get("/admin/questions/page", { params });
+    return unwrapApiData(response, { content: [], totalElements: 0 });
+  },
+
+  async getById(questionId) {
+    const response = await authAxios.get(`/admin/questions/${questionId}`);
+    return unwrapApiData(response, null);
+  },
+
+  create(payload) {
+    return authAxios.post("/admin/questions", payload);
+  },
+
+  update(questionId, payload) {
+    return authAxios.patch(`/admin/questions/${questionId}`, payload);
   },
 
   remove(questionId) {
