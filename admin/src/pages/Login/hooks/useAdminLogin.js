@@ -13,7 +13,6 @@ export const useAdminLogin = () => {
   const submitLogin = async (values) => {
     setLoading(true);
     try {
-      await logoutSilently();
       const response = await publicAxios.post("/auth/login", {
         username: values.username,
         password: values.password,

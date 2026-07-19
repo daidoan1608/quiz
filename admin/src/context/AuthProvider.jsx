@@ -1,7 +1,11 @@
 import { message } from "antd";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearAuthStorage, publicAxios } from "../api/axiosConfig";
+import {
+  clearAuthStorage,
+  publicAxios,
+  setExplicitLogoutInProgress,
+} from "../api/axiosConfig";
 import {
   canGlobal as policyCanGlobal,
   canMenu as policyCanMenu,
@@ -119,6 +123,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    setExplicitLogoutInProgress(true);
     try {
       await publicAxios.post("/auth/logout");
     } catch (error) {
@@ -130,6 +135,7 @@ export const AuthProvider = ({ children }) => {
       setCapabilities(normalizeCapabilities());
       message.success("Đăng xuất thành công!");
       navigate("/login", { replace: true });
+      window.setTimeout(() => setExplicitLogoutInProgress(false), 1000);
     }
   };
 

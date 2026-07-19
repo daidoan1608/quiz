@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 import { useTheme } from '../../context/ThemeContext';
 import { NotificationSidebar } from './NotificationSidebar';
@@ -31,7 +30,6 @@ const resolveAvatarUrl = (url) => {
 };
 
 export const ContentHeader = () => {
-  const navigate = useNavigate();
   const { logout } = useAuth();
   const { mode, setMode, colorTheme, setColorTheme } = useTheme();
   const isDarkMode = mode === 'dark';
@@ -44,7 +42,6 @@ export const ContentHeader = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
   };
 
   const colorThemes = [

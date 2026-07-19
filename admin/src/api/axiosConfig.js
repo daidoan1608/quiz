@@ -23,6 +23,11 @@ publicAxios.interceptors.request.use(attachCsrfHeader);
 
 let isRefreshing = false;
 let failedQueue = [];
+let explicitLogoutInProgress = false;
+
+const setExplicitLogoutInProgress = (value) => {
+  explicitLogoutInProgress = value;
+};
 
 const getAdminLoginPath = () => {
   const basename = ADMIN_BASENAME === "/" ? "" : ADMIN_BASENAME.replace(/\/$/, "");
@@ -87,6 +92,10 @@ authAxios.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (explicitLogoutInProgress) {
+      return Promise.reject(error);
+    }
+
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
@@ -114,4 +123,10 @@ authAxios.interceptors.response.use(
   }
 );
 
-export { authAxios, publicAxios, clearAuthStorage, getApiErrorMessage };
+export {
+  authAxios,
+  publicAxios,
+  clearAuthStorage,
+  getApiErrorMessage,
+  setExplicitLogoutInProgress,
+};
