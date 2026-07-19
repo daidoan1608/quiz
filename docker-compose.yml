@@ -1,24 +1,28 @@
 services:
   backend:
-    build: ./server
-    restart: always
-    expose:
-      - "8080"
-    depends_on:
-      - db
+    build:
+      context: ./server
+    restart: unless-stopped
     env_file:
       - ./server/.env.production
     environment:
-      - DB_HOST=db
+      DB_HOST: db
+      DB_PORT: 3306
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
+    expose:
+      - "8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
   user:
     build:
       context: ./client
       args:
-        REACT_APP_API_URL: ${CLIENT_API_URL:-https://api.quizvnua.com/api/v1/}
-        REACT_APP_AVATAR_URL: ${CLIENT_AVATAR_URL:-https://api.quizvnua.com}
-        REACT_APP_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-    restart: always
+        VITE_API_URL: ${CLIENT_API_URL:-https://api.quizvnua.com/api/v1/}
+        VITE_AVATAR_URL: ${CLIENT_AVATAR_URL:-https://api.quizvnua.com}
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    restart: unless-stopped
     expose:
       - "3000"
 
@@ -26,28 +30,36 @@ services:
     build:
       context: ./admin
       args:
-        REACT_APP_API_URL: ${ADMIN_API_URL:-https://api.quizvnua.com/api/v1/}
-        REACT_APP_ADMIN_BASENAME: ${ADMIN_BASENAME:-/}
-    restart: always
+        VITE_API_URL: ${ADMIN_API_URL:-https://api.quizvnua.com/api/v1/}
+        VITE_ADMIN_BASENAME: ${ADMIN_BASENAME:-/}
+    restart: unless-stopped
     expose:
       - "3001"
 
   db:
     image: mysql:8.0
-    restart: always
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     env_file:
       - ./server/.env.production
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-me}
       MYSQL_DATABASE: ${DB_NAME:-quiz}
     volumes:
-      - ./mysql.init:/docker-entrypoint-initdb.d
+      - ./mysql.init:/docker-entrypoint-initdb.d:ro
       - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
   nginx:
     image: nginx:alpine
-    restart: always
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -55,9 +67,12 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
-      - backend
-      - user
-      - admin
+      backend:
+        condition: service_started
+      user:
+        condition: service_started
+      admin:
+        condition: service_started
 
 volumes:
   db-data:

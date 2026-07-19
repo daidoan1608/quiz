@@ -1,43 +1,78 @@
 services:
   backend:
+    build:
+      context: ./server
+    restart: unless-stopped
     env_file:
       - ./server/.env.local
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
+    ports:
+      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      DB_HOST: db
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/quiz?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
-    ports:
-      - "8080:8080"
 
   user:
     build:
+      context: ./client
       args:
-        REACT_APP_API_URL: /api/v1/
-        REACT_APP_AVATAR_URL: ""
-        REACT_APP_GOOGLE_CLIENT_ID: ${REACT_APP_GOOGLE_CLIENT_ID:-}
+        VITE_API_URL: /api/v1/
+        VITE_AVATAR_URL: ""
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    restart: unless-stopped
     ports:
       - "3000:3000"
 
   admin:
     build:
+      context: ./admin
       args:
-        REACT_APP_API_URL: /api/v1/
-        REACT_APP_ADMIN_BASENAME: /
+        VITE_API_URL: /api/v1/
+        VITE_ADMIN_BASENAME: /
+    restart: unless-stopped
     ports:
       - "3001:3001"
 
-  nginx:
-    ports:
-      - "80:80"
-
   db:
+    image: mysql:8.0
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     env_file:
       - ./server/.env.local
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-quiz}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql.init:/docker-entrypoint-initdb.d:ro
+      - db-data-local:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 3s
       retries: 20
       start_period: 10s
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      backend:
+        condition: service_started
+      user:
+        condition: service_started
+      admin:
+        condition: service_started
+
+volumes:
+  db-data-local:
