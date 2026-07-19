@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'node:path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
@@ -7,6 +8,21 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     base: env.VITE_ADMIN_BASENAME || '/',
+    resolve: {
+      alias: {
+        '@api': path.resolve(__dirname, 'src/api'),
+        '@components': path.resolve(__dirname, 'src/components'),
+        '@config': path.resolve(__dirname, 'src/config'),
+        '@context': path.resolve(__dirname, 'src/context'),
+        '@hooks': path.resolve(__dirname, 'src/hooks'),
+        '@layouts': path.resolve(__dirname, 'src/layouts'),
+        '@pages': path.resolve(__dirname, 'src/pages'),
+        '@routes': path.resolve(__dirname, 'src/routes'),
+        '@styles': path.resolve(__dirname, 'src/styles'),
+        '@utils': path.resolve(__dirname, 'src/utils'),
+        '@': path.resolve(__dirname, 'src'),
+      },
+    },
     server: {
       port: 3001,
     },

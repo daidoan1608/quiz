@@ -13,6 +13,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.npmrc
+**/.npmrc
 node_modules/
 **/node_modules/
 target/
@@ -45,8 +47,14 @@ excel_import_data_test/
 # Local planning notes
 MAINTENANCE_PLAN.md
 .prettierignore
+.prettierrc
+.prettierrc.*
 run.cmd
 run.ps1
+
+# Local codebase-memory MCP indexes
+.codebase-memory/
+**/.codebase-memory/
 
 # Local Playwright artifacts
 .playwright-mcp/
