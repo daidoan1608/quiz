@@ -1,4 +1,10 @@
 import React from 'react';
+import { message } from 'antd';
+import PasswordInputField from './PasswordInputField';
+import {
+  getPasswordChangeValidationMessage,
+  PASSWORD_MIN_LENGTH,
+} from '../utils/passwordValidation';
 
 export default function ChangePasswordModal({
   isOpen,
@@ -6,17 +12,26 @@ export default function ChangePasswordModal({
   onSubmit,
   texts = {},
 }) {
-  // Demo dùng HTML Form đơn giản nếu không muốn cài thêm thư viện
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
+    const oldPassword = data.oldPassword?.trim() || '';
+    const newPassword = data.newPassword?.trim() || '';
+    const confirmPassword = data.confirmPassword?.trim() || '';
+    const validationMessage = getPasswordChangeValidationMessage({
+      confirmPassword,
+      newPassword,
+      oldPassword,
+      texts,
+    });
 
-    if (data.newPassword !== data.confirmPassword) {
-      alert(texts.passwordMismatch || 'Mật khẩu xác nhận không khớp!');
+    if (validationMessage) {
+      message.warning(validationMessage);
       return;
     }
-    onSubmit(data);
+
+    onSubmit({ oldPassword, newPassword });
   };
 
   if (!isOpen) return null;
@@ -29,41 +44,21 @@ export default function ChangePasswordModal({
         </h3>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {texts.oldPassword || 'Mật khẩu hiện tại'}
-            </label>
-            <input
-              name="oldPassword"
-              type="password"
-              required
-              className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {texts.newPassword || 'Mật khẩu mới'}
-            </label>
-            <input
-              name="newPassword"
-              type="password"
-              required
-              minLength={6}
-              className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {texts.confirmPassword || 'Xác nhận mật khẩu mới'}
-            </label>
-            <input
-              name="confirmPassword"
-              type="password"
-              required
-              minLength={6}
-              className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-            />
-          </div>
+          <PasswordInputField
+            label={texts.oldPassword || 'Mật khẩu hiện tại'}
+            name="oldPassword"
+          />
+          <PasswordInputField
+            autoComplete="new-password"
+            helperText={`Ít nhất ${PASSWORD_MIN_LENGTH} ký tự, gồm cả chữ và số.`}
+            label={texts.newPassword || 'Mật khẩu mới'}
+            name="newPassword"
+          />
+          <PasswordInputField
+            autoComplete="new-password"
+            label={texts.confirmPassword || 'Xác nhận mật khẩu mới'}
+            name="confirmPassword"
+          />
 
           <div className="flex gap-3 mt-4">
             <button

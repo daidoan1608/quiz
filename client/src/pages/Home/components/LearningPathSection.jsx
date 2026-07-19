@@ -1,4 +1,4 @@
-import { LEARNING_ICON_PATHS, LEARNING_PATH_STEPS } from 'pages/Home/constants';
+import { LEARNING_ICON_PATHS, LEARNING_PATH_STEPS } from 'pages/Home/constants/homeContent';
 import SvgIcon from './SvgIcon';
 
 export default function LearningPathSection({ t }) {

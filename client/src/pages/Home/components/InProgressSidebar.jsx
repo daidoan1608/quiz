@@ -2,7 +2,8 @@ import {
   formatRemainingTime,
   getAttemptKey,
   getAttemptProgress,
-} from 'pages/Home/utils';
+} from 'pages/Home/utils/attemptFormatters';
+import { progressValueStyle } from 'utils/styleVariables';
 
 export default function InProgressSidebar({
   attempts,
@@ -52,10 +53,10 @@ function InProgressAttemptCard({ attempt, t, onContinue }) {
         {attempt.subjectName || t('home.subjectFallback')} •{' '}
         {formatRemainingTime(attempt.remainingTime, t)}
       </p>
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+      <div className="aura-progress mb-3 h-2 w-full">
         <div
-          className="bg-amber-500 h-2 rounded-full transition-all duration-1000"
-          style={{ width: `${progress}%` }}
+          className="aura-progress__bar aura-progress__bar--warning"
+          style={progressValueStyle(progress)}
         />
       </div>
       <div className="flex justify-between items-center">

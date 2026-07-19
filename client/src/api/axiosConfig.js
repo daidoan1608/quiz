@@ -1,153 +1,16 @@
-import axios from "axios";
-import { message } from "antd";
+import axios from 'axios';
+import { attachAuthResponseInterceptor, EXPLICIT_LOGOUT_KEY } from './http/authInterceptors';
+import { createAxiosConfig } from './http/clientConfig';
+import { attachLanguageAndCsrfHeaders } from './http/requestInterceptors';
 
-// 1. Dùng process.env vì là Create React App
-const DEFAULT_API_URL = "/api/v1/";
-const BASE_URL = process.env.REACT_APP_API_URL || DEFAULT_API_URL;
-
-// 2. Cấu hình chung
-const config = {
-  baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true, // QUAN TRỌNG: Để gửi Cookie đi
-  xsrfCookieName: "XSRF-TOKEN",
-  xsrfHeaderName: "X-XSRF-TOKEN",
-};
+const config = createAxiosConfig();
 
 const authAxios = axios.create(config);
 const publicAxios = axios.create(config);
 
-const getCookieValue = (name) => {
-  if (typeof document === "undefined") return "";
-  const cookie = document.cookie
-    .split("; ")
-    .find((item) => item.startsWith(`${name}=`));
-  return cookie ? decodeURIComponent(cookie.split("=")[1] || "") : "";
-};
+authAxios.interceptors.request.use(attachLanguageAndCsrfHeaders);
+publicAxios.interceptors.request.use(attachLanguageAndCsrfHeaders);
 
-const isUnsafeMethod = (method = "get") =>
-  ["post", "put", "patch", "delete"].includes(method.toLowerCase());
+attachAuthResponseInterceptor({ authAxios, publicAxios });
 
-const attachLanguageHeader = (requestConfig) => {
-  const language = localStorage.getItem("appLanguage") || "vi";
-  requestConfig.headers = requestConfig.headers || {};
-  requestConfig.headers["Accept-Language"] = language;
-  const xsrfToken = getCookieValue("XSRF-TOKEN");
-  if (xsrfToken && isUnsafeMethod(requestConfig.method)) {
-    requestConfig.headers["X-XSRF-TOKEN"] = xsrfToken;
-  }
-  return requestConfig;
-};
-
-authAxios.interceptors.request.use(attachLanguageHeader);
-publicAxios.interceptors.request.use(attachLanguageHeader);
-
-const getApiErrorMessage = (error, fallback = "Có lỗi xảy ra, vui lòng thử lại!") => {
-  const responseData = error?.response?.data;
-  if (responseData?.message) return responseData.message;
-  if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
-    return responseData.errors[0];
-  }
-  if (typeof responseData === "string") return responseData;
-  return error?.message || fallback;
-};
-
-let isRefreshing = false;
-let failedQueue = [];
-
-// Hàm xử lý hàng đợi
-const processQueue = (error) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve();
-    }
-  });
-  failedQueue = [];
-};
-
-const primeCsrfToken = async () => {
-  await publicAxios.get("/auth/me");
-  return getCookieValue("XSRF-TOKEN");
-};
-
-// 3. Response Interceptor (Logic Refresh Token)
-authAxios.interceptors.response.use(
-  (response) => {
-    // Trả về response.data để component đỡ phải gọi .data lần nữa (tùy thói quen của bạn)
-    // Nếu Admin đang return response thì ở đây cũng nên return response cho đồng bộ
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (!originalRequest || originalRequest._retry) {
-      return Promise.reject(error);
-    }
-
-    const status = error.response?.status;
-
-    if (status === 403 && isUnsafeMethod(originalRequest.method) && !originalRequest._csrfRetry) {
-      originalRequest._csrfRetry = true;
-      try {
-        const xsrfToken = await primeCsrfToken();
-        if (xsrfToken) {
-          originalRequest.headers = originalRequest.headers || {};
-          originalRequest.headers["X-XSRF-TOKEN"] = xsrfToken;
-          return authAxios(originalRequest);
-        }
-      } catch (csrfError) {
-        return Promise.reject(error);
-      }
-    }
-
-    if (status === 403) {
-      message.error(getApiErrorMessage(error, "Bạn không có quyền thực hiện thao tác này!"));
-      return Promise.reject(error);
-    }
-
-    // Kiểm tra lỗi 401 để refresh phiên đăng nhập
-    if (status === 401) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => {
-            return authAxios(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Gọi API Refresh (Cookie HttpOnly sẽ tự động gửi đi)
-        await publicAxios.post("/auth/refresh");
-
-        // Refresh xong thì chạy lại các request đang chờ
-        processQueue(null);
-
-        // Gọi lại request ban đầu
-        return authAxios(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError);
-
-        // Xử lý khi refresh thất bại (Token hết hạn)
-        message.error(getApiErrorMessage(refreshError, "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!"));
-        window.location.href = "/login";
-
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-export { authAxios, publicAxios, getApiErrorMessage };
+export { authAxios, EXPLICIT_LOGOUT_KEY, publicAxios };

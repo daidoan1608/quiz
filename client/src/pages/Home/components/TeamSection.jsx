@@ -1,4 +1,4 @@
-import { TEAM_MEMBERS } from 'pages/Home/constants';
+import { TEAM_MEMBERS } from 'pages/Home/constants/homeContent';
 import SocialLinks from './SocialLinks';
 import SvgIcon from './SvgIcon';
 

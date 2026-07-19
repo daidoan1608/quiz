@@ -26,7 +26,15 @@
     "appearance": "Giao diện",
     "light": "Sáng",
     "dark": "Tối",
-    "colorTone": "Tông màu"
+    "colorTone": "Tông màu",
+    "primaryColor": "Màu chủ đạo",
+    "colorLabel": {
+      "blue": "Xanh dương",
+      "emerald": "Xanh ngọc",
+      "cyberpunk": "Cyberpunk",
+      "sunset": "Hoàng hôn",
+      "slate": "Chàm"
+    }
   },
   "language": {
     "change": "Đổi ngôn ngữ",
@@ -185,6 +193,7 @@
   "notUpdated": "Chưa cập nhật",
   "untitledExam": "Bài thi không tên",
   "accountLoadError": "Không thể tải thông tin tài khoản.",
+  "changePasswordSuccess": "Đổi mật khẩu thành công.",
   "changePasswordError": "Lỗi đổi mật khẩu.",
   "uploadAvatarError": "Lỗi tải ảnh lên.",
   "updateProfileSuccess": "Cập nhật thông tin cá nhân thành công!",
@@ -237,22 +246,6 @@
   "currentQuestion": "Câu hiện tại",
   "answered": "Đã trả lời",
   "notAnswered": "Chưa làm",
-  "subjectsMap": {
-    "Nguyên lý hệ điều hành": "Nguyên lý hệ điều hành",
-    "Mạng máy tính": "Mạng máy tính",
-    "Kiến trúc máy tính và vi xử lý": "Kiến trúc máy tính và vi xử lý",
-    "Kinh tế chính trị Mác - Lênin": "Kinh tế chính trị Mác - Lênin",
-    "Tin học cơ sở": "Tin học cơ sở",
-    "Thiết kế mạng máy tính": "Thiết kế mạng máy tính",
-    "Trí tuệ nhân tạo": "Trí tuệ nhân tạo",
-    "Khai phá dữ liệu": "Khai phá dữ liệu"
-  },
-  "categoriesMap": {
-    "Công Nghệ Thông Tin": "Công Nghệ Thông Tin",
-    "Khoa Học Xã Hội": "Khoa Học Xã Hội",
-    "Thú Y": "Thú Y",
-    "Chăn Nuôi": "Chăn Nuôi"
-  },
   "home": {
     "hero": {
       "mascotName": "Mèo Trợ Lý",

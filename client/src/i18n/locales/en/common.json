@@ -193,6 +193,7 @@
   "notUpdated": "Not updated",
   "untitledExam": "Untitled exam",
   "accountLoadError": "Unable to load account information.",
+  "changePasswordSuccess": "Password changed successfully.",
   "changePasswordError": "Unable to change password.",
   "uploadAvatarError": "Unable to upload avatar.",
   "updateProfileSuccess": "Personal information updated successfully!",
@@ -245,22 +246,6 @@
   "currentQuestion": "Current question",
   "answered": "Answered",
   "notAnswered": "Not answered",
-  "subjectsMap": {
-    "Nguyên lý hệ điều hành": "Operating Systems Principles",
-    "Mạng máy tính": "Computer Networks",
-    "Kiến trúc máy tính và vi xử lý": "Computer Architecture and Microprocessors",
-    "Kinh tế chính trị Mác - Lênin": "Political Economics Of Marxism And Leninism",
-    "Tin học cơ sở": "Basic Informatics",
-    "Thiết kế mạng máy tính": "Computer Network Design",
-    "Trí tuệ nhân tạo": "Artificial Intelligence",
-    "Khai phá dữ liệu": "Data Mining"
-  },
-  "categoriesMap": {
-    "Công Nghệ Thông Tin": "Information Technology",
-    "Khoa Học Xã Hội": "Social Sciences",
-    "Thú Y": "Veterinary Medicine",
-    "Chăn Nuôi": "Animal Husbandry"
-  },
   "home": {
     "hero": {
       "mascotName": "Cat Assistant",

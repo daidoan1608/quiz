@@ -1,4 +1,4 @@
-import { SUBJECT_ICON_PATHS } from 'pages/Home/constants';
+import { SUBJECT_ICON_PATHS } from 'pages/Home/constants/homeContent';
 import SvgIcon from './SvgIcon';
 
 export default function SubjectsSection({ subjects, t, onSelectSubject }) {

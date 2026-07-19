@@ -30,5 +30,8 @@ export const getStoredAvatarUrl = () => getStorageItem(storageKeys.avatarUrl, ""
 
 export const getStoredLanguage = () => getStorageItem(storageKeys.appLanguage, "vi");
 
+export const setStoredLanguage = (language) =>
+  setStorageItem(storageKeys.appLanguage, language);
+
 export const createExamDraftKey = (userId, examId) =>
   userId && examId ? `exam_draft_${userId}_${examId}` : null;

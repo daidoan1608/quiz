@@ -1,10 +1,9 @@
+import { CLIENT_API_ROOT } from 'config/env';
+
 const DEFAULT_API_ROOT = "";
 const DEFAULT_AVATAR_URL = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-export const getApiRoot = () =>
-  process.env.REACT_APP_API_URL
-    ? process.env.REACT_APP_API_URL.replace(/\/api\/v1\/?$/, "")
-    : DEFAULT_API_ROOT;
+export const getApiRoot = () => CLIENT_API_ROOT || DEFAULT_API_ROOT;
 
 export const isAbsoluteUrl = (url) => /^https?:\/\//i.test(url || "");
 

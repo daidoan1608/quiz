@@ -1,8 +1,8 @@
 import React from 'react';
+import { CLIENT_AVATAR_URL } from 'config/env';
 import { resolveMediaUrl } from 'utils/mediaUrl';
 import { getStoredAvatarUrl } from 'utils/storage';
 
-const BASE_URL_AVATAR = process.env.REACT_APP_AVATAR_URL;
 const DEFAULT_AVATAR = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
 export default function UserProfileCard({
@@ -17,7 +17,7 @@ export default function UserProfileCard({
   const resolvedAvatarUrl =
     avatarUrl || user?.avatarUrl || getStoredAvatarUrl();
   const avatarSrc = resolvedAvatarUrl
-    ? resolveMediaUrl(resolvedAvatarUrl, BASE_URL_AVATAR || '')
+    ? resolveMediaUrl(resolvedAvatarUrl, CLIENT_AVATAR_URL)
     : DEFAULT_AVATAR;
 
   const handleFileChange = (e) => {

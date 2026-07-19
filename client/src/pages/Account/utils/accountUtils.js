@@ -1,22 +1,20 @@
 import { getCurrentUserId, getStoredAvatarUrl } from "utils/storage";
+export { getAttemptProgress } from "utils/attemptProgress";
 
 export { getCurrentUserId };
 
-export const ACCOUNT_SECTIONS = {
-  ROADMAP: "roadmap",
-  PERSONAL: "personal",
-};
-
 export const normalizeExams = (examData = []) => {
-  return examData.filter((exam) => exam.userExamDto?.status === "SUBMITTED").map((exam) => ({
-    ...exam,
-    examId: exam.examId || exam.id || exam.userExamDto?.examId,
-    subjectName: exam.subjectName || "Chưa xác định",
-    title: exam.title || "Bài thi không tên",
-    score: exam.userExamDto?.score || 0,
-    startTime: exam.userExamDto?.startTime,
-    endTime: exam.userExamDto?.endTime,
-  }));
+  return examData
+    .filter((exam) => exam.userExamDto?.status === "SUBMITTED")
+    .map((exam) => ({
+      ...exam,
+      endTime: exam.userExamDto?.endTime,
+      examId: exam.examId || exam.id || exam.userExamDto?.examId,
+      score: exam.userExamDto?.score || 0,
+      startTime: exam.userExamDto?.startTime,
+      subjectName: exam.subjectName || "Chưa xác định",
+      title: exam.title || "Bài thi không tên",
+    }));
 };
 
 export const groupExamsBySubject = (exams = []) => {
@@ -78,11 +76,17 @@ export const buildLearningStats = (exams = []) => {
   };
 };
 
-export const getAttemptProgress = (attempt) => {
-  const total = Number(attempt.totalQuestions) || 0;
-  const answered = Number(attempt.answeredCount) || 0;
-  return total > 0 ? Math.min(100, Math.round((answered / total) * 100)) : 0;
+export const buildAvatarFormData = (fileInput) => {
+  const formData = new FormData();
+  formData.append('file', fileInput);
+  return formData;
 };
+
+export const mergeUpdatedUser = (prevUser, updatedUser) => ({
+  ...prevUser,
+  ...updatedUser,
+  avatarUrl: updatedUser.avatarUrl || prevUser?.avatarUrl,
+});
 
 export const buildProfilePayload = (profileValues) => ({
   fullName: profileValues.fullName?.trim(),

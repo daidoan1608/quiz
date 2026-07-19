@@ -1,98 +1,36 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from 'react';
-import { useAuth } from 'context/AuthProvider';
-import { useLanguage } from 'context/LanguageProvider';
-import { useNavigate, useLocation } from 'react-router-dom';
-import FavoritesModal from 'components/modals/FavoritesModal';
-import { useTheme } from 'context/ThemeProvider';
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import FavoritesModal from './components/FavoritesModal';
+import { useAuth } from 'context/auth/AuthProvider';
+import { useLanguage } from 'context/language/LanguageProvider';
+import { useNotifications } from 'context/notifications/NotificationProvider';
+import { useTheme } from 'context/theme/ThemeProvider';
 import { getStoredAvatarUrl } from 'utils/storage';
-import { resolveMediaUrl } from 'utils/mediaUrl';
-import AppearanceModeToggle from './AppearanceModeToggle';
-import Logo from './Logo';
-import { useNotifications } from 'context/NotificationProvider';
+import DesktopNav from './components/DesktopNav';
+import HeaderActions from './components/HeaderActions';
+import Logo from './components/Logo';
+import MobileMenu from './components/MobileMenu';
+import { useHeaderActions } from './hooks/useHeaderActions';
+import { useHeaderNavigation } from './hooks/useHeaderNavigation';
 
 export default function Header() {
   const { isLoggedIn, logout, fullName, avatarUrl } = useAuth();
   const { language, toggleLanguage, t } = useLanguage();
+  const { unreadCount } = useNotifications();
+  const { mode, setMode, colorTheme, setColorTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const currentAvatarUrl = avatarUrl || getStoredAvatarUrl();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const navRef = useRef(null);
-  const navItemRefs = useRef({});
-  const [activePill, setActivePill] = useState({
-    left: 0,
-    width: 0,
-    opacity: 0,
-  });
-  const { unreadCount } = useNotifications();
 
-  const { mode, setMode, colorTheme, setColorTheme } = useTheme();
   const isDarkMode = mode === 'dark';
-  const toggleTheme = () => setMode(isDarkMode ? 'light' : 'dark');
-
-  // Đóng menu khi click ra ngoài
-  useEffect(() => {
-    const handleClickOutside = () => setShowUserMenu(false);
-    if (showUserMenu) document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [showUserMenu]);
-
-  const handleLogout = () => {
-    logout();
-    setShowUserMenu(false);
-  };
-
-  const navItems = useMemo(
-    () => [
-      { name: t('nav.home'), link: '/' },
-      { name: t('nav.subjects'), link: '/subjects' },
-      { name: t('nav.documents'), link: '/documents' },
-      { name: t('nav.rank'), link: '/rank' },
-    ],
-    [t]
-  );
-
-  const isActive = useCallback(
-    (path) =>
-      path === '/'
-        ? location.pathname === '/'
-        : location.pathname === path ||
-          location.pathname.startsWith(`${path}/`),
-    [location.pathname]
-  );
-
-  useLayoutEffect(() => {
-    const activePath = navItems.find((item) => isActive(item.link))?.link;
-    const activeItem = activePath ? navItemRefs.current[activePath] : null;
-    const nav = navRef.current;
-    if (!activeItem || !nav) {
-      setActivePill((prev) => ({ ...prev, opacity: 0 }));
-      return;
-    }
-
-    const navRect = nav.getBoundingClientRect();
-    const itemRect = activeItem.getBoundingClientRect();
-    setActivePill({
-      left: itemRect.left - navRect.left,
-      width: itemRect.width,
-      opacity: 1,
-    });
-  }, [location.pathname, language, navItems, isActive]);
-
-  // Đảm bảo đóng Mobile Menu khi chuyển hướng
-  const handleMobileNavClick = (link) => {
-    navigate(link);
-    setShowMobileMenu(false);
-  };
+  const currentAvatarUrl = avatarUrl || getStoredAvatarUrl();
+  const navigation = useHeaderNavigation({ language, location, navigate, t });
+  const actions = useHeaderActions({
+    isDarkMode,
+    location,
+    logout,
+    navigate,
+    setMode,
+  });
 
   return (
     <>
@@ -101,443 +39,59 @@ export default function Header() {
           <div className="flex items-center justify-between h-20 md:h-24">
             <Logo onClick={() => navigate('/')} />
 
-            {/* MENU DESKTOP (Không đổi) */}
-            <nav
-              ref={navRef}
-              className="relative hidden md:flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-gradient-to-r from-white/80 via-blue-50/70 to-indigo-50/70 p-1.5 shadow-lg shadow-blue-900/5 ring-1 ring-white/80 backdrop-blur-md dark:border-blue-300/20 dark:from-slate-800/80 dark:via-blue-950/40 dark:to-indigo-950/40 dark:shadow-black/20 dark:ring-white/10"
-            >
-              <span
-                className="pointer-events-none absolute top-1.5 h-[calc(100%-12px)] overflow-hidden rounded-full border border-white/80 bg-white/48 shadow-[inset_0_1px_1px_rgba(255,255,255,0.95),inset_0_-10px_18px_rgba(37,99,235,0.10),0_10px_24px_rgba(37,99,235,0.16)] ring-1 ring-blue-400/25 backdrop-blur-md transition-all duration-300 ease-out dark:border-white/20 dark:bg-white/10 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.18),inset_0_-10px_18px_rgba(96,165,250,0.08),0_10px_24px_rgba(0,0,0,0.34)] dark:ring-blue-300/18"
-                style={{
-                  left: activePill.left,
-                  width: activePill.width,
-                  opacity: activePill.opacity,
-                }}
-              />
-              {navItems.map((item, index) => (
-                <a
-                  key={index}
-                  ref={(node) => {
-                    navItemRefs.current[item.link] = node;
-                  }}
-                  href={item.link}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    navigate(item.link);
-                  }}
-                  className={`relative z-10 inline-flex w-32 justify-center !no-underline px-6 py-2.5 text-base font-semibold rounded-full transition-colors duration-300 ${
-                    isActive(item.link)
-                      ? '!text-blue-700 dark:!text-blue-100 !font-bold'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-300'
-                  }`}
-                >
-                  {item.name}
-                </a>
-              ))}
-            </nav>
+            <DesktopNav
+              activePill={navigation.activePill}
+              isActive={navigation.isActive}
+              navItemRefs={navigation.navItemRefs}
+              navItems={navigation.navItems}
+              navRef={navigation.navRef}
+              navigate={navigate}
+            />
 
-            {/* USER ACTIONS */}
-            <div className="flex items-center gap-3">
-              {/* --- 1. NÚT ĐỔI NGÔN NGỮ (Chỉ hiện khi CHƯA ĐĂNG NHẬP VÀ TRÊN DESKTOP) --- */}
-              {!isLoggedIn && (
-                <button
-                  onClick={toggleLanguage}
-                  className="hidden md:flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg size-10 bg-gray-100 dark:bg-gray-700/50 text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  title={t('language.change')}
-                >
-                  <span className="font-bold text-xs">
-                    {language === 'vi' ? 'VN' : 'EN'}
-                  </span>
-                </button>
-              )}
-
-              {/* --- 2. NÚT DARK MODE (Chỉ hiện khi CHƯA ĐĂNG NHẬP VÀ TRÊN DESKTOP) --- */}
-              {!isLoggedIn && (
-                <button
-                  onClick={toggleTheme}
-                  className="hidden md:flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg size-10 bg-gray-100 dark:bg-gray-700/50 text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  title={t('theme.dark')}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    {isDarkMode ? 'light_mode' : 'dark_mode'}
-                  </span>
-                </button>
-              )}
-
-              {/* --- 3. NÚT THÔNG BÁO (Chỉ hiện khi ĐĂNG NHẬP VÀ TRÊN DESKTOP) --- */}
-              {isLoggedIn && (
-                <button
-                  className="relative hidden md:flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg size-10 bg-gray-100 dark:bg-gray-700/50 text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  onClick={() => navigate('/notifications')}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    notifications
-                  </span>
-                  {unreadCount > 0 && (
-                    <span className="absolute right-1 top-1 min-w-4 h-4 rounded-full bg-red-500 px-1 text-[10px] font-bold leading-4 text-white">
-                      {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                  )}
-                </button>
-              )}
-
-              {/* --- 4. LOGIC LOGIN/REGISTER HOẶC AVATAR --- */}
-              {!isLoggedIn ? (
-                // ẨN LOGIN/REGISTER TRÊN THANH HEADER MOBILE
-                <div className="hidden md:flex gap-2">
-                  <a
-                    href="/login"
-                    className="!no-underline px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                  >
-                    {t('auth.login')}
-                  </a>
-                  <a
-                    href="/register"
-                    className="!no-underline px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition"
-                  >
-                    {t('auth.register')}
-                  </a>
-                </div>
-              ) : (
-                <div className="relative" onClick={(e) => e.stopPropagation()}>
-                  {/* Avatar Button: HIỂN THỊ CẢ TRÊN MOBILE VÀ DESKTOP */}
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white dark:bg-gray-700/50 shadow-sm ring-2 ring-transparent hover:ring-blue-500/50 transition-all focus:outline-none"
-                    type="button"
-                  >
-                    <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden">
-                      {currentAvatarUrl ? (
-                        <img
-                          src={resolveMediaUrl(currentAvatarUrl)}
-                          alt={fullName || 'User Avatar'}
-                          className="h-full w-full object-cover"
-                          onError={(e) => {
-                            e.target.src =
-                              'https://cdn-icons-png.flaticon.com/512/149/149071.png'; // Cách 1: Thay bằng ảnh mặc định
-                            // Hoặc e.target.style.display = 'none'; // Cách 2: Ẩn ảnh lỗi để hiện placeholder phía dưới
-                          }}
-                        />
-                      ) : (
-                        <span className="text-blue-600 dark:text-blue-300 font-bold text-lg">
-                          {fullName?.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-
-                  {/* --- POP-UP MENU (Dropdown cho người dùng Đã Đăng nhập) --- */}
-                  {showUserMenu && (
-                    <div className="absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-surface-dark p-2 shadow-2xl ring-1 ring-black/5 dark:ring-white/10 animate-in fade-in zoom-in-95 duration-200">
-                      <div className="flex flex-col">
-                        {/* 1. Tài khoản */}
-                        <div
-                          onClick={() => {
-                            navigate('/account');
-                            setShowUserMenu(false);
-                          }}
-                          className="flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
-                            account_circle
-                          </span>
-                          <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">
-                            {t('nav.account')}
-                          </p>
-                        </div>
-                        {/* 2. Yêu thích (Mở Modal) */}
-                        <div
-                          onClick={() => {
-                            setIsModalOpen(true);
-                            setShowUserMenu(false);
-                          }}
-                          className="flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
-                            star
-                          </span>
-                          <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">
-                            {t('nav.favorites')}
-                          </p>
-                        </div>
-
-                        {/* 3. Ngôn ngữ (Giữ trong Menu Pop-up) */}
-                        <div
-                          onClick={toggleLanguage}
-                          className="flex items-center justify-between gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
-                        >
-                          <div className="flex items-center gap-4">
-                            <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
-                              language
-                            </span>
-                            <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">
-                              {t('language.label')}:{' '}
-                              <span className=" text-blue-600">
-                                {language === 'vi'
-                                  ? t('language.vietnamese')
-                                  : t('language.english')}
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* 4. Giao diện & Đổi tông màu */}
-                        <div className="flex flex-col gap-3 rounded-lg px-4 py-3 bg-gray-50/50 dark:bg-black/20 border border-gray-100 dark:border-white/5 my-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg">
-                                {isDarkMode ? 'dark_mode' : 'light_mode'}
-                              </span>
-                              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                {t('theme.appearance')}
-                              </p>
-                            </div>
-                            <AppearanceModeToggle
-                              isDarkMode={isDarkMode}
-                              setMode={setMode}
-                              t={t}
-                            />
-                          </div>
-
-                          <div className="h-px bg-gray-200/60 dark:bg-gray-700/60 my-1"></div>
-
-                          <div className="flex flex-col gap-2">
-                            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                              {t('theme.primaryColor')}
-                            </p>
-                            <div className="flex items-center justify-between gap-1 mt-1">
-                              {[
-                                {
-                                  name: 'blue',
-                                  color: '#0058be',
-                                  label: t('theme.colorLabel.blue'),
-                                },
-                                {
-                                  name: 'emerald',
-                                  color: '#059669',
-                                  label: t('theme.colorLabel.emerald'),
-                                },
-                                {
-                                  name: 'cyberpunk',
-                                  color: '#be185d',
-                                  label: t('theme.colorLabel.cyberpunk'),
-                                },
-                                {
-                                  name: 'sunset',
-                                  color: '#ea580c',
-                                  label: t('theme.colorLabel.sunset'),
-                                },
-                                {
-                                  name: 'slate',
-                                  color: '#4f46e5',
-                                  label: t('theme.colorLabel.slate'),
-                                },
-                              ].map((themeOpt) => (
-                                <button
-                                  key={themeOpt.name}
-                                  onClick={() => setColorTheme(themeOpt.name)}
-                                  title={themeOpt.label}
-                                  className={`relative group flex size-7 items-center justify-center rounded-full border-2 transition-all hover:scale-110 active:scale-95 ${
-                                    colorTheme === themeOpt.name
-                                      ? 'border-gray-900 dark:border-white scale-105'
-                                      : 'border-transparent'
-                                  }`}
-                                >
-                                  <span
-                                    className="size-5 rounded-full shadow-inner"
-                                    style={{ backgroundColor: themeOpt.color }}
-                                  ></span>
-                                  {colorTheme === themeOpt.name && (
-                                    <span className="absolute text-white text-[10px] font-black leading-none">
-                                      ✓
-                                    </span>
-                                  )}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="my-2 h-px bg-gray-200 dark:bg-white/10"></div>
-
-                        {/* 5. Đăng xuất */}
-                        <div
-                          onClick={handleLogout}
-                          className="flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer group"
-                        >
-                          <span className="material-symbols-outlined text-red-500 group-hover:scale-110 transition-transform">
-                            logout
-                          </span>
-                          <p className="flex-1 truncate text-base font-normal leading-normal text-red-500">
-                            {t('auth.logout')}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Mobile Menu Button: LUÔN HIỂN THỊ TRÊN MOBILE */}
-              <button
-                className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
-              >
-                <span className="material-symbols-outlined">
-                  {showMobileMenu ? 'close' : 'menu'}
-                </span>
-              </button>
-            </div>
+            <HeaderActions
+              colorTheme={colorTheme}
+              currentAvatarUrl={currentAvatarUrl}
+              fullName={fullName}
+              handleLogout={actions.handleLogout}
+              isDarkMode={isDarkMode}
+              isLoggedIn={isLoggedIn}
+              language={language}
+              navigate={navigate}
+              setColorTheme={setColorTheme}
+              setIsFavoritesOpen={actions.setIsFavoritesOpen}
+              setMode={setMode}
+              setShowMobileMenu={navigation.setShowMobileMenu}
+              setShowUserMenu={actions.setShowUserMenu}
+              showMobileMenu={navigation.showMobileMenu}
+              showUserMenu={actions.showUserMenu}
+              t={t}
+              toggleLanguage={toggleLanguage}
+              toggleTheme={actions.toggleTheme}
+              unreadCount={unreadCount}
+            />
           </div>
 
-          {/* Mobile Menu Drawer */}
-          {showMobileMenu && (
-            <div className="md:hidden max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain py-4 pb-8 border-t border-gray-100 dark:border-gray-700 space-y-2 animate-in slide-in-from-top-2">
-              {/* Menu điều hướng chính */}
-              {navItems.map((item, index) => (
-                <div
-                  key={index}
-                  onClick={() => handleMobileNavClick(item.link)}
-                  className={`cursor-pointer block px-4 py-2 rounded-lg text-base font-medium ${
-                    isActive(item.link)
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  {item.name}
-                </div>
-              ))}
-
-              <div className="my-2 h-px bg-gray-100 dark:bg-gray-700"></div>
-
-              {/* THAY THẾ NÚT LOGIN/REGISTER TRÊN HEADER BẰNG CÁC MỤC TRONG MENU */}
-              {!isLoggedIn && (
-                <>
-                  <div
-                    onClick={() => handleMobileNavClick('/login')}
-                    className="flex items-center gap-4 rounded-lg px-4 py-3 text-sm font-medium transition-colors text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined">login</span>
-                    {t('auth.login')}
-                  </div>
-                  <div
-                    onClick={() => handleMobileNavClick('/register')}
-                    className="flex items-center gap-4 rounded-lg px-4 py-3 text-sm font-medium transition-colors text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined">
-                      person_add
-                    </span>
-                    {t('auth.register')}
-                  </div>
-
-                  <div className="my-2 h-px bg-gray-100 dark:bg-gray-700"></div>
-                </>
-              )}
-
-              {/* Thêm đổi ngôn ngữ vào Mobile Menu (Luôn hiện trên Mobile Menu) */}
-              <div
-                onClick={toggleLanguage}
-                className="flex items-center justify-between gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
-                    language
-                  </span>
-                  <p className="flex-1 truncate text-base font-normal leading-normal text-gray-800 dark:text-gray-200">
-                    {t('language.label')}:{' '}
-                    <span className=" text-blue-600">
-                      {language === 'vi'
-                        ? t('language.vietnamese')
-                        : t('language.english')}
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Đa Theme trên Mobile */}
-              <div className="flex flex-col gap-3 rounded-xl px-4 py-3 bg-gray-50/50 dark:bg-black/20 border border-gray-100 dark:border-gray-700/50 mx-4 my-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
-                      {isDarkMode ? 'dark_mode' : 'light_mode'}
-                    </span>
-                    <p className="text-base font-medium text-gray-800 dark:text-gray-200">
-                      {t('theme.appearance')}
-                    </p>
-                  </div>
-                  <AppearanceModeToggle
-                    isDarkMode={isDarkMode}
-                    setMode={setMode}
-                    t={t}
-                  />
-                </div>
-
-                <div className="h-px bg-gray-200 dark:bg-gray-700/50 my-1"></div>
-
-                <div className="flex flex-col gap-2">
-                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('theme.primaryColor')}
-                  </p>
-                  <div className="flex items-center justify-between gap-1 mt-1">
-                    {[
-                      {
-                        name: 'blue',
-                        color: '#0058be',
-                        label: t('theme.colorLabel.blue'),
-                      },
-                      {
-                        name: 'emerald',
-                        color: '#059669',
-                        label: t('theme.colorLabel.emerald'),
-                      },
-                      {
-                        name: 'cyberpunk',
-                        color: '#be185d',
-                        label: t('theme.colorLabel.cyberpunk'),
-                      },
-                      {
-                        name: 'sunset',
-                        color: '#ea580c',
-                        label: t('theme.colorLabel.sunset'),
-                      },
-                      {
-                        name: 'slate',
-                        color: '#4f46e5',
-                        label: t('theme.colorLabel.slate'),
-                      },
-                    ].map((themeOpt) => (
-                      <button
-                        key={themeOpt.name}
-                        onClick={() => setColorTheme(themeOpt.name)}
-                        className={`relative flex size-8 items-center justify-center rounded-full border-2 transition-all ${
-                          colorTheme === themeOpt.name
-                            ? 'border-gray-900 dark:border-white scale-105'
-                            : 'border-transparent'
-                        }`}
-                      >
-                        <span
-                          className="size-6 rounded-full shadow-inner"
-                          style={{ backgroundColor: themeOpt.color }}
-                        ></span>
-                        {colorTheme === themeOpt.name && (
-                          <span className="absolute text-white text-xs font-black">
-                            ✓
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          {navigation.showMobileMenu && (
+            <MobileMenu
+              colorTheme={colorTheme}
+              handleMobileNavClick={navigation.handleMobileNavClick}
+              isActive={navigation.isActive}
+              isDarkMode={isDarkMode}
+              isLoggedIn={isLoggedIn}
+              language={language}
+              navItems={navigation.navItems}
+              setColorTheme={setColorTheme}
+              setMode={setMode}
+              t={t}
+              toggleLanguage={toggleLanguage}
+            />
           )}
         </div>
       </header>
 
-      {/* Gọi Component Modal đã tách */}
       <FavoritesModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={actions.isFavoritesOpen}
+        onClose={() => actions.setIsFavoritesOpen(false)}
       />
     </>
   );
