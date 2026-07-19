@@ -1,70 +1,170 @@
-# Getting Started with Create React App
+# VNUA Quiz Admin
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Admin web app cho hệ thống VNUA Quiz. Ứng dụng dùng React 18, Create React App, Ant Design, Axios, React Router và Recharts.
 
-## Available Scripts
+## Yêu cầu môi trường
 
-In the project directory, you can run:
+- Node.js 20 khuyến nghị
+- npm
+- Backend API đang chạy và expose endpoint `/api/v1`
 
-### `npm start`
+Project có file `admin/.npmrc` với:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```ini
+legacy-peer-deps=true
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Giữ file này để `npm install` ổn định với dependency stack hiện tại của CRA/React.
 
-### `npm test`
+## Cài đặt
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+cd admin
+npm install
+```
 
-### `npm run build`
+Tạo file môi trường local từ file mẫu:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+cp .env.local.example .env.local
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Trên Windows PowerShell có thể dùng:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```powershell
+Copy-Item .env.local.example .env.local
+```
 
-### `npm run eject`
+Biến môi trường chính:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```ini
+REACT_APP_API_URL=http://localhost:8080/api/v1/
+REACT_APP_ADMIN_BASENAME=/
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- `REACT_APP_API_URL`: base URL của backend API.
+- `REACT_APP_ADMIN_BASENAME`: basename khi deploy admin dưới sub-path. Để `/` nếu chạy ở root domain.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Chạy development
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+npm start
+```
 
-## Learn More
+Mặc định CRA chạy ở:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```text
+http://localhost:3000
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Build production
 
-### Code Splitting
+```bash
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Output nằm ở:
 
-### Analyzing the Bundle Size
+```text
+admin/build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Trên Windows nếu gặp policy với `npm`, dùng:
 
-### Making a Progressive Web App
+```powershell
+npm.cmd run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Docker
 
-### Advanced Configuration
+Build image:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+docker build -t quiz-admin .
+```
 
-### Deployment
+Có thể truyền API URL khi build:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```bash
+docker build \
+  --build-arg REACT_APP_API_URL=https://api.quizvnua.com/api/v1/ \
+  --build-arg REACT_APP_ADMIN_BASENAME=/ \
+  -t quiz-admin .
+```
 
-### `npm run build` fails to minify
+Run container:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+docker run -p 3001:3001 quiz-admin
+```
+
+App được serve bằng `serve -s build -l 3001`.
+
+## Cấu trúc thư mục
+
+```text
+src/
+  api/          Axios config, HTTP helpers, API service functions
+  components/   Shared UI components dùng nhiều nơi
+  context/      Auth/theme/provider và route guard
+  hooks/        Shared hooks không thuộc riêng page nào
+  layouts/      Layout shell dùng chung
+  pages/        Feature pages, mỗi page tự quản components/hooks/constants/utils
+  routes/       Route declarations và route guard mapping
+  styles/       CSS, CSS modules, global tokens, AntD overrides
+  utils/        Helper thuần, policy, formatter, UI config
+```
+
+## Quy ước kiến trúc
+
+Admin đang theo hướng feature-first:
+
+- `pages/<Feature>/index.jsx`: entry của page, chỉ nối hook với view.
+- `pages/<Feature>/components`: UI component của riêng feature.
+- `pages/<Feature>/hooks`: state, side effects, data orchestration của feature.
+- `pages/<Feature>/constants.js`: option, message, initial values.
+- `pages/<Feature>/utils`: helper chỉ dùng trong feature đó.
+
+Shared code:
+
+- `components/common`: chỉ chứa UI component dùng nhiều feature.
+- `hooks`: hook dùng chung toàn admin.
+- `api/services`: toàn bộ API calls.
+- `utils`: helper thuần, không render JSX.
+- `styles`: chỉ chứa `.css` và `.module.css`.
+
+Không đặt API call trực tiếp trong `.jsx` component. Component chỉ render UI và nhận props/callback. Data fetching nên nằm trong hook hoặc service.
+
+## CSS và style
+
+`src/index.css` chỉ là file import manifest.
+
+Các nhóm CSS chính:
+
+- `styles/global`: token, reset, base style.
+- `styles/vendors`: override thư viện bên ngoài như Ant Design.
+- `styles/layouts`: style layout shell.
+- `styles/ui`: primitive UI class dùng chung.
+- `styles/pages`: style theo page hoặc workflow cụ thể.
+
+CSS module đang dùng cho những phần có scope rõ:
+
+- `styles/layouts/ManagementPageLayout.module.css`
+- `styles/pages/Login.module.css`
+
+## Kiểm tra nhanh trước khi commit
+
+```bash
+npm run build
+```
+
+Một số warning hiện tại của CRA/Babel hoặc bundle size có thể xuất hiện. Miễn `Compiled successfully` là build đã pass.
+
+## Ghi chú maintain
+
+- Không thêm component modal/page mới vào `components/common` nếu chỉ một feature dùng.
+- Nếu nhiều feature dùng chung table/cell/renderer, đặt ở `components/common`.
+- Nếu chỉ một feature dùng, để trong `pages/<Feature>/components`.
+- Nếu helper có JSX, không đặt trong `utils`.
+- Nếu file nằm trong `styles`, chỉ dùng CSS/CSS module.
+- Nếu thêm page mới, khai báo route ở `src/routes/adminLayoutRoutes.jsx` và permission mapping ở policy tương ứng nếu cần.

@@ -43,6 +43,9 @@ excel_import_data_test/
 
 # Local planning notes
 MAINTENANCE_PLAN.md
+.prettierignore
+run.cmd
+run.ps1
 
 # Local Playwright artifacts
 .playwright-mcp/
