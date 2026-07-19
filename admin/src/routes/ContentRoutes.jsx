@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
+import PageLoading from "../components/common/PageLoading";
 import { adminDetailRoutes, adminLayoutRoutes } from "./adminLayoutRoutes";
 import { ADMIN_ROUTES, getFirstAllowedAdminPath } from "../utils/adminNavigationPolicy";
 
@@ -15,14 +16,19 @@ export default function ContentRoutes() {
     if (!isMod) return element;
     return canMenu(routeMenus[path]) ? element : denyTarget;
   };
+  const lazyElement = (Component) => (
+    <React.Suspense fallback={<PageLoading />}>
+      <Component />
+    </React.Suspense>
+  );
 
   return (
     <Routes>
-      {adminLayoutRoutes.map((route) => (
-        <Route key={route.path} path={route.path} element={guarded(route.path, route.element)} />
+      {adminLayoutRoutes.map(({ Component, path }) => (
+        <Route key={path} path={path} element={guarded(path, lazyElement(Component))} />
       ))}
-      {adminDetailRoutes.map((route) => (
-        <Route key={route.path} path={route.path} element={guarded(route.parentPath, route.element)} />
+      {adminDetailRoutes.map(({ Component, parentPath, path }) => (
+        <Route key={path} path={path} element={guarded(parentPath, lazyElement(Component))} />
       ))}
       <Route path="*" element={fallbackPath ? <Navigate to={fallbackPath} replace /> : <Navigate to="/login" replace />} />
     </Routes>

@@ -20,17 +20,14 @@ import {
   SunOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import { ADMIN_API_ROOT } from '../../config/env';
 
 const { Text } = Typography;
-const API_ROOT = (process.env.REACT_APP_API_URL || '/api/v1/').replace(
-  /\/api\/v1\/?$/,
-  ''
-);
 
 const resolveAvatarUrl = (url) => {
   if (!url) return '';
   if (/^https?:\/\//i.test(url)) return url;
-  return `${API_ROOT}${url.startsWith('/') ? '' : '/'}${url}`;
+  return `${ADMIN_API_ROOT}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 export const ContentHeader = () => {

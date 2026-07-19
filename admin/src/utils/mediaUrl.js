@@ -1,7 +1,6 @@
-export const getApiRoot = () =>
-  process.env.REACT_APP_API_URL
-    ? process.env.REACT_APP_API_URL.replace(/\/api\/v1\/?$/, "")
-    : "";
+import { ADMIN_API_ROOT } from "../config/env";
+
+export const getApiRoot = () => ADMIN_API_ROOT;
 
 export const isAbsoluteUrl = (url) => /^https?:\/\//i.test(url || "");
 

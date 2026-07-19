@@ -2,6 +2,7 @@
 **/.vscode/
 **/target/
 **/build/
+**/dist/
 **/coverage/
 .pnp
 .pnp.js

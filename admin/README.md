@@ -1,79 +1,80 @@
 # VNUA Quiz Admin
 
-Admin web app cho hệ thống VNUA Quiz. Ứng dụng dùng React 18, Create React App, Ant Design, Axios, React Router và Recharts.
+Admin web app cho hệ thống VNUA Quiz. Ứng dụng dùng React 18, Vite, Ant Design, Axios, React Router và Recharts.
 
-## Yêu cầu môi trường
+## Yêu Cầu
 
-- Node.js 20 khuyến nghị
+- Node.js 22 khuyến nghị
 - npm
-- Backend API đang chạy và expose endpoint `/api/v1`
+- Backend API expose endpoint `/api/v1`
 
-Project có file `admin/.npmrc` với:
-
-```ini
-legacy-peer-deps=true
-```
-
-Giữ file này để `npm install` ổn định với dependency stack hiện tại của CRA/React.
-
-## Cài đặt
+## Cài Đặt
 
 ```bash
 cd admin
 npm install
 ```
 
-Tạo file môi trường local từ file mẫu:
+Tạo file môi trường local:
 
 ```bash
 cp .env.local.example .env.local
 ```
 
-Trên Windows PowerShell có thể dùng:
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.local.example .env.local
 ```
 
-Biến môi trường chính:
+Biến môi trường:
 
 ```ini
-REACT_APP_API_URL=http://localhost:8080/api/v1/
-REACT_APP_ADMIN_BASENAME=/
+VITE_API_URL=http://localhost:8080/api/v1/
+VITE_ADMIN_BASENAME=/
 ```
 
-- `REACT_APP_API_URL`: base URL của backend API.
-- `REACT_APP_ADMIN_BASENAME`: basename khi deploy admin dưới sub-path. Để `/` nếu chạy ở root domain.
+- `VITE_API_URL`: base URL của backend API.
+- `VITE_ADMIN_BASENAME`: basename khi deploy admin dưới sub-path. Dùng `/` nếu deploy ở root domain.
 
-## Chạy development
+## Scripts
 
 ```bash
 npm start
+npm run dev
+npm run build
+npm run preview
 ```
 
-Mặc định CRA chạy ở:
+- `npm start` / `npm run dev`: chạy Vite dev server.
+- `npm run build`: build production ra `dist`.
+- `npm run preview`: preview production build bằng Vite.
 
-```text
-http://localhost:3000
+Port hiện tại:
+
+- Dev server: `http://localhost:3001`
+- Preview server: `http://localhost:3004`
+- Docker container: `3001`
+
+Trên Windows nếu gặp PowerShell policy với `npm`, dùng:
+
+```powershell
+npm.cmd run build
 ```
 
-## Build production
+## Build
 
 ```bash
 npm run build
 ```
 
-Output nằm ở:
+Output:
 
 ```text
-admin/build
+admin/dist
 ```
 
-Trên Windows nếu gặp policy với `npm`, dùng:
-
-```powershell
-npm.cmd run build
-```
+Build hiện tại đã sạch warning CRA/Babel và chunk-size. Vite có tách route lazy loading và vendor chunks trong `vite.config.js`.
 
 ## Docker
 
@@ -83,12 +84,12 @@ Build image:
 docker build -t quiz-admin .
 ```
 
-Có thể truyền API URL khi build:
+Build với API production:
 
 ```bash
 docker build \
-  --build-arg REACT_APP_API_URL=https://api.quizvnua.com/api/v1/ \
-  --build-arg REACT_APP_ADMIN_BASENAME=/ \
+  --build-arg VITE_API_URL=https://api.quizvnua.com/api/v1/ \
+  --build-arg VITE_ADMIN_BASENAME=/ \
   -t quiz-admin .
 ```
 
@@ -98,73 +99,90 @@ Run container:
 docker run -p 3001:3001 quiz-admin
 ```
 
-App được serve bằng `serve -s build -l 3001`.
+Dockerfile dùng Node 22 Alpine, `npm ci`, build Vite ra `dist`, rồi serve bằng:
 
-## Cấu trúc thư mục
+```bash
+serve -s dist -l 3001
+```
+
+## Cấu Trúc
 
 ```text
 src/
-  api/          Axios config, HTTP helpers, API service functions
-  components/   Shared UI components dùng nhiều nơi
-  context/      Auth/theme/provider và route guard
-  hooks/        Shared hooks không thuộc riêng page nào
-  layouts/      Layout shell dùng chung
-  pages/        Feature pages, mỗi page tự quản components/hooks/constants/utils
-  routes/       Route declarations và route guard mapping
-  styles/       CSS, CSS modules, global tokens, AntD overrides
-  utils/        Helper thuần, policy, formatter, UI config
+  api/          Axios config, HTTP helpers, API services
+  components/   Shared UI components
+  config/       Vite env mapping
+  context/      Auth/theme providers và route guards
+  hooks/        Shared hooks
+  layouts/      Admin shell layouts
+  pages/        Feature folders
+  routes/       Route config, lazy routes, permission guard mapping
+  styles/       CSS, CSS modules, design tokens, AntD overrides
+  utils/        Pure helpers, policy, formatter, UI config
 ```
 
-## Quy ước kiến trúc
+## Quy Ước Feature
 
-Admin đang theo hướng feature-first:
+Mỗi page theo cấu trúc:
 
-- `pages/<Feature>/index.jsx`: entry của page, chỉ nối hook với view.
-- `pages/<Feature>/components`: UI component của riêng feature.
-- `pages/<Feature>/hooks`: state, side effects, data orchestration của feature.
-- `pages/<Feature>/constants.js`: option, message, initial values.
-- `pages/<Feature>/utils`: helper chỉ dùng trong feature đó.
+```text
+pages/<Feature>/
+  index.jsx
+  components/
+  hooks/
+  constants.js hoặc constants.jsx nếu có JSX config
+  utils/
+```
 
-Shared code:
+Quy ước maintain:
 
-- `components/common`: chỉ chứa UI component dùng nhiều feature.
-- `hooks`: hook dùng chung toàn admin.
-- `api/services`: toàn bộ API calls.
-- `utils`: helper thuần, không render JSX.
-- `styles`: chỉ chứa `.css` và `.module.css`.
+- `index.jsx` chỉ nối hook với view.
+- UI component không gọi API trực tiếp.
+- API calls đặt trong `api/services`.
+- State/data orchestration đặt trong hooks.
+- Helper thuần đặt trong `utils`.
+- File trong `styles` chỉ là `.css` hoặc `.module.css`.
+- Component dùng một feature thì để trong `pages/<Feature>/components`.
+- Component dùng nhiều feature thì để trong `components/common`.
 
-Không đặt API call trực tiếp trong `.jsx` component. Component chỉ render UI và nhận props/callback. Data fetching nên nằm trong hook hoặc service.
+## Routing Và Code Splitting
 
-## CSS và style
+Routes nằm ở:
 
-`src/index.css` chỉ là file import manifest.
+```text
+src/routes/adminLayoutRoutes.jsx
+src/routes/ContentRoutes.jsx
+```
 
-Các nhóm CSS chính:
+Các page được load bằng `React.lazy()` và bọc `Suspense` để giảm initial bundle. Khi thêm page mới, thêm route vào `adminLayoutRoutes.jsx` và cập nhật permission policy nếu page cần guard theo menu.
 
-- `styles/global`: token, reset, base style.
-- `styles/vendors`: override thư viện bên ngoài như Ant Design.
-- `styles/layouts`: style layout shell.
-- `styles/ui`: primitive UI class dùng chung.
-- `styles/pages`: style theo page hoặc workflow cụ thể.
+Vendor chunk splitting nằm trong:
 
-CSS module đang dùng cho những phần có scope rõ:
+```text
+vite.config.js
+```
+
+Các nhóm chính:
+
+- `vendor-antd`
+- `vendor-react`
+- `vendor-charts`
+- `vendor-dnd`
+- `vendor-http`
+
+## CSS
+
+`src/index.css` chỉ là manifest import CSS.
+
+Các nhóm style:
+
+- `styles/global`: token, reset, base.
+- `styles/vendors`: override thư viện bên ngoài.
+- `styles/layouts`: admin shell/layout.
+- `styles/ui`: UI primitives.
+- `styles/pages`: style theo page/workflow.
+
+CSS module hiện dùng cho phần có scope rõ:
 
 - `styles/layouts/ManagementPageLayout.module.css`
 - `styles/pages/Login.module.css`
-
-## Kiểm tra nhanh trước khi commit
-
-```bash
-npm run build
-```
-
-Một số warning hiện tại của CRA/Babel hoặc bundle size có thể xuất hiện. Miễn `Compiled successfully` là build đã pass.
-
-## Ghi chú maintain
-
-- Không thêm component modal/page mới vào `components/common` nếu chỉ một feature dùng.
-- Nếu nhiều feature dùng chung table/cell/renderer, đặt ở `components/common`.
-- Nếu chỉ một feature dùng, để trong `pages/<Feature>/components`.
-- Nếu helper có JSX, không đặt trong `utils`.
-- Nếu file nằm trong `styles`, chỉ dùng CSS/CSS module.
-- Nếu thêm page mới, khai báo route ở `src/routes/adminLayoutRoutes.jsx` và permission mapping ở policy tương ứng nếu cần.

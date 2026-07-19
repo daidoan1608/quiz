@@ -1,36 +1,40 @@
-import GetChapter from "../pages/Chapter/index.jsx";
-import GetExam from "../pages/Exam/index.jsx";
-import ContentHome from "../pages/Home/index.jsx";
-import GetQuestion from "../pages/Question/index.jsx";
-import GetSubject from "../pages/Subject/index.jsx";
-import GetUser from "../pages/User/index.jsx";
-import GetUserExam from "../pages/ExamUser";
-import UserExamDetailPageView from "../pages/ExamUser/components/UserExamDetailPageView";
-import GetCategories from "../pages/Categories/index.jsx";
-import Notification from "../pages/Notification";
-import AuditLog from "../pages/AuditLog";
-import DocumentsManager from "../pages/Documents";
-import AdminGroups from "../pages/AdminGroups";
+import React from "react";
+
+const AdminGroups = React.lazy(() => import("../pages/AdminGroups"));
+const AuditLog = React.lazy(() => import("../pages/AuditLog"));
+const ContentHome = React.lazy(() => import("../pages/Home"));
+const DocumentsManager = React.lazy(() => import("../pages/Documents"));
+const GetCategories = React.lazy(() => import("../pages/Categories"));
+const GetChapter = React.lazy(() => import("../pages/Chapter"));
+const GetExam = React.lazy(() => import("../pages/Exam"));
+const GetQuestion = React.lazy(() => import("../pages/Question"));
+const GetSubject = React.lazy(() => import("../pages/Subject"));
+const GetUser = React.lazy(() => import("../pages/User"));
+const GetUserExam = React.lazy(() => import("../pages/ExamUser"));
+const Notification = React.lazy(() => import("../pages/Notification"));
+const UserExamDetailPageView = React.lazy(
+  () => import("../pages/ExamUser/components/UserExamDetailPageView")
+);
 
 export const adminLayoutRoutes = [
-  { path: "/", element: <ContentHome /> },
-  { path: "/users", element: <GetUser /> },
-  { path: "/groups", element: <AdminGroups /> },
-  { path: "/exams", element: <GetExam /> },
-  { path: "/categories", element: <GetCategories /> },
-  { path: "/subjects", element: <GetSubject /> },
-  { path: "/chapters", element: <GetChapter /> },
-  { path: "/questions", element: <GetQuestion /> },
-  { path: "/userexams", element: <GetUserExam /> },
-  { path: "/notifications", element: <Notification /> },
-  { path: "/documents", element: <DocumentsManager /> },
-  { path: "/audit-logs", element: <AuditLog /> },
+  { path: "/", Component: ContentHome },
+  { path: "/users", Component: GetUser },
+  { path: "/groups", Component: AdminGroups },
+  { path: "/exams", Component: GetExam },
+  { path: "/categories", Component: GetCategories },
+  { path: "/subjects", Component: GetSubject },
+  { path: "/chapters", Component: GetChapter },
+  { path: "/questions", Component: GetQuestion },
+  { path: "/userexams", Component: GetUserExam },
+  { path: "/notifications", Component: Notification },
+  { path: "/documents", Component: DocumentsManager },
+  { path: "/audit-logs", Component: AuditLog },
 ];
 
 export const adminDetailRoutes = [
   {
     path: "/userexam/:userExamId",
-    element: <UserExamDetailPageView />,
+    Component: UserExamDetailPageView,
     parentPath: "/userexams",
   },
 ];

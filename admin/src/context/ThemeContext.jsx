@@ -1,4 +1,4 @@
-// context/ThemeContext.js
+// context/ThemeContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ConfigProvider, theme } from 'antd';
 

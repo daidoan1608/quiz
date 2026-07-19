@@ -6,8 +6,7 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import GuestOnlyRoute from "./context/GuestOnlyRoute";
 import Display from "./layouts/Display";
 import { ThemeProvider } from "./context/ThemeContext";
-
-const ADMIN_BASENAME = process.env.REACT_APP_ADMIN_BASENAME || "/";
+import { ADMIN_BASENAME } from "./config/env";
 
 function normalizeAdminPath() {
   const { pathname, search, hash } = window.location;

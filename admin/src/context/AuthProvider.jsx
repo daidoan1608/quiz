@@ -120,7 +120,6 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const { publicAxios } = await import("../api/axiosConfig");
       await publicAxios.post("/auth/logout");
     } catch (error) {
       // Clear client state even if the server session is already expired.

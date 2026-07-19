@@ -3,11 +3,10 @@ import { message } from "antd";
 import { getApiErrorMessage } from "./http/apiError";
 import { clearAuthStorage } from "./http/authStorage";
 import { attachCsrfHeader, getCookieValue, isUnsafeMethod } from "./http/csrf";
-
-const BASE_URL = process.env.REACT_APP_API_URL || "/api/v1/";
+import { ADMIN_API_URL, ADMIN_BASENAME } from "../config/env";
 
 const config = {
-  baseURL: BASE_URL,
+  baseURL: ADMIN_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -24,8 +23,6 @@ publicAxios.interceptors.request.use(attachCsrfHeader);
 
 let isRefreshing = false;
 let failedQueue = [];
-
-const ADMIN_BASENAME = process.env.REACT_APP_ADMIN_BASENAME || "/";
 
 const getAdminLoginPath = () => {
   const basename = ADMIN_BASENAME === "/" ? "" : ADMIN_BASENAME.replace(/\/$/, "");
