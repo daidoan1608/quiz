@@ -12,7 +12,7 @@ const SubjectReadinessPanel = ({ chapters, exams, progress, texts }) => (
         className="aura-readiness-ring relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
         style={progressValueStyle(progress)}
       >
-        <div className="absolute h-[70%] w-[70%] rounded-full bg-gray-50 dark:bg-gray-900" />
+        <div className="absolute h-[70%] w-[70%] rounded-full bg-white dark:bg-gray-800" />
         <div className="relative z-10 text-center">
           <span className="block text-2xl font-black text-gray-950 dark:text-white">
             {progress}%

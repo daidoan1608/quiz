@@ -11,6 +11,7 @@ import {
 export const useStartPracticeSession = ({
   chapterId,
   isSubjectPractice,
+  loadFallbackMarkedQuestions,
   loadMarkedQuestions,
   loadMarkedQuestionsByChapter,
   locationState,
@@ -49,6 +50,7 @@ export const useStartPracticeSession = ({
         const markedData = await loadMarkedSubjectQuestions({
           commonParams,
           examApi,
+          loadFallbackMarkedQuestions,
           loadMarkedQuestionsByChapter,
           subjectChapters,
         });
@@ -59,8 +61,10 @@ export const useStartPracticeSession = ({
         setSelectedAnswers({});
         setConfirmedAnswers({});
         setCurrentQuestionIndex(0);
-        setTitle('Câu đã lưu của môn');
-        setSubjectName(locationState?.subjectName || texts.subjects || 'Môn học');
+        setTitle('Ôn tập thông minh');
+        if (locationState?.subjectName) {
+          setSubjectName(locationState.subjectName);
+        }
         return;
       }
 
@@ -83,11 +87,15 @@ export const useStartPracticeSession = ({
       setConfirmedAnswers({});
       setCurrentQuestionIndex(0);
       setTitle(
-        locationState?.chapterName ||
-          texts.practiceQuestions ||
-          'Câu hỏi ôn tập'
+        isSubjectPractice
+          ? 'Ôn tập thông minh'
+          : locationState?.chapterName ||
+              texts.practiceQuestions ||
+              'Câu hỏi ôn tập'
       );
-      setSubjectName(locationState?.subjectName || texts.subjects || 'Môn học');
+      if (locationState?.subjectName) {
+        setSubjectName(locationState.subjectName);
+      }
     } catch (error) {
       console.error('Lỗi tải câu hỏi ôn tập:', error);
       if (SMART_WRONG_MODES[practiceConfig.mode]) {
@@ -101,6 +109,7 @@ export const useStartPracticeSession = ({
   }, [
     chapterId,
     isSubjectPractice,
+    loadFallbackMarkedQuestions,
     loadMarkedQuestions,
     loadMarkedQuestionsByChapter,
     locationState?.chapterName,

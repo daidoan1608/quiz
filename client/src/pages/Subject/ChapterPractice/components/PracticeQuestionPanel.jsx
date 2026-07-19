@@ -16,6 +16,7 @@ export const PracticeQuestionPanel = ({
   currentQuestion,
   currentQuestionIndex,
   hasAnswered,
+  isMarkingEnabled = true,
   markedQuestions,
   onAnswerSelect,
   onConfirmMultipleAnswer,
@@ -41,10 +42,12 @@ export const PracticeQuestionPanel = ({
         <h3 className="text-left text-xl font-bold leading-tight text-primary">
           Câu {currentQuestionIndex + 1}
         </h3>
-        <MarkedQuestionButton
-          isMarked={isMarked}
-          onClick={onToggleMarkedQuestion}
-        />
+        {isMarkingEnabled && (
+          <MarkedQuestionButton
+            isMarked={isMarked}
+            onClick={onToggleMarkedQuestion}
+          />
+        )}
       </div>
       <QuestionContent question={currentQuestion} />
       <div className="space-y-4">

@@ -1,4 +1,4 @@
-export const MAX_DISPLAYED_SUBJECTS = 6;
+export const MAX_DISPLAYED_SUBJECTS = 4;
 export const MAX_DISPLAYED_ATTEMPTS = 4;
 
 export const TEAM_MEMBERS = [

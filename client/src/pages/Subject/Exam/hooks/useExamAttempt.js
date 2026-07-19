@@ -63,15 +63,19 @@ export const useExamAttempt = () => {
         setUserExamId(null);
         if (examDraftKey) localStorage.removeItem(examDraftKey);
         message.success('Nộp bài thành công!');
-        navigate(`/subjects/${subjectId}/exams/${examId}/result`, {
+        const submittedUserExamId = response.data.data.userExamId;
+        navigate(
+          `/subjects/${subjectId}/exams/${examId}/result?userExamId=${submittedUserExamId}`,
+          {
           state: {
             examId,
             subjectId,
-            userExamId: response.data.data.userExamId,
+            userExamId: submittedUserExamId,
             timeTaken: duration * 60 - (timeLeft || 0),
             totalQuestions: questions.length,
           },
-        });
+          }
+        );
       }
     } catch (error) {
       console.error('Lỗi nộp bài:', error);

@@ -1,4 +1,6 @@
 import React from 'react';
+import { AppBreadcrumb } from 'components/common/AppBreadcrumb';
+import { PageContainer } from 'components/common/PageContainer';
 import LoginPrompt from './LoginPrompt';
 import SubjectDetailHero from './SubjectDetailHero';
 import { ChapterSection, ExamSidebar } from './SubjectDetailSections';
@@ -30,22 +32,18 @@ export default function SubjectDetailView({
         />
       )}
 
-      <main className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
-        <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-          <button
-            onClick={() => navigate('/subjects')}
-            className="font-bold uppercase tracking-wide hover:text-primary"
-            type="button"
-          >
-            {texts.subjects || 'Môn học'}
-          </button>
-          <span className="material-symbols-outlined text-base">
-            chevron_right
-          </span>
-          <span className="font-bold text-gray-900 dark:text-white">
-            {subjectData.name}
-          </span>
-        </nav>
+      <PageContainer>
+        <AppBreadcrumb
+          items={[
+            {
+              label: texts.subjects || 'Môn học',
+              onClick: () => navigate('/subjects'),
+            },
+            {
+              label: subjectData.name,
+            },
+          ]}
+        />
 
         <SubjectDetailHero
           chapters={chapters}
@@ -60,7 +58,7 @@ export default function SubjectDetailView({
           toggleFavorite={toggleFavorite}
         />
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <ChapterSection
             chapters={chapters}
             handleChapterClick={handleChapterClick}
@@ -73,7 +71,7 @@ export default function SubjectDetailView({
             texts={texts}
           />
         </div>
-      </main>
+      </PageContainer>
     </div>
   );
 }

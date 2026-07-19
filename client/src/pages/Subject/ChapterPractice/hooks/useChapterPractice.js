@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { message } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { subjectApi } from 'api/services/subjectApi';
 import { useLanguage } from 'context/language/LanguageProvider';
 import { typesetMath } from 'utils/typesetMath';
 import { buildNextSelectedAnswers } from 'pages/Subject/utils/answerSelection';
@@ -25,22 +26,27 @@ export const useChapterPractice = () => {
   const chapterId = location.state?.chapterId || params.chapterId;
   const chapterQuestionCount = Number(location.state?.chapterQuestionCount || 0);
   const subjectId = location.state?.subjectId || params.subjectId;
+  const [loadedSubjectChapters, setLoadedSubjectChapters] = useState([]);
   const subjectChapters = useMemo(
-    () => location.state?.chapters || [],
-    [location.state?.chapters]
+    () =>
+      location.state?.chapters?.length
+        ? location.state.chapters
+        : loadedSubjectChapters,
+    [loadedSubjectChapters, location.state?.chapters]
   );
   const isSubjectPractice = !chapterId;
   const [practiceConfig, setPracticeConfig] = useState(() =>
     isSubjectPractice
       ? {
           ...DEFAULT_PRACTICE_CONFIG,
-          mode: 'wrongRecent',
+          mode: location.state?.practiceMode || 'wrongRecent',
         }
       : DEFAULT_PRACTICE_CONFIG
   );
   const userId = localStorage.getItem('userId') || 'guest';
   const {
     markedQuestions,
+    loadFallbackMarkedQuestions,
     loadMarkedQuestions,
     loadMarkedQuestionsByChapter,
     replaceMarkedQuestions,
@@ -80,6 +86,7 @@ export const useChapterPractice = () => {
     chapterId,
     isSubjectPractice,
     loadMarkedQuestions,
+    loadFallbackMarkedQuestions,
     loadMarkedQuestionsByChapter,
     locationState: location.state,
     maxQuestionLimit,
@@ -103,6 +110,45 @@ export const useChapterPractice = () => {
   useEffect(() => {
     typesetMath();
   }, [currentQuestionIndex, questions, selectedAnswers, confirmedAnswers]);
+
+  useEffect(() => {
+    const hasSubjectName = Boolean(subjectName || location.state?.subjectName);
+    const hasChapters =
+      Boolean(location.state?.chapters?.length) || loadedSubjectChapters.length > 0;
+
+    if (!isSubjectPractice || !subjectId || (hasSubjectName && hasChapters)) {
+      return;
+    }
+
+    let mounted = true;
+
+    const loadSubjectName = async () => {
+      try {
+        const subject = await subjectApi.getPublicSubject(subjectId);
+        if (mounted && subject?.name) {
+          setSubjectName(subject.name);
+        }
+        if (mounted && Array.isArray(subject?.chapters)) {
+          setLoadedSubjectChapters(subject.chapters);
+        }
+      } catch (error) {
+        console.error('Lỗi tải tên môn học:', error);
+      }
+    };
+
+    loadSubjectName();
+
+    return () => {
+      mounted = false;
+    };
+  }, [
+    isSubjectPractice,
+    loadedSubjectChapters.length,
+    location.state?.chapters,
+    location.state?.subjectName,
+    subjectId,
+    subjectName,
+  ]);
 
   useEffect(() => {
     if (!isSubjectPractice && !hasRequested && !isLoading) {
@@ -153,7 +199,7 @@ export const useChapterPractice = () => {
     handleConfirmMultipleAnswer,
     handleStartPractice,
     handleToggleMarkedQuestion: () =>
-      toggleMarkedQuestion(currentQuestion?.questionId),
+      toggleMarkedQuestion(currentQuestion),
     hasAnswered,
     hasRequested,
     isLoading,

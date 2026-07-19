@@ -1,21 +1,60 @@
 import React from 'react';
 
-export const AttemptDetailHeader = ({ navigate, title }) => (
-  <div className="flex flex-wrap justify-between gap-4 items-center">
-    <div className="flex flex-col gap-2">
-      <button
-        onClick={() => navigate('/account')}
-        className="mb-2 inline-flex w-fit items-center gap-2 text-sm font-semibold text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
-      >
-        <span className="material-symbols-outlined !text-lg">arrow_back</span>
-        Quay lại tài khoản
-      </button>
-      <p className="text-gray-900 dark:text-white text-3xl md:text-4xl font-black tracking-[-0.033em]">
-        Chi tiết lần làm bài
-      </p>
-      <p className="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
-        {title}
-      </p>
-    </div>
+const formatDateTime = (value) => {
+  if (!value) return '--';
+  return new Date(value).toLocaleString('vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+};
+
+const formatDuration = ({ endTime, startTime }) => {
+  if (!endTime || !startTime) return '--';
+  const durationMinutes = Math.max(
+    0,
+    Math.round((new Date(endTime) - new Date(startTime)) / 60000)
+  );
+  return `${durationMinutes} phút`;
+};
+
+const AttemptMetaItem = ({ label, value }) => (
+  <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+      {label}
+    </p>
+    <p className="mt-1 text-base font-black text-gray-950 dark:text-white">
+      {value}
+    </p>
   </div>
+);
+
+export const AttemptDetailHeader = ({ examData, userExam }) => (
+  <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex flex-col gap-5">
+      <div>
+        <h1 className="text-3xl font-black tracking-tight text-gray-950 dark:text-white md:text-4xl">
+          {examData.title}
+        </h1>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <AttemptMetaItem
+          label="Môn"
+          value={examData.subjectName || userExam?.subjectName || '--'}
+        />
+        <AttemptMetaItem
+          label="Thời gian làm"
+          value={formatDuration({
+            endTime: userExam?.endTime,
+            startTime: userExam?.startTime,
+          })}
+        />
+        <AttemptMetaItem
+          label="Bắt đầu"
+          value={formatDateTime(userExam?.startTime)}
+        />
+        <AttemptMetaItem label="Nộp lúc" value={formatDateTime(userExam?.endTime)} />
+      </div>
+    </div>
+  </section>
 );

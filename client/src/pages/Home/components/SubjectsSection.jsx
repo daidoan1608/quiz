@@ -1,5 +1,4 @@
-import { SUBJECT_ICON_PATHS } from 'pages/Home/constants/homeContent';
-import SvgIcon from './SvgIcon';
+import { SubjectSummaryCard } from 'components/common/SubjectSummaryCard';
 
 export default function SubjectsSection({ subjects, t, onSelectSubject }) {
   return (
@@ -10,13 +9,12 @@ export default function SubjectsSection({ subjects, t, onSelectSubject }) {
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {subjects.length > 0 ? (
           subjects.map((subject, index) => (
             <SubjectCard
               key={subject.subjectId || subject.name || index}
               subject={subject}
-              iconPath={SUBJECT_ICON_PATHS[index % SUBJECT_ICON_PATHS.length]}
               t={t}
               onClick={() => onSelectSubject(subject.subjectId)}
             />
@@ -29,25 +27,14 @@ export default function SubjectsSection({ subjects, t, onSelectSubject }) {
   );
 }
 
-function SubjectCard({ subject, iconPath, t, onClick }) {
+function SubjectCard({ subject, t, onClick }) {
   return (
-    <button
-      type="button"
+    <SubjectSummaryCard
+      minHeightClassName="min-h-[180px]"
       onClick={onClick}
-      className="text-left flex flex-col gap-4 rounded-2xl p-6 bg-white dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700/50 hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 dark:hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
-    >
-      <div className="flex items-center justify-center size-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-        <SvgIcon path={iconPath} />
-      </div>
-      <div className="flex flex-col flex-1">
-        <h3 className="font-bold text-gray-900 dark:text-white text-lg group-hover:text-primary transition-colors leading-snug mb-1">
-          {subject.name}
-        </h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          {t('home.questionCount', { count: subject.totalQuestions })}
-        </p>
-      </div>
-    </button>
+      subjectName={subject.name}
+      subtitle={t('home.questionCount', { count: subject.totalQuestions })}
+    />
   );
 }
 

@@ -1,14 +1,23 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { accountApi } from 'api/services/accountApi';
 import { subjectApi } from 'api/services/subjectApi';
 import { useLanguage } from 'context/language/LanguageProvider';
 import { useAuth } from 'context/auth/AuthProvider';
 import { getCurrentUserId } from 'utils/storage';
-import { MAX_DISPLAYED_ATTEMPTS, MAX_DISPLAYED_SUBJECTS } from '../constants/homeContent';
+import {
+  buildLearningStats,
+  normalizeExams,
+} from 'pages/Account/utils/accountUtils';
+import {
+  MAX_DISPLAYED_ATTEMPTS,
+  MAX_DISPLAYED_SUBJECTS,
+} from '../constants/homeContent';
 
 export const useHomePage = () => {
   const [subjects, setSubjects] = useState([]);
   const [inProgressAttempts, setInProgressAttempts] = useState([]);
+  const [learningStats, setLearningStats] = useState(() => buildLearningStats([]));
 
   const { t } = useLanguage();
   const { isLoggedIn } = useAuth();
@@ -49,6 +58,21 @@ export const useHomePage = () => {
     }
   }, [isLoggedIn, userId]);
 
+  const fetchLearningStats = useCallback(async () => {
+    if (!isLoggedIn || !userId) {
+      setLearningStats(buildLearningStats([]));
+      return;
+    }
+
+    try {
+      const accountData = await accountApi.getOverview(userId);
+      setLearningStats(buildLearningStats(normalizeExams(accountData.exams)));
+    } catch (error) {
+      console.error('Lỗi khi lấy lộ trình học tập:', error);
+      setLearningStats(buildLearningStats([]));
+    }
+  }, [isLoggedIn, userId]);
+
   useEffect(() => {
     fetchSubjects();
   }, [fetchSubjects]);
@@ -56,6 +80,10 @@ export const useHomePage = () => {
   useEffect(() => {
     fetchInProgressAttempts();
   }, [fetchInProgressAttempts]);
+
+  useEffect(() => {
+    fetchLearningStats();
+  }, [fetchLearningStats]);
 
   const handleSelectSubject = useCallback(
     (subjectId) => {
@@ -89,6 +117,7 @@ export const useHomePage = () => {
     handleSelectSubject,
     handleStartLearning,
     isLoggedIn,
+    learningStats,
     t,
   };
 };

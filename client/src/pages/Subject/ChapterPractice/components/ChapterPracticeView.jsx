@@ -10,6 +10,7 @@ export const ChapterPracticeView = ({
   displaySubjectName,
   displayTitle,
   hasAnswered,
+  isSubjectPractice,
   markedQuestions,
   onAnswerSelect,
   onConfirmMultipleAnswer,
@@ -20,6 +21,7 @@ export const ChapterPracticeView = ({
   selectedAnswers,
   selectedValue,
   setCurrentQuestionIndex,
+  texts,
   visibleAnswers,
 }) => (
   <div className="grid grid-cols-12 gap-6">
@@ -34,6 +36,7 @@ export const ChapterPracticeView = ({
       currentQuestion={currentQuestion}
       currentQuestionIndex={currentQuestionIndex}
       hasAnswered={hasAnswered}
+      isMarkingEnabled={!isSubjectPractice}
       markedQuestions={markedQuestions}
       onAnswerSelect={onAnswerSelect}
       onConfirmMultipleAnswer={onConfirmMultipleAnswer}
@@ -51,6 +54,8 @@ export const ChapterPracticeView = ({
       questions={questions}
       selectedAnswers={selectedAnswers}
       setCurrentQuestionIndex={setCurrentQuestionIndex}
+      showMarkedQuestions={!isSubjectPractice}
+      texts={texts}
     />
   </div>
 );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageContainer } from 'components/common/PageContainer';
 import { CountdownCard } from './CountdownCard';
 import { ExamBreadcrumb } from './ExamBreadcrumb';
 import { ExamHero } from './ExamHero';
@@ -32,8 +33,7 @@ export const ExamAttemptView = ({
   title,
 }) => (
   <div className="relative flex w-full flex-col bg-background-light text-gray-900 transition-colors duration-300 dark:bg-background-dark dark:text-gray-100">
-    <main className="flex-1 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl">
+    <PageContainer className="flex-1">
         <ExamBreadcrumb
           texts={texts}
           navigate={navigate}
@@ -86,8 +86,7 @@ export const ExamAttemptView = ({
             onSubmit={openSubmitConfirm}
           />
         </div>
-      </div>
-    </main>
+    </PageContainer>
 
     {isSubmitConfirmOpen && (
       <SubmitConfirmDialog

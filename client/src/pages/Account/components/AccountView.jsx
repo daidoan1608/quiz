@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageContainer } from 'components/common/PageContainer';
 import ChangePasswordModal from './ChangePasswordModal';
 import PersonalInfo from './PersonalInfo';
 import Roadmap from './Roadmap';
@@ -22,7 +23,7 @@ export const AccountView = ({
   texts,
   user,
 }) => (
-  <div className="flex flex-1 bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-gray-200 p-4 sm:p-6 lg:p-8">
+  <div className="flex flex-1 bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-gray-200">
     <ChangePasswordModal
       isOpen={showChangePassword}
       onClose={() => setShowChangePassword(false)}
@@ -30,7 +31,10 @@ export const AccountView = ({
       texts={texts}
     />
 
-    <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
+    <PageContainer
+      as="div"
+      className="grid grid-cols-1 gap-8 md:grid-cols-12"
+    >
       <aside className="md:col-span-4 lg:col-span-3">
         <UserProfileCard
           user={user}
@@ -70,6 +74,6 @@ export const AccountView = ({
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   </div>
 );

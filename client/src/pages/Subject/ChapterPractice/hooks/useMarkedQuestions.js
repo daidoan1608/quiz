@@ -20,22 +20,42 @@ export const useMarkedQuestions = ({ chapterId, userId }) => {
       ])
     );
 
+  const loadFallbackMarkedQuestions = () =>
+    readMarkedIds(createMarkedStorageKey(userId, null));
+
   const replaceMarkedQuestions = (questionIds) => {
     setMarkedQuestions(new Set(questionIds.map(Number)));
   };
 
-  const toggleMarkedQuestion = (questionId) => {
+  const toggleMarkedQuestion = (question) => {
+    const questionId =
+      typeof question === "object" ? question?.questionId : question;
+    const targetChapterId =
+      typeof question === "object" ? question?.chapterId || chapterId : chapterId;
     const numericQuestionId = Number(questionId);
-    if (!numericQuestionId) return;
+    if (!numericQuestionId || !targetChapterId) return;
+    const targetStorageKey = createMarkedStorageKey(userId, targetChapterId);
+    const fallbackStorageKey = createMarkedStorageKey(userId, null);
+    const currentMarked = readMarkedIds(targetStorageKey);
+    const fallbackMarked = readMarkedIds(fallbackStorageKey);
+    const isMarked = currentMarked.has(numericQuestionId) || fallbackMarked.has(numericQuestionId);
     const nextMarked = new Set(markedQuestions);
-    if (nextMarked.has(numericQuestionId)) nextMarked.delete(numericQuestionId);
-    else nextMarked.add(numericQuestionId);
+    if (isMarked) {
+      currentMarked.delete(numericQuestionId);
+      fallbackMarked.delete(numericQuestionId);
+      nextMarked.delete(numericQuestionId);
+    } else {
+      currentMarked.add(numericQuestionId);
+      nextMarked.add(numericQuestionId);
+    }
     setMarkedQuestions(nextMarked);
-    localStorage.setItem(markedStorageKey, JSON.stringify([...nextMarked]));
+    localStorage.setItem(targetStorageKey, JSON.stringify([...currentMarked]));
+    localStorage.setItem(fallbackStorageKey, JSON.stringify([...fallbackMarked]));
   };
 
   return {
     markedQuestions,
+    loadFallbackMarkedQuestions,
     loadMarkedQuestions,
     loadMarkedQuestionsByChapter,
     replaceMarkedQuestions,

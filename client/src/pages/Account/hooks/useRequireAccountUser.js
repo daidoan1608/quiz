@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { message } from 'antd';
 import { authApi } from 'api/services/authApi';
+import { hydrateAuthSession } from 'context/auth/authSession';
 import { getCurrentUserId } from '../utils/accountUtils';
 
 const clearStoredUser = () => {
@@ -17,25 +18,27 @@ const persistCurrentUser = (currentUser) => {
   localStorage.setItem('avatarUrl', currentUser.avatarUrl || '');
 };
 
-export const useRequireAccountUser = ({ navigate, noUserIdText }) =>
+const SESSION_EXPIRED_MESSAGE = 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!';
+
+export const useRequireAccountUser = ({ navigate }) =>
   useCallback(async () => {
     let currentUser = null;
     try {
-      currentUser = await authApi.getCurrentUser();
+      currentUser = await hydrateAuthSession(authApi);
     } catch (error) {
       clearStoredUser();
-      message.error(noUserIdText || 'Vui lòng đăng nhập lại!');
-      navigate('/login');
+      message.error(SESSION_EXPIRED_MESSAGE);
+      navigate('/login', { replace: true });
       return null;
     }
 
     const userId = currentUser?.userId || getCurrentUserId();
     if (!userId) {
-      message.error(noUserIdText || 'Vui lòng đăng nhập lại!');
-      navigate('/login');
+      message.error(SESSION_EXPIRED_MESSAGE);
+      navigate('/login', { replace: true });
       return null;
     }
 
     persistCurrentUser(currentUser);
     return userId;
-  }, [navigate, noUserIdText]);
+  }, [navigate]);

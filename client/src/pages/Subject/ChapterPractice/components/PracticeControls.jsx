@@ -1,5 +1,5 @@
 import React from 'react';
-import { progressValueStyle } from 'utils/styleVariables';
+import { SessionHero } from 'pages/Subject/components/QuestionPanelShared/SessionHero';
 import { SUBJECT_MODE_OPTIONS } from '../constants/practiceOptions';
 
 export const PracticeControls = ({
@@ -15,46 +15,46 @@ export const PracticeControls = ({
   progressPercent,
   questionCount,
   texts,
-}) => (
-  <section className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-8">
-    <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
-      <span className="material-symbols-outlined text-base">
-        {hasRequested ? 'quiz' : 'tune'}
-      </span>
-      {isSubjectPractice ? 'Ôn tập thông minh theo môn' : 'Ôn tập theo chương'}
-    </div>
-    <h1 className="text-3xl font-black tracking-tight text-gray-950 dark:text-white md:text-4xl">
-      {panelTitle}
-    </h1>
-    <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600 dark:text-gray-300">
-      {isSubjectPractice
-        ? 'Chọn tab câu sai hoặc câu đã lưu để ôn riêng trong môn này.'
-        : 'Ôn tập trực tiếp toàn bộ câu hỏi thuộc chương đã chọn.'}{' '}
-      {hasRequested
-        ? 'Sau mỗi câu, đáp án đúng sẽ hiện ngay để bạn sửa lỗi tư duy.'
-        : isSubjectPractice
-          ? 'Hệ thống chỉ tải câu hỏi sau khi bạn bấm bắt đầu.'
-          : 'Hệ thống đang chuẩn bị câu hỏi cho chương này.'}
-    </p>
-    {hasRequested && questionCount > 0 && (
-      <div className="mt-6">
-        <div className="mb-2 flex items-center justify-between text-sm font-bold text-primary">
-          <span>{texts.progress || 'Tiến độ'}</span>
-          <span>
-            {answeredCount}/{questionCount}
+}) => {
+  const description = `${isSubjectPractice
+    ? 'Chọn nhóm câu cần ôn, sau đó bắt đầu khi bạn sẵn sàng.'
+    : 'Ôn tập trực tiếp toàn bộ câu hỏi thuộc chương đã chọn.'} ${
+    hasRequested
+      ? 'Sau mỗi câu, đáp án đúng sẽ hiện ngay để bạn sửa lỗi tư duy.'
+      : isSubjectPractice
+        ? 'Câu hỏi chỉ được tải sau khi bạn bấm bắt đầu.'
+        : 'Hệ thống đang chuẩn bị câu hỏi cho chương này.'
+  }`;
+
+  return (
+    <SessionHero
+      action={
+        isSubjectPractice && (
+        <button
+          onClick={onStartPractice}
+          disabled={isLoading || maxQuestionLimit <= 0}
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
+        >
+          <span className="material-symbols-outlined text-base">
+            {hasRequested ? 'filter_alt' : 'play_arrow'}
           </span>
-        </div>
-        <div className="aura-progress h-2.5 w-full">
-          <div
-            className="aura-progress__bar aura-progress__bar--primary"
-            style={progressValueStyle(progressPercent)}
-          />
-        </div>
-      </div>
-    )}
-    <div className="mt-6">
+          {hasRequested ? 'Lọc lại' : 'Bắt đầu ôn'}
+        </button>
+        )
+      }
+      badgeIcon={hasRequested ? 'quiz' : 'tune'}
+      badgeText={isSubjectPractice ? 'Ôn tập thông minh' : 'Ôn tập theo chương'}
+      description={description}
+      progress={{
+        isVisible: hasRequested && questionCount > 0,
+        label: texts.progress || 'Tiến độ',
+        percent: progressPercent,
+        value: `${answeredCount}/${questionCount}`,
+      }}
+      title={panelTitle}
+    >
       {isSubjectPractice && (
-        <div className="grid gap-3 rounded-xl bg-gray-100 p-1.5 dark:bg-gray-900 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           {SUBJECT_MODE_OPTIONS.map((option) => {
             const isActive = practiceConfig.mode === option.value;
             return (
@@ -62,27 +62,32 @@ export const PracticeControls = ({
                 key={option.value}
                 type="button"
                 onClick={() => onModeChange(option.value)}
-                className={`flex h-14 items-center justify-center rounded-xl px-4 text-base font-black transition-all ${
+                className={`flex min-h-24 items-start gap-3 rounded-xl border p-4 text-left transition-all ${
                   isActive
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-gray-600 hover:text-primary dark:text-gray-300'
+                    ? 'border-primary bg-primary/10 text-primary shadow-sm dark:bg-primary/15'
+                    : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-primary/50 hover:text-primary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
                 }`}
               >
-                {option.label}
+                <span
+                  className={`material-symbols-outlined mt-0.5 text-xl ${
+                    isActive ? 'text-primary' : 'text-gray-400'
+                  }`}
+                >
+                  {option.icon}
+                </span>
+                <span>
+                  <span className="block text-base font-black">
+                    {option.label}
+                  </span>
+                  <span className="mt-1 block text-sm font-medium leading-5 text-gray-500 dark:text-gray-400">
+                    {option.description}
+                  </span>
+                </span>
               </button>
             );
           })}
         </div>
       )}
-      {isSubjectPractice && (
-        <button
-          onClick={onStartPractice}
-          disabled={isLoading || maxQuestionLimit <= 0}
-          className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-        >
-          {hasRequested ? 'Lọc lại' : 'Bắt đầu ôn'}
-        </button>
-      )}
-    </div>
-  </section>
-);
+    </SessionHero>
+  );
+};

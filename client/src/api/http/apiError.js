@@ -26,7 +26,7 @@ export const getApiErrorMessage = (
     return serverMessage || fallback;
   }
   if (status === 401) {
-    return "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!";
+    return serverMessage || "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!";
   }
   if (status === 403) {
     return "Bạn không có quyền thực hiện thao tác này!";

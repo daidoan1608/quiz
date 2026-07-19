@@ -31,12 +31,14 @@ export const useAccountPage = () => {
   const { texts } = useLanguage();
   const requireUserId = useRequireAccountUser({
     navigate,
-    noUserIdText: texts.noUserId,
   });
 
   const fetchAccountData = useCallback(async () => {
     const userId = await requireUserId();
-    if (!userId) return;
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);

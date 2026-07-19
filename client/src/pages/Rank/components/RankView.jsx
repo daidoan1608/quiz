@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PageContainer } from 'components/common/PageContainer';
 import { LeaderboardTable } from './LeaderboardTable';
 import { RankFilters } from './RankFilters';
 import { RankHeader } from './RankHeader';
@@ -8,7 +9,7 @@ export const RankView = (props) => {
 
   return (
     <div className="flex flex-col bg-background-light dark:bg-background-dark font-display transition-colors duration-300">
-      <div className="w-full max-w-screen-2xl mx-auto px-4 py-8">
+      <PageContainer as="div">
         <div className="flex flex-col gap-8">
           <RankHeader
             currentUserRankEntry={props.currentUserRankEntry}
@@ -41,7 +42,7 @@ export const RankView = (props) => {
             />
           </div>
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 };

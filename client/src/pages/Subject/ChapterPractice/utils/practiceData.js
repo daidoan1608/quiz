@@ -12,15 +12,23 @@ export const createPracticeRequestParams = ({
 export const loadMarkedSubjectQuestions = async ({
   commonParams,
   examApi,
+  loadFallbackMarkedQuestions,
   loadMarkedQuestionsByChapter,
   subjectChapters,
 }) => {
   const markedByChapter = loadMarkedQuestionsByChapter(subjectChapters);
+  const fallbackMarkedIds = loadFallbackMarkedQuestions();
   const markedChapterIds = [...markedByChapter.entries()]
     .filter(([, ids]) => ids.size > 0)
     .map(([id]) => id);
+  const fallbackChapterIds = fallbackMarkedIds.size
+    ? subjectChapters.map((chapter) => Number(chapter.chapterId))
+    : [];
+  const chapterIdsToLoad = [
+    ...new Set([...markedChapterIds, ...fallbackChapterIds]),
+  ];
   const chapterQuestions = await Promise.all(
-    markedChapterIds.map((id) =>
+    chapterIdsToLoad.map((id) =>
       examApi.getChapterQuestions(id, {
         ...commonParams,
         limit: 100,
@@ -31,7 +39,8 @@ export const loadMarkedSubjectQuestions = async ({
   return chapterQuestions.flat().filter((question) => {
     const questionChapterId = Number(question.chapterId);
     const chapterMarkedIds = markedByChapter.get(questionChapterId);
-    return chapterMarkedIds?.has(Number(question.questionId));
+    const questionId = Number(question.questionId);
+    return chapterMarkedIds?.has(questionId) || fallbackMarkedIds.has(questionId);
   });
 };
 

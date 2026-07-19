@@ -9,6 +9,16 @@ export const SMART_WRONG_MODES = {
 };
 
 export const SUBJECT_MODE_OPTIONS = [
-  { value: 'wrongRecent', label: 'Câu sai' },
-  { value: 'markedSubject', label: 'Câu đã lưu' },
+  {
+    value: 'wrongRecent',
+    label: 'Câu sai',
+    icon: 'error',
+    description: 'Ôn lại các câu bạn từng trả lời chưa đúng.',
+  },
+  {
+    value: 'markedSubject',
+    label: 'Câu đã lưu',
+    icon: 'bookmark',
+    description: 'Tập trung vào những câu bạn đã đánh dấu.',
+  },
 ];

@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageContainer } from 'components/common/PageContainer';
 import { NotificationList } from './NotificationList';
 import { NotificationTabs } from './NotificationTabs';
 
@@ -10,8 +11,7 @@ export const NotificationsView = ({
   loading,
   setFilter,
 }) => (
-  <main className="flex flex-1 justify-center py-6 px-4">
-    <div className="flex flex-col w-full max-w-3xl gap-6">
+  <PageContainer className="flex flex-1 flex-col gap-6">
       <div className="flex flex-wrap justify-between items-center gap-4">
         <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
           Cập nhật mới
@@ -31,6 +31,5 @@ export const NotificationsView = ({
         loading={loading}
         onNotificationClick={handleNotificationClick}
       />
-    </div>
-  </main>
+  </PageContainer>
 );

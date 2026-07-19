@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageContainer } from 'components/common/PageContainer';
 import { ChapterPracticeView } from './components/ChapterPracticeView';
 import { PracticeBreadcrumb } from './components/PracticeBreadcrumb';
 import { PracticeControls } from './components/PracticeControls';
@@ -41,66 +42,57 @@ export default function ChapterPractice() {
     />
   );
 
+  let content = null;
+
   if (practice.isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+    content = (
+      <div className="flex min-h-48 items-center justify-center rounded-xl border border-gray-200 bg-white p-8 text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
         {practice.texts.loadingPracticeQuestions ||
           'Đang tải câu hỏi ôn tập...'}
       </div>
     );
-  }
-
-  if (!practice.hasRequested) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] max-w-4xl flex-col p-4 py-6">
-        {breadcrumb()}
-        {controls}
-      </div>
+  } else if (practice.hasRequested && !practice.questions.length) {
+    content = (
+      <PracticeEmptyState
+        emptyText={practice.emptyText}
+        isSubjectPractice={practice.isSubjectPractice}
+        onStartPractice={practice.handleStartPractice}
+      />
     );
-  }
-
-  if (!practice.questions.length) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] max-w-4xl flex-col p-4 py-6">
-        {breadcrumb()}
-        {controls}
-        <PracticeEmptyState
-          emptyText={practice.emptyText}
-          isSubjectPractice={practice.isSubjectPractice}
-          onStartPractice={practice.handleStartPractice}
-        />
-      </div>
+  } else if (practice.questions.length) {
+    content = (
+      <ChapterPracticeView
+        confirmedAnswers={practice.confirmedAnswers}
+        currentQuestion={practice.currentQuestion}
+        currentQuestionIndex={practice.currentQuestionIndex}
+        displaySubjectName={practice.displaySubjectName}
+        displayTitle={practice.displayTitle}
+        hasAnswered={practice.hasAnswered}
+        isSubjectPractice={practice.isSubjectPractice}
+        markedQuestions={practice.markedQuestions}
+        onAnswerSelect={practice.handleAnswerSelect}
+        onConfirmMultipleAnswer={practice.handleConfirmMultipleAnswer}
+        onNext={practice.goToNextQuestion}
+        onPrevious={practice.goToPreviousQuestion}
+        onToggleMarkedQuestion={practice.handleToggleMarkedQuestion}
+        questions={practice.questions}
+        selectedAnswers={practice.selectedAnswers}
+        selectedValue={practice.selectedValue}
+        setCurrentQuestionIndex={practice.setCurrentQuestionIndex}
+        texts={practice.texts}
+        visibleAnswers={practice.visibleAnswers}
+      />
     );
   }
 
   return (
-    <div className="relative flex w-full flex-col bg-background-light text-gray-900 transition-colors duration-300 dark:bg-background-dark dark:text-gray-100">
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
-        <div className="mx-auto max-w-7xl">
-          {breadcrumb()}
-          {controls}
-
-          <ChapterPracticeView
-            confirmedAnswers={practice.confirmedAnswers}
-            currentQuestion={practice.currentQuestion}
-            currentQuestionIndex={practice.currentQuestionIndex}
-            displaySubjectName={practice.displaySubjectName}
-            displayTitle={practice.displayTitle}
-            hasAnswered={practice.hasAnswered}
-            markedQuestions={practice.markedQuestions}
-            onAnswerSelect={practice.handleAnswerSelect}
-            onConfirmMultipleAnswer={practice.handleConfirmMultipleAnswer}
-            onNext={practice.goToNextQuestion}
-            onPrevious={practice.goToPreviousQuestion}
-            onToggleMarkedQuestion={practice.handleToggleMarkedQuestion}
-            questions={practice.questions}
-            selectedAnswers={practice.selectedAnswers}
-            selectedValue={practice.selectedValue}
-            setCurrentQuestionIndex={practice.setCurrentQuestionIndex}
-            visibleAnswers={practice.visibleAnswers}
-          />
-        </div>
-      </main>
-    </div>
+    <PageContainer
+      as="div"
+      className="flex min-h-[60vh] flex-col text-gray-900 transition-colors duration-300 dark:text-gray-100"
+    >
+      {breadcrumb()}
+      {controls}
+      {content}
+    </PageContainer>
   );
 }
