@@ -55,5 +55,24 @@ public class Question {
     public enum QuestionType {
         SINGLE_CHOICE, MULTIPLE_CHOICE, FILL_IN_THE_BLANK
     }
+
+    @PrePersist
+    private void prePersist() {
+        ensureDefaults();
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        ensureDefaults();
+    }
+
+    private void ensureDefaults() {
+        if (deleted == null) {
+            deleted = false;
+        }
+        if (questionType == null) {
+            questionType = QuestionType.SINGLE_CHOICE;
+        }
+    }
 }
 

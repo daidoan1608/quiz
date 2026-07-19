@@ -11,7 +11,7 @@ public class SecureRandomOtpGenerator implements OtpGenerator {
     @Override
     public String generateNumericOtp(int length) {
         if (length <= 0) {
-            throw new IllegalArgumentException("OTP length must be positive");
+            throw new IllegalArgumentException("Độ dài OTP phải lớn hơn 0");
         }
 
         StringBuilder otp = new StringBuilder(length);

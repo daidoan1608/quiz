@@ -67,8 +67,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             ApiResponse<Object> body = ApiResponse.error(
+                    "UNAUTHORIZED",
                     "Phiên đăng nhập không hợp lệ hoặc đã hết hạn",
-                    List.of(ex.getMessage())
+                    List.of("Vui lòng đăng nhập lại"),
+                    request.getRequestURI()
             );
             response.getWriter().write(objectMapper.writeValueAsString(body));
             return;

@@ -41,7 +41,7 @@ public class ExcelHelper {
 
                 // Kiểm tra nếu difficulty không hợp lệ sau khi bỏ khoảng trống
                 if (!difficulty.equalsIgnoreCase("EASY") && !difficulty.equalsIgnoreCase("MEDIUM") && !difficulty.equalsIgnoreCase("HARD")) {
-                    throw new CustomApiException("Difficulty không hợp lệ: " + difficulty, HttpStatus.BAD_REQUEST);
+                    throw new CustomApiException("Độ khó không hợp lệ: " + difficulty, HttpStatus.BAD_REQUEST);
                 }
                 questionDto.setDifficulty(difficulty);
 

@@ -65,6 +65,13 @@ public class User implements UserDetails {
         LOCAL, GOOGLE, FACEBOOK, GITHUB
     }
 
+    @PrePersist
+    private void prePersist() {
+        if (deleted == null) {
+            deleted = false;
+        }
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));

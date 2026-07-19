@@ -40,4 +40,11 @@ public class Subject {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @PrePersist
+    private void prePersist() {
+        if (deleted == null) {
+            deleted = false;
+        }
+    }
 }

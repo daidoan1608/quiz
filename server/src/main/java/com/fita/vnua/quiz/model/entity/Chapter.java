@@ -35,4 +35,11 @@ public class Chapter {
     private String deleteOriginType;
 
     private Long deleteOriginId;
+
+    @PrePersist
+    private void prePersist() {
+        if (deleted == null) {
+            deleted = false;
+        }
+    }
 }

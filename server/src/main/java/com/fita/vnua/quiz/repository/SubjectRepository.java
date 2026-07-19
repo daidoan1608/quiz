@@ -11,18 +11,41 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
+    @Query("SELECT s FROM Subject s JOIN FETCH s.category WHERE s.deleted = false")
     List<Subject> findByDeletedFalse();
 
+    @Query("SELECT s FROM Subject s JOIN FETCH s.category WHERE s.deleted = true")
     List<Subject> findByDeletedTrue();
 
     long countByDeletedFalse();
 
-    List<Subject> findSubjectsByCategoryAndDeletedFalse(Category category);
+    @Query("SELECT s FROM Subject s JOIN FETCH s.category WHERE s.category = :category AND s.deleted = false")
+    List<Subject> findSubjectsByCategoryAndDeletedFalse(@Param("category") Category category);
 
     List<Subject> findSubjectsByCategoryAndDeletedTrue(Category category);
 
     @Query("""
             SELECT s FROM Subject s
+            JOIN FETCH s.category c
+            WHERE (:deleted IS NULL OR s.deleted = :deleted)
+            AND (:categoryId IS NULL OR c.categoryId = :categoryId)
+            AND (
+                :keyword IS NULL OR :keyword = ''
+                OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(s.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(c.categoryName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR CAST(s.subjectId AS string) LIKE CONCAT('%', :keyword, '%')
+            )
+            """)
+    List<Subject> filterSubjects(
+            @Param("keyword") String keyword,
+            @Param("categoryId") Long categoryId,
+            @Param("deleted") Boolean deleted
+    );
+
+    @Query("""
+            SELECT s FROM Subject s
+            JOIN FETCH s.category
             WHERE s.deleted = false
             AND (
                 LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))

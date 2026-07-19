@@ -99,7 +99,7 @@ public class OtpServiceImpl implements OtpService {
         otpCode.setResetTokenExpiry(Instant.now().plus(15, ChronoUnit.MINUTES));
         otpCodeRepository.save(otpCode);
 
-        return ApiResponse.success("OTP verified successfully", resetToken);
+        return ApiResponse.success("Xác thực OTP thành công", resetToken);
     }
 
 
@@ -135,4 +135,3 @@ public class OtpServiceImpl implements OtpService {
     }
 
 }
-

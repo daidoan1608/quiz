@@ -13,7 +13,10 @@ import com.fita.vnua.quiz.service.NotificationService;
 import com.fita.vnua.quiz.service.QuestionService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.UserExamService;
+import com.fita.vnua.quiz.service.mapper.QuestionMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -40,14 +43,16 @@ public class ExamServiceImpl implements ExamService {
     private final UserExamRepository userExamRepository;
     private final SoftDeleteService softDeleteService;
     private final UserExamService userExamService;
+    private final QuestionMapper questionMapper;
 
     protected List<ExamSummaryDto> mapExamsToSummaryDtos(List<Exam> exams) {
+        Map<Long, Long> questionCounts = countQuestionsByExam(exams);
         return exams.stream()
-                .map(this::mapExamToSummaryDto)
+                .map(exam -> mapExamToSummaryDto(exam, questionCounts))
                 .toList();
     }
 
-    private ExamSummaryDto mapExamToSummaryDto(Exam exam) {
+    private ExamSummaryDto mapExamToSummaryDto(Exam exam, Map<Long, Long> questionCounts) {
         ExamSummaryDto dto = new ExamSummaryDto();
         dto.setExamId(exam.getExamId());
         dto.setTitle(exam.getTitle());
@@ -57,8 +62,22 @@ public class ExamServiceImpl implements ExamService {
         dto.setSubjectName(exam.getSubject().getName());
         dto.setCreatedBy(exam.getCreatedBy().getUserId());
         dto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
-        dto.setQuestionCount(examQuestionRepository.countByExam(exam).intValue());
+        dto.setQuestionCount(questionCounts.getOrDefault(exam.getExamId(), 0L).intValue());
         return dto;
+    }
+
+    private Map<Long, Long> countQuestionsByExam(List<Exam> exams) {
+        List<Long> examIds = exams.stream()
+                .map(Exam::getExamId)
+                .toList();
+        if (examIds.isEmpty()) {
+            return Map.of();
+        }
+        return examRepository.countQuestionsByExamIds(examIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
     }
 
     @Override
@@ -79,9 +98,36 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    public List<ExamSummaryDto> filterExams(String keyword, Long categoryId, Long subjectId, UUID createdBy, Boolean deleted, String sortBy, String sortDir) {
+        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
+        List<ExamSummaryDto> exams = mapExamsToSummaryDtos(
+                examRepository.filterExams(normalizedKeyword, categoryId, subjectId, createdBy, deleted)
+        );
+        return AdminSortHelper.sort(exams, sortBy, sortDir, Map.of(
+                "examId", ExamSummaryDto::getExamId,
+                "subjectId", ExamSummaryDto::getSubjectId,
+                "subjectName", ExamSummaryDto::getSubjectName,
+                "title", ExamSummaryDto::getTitle,
+                "description", ExamSummaryDto::getDescription,
+                "duration", ExamSummaryDto::getDuration,
+                "createdDate", ExamSummaryDto::getCreatedDate,
+                "questionCount", ExamSummaryDto::getQuestionCount,
+                "deletedAt", ExamSummaryDto::getDeletedAt
+        ));
+    }
+
+    @Override
+    public Page<ExamSummaryDto> filterExamsPage(String keyword, Long categoryId, Long subjectId, UUID createdBy, Boolean deleted, Pageable pageable) {
+        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
+        Page<Exam> page = examRepository.filterExamsPage(normalizedKeyword, categoryId, subjectId, createdBy, deleted, pageable);
+        Map<Long, Long> questionCounts = countQuestionsByExam(page.getContent());
+        return page.map(exam -> mapExamToSummaryDto(exam, questionCounts));
+    }
+
+    @Override
     public ExamDto getExamById(Long id) {
         Exam exam = examRepository.findByExamIdAndDeletedFalse(id)
-                .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi", HttpStatus.NOT_FOUND));
         ExamDto examDto = new ExamDto();
         examDto.setExamId(exam.getExamId());
         examDto.setTitle(exam.getTitle());
@@ -89,7 +135,7 @@ public class ExamServiceImpl implements ExamService {
         examDto.setDuration(exam.getDuration());
         examDto.setSubjectId(exam.getSubject().getSubjectId());
         examDto.setSubjectName(subjectRepository.findById(exam.getSubject().getSubjectId())
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND))
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND))
                 .getName());
         examDto.setCreatedBy(exam.getCreatedBy().getUserId());
         examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
@@ -103,10 +149,10 @@ public class ExamServiceImpl implements ExamService {
 //        ExamDto examDto = examRequest.getExamDto();
 //        Exam exam = new Exam();
 //        exam.setTitle(examDto.getTitle());
-//        exam.setSubject(subjectRepository.findById(examDto.getSubjectId()).orElseThrow(() -> new RuntimeException("Subject not found")));
+//        exam.setSubject(subjectRepository.findById(examDto.getSubjectId()).orElseThrow(() -> new RuntimeException("Không tìm thấy môn học")));
 //        exam.setDescription(examDto.getDescription());
 //        exam.setDuration(examDto.getDuration());
-//        exam.setCreatedBy(userRepository.findById(examDto.getCreatedBy()).orElseThrow(() -> new RuntimeException("User not found")));
+//        exam.setCreatedBy(userRepository.findById(examDto.getCreatedBy()).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng")));
 //        exam.setCreatedTime(LocalDate.now());
 //        exam = examRepository.save(exam);
 //
@@ -206,16 +252,16 @@ public class ExamServiceImpl implements ExamService {
 
         // Lấy đối tượng Subject để dùng sau này cho việc gửi thông báo
         Subject subject = subjectRepository.findById(examDto.getSubjectId())
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(subject.getDeleted())) {
-            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
         exam.setSubject(subject);
 
         exam.setDescription(examDto.getDescription());
         exam.setDuration(examDto.getDuration());
         exam.setCreatedBy(userRepository.findById(currentUserId)
-                .orElseThrow(() -> new CustomApiException("User not found", HttpStatus.NOT_FOUND)));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND)));
         exam.setCreatedTime(LocalDate.now());
 
         // Lưu lần 1 để lấy Exam ID
@@ -301,15 +347,15 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public ExamDto updateExam(Long id, ExamDto examDto) {
         Exam exam = examRepository.findByExamIdAndDeletedFalse(id)
-                .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi", HttpStatus.NOT_FOUND));
         exam.setTitle(examDto.getTitle());
         exam.setDescription(examDto.getDescription());
         exam.setDuration(examDto.getDuration());
         if (examDto.getSubjectId() != null) {
             Subject subject = subjectRepository.findById(examDto.getSubjectId())
-                    .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
             if (Boolean.TRUE.equals(subject.getDeleted())) {
-                throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+                throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
             }
             exam.setSubject(subject);
         }
@@ -343,16 +389,16 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public ExamDto getExamByIdForSubmittedAttempt(Long examId, Long userExamId, UUID currentUserId) {
         User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN));
+                .orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN));
         UserExam userExam = (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MOD)
-                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN))
+                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN))
                 : userExamRepository.findByIdAndUserId(userExamId, currentUserId)
-                        .orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN));
+                        .orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN));
         if (!examId.equals(userExam.getExam().getExamId()) || !"SUBMITTED".equals(userExam.getStatus())) {
-            throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
+            throw new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN);
         }
         List<QuestionDto> questions = userExamService.getAttemptQuestionsForSubmittedAttempt(userExamId, currentUserId).stream()
-                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .map(questionMapper::toDto)
                 .toList();
         return mapExamToDto(userExam.getExam(), questions);
     }

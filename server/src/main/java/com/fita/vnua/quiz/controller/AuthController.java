@@ -55,13 +55,21 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return buildAuthenticatedResponse("Login successful", userDetails);
+            return buildAuthenticatedResponse("Đăng nhập thành công", userDetails);
         } catch (DisabledException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", List.of(e.getMessage())));
+                    .body(ApiResponse.error(
+                            "FORBIDDEN",
+                            "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.",
+                            List.of("Tài khoản đã bị vô hiệu hóa")
+                    ));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Authentication failed", List.of("Invalid username/email or password")));
+                    .body(ApiResponse.error(
+                            "INVALID_CREDENTIALS",
+                            "Tên đăng nhập/email hoặc mật khẩu không đúng",
+                            List.of("Thông tin đăng nhập không hợp lệ")
+                    ));
         }
     }
 
@@ -69,10 +77,10 @@ public class AuthController {
     @Operation(summary = "API lấy thông tin người dùng đang đăng nhập")
     public ResponseEntity<ApiResponse<AuthResponse>> me(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
-            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
         }
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(currentUser.getUsername());
-        return ResponseEntity.ok(ApiResponse.success("Current user fetched successfully", authService.createAuthResponse(userDetails)));
+        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin người dùng thành công", authService.createAuthResponse(userDetails)));
     }
 
     @PostMapping("refresh")
@@ -81,7 +89,7 @@ public class AuthController {
             @CookieValue(name = "refreshToken", required = false) String refreshToken
     ) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new CustomApiException("Refresh token is empty", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("Phiên đăng nhập không hợp lệ hoặc đã hết hạn", HttpStatus.UNAUTHORIZED);
         }
 
         String newAccessToken = authService.refreshAccessToken(UUID.fromString(refreshToken));
@@ -89,7 +97,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                .body(ApiResponse.success("Refreshed", null));
+                .body(ApiResponse.success("Làm mới phiên đăng nhập thành công", null));
     }
 
     @PostMapping("logout")
@@ -107,7 +115,7 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cleanAccess.toString())
                 .header(HttpHeaders.SET_COOKIE, cleanRefresh.toString())
-                .body(ApiResponse.success("Logout successful", null));
+                .body(ApiResponse.success("Đăng xuất thành công", null));
     }
 
     @PostMapping("register")
@@ -118,14 +126,18 @@ public class AuthController {
         User existingByUsername = userService.findEntityByUsername(registerRequest.getUsername());
 
         if (existingByEmail != null && existingByEmail.isEmailVerified()) {
-            throw new CustomApiException("Email is already existed", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("EMAIL_ALREADY_EXISTS", "Email đã được sử dụng", HttpStatus.BAD_REQUEST);
         }
         if (existingByUsername != null && existingByUsername.isEmailVerified()) {
-            throw new CustomApiException("Username is already existed", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("USERNAME_ALREADY_EXISTS", "Tên đăng nhập đã được sử dụng", HttpStatus.BAD_REQUEST);
         }
         if (existingByEmail != null && existingByUsername != null
                 && !existingByEmail.getUserId().equals(existingByUsername.getUserId())) {
-            throw new CustomApiException("Email or username is already pending verification", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException(
+                    "ACCOUNT_PENDING_VERIFICATION",
+                    "Email hoặc tên đăng nhập đang chờ xác thực",
+                    HttpStatus.BAD_REQUEST
+            );
         }
 
         User pendingUser = existingByEmail != null ? existingByEmail : existingByUsername;
@@ -138,7 +150,7 @@ public class AuthController {
             UserDto updatedPendingUser = userService.update(pendingUser.getUserId(), pendingUserDto);
             User updatedPendingEntity = userService.findEntityById(updatedPendingUser.getUserId());
             emailVerificationService.createAndSendVerification(updatedPendingEntity);
-            return ResponseEntity.ok(ApiResponse.success("Verification email has been resent. Please check your email.", null));
+            return ResponseEntity.ok(ApiResponse.success("Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư.", null));
         }
 
         UserDto user = new UserDto();
@@ -152,14 +164,14 @@ public class AuthController {
         emailVerificationService.createAndSendVerification(createdEntity);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Registration successful. Please check your email to verify your account.", null));
+                .body(ApiResponse.success("Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", null));
     }
 
     @GetMapping("verify-email")
     @Operation(summary = "API xác thực email tài khoản bằng token")
     public ResponseEntity<ApiResponse<Object>> verifyEmail(@RequestParam String token) {
         emailVerificationService.verifyEmail(token);
-        return ResponseEntity.ok(ApiResponse.success("Email verified successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xác thực email thành công", null));
     }
 
     @PostMapping("google")
@@ -167,7 +179,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> loginWithGoogle(@RequestBody Map<String, String> body) throws Exception {
         String idToken = body.get("idToken");
         if (!googleVerifier.verify(idToken)) {
-            throw new CustomApiException("Invalid Google ID Token", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("INVALID_GOOGLE_TOKEN", "Google ID Token không hợp lệ", HttpStatus.UNAUTHORIZED);
         }
 
         String email = googleVerifier.extractEmail(idToken);
@@ -179,7 +191,7 @@ public class AuthController {
         }
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getUsername());
-        return buildAuthenticatedResponse("Google login successful", userDetails);
+        return buildAuthenticatedResponse("Đăng nhập bằng Google thành công", userDetails);
     }
 
     private ResponseEntity<ApiResponse<AuthResponse>> buildAuthenticatedResponse(String message, UserDetails userDetails) {

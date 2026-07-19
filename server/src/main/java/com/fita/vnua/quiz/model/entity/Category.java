@@ -33,4 +33,11 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subject> subjects;
+
+    @PrePersist
+    private void prePersist() {
+        if (deleted == null) {
+            deleted = false;
+        }
+    }
 }

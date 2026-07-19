@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -30,22 +31,17 @@ public class SubjectServiceImpl implements SubjectService {
     private final CategoryRepository categoryRepository;
     private final QuestionRepository questionRepository;
     private final ExamRepository examRepository;
-    private final ExamQuestionRepository examQuestionRepository;
     private final ModelMapper modelMapper;
     private final SoftDeleteService softDeleteService;
 
     @Override
     public List<SubjectSummaryDto> getAllSubject() {
-        return subjectRepository.findByDeletedFalse().stream()
-                .map(this::mapSubjectToSummaryDto)
-                .toList();
+        return mapSubjectsToSummaryDtos(subjectRepository.findByDeletedFalse());
     }
 
     @Override
     public List<SubjectSummaryDto> getDeletedSubjects() {
-        return subjectRepository.findByDeletedTrue().stream()
-                .map(this::mapSubjectToSummaryDto)
-                .toList();
+        return mapSubjectsToSummaryDtos(subjectRepository.findByDeletedTrue());
     }
 
     @Override
@@ -53,30 +49,43 @@ public class SubjectServiceImpl implements SubjectService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllSubject();
         }
-        return subjectRepository.searchActive(keyword.trim())
-                .stream()
-                .map(this::mapSubjectToSummaryDto)
-                .toList();
+        return mapSubjectsToSummaryDtos(subjectRepository.searchActive(keyword.trim()));
+    }
+
+    @Override
+    public List<SubjectSummaryDto> filterSubjects(String keyword, Long categoryId, Boolean deleted, String sortBy, String sortDir) {
+        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
+        List<SubjectSummaryDto> subjects = mapSubjectsToSummaryDtos(
+                subjectRepository.filterSubjects(normalizedKeyword, categoryId, deleted)
+        );
+        return AdminSortHelper.sort(subjects, sortBy, sortDir, Map.of(
+                "subjectId", SubjectSummaryDto::getSubjectId,
+                "categoryId", SubjectSummaryDto::getCategoryId,
+                "name", SubjectSummaryDto::getName,
+                "description", SubjectSummaryDto::getDescription,
+                "totalChapters", SubjectSummaryDto::getTotalChapters,
+                "totalExams", SubjectSummaryDto::getTotalExams,
+                "totalQuestions", SubjectSummaryDto::getTotalQuestions,
+                "deletedAt", SubjectSummaryDto::getDeletedAt
+        ));
     }
 
     @Override
     public List<SubjectSummaryDto> getSubjectsByCategoryId(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(category.getDeleted())) {
             return List.of();
         }
-        return subjectRepository.findSubjectsByCategoryAndDeletedFalse(category).stream()
-                .map(this::mapSubjectToSummaryDto)
-                .toList();
+        return mapSubjectsToSummaryDtos(subjectRepository.findSubjectsByCategoryAndDeletedFalse(category));
     }
 
     @Override
     public SubjectDto getSubjectById(Long subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(subject.getDeleted())) {
-            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
 
         // Gọi hàm helper để lấy chi tiết
@@ -86,12 +95,15 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public SubjectDto create(SubjectDto subjectDto) {
         Category category = categoryRepository.findById(subjectDto.getCategoryId())
-                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(category.getDeleted())) {
-            throw new CustomApiException("Category not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND);
         }
-        Subject subject = subjectRepository.save(modelMapper.map(subjectDto, Subject.class));
+        Subject subject = new Subject();
+        subject.setName(subjectDto.getName());
+        subject.setDescription(subjectDto.getDescription());
         subject.setCategory(category);
+        subject.setDeleted(false);
         Subject savedSubject = subjectRepository.save(subject);
         return modelMapper.map(savedSubject, SubjectDto.class);
     }
@@ -99,9 +111,9 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public SubjectDto update(Long subjectId, SubjectDto subjectDto) {
         var existingSubject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(existingSubject.getDeleted())) {
-            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
 
         existingSubject.setName(subjectDto.getName());
@@ -113,7 +125,7 @@ public class SubjectServiceImpl implements SubjectService {
     public Response delete(Long subjectId) {
         softDeleteService.deleteSubject(subjectId, null);
         return Response.builder()
-                .responseMessage("Subject deleted successfully")
+                .responseMessage("Xóa môn học thành công")
                 .responseCode("200 OK").build();
     }
 
@@ -121,26 +133,49 @@ public class SubjectServiceImpl implements SubjectService {
     public SubjectDto restore(Long subjectId) {
         softDeleteService.restoreSubject(subjectId);
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
         return mapSubjectToDetailedDto(subject);
     }
 
     @Override
     public List<SubjectSummaryDto> getSubjectsByUser(UUID userId) {
         List<Subject> subjects = subjectRepository.findSubjectsWithUserExams(userId);
-        return subjects.stream().map(this::mapSubjectToSummaryDto).toList();
+        return mapSubjectsToSummaryDtos(subjects);
     }
 
-    private SubjectSummaryDto mapSubjectToSummaryDto(Subject subject) {
+    private List<SubjectSummaryDto> mapSubjectsToSummaryDtos(List<Subject> subjects) {
+        List<Long> subjectIds = subjects.stream()
+                .map(Subject::getSubjectId)
+                .toList();
+        if (subjectIds.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, Long> chapterCounts = countBySubjectId(
+                chapterRepository.countActiveChaptersBySubjectIds(subjectIds)
+        );
+        Map<Long, Long> examCounts = countBySubjectId(
+                examRepository.countActiveExamsBySubjectIds(subjectIds)
+        );
+        Map<Long, Long> questionCounts = countBySubjectId(
+                questionRepository.countActiveQuestionsBySubjectIds(subjectIds)
+        );
+
+        return subjects.stream()
+                .map(subject -> mapSubjectToSummaryDto(subject, chapterCounts, examCounts, questionCounts))
+                .toList();
+    }
+
+    private SubjectSummaryDto mapSubjectToSummaryDto(
+            Subject subject,
+            Map<Long, Long> chapterCounts,
+            Map<Long, Long> examCounts,
+            Map<Long, Long> questionCounts
+    ) {
         SubjectSummaryDto subjectDto = modelMapper.map(subject, SubjectSummaryDto.class);
-        List<Exam> exams = examRepository.findExamsBySubjectId(subject.getSubjectId());
-        List<Chapter> chapters = chapterRepository.findBySubject(subject.getSubjectId());
-        long totalQuestions = chapters.stream()
-                .mapToLong(questionRepository::countByChapter)
-                .sum();
-        subjectDto.setTotalChapters(chapters.size());
-        subjectDto.setTotalExams(exams.size());
-        subjectDto.setTotalQuestions(totalQuestions);
+        subjectDto.setTotalChapters(chapterCounts.getOrDefault(subject.getSubjectId(), 0L));
+        subjectDto.setTotalExams(examCounts.getOrDefault(subject.getSubjectId(), 0L));
+        subjectDto.setTotalQuestions(questionCounts.getOrDefault(subject.getSubjectId(), 0L));
         return subjectDto;
     }
 
@@ -149,17 +184,18 @@ public class SubjectServiceImpl implements SubjectService {
 
         // --- 1. Xử lý Exams ---
         List<Exam> exams = examRepository.findExamsBySubjectId(subject.getSubjectId());
+        Map<Long, Long> examQuestionCounts = countExamQuestions(exams);
         List<ExamInfo> examInfos = new ArrayList<>();
 
         for (Exam exam : exams) {
             ExamInfo examInfo = modelMapper.map(exam, ExamInfo.class);
-            Long totalQuestions = examQuestionRepository.countByExam(exam);
-            examInfo.setTotalQuestions(totalQuestions);
+            examInfo.setTotalQuestions(examQuestionCounts.getOrDefault(exam.getExamId(), 0L));
             examInfos.add(examInfo);
         }
 
         // --- 2. Xử lý Chapters & Questions ---
         List<Chapter> chapters = chapterRepository.findBySubject(subject.getSubjectId());
+        Map<Long, Long> chapterQuestionCounts = countChapterQuestions(chapters);
         List<ChapterDto> chapterDtos = new ArrayList<>();
         long totalQuestionsOfSubject = 0;
 
@@ -167,7 +203,7 @@ public class SubjectServiceImpl implements SubjectService {
             ChapterDto chapterDto = modelMapper.map(chapter, ChapterDto.class);
 
             // Đếm số câu hỏi của chương
-            long questionCount = questionRepository.countByChapter(chapter);
+            long questionCount = chapterQuestionCounts.getOrDefault(chapter.getChapterId(), 0L);
             chapterDto.setCountQuestion(questionCount);
 
             // Cộng dồn tổng câu hỏi
@@ -186,5 +222,41 @@ public class SubjectServiceImpl implements SubjectService {
         subjectDto.setChapters(chapterDtos);
 
         return subjectDto;
+    }
+
+    private Map<Long, Long> countBySubjectId(List<Object[]> rows) {
+        return rows.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+    }
+
+    private Map<Long, Long> countExamQuestions(List<Exam> exams) {
+        List<Long> examIds = exams.stream()
+                .map(Exam::getExamId)
+                .toList();
+        if (examIds.isEmpty()) {
+            return Map.of();
+        }
+        return examRepository.countQuestionsByExamIds(examIds).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+    }
+
+    private Map<Long, Long> countChapterQuestions(List<Chapter> chapters) {
+        List<Long> chapterIds = chapters.stream()
+                .map(Chapter::getChapterId)
+                .toList();
+        if (chapterIds.isEmpty()) {
+            return Map.of();
+        }
+        return questionRepository.countActiveQuestionsByChapterIds(chapterIds).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
     }
 }

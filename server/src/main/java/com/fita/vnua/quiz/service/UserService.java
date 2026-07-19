@@ -32,6 +32,8 @@ public interface UserService {
 
     List<UserResponse> searchNotificationRecipients(String keyword, int limit);
 
+    List<UserResponse> filterUsers(String keyword, String role, String authProvider, Boolean emailVerified, Boolean deleted, String sortBy, String sortDir);
+
     UserDto create(UserDto userDto);
 
     UserDto update(UUID userId, UserDto userDto);

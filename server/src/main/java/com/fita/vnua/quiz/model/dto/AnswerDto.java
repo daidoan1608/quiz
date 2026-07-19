@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,5 +14,6 @@ public class AnswerDto {
     private Long questionId; // ID của câu hỏi mà đáp án này thuộc về
     private String content;  // Nội dung của đáp án
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("isCorrect")
     private Boolean isCorrect; // Đúng hay sai, chỉ định nếu đáp án này là đúng
 }

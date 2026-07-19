@@ -82,11 +82,11 @@ public class JwtTokenUtil {
             final String username = getUsernameFromToken(token);
             return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
         } catch (ExpiredJwtException ex) {
-            throw new CustomApiException("Token has expired", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("TOKEN_EXPIRED", "Token đã hết hạn", HttpStatus.UNAUTHORIZED);
         } catch (JwtException ex) {
-            throw new CustomApiException("Invalid JWT token", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("INVALID_TOKEN", "Token không hợp lệ", HttpStatus.UNAUTHORIZED);
         } catch (IllegalArgumentException ex) {
-            throw new CustomApiException("Token is null, empty or only whitespace", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("INVALID_TOKEN", "Token không được để trống", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -94,9 +94,9 @@ public class JwtTokenUtil {
         try {
             return getClaimFromToken(token, Claims::getSubject);
         } catch (ExpiredJwtException ex) {
-            throw new CustomApiException("Token has expired", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("TOKEN_EXPIRED", "Token đã hết hạn", HttpStatus.UNAUTHORIZED);
         } catch (JwtException ex) {
-            throw new CustomApiException("Invalid JWT token", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("INVALID_TOKEN", "Token không hợp lệ", HttpStatus.UNAUTHORIZED);
         }
     }
 

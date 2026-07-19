@@ -12,6 +12,8 @@ public interface CategoryService {
 
     List<CategorySummaryDto> searchCategories(String keyword);
 
+    List<CategorySummaryDto> filterCategories(String keyword, Boolean deleted, String sortBy, String sortDir);
+
     CategoryDto getCategoryById(Long id);
 
     CategoryDto addCategory(CategoryDto categoryDto);

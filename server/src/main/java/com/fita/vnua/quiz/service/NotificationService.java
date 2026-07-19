@@ -3,6 +3,7 @@ package com.fita.vnua.quiz.service;
 import com.fita.vnua.quiz.model.dto.response.CampaignResponse;
 import com.fita.vnua.quiz.model.dto.response.NotificationResponse;
 import com.fita.vnua.quiz.model.dto.response.RecipientResponse;
+import com.fita.vnua.quiz.model.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,19 @@ public interface NotificationService {
             Pageable pageable
     );
 
+    Page<CampaignResponse> getCampaignsForAdminUser(
+            String keyword,
+            String sendType,
+            UUID createdBy,
+            LocalDateTime fromDate,
+            LocalDateTime toDate,
+            Pageable pageable,
+            User currentUser
+    );
+
     Page<RecipientResponse> getRecipientsByHistoryId(Long historyId, Pageable pageable);
+
+    Page<RecipientResponse> getRecipientsByHistoryIdForAdminUser(Long historyId, Pageable pageable, User currentUser);
 
     @Transactional
     void deleteHistory(Long historyId);

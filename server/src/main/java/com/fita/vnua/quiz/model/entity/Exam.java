@@ -52,5 +52,12 @@ public class Exam {
 
     @OneToMany(mappedBy = "exam")
     private List<ExamQuestion> examQuestions;
+
+    @PrePersist
+    private void prePersist() {
+        if (deleted == null) {
+            deleted = false;
+        }
+    }
 }
 

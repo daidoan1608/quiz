@@ -9,11 +9,12 @@ import java.util.UUID;
 
 @Service
 public class AuthorizationService {
-    private static final String ACCESS_DENIED = "Access denied";
+    private static final String LOGIN_REQUIRED = "Vui lòng đăng nhập để tiếp tục";
+    private static final String ACCESS_DENIED = "Bạn không có quyền thực hiện thao tác này";
 
     public User requireAuthenticated(User currentUser) {
         if (currentUser == null) {
-            throw new CustomApiException(ACCESS_DENIED, HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("UNAUTHORIZED", LOGIN_REQUIRED, HttpStatus.UNAUTHORIZED);
         }
         return currentUser;
     }
@@ -21,14 +22,14 @@ public class AuthorizationService {
     public void requireSelfOrAdminMod(UUID requestedUserId, User currentUser) {
         User authenticatedUser = requireAuthenticated(currentUser);
         if (!authenticatedUser.getUserId().equals(requestedUserId) && !isAdminOrMod(authenticatedUser)) {
-            throw new CustomApiException(ACCESS_DENIED, HttpStatus.FORBIDDEN);
+            throw new CustomApiException("FORBIDDEN", ACCESS_DENIED, HttpStatus.FORBIDDEN);
         }
     }
 
     public void requireSelf(UUID requestedUserId, User currentUser) {
         User authenticatedUser = requireAuthenticated(currentUser);
         if (!authenticatedUser.getUserId().equals(requestedUserId)) {
-            throw new CustomApiException(ACCESS_DENIED, HttpStatus.FORBIDDEN);
+            throw new CustomApiException("FORBIDDEN", ACCESS_DENIED, HttpStatus.FORBIDDEN);
         }
     }
 

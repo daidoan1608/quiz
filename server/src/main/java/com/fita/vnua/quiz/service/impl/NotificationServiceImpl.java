@@ -13,6 +13,7 @@ import com.fita.vnua.quiz.repository.FavoriteRepository;
 import com.fita.vnua.quiz.repository.GlobalNotificationReadRepository;
 import com.fita.vnua.quiz.repository.NotificationHistoryRepository;
 import com.fita.vnua.quiz.repository.NotificationRepository;
+import com.fita.vnua.quiz.service.AdminCapabilityService;
 import com.fita.vnua.quiz.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final GlobalNotificationReadRepository globalReadRepository;
     private final FavoriteRepository favoriteRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final AdminCapabilityService adminCapabilityService;
 
     @Transactional
     @Override
@@ -171,8 +173,60 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<CampaignResponse> getCampaignsForAdminUser(
+            String keyword,
+            String sendType,
+            UUID createdBy,
+            LocalDateTime fromDate,
+            LocalDateTime toDate,
+            Pageable pageable,
+            User currentUser
+    ) {
+        if (currentUser == null || Boolean.TRUE.equals(currentUser.getDeleted())) {
+            throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
+        }
+        if (currentUser.getRole() == User.Role.MOD) {
+            List<String> sendTypes = adminCapabilityService
+                    .getAllowedSubjectIds(currentUser, "NOTIFICATION", "VIEW")
+                    .stream()
+                    .map(subjectId -> "SUBJECT_ID:" + subjectId)
+                    .toList();
+            if (sendTypes.isEmpty()) {
+                return Page.empty(pageable);
+            }
+            return historyRepository.searchSubjectCampaignsBySendTypes(
+                    keyword,
+                    sendTypes,
+                    fromDate,
+                    toDate,
+                    pageable
+            ).map(this::mapCampaign);
+        }
+        return getAllCampaigns(keyword, sendType, createdBy, fromDate, toDate, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<RecipientResponse> getRecipientsByHistoryId(Long historyId, Pageable pageable) {
         return notificationRepository.findRecipientsByHistoryId(historyId, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RecipientResponse> getRecipientsByHistoryIdForAdminUser(Long historyId, Pageable pageable, User currentUser) {
+        if (currentUser == null || Boolean.TRUE.equals(currentUser.getDeleted())) {
+            throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
+        }
+        if (currentUser.getRole() == User.Role.MOD) {
+            NotificationHistory history = historyRepository.findById(historyId)
+                    .orElseThrow(() -> new CustomApiException("Chiến dịch không tồn tại", HttpStatus.NOT_FOUND));
+            Long subjectId = subjectIdFromSendType(history.getSendType());
+            if (subjectId == null
+                    || !adminCapabilityService.hasPermission(currentUser, "NOTIFICATION", "VIEW_RECIPIENTS", "SUBJECT", subjectId)) {
+                throw new CustomApiException("Bạn không có quyền xem danh sách người nhận này", HttpStatus.FORBIDDEN);
+            }
+        }
+        return getRecipientsByHistoryId(historyId, pageable);
     }
 
     @Transactional
@@ -251,6 +305,28 @@ public class NotificationServiceImpl implements NotificationService {
             return user.getUserId();
         }
         return null;
+    }
+
+    private CampaignResponse mapCampaign(NotificationHistory history) {
+        return CampaignResponse.builder()
+                .id(history.getId())
+                .title(history.getTitle())
+                .message(history.getMessage())
+                .sendType(history.getSendType())
+                .createdAt(history.getCreatedAt())
+                .createdBy(history.getCreatedBy())
+                .build();
+    }
+
+    private Long subjectIdFromSendType(String sendType) {
+        if (sendType == null || !sendType.startsWith("SUBJECT_ID:")) {
+            return null;
+        }
+        try {
+            return Long.parseLong(sendType.substring("SUBJECT_ID:".length()));
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
     }
 
     private void sendPersonalRealtimeNotification(Notification notification) {

@@ -2,6 +2,9 @@ package com.fita.vnua.quiz.repository;
 
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,23 +13,29 @@ import java.util.List;
 import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     List<Question> findByDeletedFalse();
 
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     List<Question> findByDeletedTrue();
 
     long countByDeletedFalse();
 
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     Optional<Question> findByQuestionIdAndDeletedFalse(Long questionId);
 
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     List<Question> findByContentContainingIgnoreCaseAndDeletedFalse(String content);
 
     default List<Question> findByContentContainingIgnoreCase(String content) {
         return findByContentContainingIgnoreCaseAndDeletedFalse(content);
     }
 
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     @Query("SELECT q FROM Question q WHERE q.chapter.chapterId = :chapterId AND q.deleted = false")
     List<Question> findByChapter(@Param("chapterId") Long chapterId);
 
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     @Query("SELECT q FROM Question q JOIN q.chapter c JOIN c.subject s WHERE s.subjectId = :subjectId AND q.deleted = false")
     List<Question> findQuestionsBySubjectId(@Param("subjectId") Long subjectId);
 
@@ -68,10 +77,25 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("subjectId") Long subjectId,
             @Param("number") int number);
 
-    @Query(value = "SELECT q.* FROM question q JOIN exam_question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId AND q.deleted = false", nativeQuery = true)
+    @Query("""
+            SELECT DISTINCT q FROM ExamQuestion eq
+            JOIN eq.question q
+            LEFT JOIN FETCH q.answers
+            JOIN FETCH q.chapter c
+            JOIN FETCH c.subject
+            WHERE eq.exam.examId = :examId
+            AND q.deleted = false
+            """)
     List<Question> findQuestionsByExamId(Long examId);
 
-    @Query(value = "SELECT q.* FROM question q JOIN exam_question eq ON q.question_id = eq.question_id WHERE eq.exam_id = :examId", nativeQuery = true)
+    @Query("""
+            SELECT DISTINCT q FROM ExamQuestion eq
+            JOIN eq.question q
+            LEFT JOIN FETCH q.answers
+            JOIN FETCH q.chapter c
+            JOIN FETCH c.subject
+            WHERE eq.exam.examId = :examId
+            """)
     List<Question> findQuestionsByExamIdIncludingDeleted(Long examId);
 
     long countByDifficultyAndDeletedFalse(Question.Difficulty difficulty);
@@ -94,6 +118,24 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     int countByChapterAndDeletedFalse(Chapter chapter);
 
+    @Query("""
+            SELECT q.chapter.chapterId, COUNT(q)
+            FROM Question q
+            WHERE q.chapter.chapterId IN :chapterIds
+            AND q.deleted = false
+            GROUP BY q.chapter.chapterId
+            """)
+    List<Object[]> countActiveQuestionsByChapterIds(@Param("chapterIds") List<Long> chapterIds);
+
+    @Query("""
+            SELECT q.chapter.subject.subjectId, COUNT(q)
+            FROM Question q
+            WHERE q.chapter.subject.subjectId IN :subjectIds
+            AND q.deleted = false
+            GROUP BY q.chapter.subject.subjectId
+            """)
+    List<Object[]> countActiveQuestionsBySubjectIds(@Param("subjectIds") List<Long> subjectIds);
+
     default int countByChapter(Chapter chapter) {
         return countByChapterAndDeletedFalse(chapter);
     }
@@ -111,6 +153,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            "GROUP BY q.chapter.chapterId, q.difficulty")
     List<Object[]> countQuestionsBySubjectGroupedByChapterAndDifficulty(@Param("subjectId") Long subjectId);
 
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     @Query("""
             SELECT q FROM Question q
             WHERE (:keyword IS NULL OR LOWER(q.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
@@ -126,4 +169,48 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("chapterId") Long chapterId,
             @Param("difficulty") Question.Difficulty difficulty,
             @Param("deleted") Boolean deleted);
+
+    @Query(
+            value = """
+            SELECT q.questionId FROM Question q
+            JOIN q.chapter c
+            JOIN c.subject s
+            WHERE (:keyword IS NULL OR LOWER(q.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND (:subjectId IS NULL OR s.subjectId = :subjectId)
+              AND (:chapterId IS NULL OR c.chapterId = :chapterId)
+              AND (:difficulty IS NULL OR q.difficulty = :difficulty)
+              AND (:deleted IS NULL OR q.deleted = :deleted)
+              AND (:creatorFilterEnabled = false OR q.questionId IN :creatorQuestionIds)
+            """,
+            countQuery = """
+            SELECT COUNT(q) FROM Question q
+            JOIN q.chapter c
+            JOIN c.subject s
+            WHERE (:keyword IS NULL OR LOWER(q.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND (:subjectId IS NULL OR s.subjectId = :subjectId)
+              AND (:chapterId IS NULL OR c.chapterId = :chapterId)
+              AND (:difficulty IS NULL OR q.difficulty = :difficulty)
+              AND (:deleted IS NULL OR q.deleted = :deleted)
+              AND (:creatorFilterEnabled = false OR q.questionId IN :creatorQuestionIds)
+            """
+    )
+    Page<Long> filterQuestionIds(
+            @Param("keyword") String keyword,
+            @Param("subjectId") Long subjectId,
+            @Param("chapterId") Long chapterId,
+            @Param("difficulty") Question.Difficulty difficulty,
+            @Param("deleted") Boolean deleted,
+            @Param("creatorFilterEnabled") boolean creatorFilterEnabled,
+            @Param("creatorQuestionIds") List<Long> creatorQuestionIds,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT DISTINCT q FROM Question q
+            LEFT JOIN FETCH q.answers
+            JOIN FETCH q.chapter c
+            JOIN FETCH c.subject
+            WHERE q.questionId IN :questionIds
+            """)
+    List<Question> findWithDetailsByQuestionIds(@Param("questionIds") List<Long> questionIds);
 }

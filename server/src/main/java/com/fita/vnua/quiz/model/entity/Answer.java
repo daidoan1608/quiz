@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,6 +19,7 @@ public class Answer {
     private String content;
 
     @Column(nullable = false)
+    @JsonProperty("isCorrect")
     private Boolean isCorrect;
 
 }

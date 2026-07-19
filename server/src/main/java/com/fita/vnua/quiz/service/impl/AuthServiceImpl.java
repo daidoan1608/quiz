@@ -7,6 +7,7 @@ import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.RefreshTokenRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
+import com.fita.vnua.quiz.service.AdminCapabilityService;
 import com.fita.vnua.quiz.service.AuthService;
 import com.fita.vnua.quiz.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
     private final UserMapper userMapper;
+    private final AdminCapabilityService adminCapabilityService;
 
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
@@ -39,7 +41,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse createAuthResponse(UserDetails userDetails) {
         User user = getUserByUsername(userDetails.getUsername());
-        return userMapper.toAuthResponse(user);
+        AuthResponse response = userMapper.toAuthResponse(user);
+        response.setCapabilities(adminCapabilityService.getCapabilities(user));
+        return response;
     }
 
     @Override
@@ -72,11 +76,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String refreshAccessToken(UUID refreshTokenId) {
         RefreshToken refreshToken = refreshTokenRepository.findByTokenAndRevoked(refreshTokenId, false)
-                .orElseThrow(() -> new CustomApiException("Refresh token không tồn tại hoặc đã bị thu hồi", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new CustomApiException("Phiên đăng nhập không tồn tại hoặc đã bị thu hồi", HttpStatus.UNAUTHORIZED));
 
         if (refreshToken.getExpiryDate().before(new Date())) {
             refreshTokenRepository.delete(refreshToken);
-            throw new CustomApiException("Refresh token đã hết hạn", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("Phiên đăng nhập đã hết hạn", HttpStatus.UNAUTHORIZED);
         }
 
         User user = refreshToken.getUser();
@@ -118,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
 
     private User getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng: " + username));
         if (Boolean.TRUE.equals(user.getDeleted())) {
             throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
         }

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ public class StatisticsController {
 
     @GetMapping("/api/v1/admin/statistics")
     @Operation(summary = "Lấy thống kê tổng quan")
+    @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'STATISTIC', 'VIEW', 'GLOBAL', null)")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getStatistics(
             @RequestParam(defaultValue = "5") int hotSubjectsLimit,
             @RequestParam(defaultValue = "5") int wrongQuestionsLimit,
@@ -30,6 +32,6 @@ public class StatisticsController {
                 wrongQuestionsLimit,
                 activeUsersLimit,
                 attemptsDays);
-        return ResponseEntity.ok(ApiResponse.success("Statistics fetched successfully", statistics));
+        return ResponseEntity.ok(ApiResponse.success("Lấy thống kê thành công", statistics));
     }
 }

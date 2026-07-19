@@ -34,10 +34,10 @@ class AuthorizationServiceTest {
 
         assertThatThrownBy(() -> authorizationService.requireSelfOrAdminMod(requestedUserId, user(UUID.randomUUID(), User.Role.USER)))
                 .isInstanceOf(CustomApiException.class)
-                .hasMessage("Access denied");
+                .hasMessage("Bạn không có quyền thực hiện thao tác này");
         assertThatThrownBy(() -> authorizationService.requireSelfOrAdminMod(requestedUserId, null))
                 .isInstanceOf(CustomApiException.class)
-                .hasMessage("Access denied");
+                .hasMessage("Vui lòng đăng nhập để tiếp tục");
     }
 
     @Test

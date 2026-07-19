@@ -18,9 +18,9 @@ import java.util.List;
 public class AuditLogController {
     private final AuditLogService auditLogService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'AUDIT_LOG', 'VIEW', 'GLOBAL', null)")
     @GetMapping
     public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getAuditLogs() {
-        return ResponseEntity.ok(ApiResponse.success("Audit logs fetched successfully", auditLogService.latest()));
+        return ResponseEntity.ok(ApiResponse.success("Lấy nhật ký thao tác thành công", auditLogService.latest()));
     }
 }

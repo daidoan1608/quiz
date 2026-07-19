@@ -49,11 +49,32 @@ public class QuestionMapper {
                 .collect(Collectors.toList());
     }
 
+    public QuestionDto toDto(Question question) {
+        QuestionDto dto = new QuestionDto();
+        dto.setQuestionId(question.getQuestionId());
+        dto.setContent(question.getContent());
+        dto.setDifficulty(question.getDifficulty() == null ? null : question.getDifficulty().name());
+        dto.setChapterId(question.getChapter() == null ? null : question.getChapter().getChapterId());
+        dto.setChapterName(question.getChapter() == null ? null : question.getChapter().getName());
+        dto.setImageUrl(question.getImageUrl());
+        dto.setQuestionType(resolveQuestionType(question).name());
+        dto.setDeleted(question.getDeleted());
+        dto.setDeletedAt(question.getDeletedAt());
+        dto.setDeletedBy(question.getDeletedBy());
+        dto.setDeletedCascadeId(question.getDeletedCascadeId());
+        dto.setDeleteOriginType(question.getDeleteOriginType());
+        dto.setDeleteOriginId(question.getDeleteOriginId());
+        dto.setAnswers(question.getAnswers().stream()
+                .map(this::toAnswerDto)
+                .collect(Collectors.toList()));
+        return dto;
+    }
+
     public Question.Difficulty parseDifficulty(String difficulty) {
         try {
             return Question.Difficulty.valueOf(difficulty.toUpperCase());
         } catch (IllegalArgumentException | NullPointerException e) {
-            throw new CustomApiException("Difficulty không hợp lệ: " + difficulty, HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Độ khó không hợp lệ: " + difficulty, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -65,15 +86,34 @@ public class QuestionMapper {
         try {
             return Question.QuestionType.valueOf(questionType.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new CustomApiException("Question type không hợp lệ: " + questionType, HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Loại câu hỏi không hợp lệ: " + questionType, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private Question.QuestionType resolveQuestionType(Question question) {
+        if (question.getQuestionType() != null) {
+            return question.getQuestionType();
+        }
+        long correctCount = question.getAnswers().stream()
+                .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
+                .count();
+        return correctCount > 1 ? Question.QuestionType.MULTIPLE_CHOICE : Question.QuestionType.SINGLE_CHOICE;
     }
 
     private Answer toAnswer(AnswerDto answerDto, Question question) {
         Answer answer = new Answer();
         answer.setContent(answerDto.getContent());
-        answer.setIsCorrect(answerDto.getIsCorrect());
+        answer.setIsCorrect(Boolean.TRUE.equals(answerDto.getIsCorrect()));
         answer.setQuestion(question);
         return answer;
+    }
+
+    private AnswerDto toAnswerDto(Answer answer) {
+        AnswerDto dto = new AnswerDto();
+        dto.setOptionId(answer.getOptionId());
+        dto.setQuestionId(answer.getQuestion() == null ? null : answer.getQuestion().getQuestionId());
+        dto.setContent(answer.getContent());
+        dto.setIsCorrect(answer.getIsCorrect());
+        return dto;
     }
 }

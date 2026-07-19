@@ -11,6 +11,7 @@ import com.fita.vnua.quiz.model.dto.request.StartExamAttemptRequest;
 import com.fita.vnua.quiz.model.dto.request.UpdateExamAttemptProgressRequest;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.ExamAttemptResponse;
+import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;
@@ -21,6 +22,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,19 +56,51 @@ public class UserExamServiceImpl implements UserExamService {
     public List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate) {
         List<UserExamRepository.UserExamSummaryProjection> projections = userExamRepository.getUserExamSummaries(fromDate, toDate);
 
-        // Chuyển projection sang DTO
-        return projections.stream().map(proj -> {
-            UserExamSummaryDto dto = new UserExamSummaryDto();
-            dto.setUserId(bytesToUUID(proj.getUserId()));
-            dto.setUsername(proj.getUsername());
-            dto.setAvatarUrl(proj.getAvatarUrl());
-            dto.setAttemptCount(proj.getAttemptCount());
-            dto.setAvgScore(proj.getAvgScore());
-            dto.setTotalScore(proj.getTotalScore());
-            dto.setTotalDurationSeconds(proj.getTotalDurationSeconds());
-            dto.setSubjectName(proj.getSubjects());
-            return dto;
-        }).collect(Collectors.toList());
+        return projections.stream().map(this::mapSummaryProjection).collect(Collectors.toList());
+    }
+
+    @Override
+    public RankingResponse getRankings(
+            LocalDateTime fromDate,
+            LocalDateTime toDate,
+            String subjectName,
+            String criteria,
+            int limit,
+            UUID currentUserId
+    ) {
+        String normalizedSubject = subjectName == null || subjectName.isBlank() ? null : subjectName.trim();
+        String normalizedCriteria = "avg".equalsIgnoreCase(criteria) ? "avg" : "total";
+        int normalizedLimit = Math.min(Math.max(limit, 1), 50);
+
+        List<UserExamSummaryDto> topUsers = userExamRepository
+                .getTopRankings(fromDate, toDate, normalizedSubject, normalizedCriteria, normalizedLimit)
+                .stream()
+                .map(this::mapSummaryProjection)
+                .toList();
+
+        UserExamSummaryDto currentUser = null;
+        if (currentUserId != null) {
+            currentUser = userExamRepository
+                    .getUserRanking(fromDate, toDate, normalizedSubject, normalizedCriteria, uuidToBytes(currentUserId))
+                    .map(this::mapSummaryProjection)
+                    .orElse(null);
+        }
+
+        return new RankingResponse(topUsers, currentUser);
+    }
+
+    private UserExamSummaryDto mapSummaryProjection(UserExamRepository.UserExamSummaryProjection proj) {
+        UserExamSummaryDto dto = new UserExamSummaryDto();
+        dto.setUserId(bytesToUUID(proj.getUserId()));
+        dto.setUsername(proj.getUsername());
+        dto.setAvatarUrl(proj.getAvatarUrl());
+        dto.setAttemptCount(proj.getAttemptCount());
+        dto.setAvgScore(proj.getAvgScore());
+        dto.setTotalScore(proj.getTotalScore());
+        dto.setTotalDurationSeconds(proj.getTotalDurationSeconds());
+        dto.setSubjectName(proj.getSubjects());
+        dto.setRank(proj.getRankPosition());
+        return dto;
     }
 
     protected UUID bytesToUUID(byte[] bytes) {
@@ -73,6 +108,13 @@ public class UserExamServiceImpl implements UserExamService {
         long high = bb.getLong();
         long low = bb.getLong();
         return new UUID(high, low);
+    }
+
+    protected byte[] uuidToBytes(UUID uuid) {
+        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+        bb.putLong(uuid.getMostSignificantBits());
+        bb.putLong(uuid.getLeastSignificantBits());
+        return bb.array();
     }
 
     @Override
@@ -84,7 +126,7 @@ public class UserExamServiceImpl implements UserExamService {
     @Override
     public UserExamResponse getUserExamByIdForAdmin(Long id) {
         UserExam userExam = userExamRepository.findById(id)
-                .orElseThrow(() -> new CustomApiException("User exam not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi của người dùng", HttpStatus.NOT_FOUND));
         return buildUserExamResponse(userExam);
     }
 
@@ -117,10 +159,10 @@ public class UserExamServiceImpl implements UserExamService {
         List<UserAnswerDto> userAnswerDtos = userExamRequest.getUserAnswerDtos();
 
         if (currentUserId == null) {
-            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.UNAUTHORIZED);
         }
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + currentUserId));
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
         Exam exam = findActiveExam(userExamDto.getExamId());
 
         // Tự động tính điểm ở Backend
@@ -171,11 +213,11 @@ public class UserExamServiceImpl implements UserExamService {
             userAnswer.setUserExam(savedUserExam);
 
             Answer answer = answerRepository.findById(userAnswerDto.getAnswerId())
-                    .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + userAnswerDto.getAnswerId()));
+                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đáp án với id: " + userAnswerDto.getAnswerId()));
             userAnswer.setAnswer(answer);
 
             Question question = questionRepository.findById(userAnswerDto.getQuestionId())
-                    .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + userAnswerDto.getQuestionId()));
+                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy câu hỏi"));
             userAnswer.setQuestion(question);
 
             userAnswerRepository.save(userAnswer);
@@ -195,9 +237,49 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     @Override
-    public List<UserExamResponse> getAllUserExamsForAdmin() {
-        List<UserExam> userExams = userExamRepository.findAll();
-        return getUserExamResponses(userExams);
+    public Page<UserExamResponse> getAllUserExamsForAdmin(
+            String keyword,
+            Long categoryId,
+            Long subjectId,
+            LocalDateTime startedFrom,
+            LocalDateTime startedTo,
+            Pageable pageable
+    ) {
+        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
+        return userExamRepository.filterForAdmin(
+                        normalizedKeyword,
+                        categoryId,
+                        subjectId,
+                        startedFrom,
+                        startedTo,
+                        pageable
+                )
+                .map(this::buildUserExamListResponse);
+    }
+
+    private UserExamResponse buildUserExamListResponse(UserExam userExam) {
+        UserExamDto userExamDto = mapUserExamListDto(userExam);
+        return UserExamResponse.builder()
+                .userExamDto(userExamDto)
+                .subjectName(userExam.getExam().getSubject().getName())
+                .title(userExam.getExam().getTitle())
+                .username(userExam.getUser().getUsername())
+                .fullName(userExam.getUser().getFullName())
+                .build();
+    }
+
+    private UserExamDto mapUserExamListDto(UserExam userExam) {
+        UserExamDto userExamDto = new UserExamDto();
+        userExamDto.setUserExamId(userExam.getUserExamId());
+        userExamDto.setStartTime(userExam.getStartTime());
+        userExamDto.setEndTime(userExam.getEndTime());
+        userExamDto.setScore(userExam.getScore());
+        userExamDto.setStatus(userExam.getStatus());
+        userExamDto.setRemainingTime(userExam.getRemainingTime());
+        userExamDto.setCurrentQuestionIndex(userExam.getCurrentQuestionIndex());
+        userExamDto.setUserId(userExam.getUser().getUserId());
+        userExamDto.setExamId(userExam.getExam().getExamId());
+        return userExamDto;
     }
 
     @Override
@@ -232,7 +314,7 @@ public class UserExamServiceImpl implements UserExamService {
     @Transactional
     public synchronized ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request, UUID currentUserId) {
         if (currentUserId == null) {
-            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.UNAUTHORIZED);
         }
         List<UserExam> existingAttempts = userExamRepository.findInProgressByUserIdAndExamId(currentUserId, request.getExamId());
         if (!existingAttempts.isEmpty()) {
@@ -242,7 +324,7 @@ public class UserExamServiceImpl implements UserExamService {
         }
 
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + currentUserId));
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
         Exam exam = findActiveExam(request.getExamId());
 
         // Kiểm tra lại sau khi load User/Exam để tránh trường hợp 2 request start chạy gần như đồng thời
@@ -299,9 +381,9 @@ public class UserExamServiceImpl implements UserExamService {
 
     private ExamAttemptResponse saveAttemptAnswerInternal(UserExam userExam, Long userExamId, SaveExamAttemptAnswerRequest request) {
         Question question = questionRepository.findById(request.getQuestionId())
-                .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + request.getQuestionId()));
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy câu hỏi"));
         if (getAttemptQuestions(userExam).stream().noneMatch(q -> q.getQuestionId().equals(question.getQuestionId()))) {
-            throw new CustomApiException("Question is not part of this attempt", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Câu hỏi không thuộc lượt làm bài này", HttpStatus.BAD_REQUEST);
         }
 
         List<Long> answerIds = request.getAnswerIds() != null ? request.getAnswerIds() : new ArrayList<>();
@@ -312,7 +394,7 @@ public class UserExamServiceImpl implements UserExamService {
         userAnswerRepository.deleteByUserExamIdAndQuestionId(userExamId, request.getQuestionId());
         for (Long answerId : new HashSet<>(answerIds)) {
             Answer answer = answerRepository.findById(answerId)
-                    .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + answerId));
+                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đáp án với id: " + answerId));
             UserAnswer userAnswer = new UserAnswer();
             userAnswer.setUserExam(userExam);
             userAnswer.setQuestion(question);
@@ -342,12 +424,12 @@ public class UserExamServiceImpl implements UserExamService {
     @Override
     public List<Question> getAttemptQuestionsForSubmittedAttempt(Long userExamId, UUID currentUserId) {
         User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN));
+                .orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN));
         UserExam userExam = (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MOD)
-                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN))
+                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN))
                 : getUserExamForCurrentUser(userExamId, currentUserId);
         if (!"SUBMITTED".equals(userExam.getStatus())) {
-            throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
+            throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN);
         }
         return getAttemptQuestions(userExam);
     }
@@ -413,17 +495,17 @@ public class UserExamServiceImpl implements UserExamService {
     private UserExam getInProgressUserExam(Long userExamId, UUID currentUserId) {
         UserExam userExam = getUserExamForCurrentUser(userExamId, currentUserId);
         if (!"IN_PROGRESS".equals(userExam.getStatus())) {
-            throw new IllegalStateException("Attempt is not in progress");
+            throw new IllegalStateException("Lượt làm bài không ở trạng thái đang thực hiện");
         }
         return userExam;
     }
 
     private UserExam getUserExamForCurrentUser(Long userExamId, UUID currentUserId) {
         if (currentUserId == null) {
-            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.UNAUTHORIZED);
         }
         return userExamRepository.findByIdAndUserId(userExamId, currentUserId)
-                .orElseThrow(() -> new CustomApiException("Access denied", HttpStatus.FORBIDDEN));
+                .orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN));
     }
 
     private void updateAttemptProgressFields(UserExam userExam, Integer currentQuestionIndex, Integer remainingTime) {
@@ -562,9 +644,9 @@ public class UserExamServiceImpl implements UserExamService {
         Exam exam = examRepository.findByExamIdAndDeletedFalse(examId)
                 .or(() -> examRepository.findById(examId)
                         .filter(found -> !Boolean.TRUE.equals(found.getDeleted())))
-                .orElseThrow(() -> new EntityNotFoundException("Exam not found with id: " + examId));
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy bài thi"));
         if (exam.getSubject() != null && Boolean.TRUE.equals(exam.getSubject().getDeleted())) {
-            throw new EntityNotFoundException("Exam not found with id: " + examId);
+            throw new EntityNotFoundException("Không tìm thấy bài thi");
         }
         return exam;
     }

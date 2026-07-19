@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -52,11 +53,26 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public List<CategorySummaryDto> filterCategories(String keyword, Boolean deleted, String sortBy, String sortDir) {
+        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
+        List<CategorySummaryDto> categories = categoryRepository.filterCategories(normalizedKeyword, deleted).stream()
+                .map(this::mapCategoryToSummaryDto)
+                .toList();
+        return AdminSortHelper.sort(categories, sortBy, sortDir, Map.of(
+                "categoryId", CategorySummaryDto::getCategoryId,
+                "categoryName", CategorySummaryDto::getCategoryName,
+                "categoryDescription", CategorySummaryDto::getCategoryDescription,
+                "totalSubjects", CategorySummaryDto::getTotalSubjects,
+                "deletedAt", CategorySummaryDto::getDeletedAt
+        ));
+    }
+
+    @Override
     public CategoryDto getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(category.getDeleted())) {
-            throw new CustomApiException("Category not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND);
         }
         CategoryDto categoryDto = modelMapper.map(category, CategoryDto.class);
         List<SubjectDto> subjectDtos = subjectRepository.findSubjectsByCategoryAndDeletedFalse(category).stream()
@@ -68,7 +84,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto addCategory(CategoryDto categoryDto) {
-        Category category = modelMapper.map(categoryDto, Category.class);
+        Category category = new Category();
+        category.setCategoryName(categoryDto.getCategoryName());
+        category.setCategoryDescription(categoryDto.getCategoryDescription());
+        category.setDeleted(false);
         Category savedCategory = categoryRepository.save(category);
         return modelMapper.map(savedCategory, CategoryDto.class);
     }
@@ -76,9 +95,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(category.getDeleted())) {
-            throw new CustomApiException("Category not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND);
         }
         category.setCategoryName((categoryDto.getCategoryName()));
         category.setCategoryDescription(categoryDto.getCategoryDescription());
@@ -95,7 +114,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto restoreCategory(Long id) {
         softDeleteService.restoreCategory(id);
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
         return modelMapper.map(category, CategoryDto.class);
     }
 

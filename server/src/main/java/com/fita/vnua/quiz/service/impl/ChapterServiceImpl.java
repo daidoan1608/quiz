@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,25 +30,25 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public List<ChapterDto> getChapterBySubject(Long subjectId) {
-        return chapterRepository.findBySubject(subjectId)
-                .stream()
-                .map(chapter -> {
-                    ChapterDto dto = modelMapper.map(chapter, ChapterDto.class);
-                    long count = questionRepository.countByChapter(chapter);
-                    dto.setCountQuestion(count);
-                    return dto;
-                })
+        List<Chapter> chapters = chapterRepository.findBySubject(subjectId);
+        Map<Long, Long> questionCounts = countQuestionsByChapter(chapters);
+        return chapters.stream()
+                .map(chapter -> mapChapterToDto(chapter, questionCounts))
                 .toList();
     }
 
     @Override
     public List<ChapterDto> getAllChapter() {
-        return chapterRepository.findByDeletedFalse().stream().map(this::mapChapterToDto).toList();
+        List<Chapter> chapters = chapterRepository.findByDeletedFalse();
+        Map<Long, Long> questionCounts = countQuestionsByChapter(chapters);
+        return chapters.stream().map(chapter -> mapChapterToDto(chapter, questionCounts)).toList();
     }
 
     @Override
     public List<ChapterDto> getDeletedChapters() {
-        return chapterRepository.findByDeletedTrue().stream().map(this::mapChapterToDto).toList();
+        List<Chapter> chapters = chapterRepository.findByDeletedTrue();
+        Map<Long, Long> questionCounts = countQuestionsByChapter(chapters);
+        return chapters.stream().map(chapter -> mapChapterToDto(chapter, questionCounts)).toList();
     }
 
     @Override
@@ -55,9 +56,29 @@ public class ChapterServiceImpl implements ChapterService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllChapter();
         }
-        return chapterRepository.findByNameContainingIgnoreCaseAndDeletedFalse(keyword.trim()).stream()
-                .map(this::mapChapterToDto)
+        List<Chapter> chapters = chapterRepository.findByNameContainingIgnoreCaseAndDeletedFalse(keyword.trim());
+        Map<Long, Long> questionCounts = countQuestionsByChapter(chapters);
+        return chapters.stream()
+                .map(chapter -> mapChapterToDto(chapter, questionCounts))
                 .toList();
+    }
+
+    @Override
+    public List<ChapterDto> filterChapters(String keyword, Long categoryId, Long subjectId, Boolean deleted, String sortBy, String sortDir) {
+        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
+        List<Chapter> chapterEntities = chapterRepository.filterChapters(normalizedKeyword, categoryId, subjectId, deleted);
+        Map<Long, Long> questionCounts = countQuestionsByChapter(chapterEntities);
+        List<ChapterDto> chapters = chapterEntities.stream()
+                .map(chapter -> mapChapterToDto(chapter, questionCounts))
+                .toList();
+        return AdminSortHelper.sort(chapters, sortBy, sortDir, Map.of(
+                "chapterId", ChapterDto::getChapterId,
+                "name", ChapterDto::getName,
+                "subjectId", ChapterDto::getSubjectId,
+                "chapterNumber", ChapterDto::getChapterNumber,
+                "countQuestion", ChapterDto::getCountQuestion,
+                "deletedAt", ChapterDto::getDeletedAt
+        ));
     }
 
     @Override
@@ -70,12 +91,15 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public ChapterDto create(ChapterDto chapterDto) {
         var subject = subjectRepository.findById(chapterDto.getSubjectId())
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(subject.getDeleted())) {
-            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
-        Chapter chapter = modelMapper.map(chapterDto, Chapter.class);
+        Chapter chapter = new Chapter();
+        chapter.setName(chapterDto.getName());
+        chapter.setChapterNumber(chapterDto.getChapterNumber());
         chapter.setSubject(subject);
+        chapter.setDeleted(false);
 
         Chapter savedChapter = chapterRepository.save(chapter);
 
@@ -85,9 +109,9 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public ChapterDto update(Long chapterId, ChapterDto chapterDto) {
         var existingChapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(existingChapter.getDeleted())) {
-            throw new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND);
         }
 
         existingChapter.setName(chapterDto.getName());
@@ -100,7 +124,7 @@ public class ChapterServiceImpl implements ChapterService {
     public Response delete(Long chapterId) {
         softDeleteService.deleteChapter(chapterId, null);
         return Response.builder()
-                .responseMessage("Chapter deleted successfully")
+                .responseMessage("Xóa chương thành công")
                 .responseCode("200 OK").build();
     }
 
@@ -108,13 +132,31 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterDto restore(Long chapterId) {
         softDeleteService.restoreChapter(chapterId);
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
         return mapChapterToDto(chapter);
     }
 
     private ChapterDto mapChapterToDto(Chapter chapter) {
+        return mapChapterToDto(chapter, Map.of(chapter.getChapterId(), (long) questionRepository.countByChapter(chapter)));
+    }
+
+    private ChapterDto mapChapterToDto(Chapter chapter, Map<Long, Long> questionCounts) {
         ChapterDto dto = modelMapper.map(chapter, ChapterDto.class);
-        dto.setCountQuestion((long) questionRepository.countByChapter(chapter));
+        dto.setCountQuestion(questionCounts.getOrDefault(chapter.getChapterId(), 0L));
         return dto;
+    }
+
+    private Map<Long, Long> countQuestionsByChapter(List<Chapter> chapters) {
+        List<Long> chapterIds = chapters.stream()
+                .map(Chapter::getChapterId)
+                .toList();
+        if (chapterIds.isEmpty()) {
+            return Map.of();
+        }
+        return questionRepository.countActiveQuestionsByChapterIds(chapterIds).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
     }
 }

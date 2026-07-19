@@ -8,7 +8,10 @@ import com.fita.vnua.quiz.model.dto.request.StartExamAttemptRequest;
 import com.fita.vnua.quiz.model.dto.request.UpdateExamAttemptProgressRequest;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.ExamAttemptResponse;
+import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +20,8 @@ import java.util.UUID;
 
 public interface UserExamService {
     List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate);
+
+    RankingResponse getRankings(LocalDateTime fromDate, LocalDateTime toDate, String subjectName, String criteria, int limit, UUID currentUserId);
 
     UserExamResponse getUserExamByIdForUser(Long id, UUID currentUserId);
 
@@ -28,7 +33,14 @@ public interface UserExamService {
 
     List<Map<Long, Object>> getExamAttemptsByUserId(UUID userId);
 
-    List<UserExamResponse> getAllUserExamsForAdmin();
+    Page<UserExamResponse> getAllUserExamsForAdmin(
+            String keyword,
+            Long categoryId,
+            Long subjectId,
+            LocalDateTime startedFrom,
+            LocalDateTime startedTo,
+            Pageable pageable
+    );
 
     List<UserExamResponse> getExamsByUserAndSubject(UUID userId, Long subjectId);
 

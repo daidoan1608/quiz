@@ -6,7 +6,7 @@ import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.ExamRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
-import com.fita.vnua.quiz.repository.UserSubjectPermissionRepository;
+import com.fita.vnua.quiz.service.AdminCapabilityService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,8 +26,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CustomPermissionEvaluatorTest {
     @Mock
-    private UserSubjectPermissionRepository permissionRepository;
-    @Mock
     private ChapterRepository chapterRepository;
     @Mock
     private ExamRepository examRepository;
@@ -37,6 +35,8 @@ class CustomPermissionEvaluatorTest {
     private AnswerRepository answerRepository;
     @Mock
     private SubjectRepository subjectRepository;
+    @Mock
+    private AdminCapabilityService adminCapabilityService;
 
     @Test
     void modPermissionPassesForActiveSubject() {
@@ -45,7 +45,7 @@ class CustomPermissionEvaluatorTest {
         CustomPermissionEvaluator evaluator = evaluator();
 
         when(subjectRepository.findActiveSubjectId(subjectId)).thenReturn(Optional.of(subjectId));
-        when(permissionRepository.existsByUserIdAndSubjectIdAndPermissionType(userId, subjectId, "UPDATE"))
+        when(adminCapabilityService.hasPermission(org.mockito.ArgumentMatchers.any(User.class), org.mockito.ArgumentMatchers.eq("SUBJECT"), org.mockito.ArgumentMatchers.eq("UPDATE"), org.mockito.ArgumentMatchers.eq("SUBJECT"), org.mockito.ArgumentMatchers.eq(subjectId)))
                 .thenReturn(true);
 
         boolean allowed = evaluator.hasPermission(authentication(userId, User.Role.MOD, false), subjectId, "Subject", "update");
@@ -64,7 +64,7 @@ class CustomPermissionEvaluatorTest {
         boolean allowed = evaluator.hasPermission(authentication(userId, User.Role.MOD, false), subjectId, "Subject", "UPDATE");
 
         assertThat(allowed).isFalse();
-        verify(permissionRepository, never()).existsByUserIdAndSubjectIdAndPermissionType(userId, subjectId, "UPDATE");
+        verify(adminCapabilityService, never()).hasPermission(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test
@@ -80,12 +80,12 @@ class CustomPermissionEvaluatorTest {
 
     private CustomPermissionEvaluator evaluator() {
         return new CustomPermissionEvaluator(
-                permissionRepository,
                 chapterRepository,
                 examRepository,
                 questionRepository,
                 answerRepository,
-                subjectRepository
+                subjectRepository,
+                adminCapabilityService
         );
     }
 

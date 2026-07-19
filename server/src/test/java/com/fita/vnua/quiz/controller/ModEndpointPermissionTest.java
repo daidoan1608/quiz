@@ -10,7 +10,7 @@ import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.ExamRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
-import com.fita.vnua.quiz.repository.UserSubjectPermissionRepository;
+import com.fita.vnua.quiz.service.AdminCapabilityService;
 import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.ExamService;
 import com.fita.vnua.quiz.service.QuestionService;
@@ -74,9 +74,6 @@ class ModEndpointPermissionTest {
     private AuditLogService auditLogService;
 
     @MockBean
-    private UserSubjectPermissionRepository permissionRepository;
-
-    @MockBean
     private ChapterRepository chapterRepository;
 
     @MockBean
@@ -91,6 +88,9 @@ class ModEndpointPermissionTest {
     @MockBean
     private SubjectRepository subjectRepository;
 
+    @MockBean
+    private AdminCapabilityService adminCapabilityService;
+
     @Test
     void modCanUpdateQuestionWhenSubjectPermissionAllowsUpdate() throws Exception {
         User mod = modUser();
@@ -99,7 +99,7 @@ class ModEndpointPermissionTest {
         response.setContent("Updated question");
 
         when(questionRepository.findActiveSubjectIdByQuestionId(QUESTION_ID)).thenReturn(Optional.of(SUBJECT_ID));
-        when(permissionRepository.existsByUserIdAndSubjectIdAndPermissionType(mod.getUserId(), SUBJECT_ID, "UPDATE"))
+        when(adminCapabilityService.hasPermission(eq(mod), eq("QUESTION"), eq("UPDATE"), eq("SUBJECT"), eq(SUBJECT_ID)))
                 .thenReturn(true);
         when(questionService.update(eq(QUESTION_ID), any(QuestionDto.class))).thenReturn(response);
 
@@ -117,7 +117,7 @@ class ModEndpointPermissionTest {
     void modCannotUpdateQuestionWithoutSubjectPermission() throws Exception {
         User mod = modUser();
         when(questionRepository.findActiveSubjectIdByQuestionId(QUESTION_ID)).thenReturn(Optional.of(SUBJECT_ID));
-        when(permissionRepository.existsByUserIdAndSubjectIdAndPermissionType(mod.getUserId(), SUBJECT_ID, "UPDATE"))
+        when(adminCapabilityService.hasPermission(eq(mod), eq("QUESTION"), eq("UPDATE"), eq("SUBJECT"), eq(SUBJECT_ID)))
                 .thenReturn(false);
 
         mockMvc.perform(patch("/api/v1/admin/questions/{questionId}", QUESTION_ID)
@@ -138,7 +138,7 @@ class ModEndpointPermissionTest {
         response.setTitle("Updated exam");
 
         when(examRepository.findActiveSubjectIdByExamId(EXAM_ID)).thenReturn(Optional.of(SUBJECT_ID));
-        when(permissionRepository.existsByUserIdAndSubjectIdAndPermissionType(mod.getUserId(), SUBJECT_ID, "UPDATE"))
+        when(adminCapabilityService.hasPermission(eq(mod), eq("EXAM"), eq("UPDATE"), eq("SUBJECT"), eq(SUBJECT_ID)))
                 .thenReturn(true);
         when(examService.updateExam(eq(EXAM_ID), any(ExamDto.class))).thenReturn(response);
 
@@ -156,7 +156,7 @@ class ModEndpointPermissionTest {
     void modCannotUpdateExamWithoutSubjectPermission() throws Exception {
         User mod = modUser();
         when(examRepository.findActiveSubjectIdByExamId(EXAM_ID)).thenReturn(Optional.of(SUBJECT_ID));
-        when(permissionRepository.existsByUserIdAndSubjectIdAndPermissionType(mod.getUserId(), SUBJECT_ID, "UPDATE"))
+        when(adminCapabilityService.hasPermission(eq(mod), eq("EXAM"), eq("UPDATE"), eq("SUBJECT"), eq(SUBJECT_ID)))
                 .thenReturn(false);
 
         mockMvc.perform(put("/api/v1/admin/exams/{examId}", EXAM_ID)
@@ -177,7 +177,7 @@ class ModEndpointPermissionTest {
         response.setName("Updated subject");
 
         when(subjectRepository.findActiveSubjectId(SUBJECT_ID)).thenReturn(Optional.of(SUBJECT_ID));
-        when(permissionRepository.existsByUserIdAndSubjectIdAndPermissionType(mod.getUserId(), SUBJECT_ID, "UPDATE"))
+        when(adminCapabilityService.hasPermission(eq(mod), eq("SUBJECT"), eq("UPDATE"), eq("SUBJECT"), eq(SUBJECT_ID)))
                 .thenReturn(true);
         when(subjectService.update(eq(SUBJECT_ID), any(SubjectDto.class))).thenReturn(response);
 
@@ -195,7 +195,7 @@ class ModEndpointPermissionTest {
     void modCannotUpdateSubjectWithoutSubjectPermission() throws Exception {
         User mod = modUser();
         when(subjectRepository.findActiveSubjectId(SUBJECT_ID)).thenReturn(Optional.of(SUBJECT_ID));
-        when(permissionRepository.existsByUserIdAndSubjectIdAndPermissionType(mod.getUserId(), SUBJECT_ID, "UPDATE"))
+        when(adminCapabilityService.hasPermission(eq(mod), eq("SUBJECT"), eq("UPDATE"), eq("SUBJECT"), eq(SUBJECT_ID)))
                 .thenReturn(false);
 
         mockMvc.perform(patch("/api/v1/admin/subjects/{subjectId}", SUBJECT_ID)

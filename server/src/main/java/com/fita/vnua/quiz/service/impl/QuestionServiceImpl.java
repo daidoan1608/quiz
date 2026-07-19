@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
+import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
 import com.fita.vnua.quiz.model.dto.response.Response;
@@ -15,6 +16,9 @@ import com.fita.vnua.quiz.service.QuestionService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.mapper.QuestionMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -49,12 +53,12 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Optional<QuestionDto> getQuestionById(Long questionId) {
         return questionRepository.findByQuestionIdAndDeletedFalse(questionId)
-                .map(question -> modelMapper.map(question, QuestionDto.class));
+                .map(question -> questionMapper.toDto(question));
     }
 
     @Override
     public List<QuestionDto> getQuestionsByChapterId(Long chapterId) {
-        return questionRepository.findByChapter(chapterId).stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+        return questionRepository.findByChapter(chapterId).stream().map(question -> questionMapper.toDto(question)).toList();
     }
 
     @Override
@@ -67,21 +71,21 @@ public class QuestionServiceImpl implements QuestionService {
         List<Question> questions = questionRepository.findQuestionsByChapterAndDifficulty(chapterId, normalizedDifficulty, safeLimit);
         if ("wrong".equalsIgnoreCase(mode)) {
             if (userId == null) {
-                throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+                throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
             }
             Set<Long> wrongQuestionIds = findWrongQuestionIds(userId, chapterId);
             questions = questions.stream()
                     .filter(question -> wrongQuestionIds.contains(question.getQuestionId()))
                     .toList();
         }
-        return questions.stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+        return questions.stream().map(question -> questionMapper.toDto(question)).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<QuestionDto> getSmartWrongPracticeQuestions(Long subjectId, Long chapterId, Integer limit, String difficulty, String strategy, UUID userId) {
         if (userId == null) {
-            throw new CustomApiException("Access denied", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
         }
         int safeLimit = limit == null || limit <= 0 ? 10 : Math.min(limit, 100);
         Question.Difficulty normalizedDifficulty = difficulty == null || difficulty.isBlank() || "ALL".equalsIgnoreCase(difficulty)
@@ -158,7 +162,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .sorted(comparator)
                 .limit(safeLimit)
                 .map(WrongQuestionStat::question)
-                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .map(question -> questionMapper.toDto(question))
                 .toList();
     }
 
@@ -198,12 +202,12 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionDto> getAllQuestion() {
-        return questionRepository.findByDeletedFalse().stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+        return questionRepository.findByDeletedFalse().stream().map(question -> questionMapper.toDto(question)).toList();
     }
 
     @Override
     public List<QuestionDto> getDeletedQuestions() {
-        return questionRepository.findByDeletedTrue().stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+        return questionRepository.findByDeletedTrue().stream().map(question -> questionMapper.toDto(question)).toList();
     }
 
     @Override
@@ -212,13 +216,13 @@ public class QuestionServiceImpl implements QuestionService {
             return getAllQuestion();
         }
         return questionRepository.findByContentContainingIgnoreCase(keyword.trim()).stream()
-                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .map(question -> questionMapper.toDto(question))
                 .toList();
     }
 
     @Override
     public List<QuestionDto> getQuestionsBySubject(Long subjectId) {
-        return questionRepository.findQuestionsBySubjectId(subjectId).stream().map(question -> modelMapper.map(question, QuestionDto.class)).toList();
+        return questionRepository.findQuestionsBySubjectId(subjectId).stream().map(question -> questionMapper.toDto(question)).toList();
     }
 
     @Override
@@ -227,7 +231,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         // Chuyển đổi từ Entity sang DTO
         return questions.stream()
-                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .map(question -> questionMapper.toDto(question))
                 .toList();
     }
 
@@ -238,7 +242,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         // Chuyển đổi từ Entity sang DTO
         return questions.stream()
-                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .map(question -> questionMapper.toDto(question))
                 .collect(Collectors.toList());
     }
 
@@ -249,7 +253,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         // Chuyển đổi từ Entity sang DTO
         return questions.stream()
-                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .map(question -> questionMapper.toDto(question))
                 .collect(Collectors.toList());
     }
 
@@ -259,7 +263,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         // Sử dụng ModelMapper để chuyển đổi từ Entity sang DTO
         return questions.stream()
-                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .map(question -> questionMapper.toDto(question))
                 .collect(Collectors.toList());
     }
 
@@ -292,7 +296,60 @@ public class QuestionServiceImpl implements QuestionService {
                     .toList();
         }
         return questions.stream()
-                .map(question -> modelMapper.map(question, QuestionDto.class))
+                .map(question -> questionMapper.toDto(question))
+                .toList();
+    }
+
+    @Override
+    public Page<QuestionDto> filterQuestionsPage(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId, Pageable pageable) {
+        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
+        Question.Difficulty normalizedDifficulty = difficulty == null || difficulty.isBlank()
+                ? null
+                : questionMapper.parseDifficulty(difficulty);
+        List<Long> creatorQuestionIds = List.of(-1L);
+        boolean creatorFilterEnabled = creatorId != null;
+        if (creatorFilterEnabled) {
+            creatorQuestionIds = findCreatedQuestionIds(creatorId);
+            if (creatorQuestionIds.isEmpty()) {
+                return new PageImpl<>(List.of(), pageable, 0);
+            }
+        }
+        Page<Long> questionIdPage = questionRepository.filterQuestionIds(
+                normalizedKeyword,
+                subjectId,
+                chapterId,
+                normalizedDifficulty,
+                deleted,
+                creatorFilterEnabled,
+                creatorQuestionIds,
+                pageable
+        );
+        List<Long> questionIds = questionIdPage.getContent();
+        if (questionIds.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, questionIdPage.getTotalElements());
+        }
+
+        Map<Long, Integer> orderById = new HashMap<>();
+        for (int index = 0; index < questionIds.size(); index++) {
+            orderById.put(questionIds.get(index), index);
+        }
+        List<QuestionDto> content = questionRepository.findWithDetailsByQuestionIds(questionIds).stream()
+                .sorted(Comparator.comparingInt(question -> orderById.getOrDefault(question.getQuestionId(), Integer.MAX_VALUE)))
+                .map(question -> questionMapper.toDto(question))
+                .toList();
+        return new PageImpl<>(content, pageable, questionIdPage.getTotalElements());
+    }
+
+    private List<Long> findCreatedQuestionIds(UUID creatorId) {
+        return auditLogRepository.findByEntityTypeAndActionAndActorId("QUESTION", "CREATE", creatorId).stream()
+                .map(log -> {
+                    try {
+                        return Long.valueOf(log.getEntityId());
+                    } catch (NumberFormatException ignored) {
+                        return null;
+                    }
+                })
+                .filter(java.util.Objects::nonNull)
                 .toList();
     }
 
@@ -304,14 +361,14 @@ public class QuestionServiceImpl implements QuestionService {
 
     private void validateImportTarget(Long subjectId, Long chapterId) {
         Long chapterSubjectId = chapterRepository.findSubjectIdByChapterId(chapterId)
-                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(chapter.getDeleted())) {
-            throw new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND);
         }
         if (!chapterSubjectId.equals(subjectId)) {
-            throw new CustomApiException("Access denied", HttpStatus.FORBIDDEN);
+            throw new CustomApiException("Bạn không có quyền thao tác với câu hỏi này", HttpStatus.FORBIDDEN);
         }
     }
 
@@ -319,15 +376,16 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional
     public QuestionDto create(QuestionDto questionDto) {
         Chapter chapter = chapterRepository.findById(questionDto.getChapterId())
-                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(chapter.getDeleted())) {
-            throw new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND);
         }
+        validateCorrectAnswers(questionDto);
 
         Question question = questionMapper.toEntity(questionDto, chapter);
         question = questionRepository.save(question);
 
-        return modelMapper.map(question, QuestionDto.class);
+        return questionMapper.toDto(question);
     }
 
     @Override
@@ -335,12 +393,13 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionDto update(Long questionId, QuestionDto questionDto) {
         // Tìm câu hỏi hiện tại
         var existingQuestion = questionRepository.findByQuestionIdAndDeletedFalse(questionId)
-                .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
 
         questionMapper.updateEntity(existingQuestion, questionDto);
 
         // Cập nhật danh sách câu trả lời
         if (questionDto.getAnswers() != null) {
+            validateCorrectAnswers(questionDto);
             // Xóa các câu trả lời cũ
             answerRepository.deleteAll(existingQuestion.getAnswers());
             existingQuestion.getAnswers().clear();
@@ -351,7 +410,26 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepository.save(existingQuestion);
 
         // Trả về phản hồi
-        return modelMapper.map(question, QuestionDto.class);
+        return questionMapper.toDto(question);
+    }
+
+    private void validateCorrectAnswers(QuestionDto questionDto) {
+        List<AnswerDto> answers = questionDto.getAnswers();
+        if (answers == null || answers.isEmpty()) {
+            throw new CustomApiException("Vui lòng nhập danh sách đáp án", HttpStatus.BAD_REQUEST);
+        }
+
+        long correctAnswerCount = answers.stream()
+                .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
+                .count();
+        Question.QuestionType questionType = questionMapper.parseQuestionType(questionDto.getQuestionType());
+
+        if (questionType == Question.QuestionType.SINGLE_CHOICE && correctAnswerCount != 1) {
+            throw new CustomApiException("Câu hỏi chọn một phải có đúng 1 đáp án đúng", HttpStatus.BAD_REQUEST);
+        }
+        if (questionType == Question.QuestionType.MULTIPLE_CHOICE && correctAnswerCount < 2) {
+            throw new CustomApiException("Câu hỏi chọn nhiều phải có ít nhất 2 đáp án đúng", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
@@ -359,7 +437,7 @@ public class QuestionServiceImpl implements QuestionService {
         softDeleteService.deleteQuestion(questionId, null);
 
         return Response.builder()
-                .responseMessage("Question soft deleted successfully")
+                .responseMessage("Xóa câu hỏi thành công")
                 .responseCode("200 OK").build();
     }
 
@@ -367,8 +445,8 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionDto restore(Long questionId) {
         softDeleteService.restoreQuestion(questionId);
         Question restoredQuestion = questionRepository.findById(questionId)
-                .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
-        return modelMapper.map(restoredQuestion, QuestionDto.class);
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
+        return questionMapper.toDto(restoredQuestion);
     }
 
     @Override

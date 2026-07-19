@@ -29,14 +29,14 @@ public class SubjectController {
     @Operation(summary = "Lấy danh sách tất cả các môn học")
     public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getAllSubject() {
         List<SubjectSummaryDto> subjects = subjectService.getAllSubject();
-        return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học thành công", subjects));
     }
 
     @GetMapping("public/subjects/search")
     @Operation(summary = "Tìm kiếm môn học theo tên hoặc mô tả")
     public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> searchSubjects(@RequestParam("q") String keyword) {
         List<SubjectSummaryDto> subjects = subjectService.searchSubjects(keyword);
-        return ResponseEntity.ok(ApiResponse.success("Subjects searched successfully", subjects));
+        return ResponseEntity.ok(ApiResponse.success("Tìm kiếm môn học thành công", subjects));
     }
 
     @GetMapping("user/subjects")
@@ -47,28 +47,44 @@ public class SubjectController {
     ) {
         authorizationService.requireSelfOrAdminMod(userId, currentUser);
         List<SubjectSummaryDto> subjects = subjectService.getSubjectsByUser(userId);
-        return ResponseEntity.ok(ApiResponse.success("Fetched successfully", subjects));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học của người dùng thành công", subjects));
     }
 
     @GetMapping("public/subjects/category/{categoryId}")
     @Operation(summary = "Lấy danh sách môn học theo Id danh mục")
     public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getSubjectByCategoryId(@PathVariable("categoryId") Long categoryId) {
         List<SubjectSummaryDto> subjects = subjectService.getSubjectsByCategoryId(categoryId);
-        return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", subjects));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học theo danh mục thành công", subjects));
     }
 
     @GetMapping("public/subjects/{subjectId}")
     @Operation(summary = "Lấy môn học theo Id môn học")
     public ResponseEntity<ApiResponse<SubjectDto>> getSubjectById(@PathVariable("subjectId") Long subjectId) {
         SubjectDto subject = subjectService.getSubjectById(subjectId);
-        return ResponseEntity.ok(ApiResponse.success("Subject fetched successfully", subject));
+        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin môn học thành công", subject));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/subjects/filter")
+    @Operation(summary = "Lọc môn học cho admin")
+    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> filterSubjects(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Boolean deleted,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDir
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Lọc môn học thành công",
+                subjectService.filterSubjects(keyword, categoryId, deleted, sortBy, sortDir)
+        ));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/subjects/deleted")
     @Operation(summary = "Lấy danh sách môn học đã xóa mềm")
     public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getDeletedSubjects() {
-        return ResponseEntity.ok(ApiResponse.success("Deleted subjects fetched successfully", subjectService.getDeletedSubjects()));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học đã xóa thành công", subjectService.getDeletedSubjects()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -76,7 +92,7 @@ public class SubjectController {
     @Operation(summary = "Tạo môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> createSubject(@RequestBody SubjectDto subjectDto) {
         SubjectDto createdSubject = subjectService.create(subjectDto);
-        return ResponseEntity.ok(ApiResponse.success("Subject created successfully", createdSubject));
+        return ResponseEntity.ok(ApiResponse.success("Tạo môn học thành công", createdSubject));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'UPDATE')")
@@ -87,21 +103,21 @@ public class SubjectController {
             @RequestBody SubjectDto subjectDto
     ) {
         SubjectDto updatedSubject = subjectService.update(subjectId, subjectDto);
-        return ResponseEntity.ok(ApiResponse.success("Subject updated successfully", updatedSubject));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật môn học thành công", updatedSubject));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'DELETE')")
     @DeleteMapping("admin/subjects/{subjectId}")
     @Operation(summary = "Xóa môn học (admin)")
-    public ResponseEntity<Void> deleteSubject(@PathVariable("subjectId") Long subjectId) {
+    public ResponseEntity<ApiResponse<Object>> deleteSubject(@PathVariable("subjectId") Long subjectId) {
         subjectService.delete(subjectId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Xóa môn học thành công", null));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'UPDATE')")
     @PatchMapping("admin/subjects/{subjectId}/restore")
     @Operation(summary = "Khôi phục môn học đã xóa mềm")
     public ResponseEntity<ApiResponse<SubjectDto>> restoreSubject(@PathVariable("subjectId") Long subjectId) {
-        return ResponseEntity.ok(ApiResponse.success("Subject restored successfully", subjectService.restore(subjectId)));
+        return ResponseEntity.ok(ApiResponse.success("Khôi phục môn học thành công", subjectService.restore(subjectId)));
     }
 }

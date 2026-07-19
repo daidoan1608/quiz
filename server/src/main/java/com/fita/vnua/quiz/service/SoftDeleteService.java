@@ -24,7 +24,7 @@ public class SoftDeleteService {
     @Transactional
     public void deleteCategory(Long categoryId, UUID actorId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
         UUID cascadeId = UUID.randomUUID();
         markDeleted(category, actorId, cascadeId, "CATEGORY", categoryId);
         subjectRepository.findSubjectsByCategoryAndDeletedFalse(category)
@@ -35,7 +35,7 @@ public class SoftDeleteService {
     @Transactional
     public void deleteSubject(Long subjectId, UUID actorId) {
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
         UUID cascadeId = UUID.randomUUID();
         deleteSubjectTree(subject, actorId, cascadeId, "SUBJECT", subjectId);
     }
@@ -43,7 +43,7 @@ public class SoftDeleteService {
     @Transactional
     public void deleteChapter(Long chapterId, UUID actorId) {
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
         UUID cascadeId = UUID.randomUUID();
         deleteChapterTree(chapter, actorId, cascadeId, "CHAPTER", chapterId);
     }
@@ -51,7 +51,7 @@ public class SoftDeleteService {
     @Transactional
     public void deleteExam(Long examId, UUID actorId) {
         Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi", HttpStatus.NOT_FOUND));
         UUID cascadeId = UUID.randomUUID();
         markDeleted(exam, actorId, cascadeId, "EXAM", examId);
         examRepository.save(exam);
@@ -60,7 +60,7 @@ public class SoftDeleteService {
     @Transactional
     public void deleteQuestion(Long questionId, UUID actorId) {
         Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
         UUID cascadeId = UUID.randomUUID();
         markDeleted(question, actorId, cascadeId, "QUESTION", questionId);
         questionRepository.save(question);
@@ -69,7 +69,7 @@ public class SoftDeleteService {
     @Transactional
     public void restoreCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CustomApiException("Category not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
         UUID cascadeId = category.getDeletedCascadeId();
         clearDeleted(category);
         categoryRepository.save(category);
@@ -84,9 +84,9 @@ public class SoftDeleteService {
     @Transactional
     public void restoreSubject(Long subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new CustomApiException("Subject not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(subject.getCategory().getDeleted())) {
-            throw new CustomApiException("Category must be restored first", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Vui lòng khôi phục danh mục trước", HttpStatus.BAD_REQUEST);
         }
         restoreSubjectTree(subject, subject.getDeletedCascadeId());
     }
@@ -94,9 +94,9 @@ public class SoftDeleteService {
     @Transactional
     public void restoreChapter(Long chapterId) {
         Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new CustomApiException("Chapter not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(chapter.getSubject().getDeleted())) {
-            throw new CustomApiException("Subject must be restored first", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Vui lòng khôi phục môn học trước", HttpStatus.BAD_REQUEST);
         }
         restoreChapterTree(chapter, chapter.getDeletedCascadeId());
     }
@@ -104,9 +104,9 @@ public class SoftDeleteService {
     @Transactional
     public void restoreExam(Long examId) {
         Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new CustomApiException("Exam not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(exam.getSubject().getDeleted())) {
-            throw new CustomApiException("Subject must be restored first", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Vui lòng khôi phục môn học trước", HttpStatus.BAD_REQUEST);
         }
         clearDeleted(exam);
         examRepository.save(exam);
@@ -115,9 +115,9 @@ public class SoftDeleteService {
     @Transactional
     public void restoreQuestion(Long questionId) {
         Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(question.getChapter().getDeleted())) {
-            throw new CustomApiException("Chapter must be restored first", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Vui lòng khôi phục chương trước", HttpStatus.BAD_REQUEST);
         }
         clearDeleted(question);
         questionRepository.save(question);

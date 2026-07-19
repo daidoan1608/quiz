@@ -75,6 +75,6 @@ class AuthControllerTest {
     void meRejectsAnonymousUser() {
         assertThatThrownBy(() -> authController.me(null))
                 .isInstanceOf(CustomApiException.class)
-                .hasMessage("Access denied");
+                .hasMessage("Vui lòng đăng nhập để tiếp tục");
     }
 }

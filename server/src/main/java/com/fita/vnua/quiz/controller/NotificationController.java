@@ -25,7 +25,7 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<NotificationResponse>>> getNotifications(@AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(ApiResponse.success(
-                "Notifications fetched successfully",
+                "Lấy danh sách thông báo thành công",
                 notificationService.getNotifications(currentUser.getUserId())
         ));
     }
@@ -33,7 +33,7 @@ public class NotificationController {
     @GetMapping("/unread-count")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount(@AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(ApiResponse.success(
-                "Unread count fetched successfully",
+                "Lấy số thông báo chưa đọc thành công",
                 notificationService.getUnreadCount(currentUser.getUserId())
         ));
     }

@@ -32,7 +32,7 @@ public class FavoriteController {
     ) {
         User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
         FavoriteDto created = favoriteService.create(favoriteDto, authenticatedUser.getUserId());
-        return ResponseEntity.ok(ApiResponse.success("Thêm favorite thành công", created));
+        return ResponseEntity.ok(ApiResponse.success("Thêm môn học yêu thích thành công", created));
     }
 
     @DeleteMapping("/favorites")
@@ -43,7 +43,7 @@ public class FavoriteController {
     ) {
         User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
         FavoriteDto deleted = favoriteService.delete(favoriteDto, authenticatedUser.getUserId());
-        return ResponseEntity.ok(ApiResponse.success("Xóa favorite thành công", deleted));
+        return ResponseEntity.ok(ApiResponse.success("Xóa môn học yêu thích thành công", deleted));
     }
 
     @GetMapping("/users/{userId}/favorites")
@@ -54,6 +54,6 @@ public class FavoriteController {
     ) {
         authorizationService.requireSelfOrAdminMod(userId, currentUser);
         List<FavoriteDto> favorites = favoriteService.findFavoriteByUserID(userId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách favorite thành công", favorites));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học yêu thích thành công", favorites));
     }
 }

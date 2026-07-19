@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(usernameOrEmail)
                 .or(() -> userRepository.findByEmail(usernameOrEmail))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + usernameOrEmail));
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng with username or email: " + usernameOrEmail));
         if (Boolean.TRUE.equals(user.getDeleted())) {
             throw new DisabledException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.");
         }

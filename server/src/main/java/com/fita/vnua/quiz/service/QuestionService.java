@@ -3,6 +3,8 @@ package com.fita.vnua.quiz.service;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
 import com.fita.vnua.quiz.model.dto.response.Response;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -28,6 +30,8 @@ public interface QuestionService {
     List<QuestionDto> searchQuestions(String keyword);
 
     List<QuestionDto> filterQuestions(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId);
+
+    Page<QuestionDto> filterQuestionsPage(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId, Pageable pageable);
 
     List<QuestionDto> getQuestionsBySubject(Long subjectId);
 

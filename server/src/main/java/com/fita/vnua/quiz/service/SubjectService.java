@@ -14,6 +14,8 @@ public interface SubjectService {
 
     List<SubjectSummaryDto> searchSubjects(String keyword);
 
+    List<SubjectSummaryDto> filterSubjects(String keyword, Long categoryId, Boolean deleted, String sortBy, String sortDir);
+
     List<SubjectSummaryDto> getSubjectsByCategoryId(Long categoryId);
 
     SubjectDto getSubjectById(Long subjectId);

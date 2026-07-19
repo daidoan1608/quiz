@@ -15,6 +15,8 @@ public interface ChapterService {
 
     List<ChapterDto> searchChapters(String keyword);
 
+    List<ChapterDto> filterChapters(String keyword, Long categoryId, Long subjectId, Boolean deleted, String sortBy, String sortDir);
+
     Optional<ChapterDto> getChapterById(Long chapterId);
 
     ChapterDto create(ChapterDto chapterDto);

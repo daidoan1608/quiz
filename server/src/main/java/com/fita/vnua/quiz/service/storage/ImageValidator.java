@@ -25,7 +25,7 @@ public class ImageValidator {
 
     private void validateMetadata(String originalName, String contentType, long size) {
         if (size <= 0 || size > MAX_IMAGE_SIZE_BYTES) {
-            throw new IllegalArgumentException("Invalid image size");
+            throw new IllegalArgumentException("Kích thước ảnh không hợp lệ");
         }
 
         String extension = extractExtension(originalName);
@@ -49,7 +49,7 @@ public class ImageValidator {
 
     private void validateContent(byte[] bytes) throws Exception {
         if (bytes == null || ImageIO.read(new ByteArrayInputStream(bytes)) == null) {
-            throw new IllegalArgumentException("Invalid image content");
+            throw new IllegalArgumentException("Nội dung ảnh không hợp lệ");
         }
     }
 }

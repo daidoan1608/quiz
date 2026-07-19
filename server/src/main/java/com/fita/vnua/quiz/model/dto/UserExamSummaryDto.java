@@ -17,4 +17,5 @@ public class UserExamSummaryDto {
     private Double totalScore;
     private Long totalDurationSeconds;
     private String subjectName;
+    private Long rank;
 }

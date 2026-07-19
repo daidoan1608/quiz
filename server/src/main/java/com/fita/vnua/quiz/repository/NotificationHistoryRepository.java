@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface NotificationHistoryRepository extends JpaRepository<NotificationHistory, Long> {
@@ -28,6 +29,41 @@ public interface NotificationHistoryRepository extends JpaRepository<Notificatio
             @Param("keyword") String keyword,
             @Param("sendType") String sendType,
             @Param("createdBy") UUID createdBy,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT h FROM NotificationHistory h
+            WHERE (:keyword IS NULL OR :keyword = ''
+                OR LOWER(h.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(h.message) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND h.sendType LIKE 'SUBJECT_ID:%'
+              AND h.createdBy = :createdBy
+              AND (:fromDate IS NULL OR h.createdAt >= :fromDate)
+              AND (:toDate IS NULL OR h.createdAt <= :toDate)
+            """)
+    Page<NotificationHistory> searchSubjectCampaignsByCreator(
+            @Param("keyword") String keyword,
+            @Param("createdBy") UUID createdBy,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT h FROM NotificationHistory h
+            WHERE (:keyword IS NULL OR :keyword = ''
+                OR LOWER(h.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(h.message) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND h.sendType IN :sendTypes
+              AND (:fromDate IS NULL OR h.createdAt >= :fromDate)
+              AND (:toDate IS NULL OR h.createdAt <= :toDate)
+            """)
+    Page<NotificationHistory> searchSubjectCampaignsBySendTypes(
+            @Param("keyword") String keyword,
+            @Param("sendTypes") List<String> sendTypes,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable

@@ -137,7 +137,7 @@ public class SharedDocumentServiceImpl implements SharedDocumentService {
             }
             return resource;
         } catch (MalformedURLException e) {
-            throw new IOException("Invalid document path", e);
+            throw new IOException("Đường dẫn tài liệu không hợp lệ", e);
         }
     }
 

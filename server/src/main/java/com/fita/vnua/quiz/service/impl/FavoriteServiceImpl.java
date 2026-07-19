@@ -30,16 +30,16 @@ public class FavoriteServiceImpl implements FavoriteService {
     public FavoriteDto create(FavoriteDto favoriteDto, UUID currentUserId) {
         // Lấy User hoặc ném ngoại lệ nếu không tìm thấy
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
         if (Boolean.TRUE.equals(user.getDeleted())) {
-            throw new CustomApiException("User not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND);
         }
 
         // Lấy Subject hoặc ném ngoại lệ nếu không tìm thấy
         Subject subject = subjectRepository.findById(favoriteDto.getSubjectId())
-                .orElseThrow(() -> new RuntimeException("Subject not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học"));
         if (Boolean.TRUE.equals(subject.getDeleted()) || Boolean.TRUE.equals(subject.getCategory().getDeleted())) {
-            throw new CustomApiException("Subject not found", HttpStatus.NOT_FOUND);
+            throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
 
         // Tạo entity Favorite mới
@@ -75,7 +75,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         // Tìm favorite theo composite key
         Favorite favorite = favoriteRepository.findById(favoriteId)
-                .orElseThrow(() -> new RuntimeException("Favorite not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học yêu thích"));
 
         favoriteRepository.delete(favorite);
 

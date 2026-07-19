@@ -12,6 +12,10 @@ import com.fita.vnua.quiz.service.impl.AvatarStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,7 +47,7 @@ public class QuestionController {
             @RequestParam("chapterId") Long chapterId
     ) throws Exception {
         ImportPreviewResponse preview = questionService.previewImportQuestions(file, categoryId, subjectId, chapterId);
-        return ResponseEntity.ok(ApiResponse.success("Import preview fetched successfully", preview));
+        return ResponseEntity.ok(ApiResponse.success("Kiểm tra file import thành công", preview));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'CREATE')")
@@ -56,7 +60,7 @@ public class QuestionController {
             @RequestParam("chapterId") Long chapterId
     ) throws Exception {
         questionService.importQuestionsFromExcel(file, categoryId, subjectId, chapterId);
-        return ResponseEntity.ok(ApiResponse.success("Import câu hỏi thành công", "File imported successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Import câu hỏi thành công", "File đã được import thành công"));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'READ')")
@@ -64,7 +68,7 @@ public class QuestionController {
     @Operation(summary = "Lấy tổng số câu hỏi theo subjectId")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getTotalQuestions(@PathVariable Long subjectId) {
         Map<String, Object> data = questionService.totalQuestionBySubject(subjectId);
-        return ResponseEntity.ok(ApiResponse.success("Total questions fetched successfully", data));
+        return ResponseEntity.ok(ApiResponse.success("Lấy tổng số câu hỏi thành công", data));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#subjectId, 'Subject', 'READ')")
@@ -72,7 +76,7 @@ public class QuestionController {
     @Operation(summary = "Lấy câu hỏi theo Id môn học")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getQuestionsBySubject(@PathVariable Long subjectId) {
         List<QuestionDto> questions = questionService.getQuestionsBySubject(subjectId);
-        return ResponseEntity.ok(ApiResponse.success("Questions fetched successfully", questions));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách câu hỏi theo môn học thành công", questions));
     }
 
     @GetMapping("public/questions/chapter/{chapterId}")
@@ -92,7 +96,7 @@ public class QuestionController {
         } else {
             stripCorrectAnswers(questions);
         }
-        return ResponseEntity.ok(ApiResponse.success("Questions fetched successfully", questions));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách câu hỏi theo chương thành công", questions));
     }
 
     @GetMapping("questions/practice/wrong")
@@ -117,7 +121,7 @@ public class QuestionController {
         if (!includeCorrectAnswers) {
             stripCorrectAnswers(questions);
         }
-        return ResponseEntity.ok(ApiResponse.success("Smart wrong practice questions fetched successfully", questions));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách câu hỏi ôn tập theo câu sai thành công", questions));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -125,7 +129,7 @@ public class QuestionController {
     @Operation(summary = "Lấy tất cả câu hỏi")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getAllQuestion() {
         List<QuestionDto> questions = questionService.getAllQuestion();
-        return ResponseEntity.ok(ApiResponse.success("All questions fetched successfully", questions));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách câu hỏi thành công", questions));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -133,7 +137,7 @@ public class QuestionController {
     @Operation(summary = "Lấy danh sách câu hỏi đã xóa mềm")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> getDeletedQuestions() {
         List<QuestionDto> questions = questionService.getDeletedQuestions();
-        return ResponseEntity.ok(ApiResponse.success("Deleted questions fetched successfully", questions));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách câu hỏi đã xóa thành công", questions));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -141,7 +145,7 @@ public class QuestionController {
     @Operation(summary = "Tìm kiếm câu hỏi theo nội dung")
     public ResponseEntity<ApiResponse<List<QuestionDto>>> searchQuestions(@RequestParam("q") String keyword) {
         List<QuestionDto> questions = questionService.searchQuestions(keyword);
-        return ResponseEntity.ok(ApiResponse.success("Questions searched successfully", questions));
+        return ResponseEntity.ok(ApiResponse.success("Tìm kiếm câu hỏi thành công", questions));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -156,7 +160,39 @@ public class QuestionController {
             @RequestParam(required = false) UUID creatorId
     ) {
         List<QuestionDto> questions = questionService.filterQuestions(keyword, subjectId, chapterId, difficulty, deleted, creatorId);
-        return ResponseEntity.ok(ApiResponse.success("Questions filtered successfully", questions));
+        return ResponseEntity.ok(ApiResponse.success("Lọc câu hỏi thành công", questions));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/questions/page")
+    @Operation(summary = "Lọc câu hỏi nâng cao có phân trang")
+    public ResponseEntity<ApiResponse<Page<QuestionDto>>> filterQuestionsPage(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) Long chapterId,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) Boolean deleted,
+            @RequestParam(required = false) UUID creatorId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDir
+    ) {
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                Math.min(Math.max(size, 1), 100),
+                resolveQuestionSort(sortBy, sortDir)
+        );
+        Page<QuestionDto> questions = questionService.filterQuestionsPage(
+                keyword,
+                subjectId,
+                chapterId,
+                difficulty,
+                deleted,
+                creatorId,
+                pageable
+        );
+        return ResponseEntity.ok(ApiResponse.success("Lọc câu hỏi thành công", questions));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'READ')")
@@ -164,8 +200,8 @@ public class QuestionController {
     @Operation(summary = "Lấy câu hỏi theo Id")
     public ResponseEntity<ApiResponse<QuestionDto>> getQuestionById(@PathVariable("questionId") Long questionId) {
         QuestionDto question = questionService.getQuestionById(questionId)
-                .orElseThrow(() -> new CustomApiException("Question not found", HttpStatus.NOT_FOUND));
-        return ResponseEntity.ok(ApiResponse.success("Question fetched successfully", question));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
+        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin câu hỏi thành công", question));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionDto.chapterId, 'Chapter', 'CREATE')")
@@ -174,7 +210,7 @@ public class QuestionController {
     public ResponseEntity<ApiResponse<QuestionDto>> createQuestion(@RequestBody QuestionDto questionDto, @AuthenticationPrincipal User currentUser) {
         QuestionDto createdQuestion = questionService.create(questionDto);
         auditLogService.record("CREATE", "QUESTION", createdQuestion.getQuestionId(), currentUser, createdQuestion.getContent());
-        return ResponseEntity.ok(ApiResponse.success("Question created successfully", createdQuestion));
+        return ResponseEntity.ok(ApiResponse.success("Tạo câu hỏi thành công", createdQuestion));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'UPDATE')")
@@ -187,16 +223,16 @@ public class QuestionController {
     ) {
         QuestionDto updatedQuestion = questionService.update(questionId, questionDto);
         auditLogService.record("UPDATE", "QUESTION", questionId, currentUser, updatedQuestion.getContent());
-        return ResponseEntity.ok(ApiResponse.success("Question updated successfully", updatedQuestion));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật câu hỏi thành công", updatedQuestion));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'DELETE')")
     @DeleteMapping("admin/questions/{questionId}")
     @Operation(summary = "Xóa mềm câu hỏi")
-    public ResponseEntity<Void> deleteQuestion(@PathVariable("questionId") Long questionId, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse<Object>> deleteQuestion(@PathVariable("questionId") Long questionId, @AuthenticationPrincipal User currentUser) {
         questionService.delete(questionId);
         auditLogService.record("DELETE", "QUESTION", questionId, currentUser, "Soft delete question");
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Xóa câu hỏi thành công", null));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionId, 'Question', 'UPDATE')")
@@ -204,7 +240,7 @@ public class QuestionController {
     @Operation(summary = "Khôi phục câu hỏi đã xóa mềm")
     public ResponseEntity<ApiResponse<QuestionDto>> restoreQuestion(@PathVariable("questionId") Long questionId) {
         QuestionDto restoredQuestion = questionService.restore(questionId);
-        return ResponseEntity.ok(ApiResponse.success("Question restored successfully", restoredQuestion));
+        return ResponseEntity.ok(ApiResponse.success("Khôi phục câu hỏi thành công", restoredQuestion));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -227,5 +263,19 @@ public class QuestionController {
             return;
         }
         question.getAnswers().forEach(answer -> answer.setIsCorrect(null));
+    }
+
+    private Sort resolveQuestionSort(String sortBy, String sortDir) {
+        String property = switch (sortBy == null ? "" : sortBy) {
+            case "content" -> "content";
+            case "difficulty" -> "difficulty";
+            case "chapterName", "chapterId" -> "chapter.chapterId";
+            case "deletedAt" -> "deletedAt";
+            default -> "questionId";
+        };
+        Sort.Direction direction = "ascend".equalsIgnoreCase(sortDir) || "asc".equalsIgnoreCase(sortDir)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+        return Sort.by(direction, property);
     }
 }

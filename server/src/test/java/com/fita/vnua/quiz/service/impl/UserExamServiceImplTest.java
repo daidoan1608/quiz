@@ -65,7 +65,7 @@ class UserExamServiceImplTest {
 
         assertThatThrownBy(() -> userExamService.getUserExamByIdForUser(10L, currentUserId))
                 .isInstanceOf(CustomApiException.class)
-                .hasMessage("Access denied");
+                .hasMessage("Bạn không có quyền thực hiện thao tác này");
     }
 
     @Test

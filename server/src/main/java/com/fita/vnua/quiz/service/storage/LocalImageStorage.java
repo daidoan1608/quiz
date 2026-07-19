@@ -18,7 +18,7 @@ public class LocalImageStorage implements ImageStorage {
 
         Path target = folder.resolve(filename).normalize();
         if (!target.startsWith(folder)) {
-            throw new IllegalArgumentException("Invalid upload path");
+            throw new IllegalArgumentException("Đường dẫn upload không hợp lệ");
         }
 
         Files.write(target, bytes);
