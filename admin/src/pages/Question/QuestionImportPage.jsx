@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Alert,
-  Button,
   Card,
   Col,
   Divider,
@@ -13,12 +12,17 @@ import {
   Upload,
 } from "antd";
 import {
-  ArrowLeftOutlined,
   CloudUploadOutlined,
-  DownloadOutlined,
   ImportOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import {
+  AdminCancelButton,
+  AdminCheckButton,
+  AdminExportButton,
+  AdminImportButton,
+} from "../../components/common/buttons/AdminButtons";
+import MainBackButton from "../../components/common/MainBackButton";
 import { useQuestionImport } from "./hooks/useQuestionImport";
 
 const { Title } = Typography;
@@ -52,16 +56,15 @@ const QuestionImportPage = () => {
 
   return (
     <div style={{ padding: 24 }}>
+      <MainBackButton onClick={handleCancel} />
+
       <Space style={{ marginBottom: 16 }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={handleCancel}>
-          Quay lại
-        </Button>
         <Title level={3} style={{ margin: 0 }}>
           <ImportOutlined /> Import câu hỏi
         </Title>
       </Space>
 
-      <Card bordered={false}>
+      <Card variant="borderless">
         <Alert
           type="info"
           message={
@@ -76,14 +79,13 @@ const QuestionImportPage = () => {
             </div>
           }
           action={
-            <Button
+            <AdminExportButton
               type="link"
-              icon={<DownloadOutlined />}
-              href="/templates/mau_import.xlsx"
-              download="mau_nhap_cau_hoi.xlsx"
+              href="/templates/mau_zip.zip"
+              download="mau_nhap_cau_hoi.zip"
             >
-              Tải file mẫu
-            </Button>
+              Tải folder mẫu
+            </AdminExportButton>
           }
           showIcon
           style={{ marginBottom: 24 }}
@@ -205,19 +207,20 @@ const QuestionImportPage = () => {
           )}
 
           <Space style={{ display: "flex", justifyContent: "flex-end", marginTop: 30 }}>
-            <Button onClick={handleCancel}>Hủy bỏ</Button>
-            <Button icon={<CloudUploadOutlined />} loading={previewLoading} onClick={handlePreview}>
+            <AdminCancelButton onClick={handleCancel} />
+            <AdminCheckButton
+              loading={previewLoading}
+              onClick={handlePreview}
+            >
               Kiểm tra file
-            </Button>
-            <Button
-              type="primary"
+            </AdminCheckButton>
+            <AdminImportButton
               htmlType="submit"
-              icon={<ImportOutlined />}
               loading={loading}
               disabled={(isChaptersEmpty && chapters.length === 0) || previewResult?.invalidRows > 0}
             >
               Bắt đầu import
-            </Button>
+            </AdminImportButton>
           </Space>
         </Form>
       </Card>

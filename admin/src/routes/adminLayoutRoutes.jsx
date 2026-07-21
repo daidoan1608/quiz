@@ -1,13 +1,16 @@
 import React from "react";
 
 const AdminGroups = React.lazy(() => import("../pages/AdminGroups"));
+const AdminGroupFormPage = React.lazy(() => import("../pages/AdminGroups/AdminGroupFormPage"));
 const AuditLog = React.lazy(() => import("../pages/AuditLog"));
 const ContentHome = React.lazy(() => import("../pages/Home"));
 const DocumentsManager = React.lazy(() => import("../pages/Documents"));
 const GetCategories = React.lazy(() => import("../pages/Categories"));
 const GetChapter = React.lazy(() => import("../pages/Chapter"));
 const GetExam = React.lazy(() => import("../pages/Exam"));
+const ExamCreatePage = React.lazy(() => import("../pages/Exam/ExamCreatePage"));
 const ExamPrintPreviewPage = React.lazy(() => import("../pages/Exam/ExamPrintPreviewPage"));
+const ExamUpdatePage = React.lazy(() => import("../pages/Exam/ExamUpdatePage"));
 const GetQuestion = React.lazy(() => import("../pages/Question"));
 const QuestionCreatePage = React.lazy(() => import("../pages/Question/QuestionCreatePage"));
 const QuestionImportPage = React.lazy(() => import("../pages/Question/QuestionImportPage"));
@@ -37,6 +40,16 @@ export const adminLayoutRoutes = [
 
 export const adminDetailRoutes = [
   {
+    path: "/groups/create",
+    Component: AdminGroupFormPage,
+    parentPath: "/groups",
+  },
+  {
+    path: "/groups/:groupId/edit",
+    Component: AdminGroupFormPage,
+    parentPath: "/groups",
+  },
+  {
     path: "/userexam/:userExamId",
     Component: UserExamDetailPageView,
     parentPath: "/userexams",
@@ -59,6 +72,16 @@ export const adminDetailRoutes = [
   {
     path: "/exams/:examId/print-preview",
     Component: ExamPrintPreviewPage,
+    parentPath: "/exams",
+  },
+  {
+    path: "/exams/create",
+    Component: ExamCreatePage,
+    parentPath: "/exams",
+  },
+  {
+    path: "/exams/:examId/edit",
+    Component: ExamUpdatePage,
     parentPath: "/exams",
   },
 ];

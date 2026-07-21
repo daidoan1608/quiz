@@ -1,9 +1,9 @@
 import axios from "axios";
-import { message } from "antd";
 import { getApiErrorMessage } from "./http/apiError";
 import { clearAuthStorage } from "./http/authStorage";
 import { attachCsrfHeader, getCookieValue, isUnsafeMethod } from "./http/csrf";
 import { ADMIN_API_URL, ADMIN_BASENAME } from "../config/env";
+import { appMessage } from "../utils/ui/messageService";
 
 const config = {
   baseURL: ADMIN_API_URL,
@@ -84,7 +84,7 @@ authAxios.interceptors.response.use(
     }
 
     if (status === 403) {
-      message.error(getApiErrorMessage(error, "Bạn không có quyền thực hiện thao tác này!"));
+      appMessage.error(getApiErrorMessage(error, "Bạn không có quyền thực hiện thao tác này!"));
       return Promise.reject(error);
     }
 
@@ -114,7 +114,7 @@ authAxios.interceptors.response.use(
       return authAxios(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError);
-      message.error(getApiErrorMessage(refreshError, "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!"));
+      appMessage.error(getApiErrorMessage(refreshError, "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!"));
       redirectToLoginOnce();
       return Promise.reject(refreshError);
     } finally {

@@ -9,5 +9,6 @@
 @import "./styles/ui/legacyTables.css";
 @import "./styles/pages/dashboard.css";
 @import "./styles/pages/detailModal.css";
+@import "./styles/pages/examPrintPreview.css";
 @import "./styles/pages/notificationTemplate.css";
 @import "./styles/pages/question.css";

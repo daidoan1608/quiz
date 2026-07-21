@@ -1,22 +1,22 @@
 import React from "react";
 import {
-  Button,
   DatePicker,
-  Input,
-  Select,
   Space,
-  Table,
   Tag,
-  Tooltip,
 } from "antd";
 import {
-  DownloadOutlined,
   EyeOutlined,
   ReadOutlined,
-  SearchOutlined,
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
+import {
+  AdminFilterSelect,
+  AdminSearchInput,
+} from "../../../components/common/filters/AdminFilterControls";
+import AdminTable from "../../../components/common/table/AdminTable";
+import { AdminActionButton } from "../../../components/common/table/AdminTableActions";
 import AdminTableText from "../../../components/common/table/AdminTableText";
+import { AdminExportButton } from "../../../components/common/buttons/AdminButtons";
 import { getNoWrapHeaderColumns } from "../utils/tableColumnStyles";
 import UserExamDetailModal from "./UserExamDetailModal";
 
@@ -109,7 +109,7 @@ export const UserExamListView = ({
       width: 150,
       ellipsis: true,
       sorter: (a, b) => String(a.userId || "").localeCompare(String(b.userId || "")),
-      render: (text) => <AdminTableText copyable>{text}</AdminTableText>,
+      render: (text) => <AdminTableText>{text}</AdminTableText>,
     },
     {
       title: "Hành động",
@@ -117,12 +117,11 @@ export const UserExamListView = ({
       fixed: "right",
       width: 120,
       render: (_, record) => (
-        <Tooltip title="Xem chi tiết bài làm">
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => openDetailModal(record.userExamId)}
-          />
-        </Tooltip>
+        <AdminActionButton
+          title="Xem chi tiết bài làm"
+          icon={<EyeOutlined />}
+          onClick={() => openDetailModal(record.userExamId)}
+        />
       ),
     },
   ]);
@@ -140,35 +139,28 @@ export const UserExamListView = ({
 
   const filters = (
     <Space wrap>
-      <Input
+      <AdminSearchInput
         placeholder="Tìm đề thi, môn học, user..."
-        prefix={<SearchOutlined />}
         value={searchText}
         onChange={(event) => setSearchText(event.target.value)}
-        style={{ width: 280 }}
-        allowClear
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Khoa"
         value={advancedFilters.categoryId}
         onChange={(value) => updateFilter("categoryId", value)}
-        allowClear
         showSearch
         optionFilterProp="label"
-        style={{ width: 180 }}
         options={categories.map((category) => ({
           value: category.categoryId,
           label: category.categoryName,
         }))}
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Môn học"
         value={advancedFilters.subjectId}
         onChange={(value) => updateFilter("subjectId", value)}
-        allowClear
         showSearch
         optionFilterProp="label"
-        style={{ width: 220 }}
         options={filteredSubjects}
       />
       <DatePicker.RangePicker
@@ -177,7 +169,7 @@ export const UserExamListView = ({
         format="DD/MM/YYYY"
         placeholder={["Bắt đầu từ", "Bắt đầu đến"]}
         allowClear
-        style={{ width: 260 }}
+        style={{ width: 220 }}
       />
     </Space>
   );
@@ -192,26 +184,19 @@ export const UserExamListView = ({
         }
         filters={filters}
         extra={
-          <Button
-            className="toolbar-btn"
-            icon={<DownloadOutlined />}
-            onClick={downloadExamResults}
-          >
-            Export CSV
-          </Button>
+          <AdminExportButton onClick={downloadExamResults} />
         }
         table={
-          <Table
+          <AdminTable
             columns={columns}
             dataSource={data}
+            rowKey="userExamId"
             loading={loading}
             pagination={{
               ...pagination,
               onChange: changePage,
-              showSizeChanger: false,
             }}
             scroll={{ x: 1200 }}
-            tableLayout="fixed"
           />
         }
         onReload={() => fetchData(1)}

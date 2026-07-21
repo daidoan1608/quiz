@@ -16,7 +16,7 @@
 
 .dashboard-widget.is-dragging {
   opacity: 0.82;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18) !important;
+  box-shadow: var(--admin-shadow-lg) !important;
 }
 
 .dashboard-drag-handle {

@@ -64,10 +64,10 @@ export const ExamDetailModal = ({ open, onCancel, examId }) => {
       footer={null}
       width={980}
       centered
-      destroyOnClose
+      destroyOnHidden
       className="detail-modal"
     >
-      <Spin spinning={loading} tip="Đang tải đề thi...">
+      <Spin spinning={loading}>
         {examDetail ? (
           <div className="detail-modal-scroll">
             <div className="detail-modal-hero">
@@ -76,11 +76,11 @@ export const ExamDetailModal = ({ open, onCancel, examId }) => {
                   {examDetail.title}
                 </Title>
                 <Text type="secondary">{examDetail.subjectName}</Text>
-                <Text type="secondary">Ma de: {examDetail.examCode}</Text>
+                <Text type="secondary">Mã đề: {examDetail.examCode}</Text>
               </Space>
             </div>
 
-            <Card bordered={false} className="modern-card" style={{ marginBottom: 16 }}>
+            <Card variant="borderless" className="modern-card" style={{ marginBottom: 16 }}>
               <Row gutter={16}>
                 <Col span={12}>
                   <Statistic
@@ -111,7 +111,7 @@ export const ExamDetailModal = ({ open, onCancel, examId }) => {
                 <Card
                   key={question.questionId}
                   title={<Text strong>Câu {index + 1}</Text>}
-                  bordered={false}
+                  variant="borderless"
                   className="modern-card detail-question-card"
                 >
                   <MarkdownLatex

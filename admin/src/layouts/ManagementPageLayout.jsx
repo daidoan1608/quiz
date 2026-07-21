@@ -1,6 +1,9 @@
 import React from 'react';
-import { Card, Space, Button } from 'antd';
-import { ReloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { Card, Space } from 'antd';
+import {
+  AdminAddButton,
+  AdminReloadButton,
+} from '../components/common/buttons/AdminButtons';
 import styles from '../styles/layouts/ManagementPageLayout.module.css';
 
 const ManagementPageLayout = ({
@@ -20,23 +23,11 @@ const ManagementPageLayout = ({
         {extra}
 
         {showReloadButton && typeof onReload === 'function' && (
-          <Button
-            className="toolbar-btn"
-            icon={<ReloadOutlined />}
-            onClick={onReload}
-          >
-            Tải lại
-          </Button>
+          <AdminReloadButton onClick={onReload} />
         )}
 
         {typeof onAdd === 'function' && (
-          <Button
-            className="toolbar-btn"
-            icon={<PlusOutlined />}
-            onClick={onAdd}
-          >
-            Thêm mới
-          </Button>
+          <AdminAddButton onClick={onAdd} />
         )}
       </Space>
     );
@@ -49,13 +40,13 @@ const ManagementPageLayout = ({
         {renderActionButtons()}
       </div>
       {filters && (
-        <Card className={styles.managementFilters} bordered={false}>
+        <Card className={styles.managementFilters} variant="borderless">
           {filters}
         </Card>
       )}
 
       {/* 3. Phần Bảng Dữ Liệu (Table) */}
-      <Card className={styles.managementContent} bordered={false}>
+      <Card className={styles.managementContent} variant="borderless">
         {table}
       </Card>
     </div>

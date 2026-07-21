@@ -1,21 +1,26 @@
 import React from "react";
 import {
   Button,
-  Input,
-  Popconfirm,
   Segmented,
   Space,
-  Table,
-  Tooltip,
 } from "antd";
 import {
   AppstoreOutlined,
   DeleteOutlined,
   EditOutlined,
-  SearchOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
+import {
+  AdminFilterBar,
+  AdminSearchInput,
+} from "../../../components/common/filters/AdminFilterControls";
+import AdminTable from "../../../components/common/table/AdminTable";
+import {
+  AdminActionButton,
+  AdminConfirmAction,
+  AdminTableActions,
+} from "../../../components/common/table/AdminTableActions";
 import AdminTableText from "../../../components/common/table/AdminTableText";
 import { buildSoftDeleteColumns } from "../../../components/common/table/softDeleteColumns";
 import { CategoryFormModal } from "./CategoryFormModal";
@@ -80,68 +85,60 @@ export const CategoryManagerView = ({
       fixed: "right",
       render: (_, record) =>
         viewMode === "active" ? (
-          <Space>
-            <Tooltip title={!isAdmin ? "Chỉ Admin mới được sửa" : "Sửa khoa"}>
-              <Button
-                className="action-btn is-primary"
-                icon={<EditOutlined />}
-                disabled={!isAdmin}
-                onClick={() => openUpdateModal(record.categoryId)}
-              />
-            </Tooltip>
-            <Popconfirm
-              title="Chuyển khoa vào thùng rác?"
+          <AdminTableActions>
+            <AdminActionButton
+              title={!isAdmin ? "Chỉ Admin mới được sửa" : "Sửa khoa"}
+              variant="warning"
+              icon={<EditOutlined />}
+              disabled={!isAdmin}
+              onClick={() => openUpdateModal(record.categoryId)}
+            />
+            <AdminConfirmAction
+              buttonTitle="Chuyển vào thùng rác"
+              confirmTitle="Chuyển khoa vào thùng rác?"
               description="Các môn, chương, đề và câu hỏi đang hoạt động bên dưới sẽ bị xóa mềm theo cascade."
               onConfirm={() => deleteCategory(record.categoryId)}
               okText="Chuyển vào thùng rác"
-              cancelText="Hủy"
-              okButtonProps={{ danger: true }}
+              danger
               disabled={!isAdmin}
-            >
-              <Button
-                className="action-btn is-danger"
-                icon={<DeleteOutlined />}
-                disabled={!isAdmin}
-              />
-            </Popconfirm>
-          </Space>
+              icon={<DeleteOutlined />}
+            />
+          </AdminTableActions>
         ) : (
-          <Popconfirm
-            title="Khôi phục khoa?"
+          <AdminConfirmAction
+            buttonTitle="Khôi phục"
+            confirmTitle="Khôi phục khoa?"
             description="Các bản ghi con có cùng cascade id sẽ được khôi phục theo."
             onConfirm={() => restoreCategory(record.categoryId)}
             okText="Khôi phục"
-            cancelText="Hủy"
-          >
-            <Button
-              className="action-btn is-success"
-              icon={<UndoOutlined />}
-              disabled={!isAdmin}
-            />
-          </Popconfirm>
+            variant="success"
+            icon={<UndoOutlined />}
+            disabled={!isAdmin}
+          />
         ),
     },
   ];
 
   const filters = (
-    <Space wrap>
-      <Segmented
-        value={viewMode}
-        onChange={setViewMode}
-        options={[
-          { label: "Đang hoạt động", value: "active" },
-          { label: "Thùng rác", value: "deleted" },
-        ]}
-      />
-      <Input
+    <AdminFilterBar
+      filters={
+      <AdminSearchInput
         placeholder="Tìm tên khoa..."
-        prefix={<SearchOutlined />}
         value={searchText}
         onChange={(event) => setSearchText(event.target.value)}
-        allowClear
-        style={{ width: 300 }}
       />
-    </Space>
+      }
+      statusSwitch={
+        <Segmented
+          value={viewMode}
+          onChange={setViewMode}
+          options={[
+            { label: "Đang hoạt động", value: "active" },
+            { label: "Thùng rác", value: "deleted" },
+          ]}
+        />
+      }
+    />
   );
 
   return (
@@ -154,14 +151,13 @@ export const CategoryManagerView = ({
         }
         filters={filters}
         table={
-          <Table
+          <AdminTable
             columns={columns}
             dataSource={categories}
             rowKey="categoryId"
             loading={loading}
             pagination={{ pageSize: 7 }}
             scroll={{ x: viewMode === "active" ? 860 : 1030 }}
-            tableLayout="fixed"
             onChange={handleTableChange}
           />
         }

@@ -1,8 +1,11 @@
-import React from "react";
-import { Space, Table, Tag } from "antd";
+import React, { useState } from "react";
+import { Descriptions, Modal, Space, Tag, Typography } from "antd";
 import { HistoryOutlined } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
+import AdminTable from "../../../components/common/table/AdminTable";
 import AdminTableText from "../../../components/common/table/AdminTableText";
+
+const { Paragraph, Text } = Typography;
 
 const actionColor = (value) => {
   if (value === "DELETE") return "red";
@@ -11,6 +14,8 @@ const actionColor = (value) => {
 };
 
 export const AuditLogView = ({ logs, loading, fetchLogs }) => {
+  const [selectedLog, setSelectedLog] = useState(null);
+
   const columns = [
     {
       title: "Thời gian",
@@ -63,33 +68,74 @@ export const AuditLogView = ({ logs, loading, fetchLogs }) => {
       title: "Mô tả",
       dataIndex: "description",
       key: "description",
-      width: 360,
+      width: 320,
       ellipsis: true,
       sorter: (a, b) =>
         String(a.description || "").localeCompare(String(b.description || "")),
-      render: (value) => <AdminTableText>{value}</AdminTableText>,
+      render: (value) => (
+        <div style={{ maxWidth: 320, minWidth: 0 }}>
+          <AdminTableText>{value}</AdminTableText>
+        </div>
+      ),
     },
   ];
 
   return (
-    <ManagementPageLayout
-      title={
-        <Space>
-          <HistoryOutlined /> Audit log
-        </Space>
-      }
-      table={
-        <Table
-          columns={columns}
-          dataSource={logs}
-          rowKey="auditLogId"
-          loading={loading}
-          pagination={{ pageSize: 10 }}
-          scroll={{ x: 1070 }}
-          tableLayout="fixed"
-        />
-      }
-      onReload={fetchLogs}
-    />
+    <>
+      <ManagementPageLayout
+        title={
+          <Space>
+            <HistoryOutlined /> Audit log
+          </Space>
+        }
+        table={
+          <AdminTable
+            columns={columns}
+            dataSource={logs}
+            rowKey="auditLogId"
+            loading={loading}
+            pagination={{ pageSize: 10 }}
+            scroll={{ x: 1030 }}
+            onRow={(record) => ({
+              onClick: () => setSelectedLog(record),
+              style: { cursor: "pointer" },
+            })}
+          />
+        }
+        onReload={fetchLogs}
+      />
+
+      <Modal
+        title="Chi tiết audit log"
+        open={Boolean(selectedLog)}
+        onCancel={() => setSelectedLog(null)}
+        footer={null}
+        width={760}
+      >
+        {selectedLog && (
+          <Descriptions column={1} size="middle">
+            <Descriptions.Item label="Thời gian">
+              {selectedLog.createdAt ? new Date(selectedLog.createdAt).toLocaleString() : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Hành động">
+              <Tag color={actionColor(selectedLog.action)}>{selectedLog.action || "-"}</Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Đối tượng">
+              <Text>
+                {selectedLog.entityType || "-"} #{selectedLog.entityId || "-"}
+              </Text>
+            </Descriptions.Item>
+            <Descriptions.Item label="Người thực hiện">
+              {selectedLog.actorUsername || selectedLog.actorId || "System"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Mô tả">
+              <Paragraph style={{ marginBottom: 0, whiteSpace: "pre-wrap" }}>
+                {selectedLog.description || "-"}
+              </Paragraph>
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Modal>
+    </>
   );
 };

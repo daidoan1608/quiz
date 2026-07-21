@@ -1,7 +1,35 @@
-.management-filter-control {
+/* Management filter controls */
+.management-filter-control,
+.management-filter-control.ant-select,
+.management-filter-control.ant-select .ant-select-selector {
+  height: 40px;
   min-height: 40px;
 }
 
+.management-filter-control.ant-input-affix-wrapper,
+.management-filter-control.ant-select .ant-select-selector {
+  align-items: center;
+  display: inline-flex;
+}
+
+.management-filter-control.ant-input-affix-wrapper {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.management-filter-control.ant-input-affix-wrapper .ant-input,
+.management-filter-control.ant-input-affix-wrapper .ant-input::placeholder,
+.management-filter-control.ant-select .ant-select-selection-item,
+.management-filter-control.ant-select .ant-select-selection-placeholder {
+  line-height: 38px;
+}
+
+.management-filter-control.ant-input-affix-wrapper .ant-input {
+  height: 38px;
+  min-height: 38px;
+}
+
+/* Ant form defaults */
 .ant-input,
 .ant-input-affix-wrapper,
 .ant-input-number,

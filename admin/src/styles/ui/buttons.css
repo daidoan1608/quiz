@@ -3,17 +3,24 @@
   border-radius: var(--admin-radius) !important;
   font-weight: 700;
   box-shadow: none !important;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease !important;
 }
 
 .ant-btn-primary {
   min-height: 44px;
-  background: color-mix(in srgb, var(--admin-primary) 12%, transparent) !important;
+  background: var(--admin-primary) !important;
   border-color: var(--admin-primary) !important;
-  color: var(--admin-primary) !important;
+  color: var(--admin-on-primary) !important;
 }
 
-body.dark .ant-btn-primary {
-  color: var(--admin-primary-hover) !important;
+.ant-btn-primary:not(:disabled):hover {
+  background: var(--admin-primary-hover) !important;
+  border-color: var(--admin-primary-hover) !important;
+  color: var(--admin-on-primary) !important;
 }
 
 .ant-btn.toolbar-btn {
@@ -22,15 +29,16 @@ body.dark .ant-btn-primary {
   line-height: 38px;
   padding-inline: 14px;
   border-radius: 10px !important;
-  border-color: color-mix(in srgb, var(--admin-primary) 34%, var(--admin-border)) !important;
-  background: color-mix(in srgb, var(--admin-primary) 6%, var(--admin-surface-solid)) !important;
-  color: var(--admin-primary) !important;
+  border-color: color-mix(in srgb, var(--btn-color) 34%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--btn-color) 10%, var(--admin-surface-solid)) !important;
+  color: var(--btn-color) !important;
 }
 
-.ant-btn.toolbar-btn:hover {
-  border-color: var(--admin-primary) !important;
-  color: var(--admin-primary) !important;
-  background: color-mix(in srgb, var(--admin-primary) 12%, var(--admin-surface-solid)) !important;
+.ant-btn.toolbar-btn:not(:disabled):hover {
+  border-color: var(--btn-hover) !important;
+  color: var(--btn-hover) !important;
+  background: color-mix(in srgb, var(--btn-color) 18%, var(--admin-surface-solid)) !important;
+  transform: translateY(-1px);
 }
 
 .ant-btn.toolbar-btn.is-primary,
@@ -38,9 +46,9 @@ body.dark .ant-btn-primary {
   height: 40px;
   min-height: 40px;
   line-height: 38px;
-  background: color-mix(in srgb, var(--admin-primary) 12%, var(--admin-surface-solid)) !important;
-  border-color: var(--admin-primary) !important;
-  color: var(--admin-primary) !important;
+  background: var(--btn-color) !important;
+  border-color: var(--btn-color) !important;
+  color: var(--admin-on-primary) !important;
 }
 
 .ant-btn.toolbar-btn > span {
@@ -51,20 +59,110 @@ body.dark .ant-btn-primary {
   font-size: 15px;
 }
 
+.ant-btn.admin-form-btn,
+.ant-btn.toolbar-btn.admin-form-btn,
+.ant-btn-primary.admin-form-btn {
+  height: 40px !important;
+  min-height: 40px !important;
+  line-height: 38px !important;
+  padding-inline: 16px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ant-btn.admin-form-btn > span,
+.ant-btn.admin-form-btn .anticon {
+  line-height: 1;
+}
+
 body.dark .ant-btn.toolbar-btn.is-primary,
 body.dark .ant-btn.toolbar-btn.ant-btn-primary {
-  color: #0f172a !important;
+  color: var(--admin-on-primary) !important;
 }
 
 body.dark .ant-btn.toolbar-btn {
-  border-color: var(--admin-border) !important;
-  background: var(--admin-surface-muted) !important;
-  color: var(--admin-primary-hover) !important;
+  border-color: color-mix(in srgb, var(--btn-color) 30%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--btn-color) 13%, var(--admin-surface-muted)) !important;
+  color: var(--btn-hover) !important;
 }
 
-body.dark .ant-btn.toolbar-btn:hover {
-  border-color: var(--admin-primary) !important;
-  background: var(--admin-primary-soft) !important;
+body.dark .ant-btn.toolbar-btn:not(:disabled):hover {
+  border-color: var(--btn-hover) !important;
+  background: color-mix(in srgb, var(--btn-color) 22%, var(--admin-surface-muted)) !important;
+}
+
+.admin-btn--primary {
+  --btn-color: var(--admin-primary);
+  --btn-hover: var(--admin-primary-hover);
+}
+
+.admin-btn--success {
+  --btn-color: var(--admin-success);
+  --btn-hover: var(--admin-success-hover);
+}
+
+.admin-btn--warning {
+  --btn-color: var(--admin-warning);
+  --btn-hover: var(--admin-warning-hover);
+}
+
+.admin-btn--danger {
+  --btn-color: var(--admin-error);
+  --btn-hover: var(--admin-error-hover);
+}
+
+.admin-btn--info {
+  --btn-color: var(--admin-info);
+  --btn-hover: var(--admin-info-hover);
+}
+
+.admin-btn--accent {
+  --btn-color: var(--admin-accent);
+  --btn-hover: var(--admin-accent-hover);
+}
+
+.admin-btn--neutral {
+  --btn-color: var(--admin-neutral);
+  --btn-hover: var(--admin-neutral-hover);
+}
+
+.ant-btn.admin-btn--danger:not(.toolbar-btn) {
+  border-color: color-mix(in srgb, var(--admin-error) 35%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-error) 8%, var(--admin-surface-solid)) !important;
+  color: var(--admin-error) !important;
+}
+
+.ant-btn.admin-btn--danger:not(.toolbar-btn):not(:disabled):hover {
+  border-color: var(--admin-error-hover) !important;
+  background: color-mix(in srgb, var(--admin-error) 14%, var(--admin-surface-solid)) !important;
+  color: var(--admin-error-hover) !important;
+}
+
+.ant-btn.admin-btn--solid-success {
+  background: var(--admin-success) !important;
+  border-color: var(--admin-success) !important;
+  color: #ffffff !important;
+}
+
+.ant-btn.admin-btn--solid-success:not(:disabled):hover {
+  background: var(--admin-success-hover) !important;
+  border-color: var(--admin-success-hover) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+body.dark .ant-btn.admin-btn--solid-success {
+  color: #052e16 !important;
+}
+
+body.dark .ant-btn.admin-btn--danger:not(.toolbar-btn) {
+  background: color-mix(in srgb, var(--admin-error) 13%, var(--admin-surface-muted)) !important;
+  color: var(--admin-error) !important;
 }
 
 .action-btn,
@@ -74,10 +172,10 @@ body.dark .ant-btn.toolbar-btn:hover {
   height: 36px;
   min-height: 36px;
   padding: 0 !important;
-  border: 1px solid color-mix(in srgb, #0891b2 28%, var(--admin-border)) !important;
+  border: 1px solid color-mix(in srgb, var(--admin-info-strong) 28%, var(--admin-border)) !important;
   border-radius: 10px !important;
-  background: color-mix(in srgb, #0891b2 9%, var(--admin-surface-solid)) !important;
-  color: #0e7490 !important;
+  background: color-mix(in srgb, var(--admin-info-strong) 9%, var(--admin-surface-solid)) !important;
+  color: var(--admin-info) !important;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -87,9 +185,9 @@ body.dark .ant-btn.toolbar-btn:hover {
 
 .action-btn:hover,
 .ant-btn.action-btn:hover {
-  border-color: #0891b2 !important;
-  color: #0e7490 !important;
-  background: color-mix(in srgb, #0891b2 16%, var(--admin-surface-solid)) !important;
+  border-color: var(--admin-info-strong) !important;
+  color: var(--admin-info) !important;
+  background: color-mix(in srgb, var(--admin-info-strong) 16%, var(--admin-surface-solid)) !important;
 }
 
 .ant-btn.action-btn.is-primary {
@@ -102,6 +200,54 @@ body.dark .ant-btn.toolbar-btn:hover {
   color: var(--admin-primary) !important;
   border-color: var(--admin-primary) !important;
   background: color-mix(in srgb, var(--admin-primary) 17%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-info {
+  color: var(--admin-info) !important;
+  border-color: color-mix(in srgb, var(--admin-info) 30%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-info) 9%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-info:hover {
+  color: var(--admin-info-hover) !important;
+  border-color: var(--admin-info-hover) !important;
+  background: color-mix(in srgb, var(--admin-info) 16%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-warning {
+  color: var(--admin-warning) !important;
+  border-color: color-mix(in srgb, var(--admin-warning) 32%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-warning) 10%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-warning:hover {
+  color: var(--admin-warning-hover) !important;
+  border-color: var(--admin-warning-hover) !important;
+  background: color-mix(in srgb, var(--admin-warning) 17%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-accent {
+  color: var(--admin-accent) !important;
+  border-color: color-mix(in srgb, var(--admin-accent) 30%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-accent) 9%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-accent:hover {
+  color: var(--admin-accent-hover) !important;
+  border-color: var(--admin-accent-hover) !important;
+  background: color-mix(in srgb, var(--admin-accent) 16%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-neutral {
+  color: var(--admin-neutral) !important;
+  border-color: color-mix(in srgb, var(--admin-neutral) 30%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-neutral) 8%, var(--admin-surface-solid)) !important;
+}
+
+.ant-btn.action-btn.is-neutral:hover {
+  color: var(--admin-neutral-hover) !important;
+  border-color: var(--admin-neutral-hover) !important;
+  background: color-mix(in srgb, var(--admin-neutral) 14%, var(--admin-surface-solid)) !important;
 }
 
 .ant-btn.action-btn.is-danger {
@@ -129,19 +275,35 @@ body.dark .ant-btn.toolbar-btn:hover {
 }
 
 body.dark .ant-btn.action-btn {
-  border-color: color-mix(in srgb, #22d3ee 24%, var(--admin-border)) !important;
-  background: color-mix(in srgb, #22d3ee 9%, var(--admin-surface-muted)) !important;
-  color: #67e8f9 !important;
+  border-color: color-mix(in srgb, var(--admin-info-strong) 24%, var(--admin-border)) !important;
+  background: color-mix(in srgb, var(--admin-info-strong) 9%, var(--admin-surface-muted)) !important;
+  color: var(--admin-info) !important;
 }
 
 body.dark .ant-btn.action-btn:hover {
-  border-color: #67e8f9 !important;
-  color: #a5f3fc !important;
-  background: color-mix(in srgb, #22d3ee 16%, var(--admin-surface-muted)) !important;
+  border-color: var(--admin-info) !important;
+  color: var(--admin-info) !important;
+  background: color-mix(in srgb, var(--admin-info-strong) 16%, var(--admin-surface-muted)) !important;
 }
 
 body.dark .ant-btn.action-btn.is-primary {
   background: color-mix(in srgb, var(--admin-primary) 14%, var(--admin-surface-muted)) !important;
+}
+
+body.dark .ant-btn.action-btn.is-info {
+  background: color-mix(in srgb, var(--admin-info) 14%, var(--admin-surface-muted)) !important;
+}
+
+body.dark .ant-btn.action-btn.is-warning {
+  background: color-mix(in srgb, var(--admin-warning) 14%, var(--admin-surface-muted)) !important;
+}
+
+body.dark .ant-btn.action-btn.is-accent {
+  background: color-mix(in srgb, var(--admin-accent) 14%, var(--admin-surface-muted)) !important;
+}
+
+body.dark .ant-btn.action-btn.is-neutral {
+  background: color-mix(in srgb, var(--admin-neutral) 12%, var(--admin-surface-muted)) !important;
 }
 
 body.dark .ant-btn.action-btn.is-danger {
@@ -169,8 +331,8 @@ body.dark .ant-btn.action-btn.is-success {
   min-height: 40px;
   border-radius: 10px !important;
   border-color: var(--admin-primary) !important;
-  background: color-mix(in srgb, var(--admin-primary) 12%, transparent) !important;
-  color: var(--admin-primary) !important;
+  background: var(--admin-primary) !important;
+  color: var(--admin-on-primary) !important;
   box-shadow: none !important;
 }
 
@@ -179,8 +341,8 @@ body.dark .ant-btn.action-btn.is-success {
 .ant-btn.modal-primary-btn:hover,
 .ant-btn.modal-primary-btn:focus {
   border-color: var(--admin-primary-hover) !important;
-  background: color-mix(in srgb, var(--admin-primary) 18%, transparent) !important;
-  color: var(--admin-primary-hover) !important;
+  background: var(--admin-primary-hover) !important;
+  color: var(--admin-on-primary) !important;
 }
 
 .modal-primary-btn > span,
@@ -192,5 +354,5 @@ body.dark .ant-btn.action-btn.is-success {
 
 body.dark .modal-primary-btn,
 body.dark .ant-btn.modal-primary-btn {
-  color: var(--admin-primary-hover) !important;
+  color: var(--admin-on-primary) !important;
 }

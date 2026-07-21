@@ -26,7 +26,7 @@ export function DashboardCard({
           />
         </Space>
       }
-      bordered={false}
+      variant="borderless"
       loading={loading}
       className={`modern-card dashboard-widget${isDragging ? " is-dragging" : ""}`}
     >

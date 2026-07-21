@@ -1,15 +1,18 @@
 import React from 'react';
 import {
-  Form, Select, Button, Modal,
+  Form, Select, Modal,
   Typography, Divider,
   Upload, Row, Col, Alert
 } from "antd";
 import {
   CloudUploadOutlined,
-  DownloadOutlined,
   ImportOutlined,
 } from "@ant-design/icons";
-import { primaryModalButtonStyle } from "../../../utils/ui/antdModalButtonStyles";
+import {
+  AdminCheckButton,
+  AdminExportButton,
+  AdminImportButton,
+} from "../../../components/common/buttons/AdminButtons";
 import { useQuestionImport } from "../hooks/useQuestionImport";
 
 const { Title } = Typography;
@@ -57,14 +60,13 @@ const QuestionImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
           </div>
         }
         action={
-          <Button
+          <AdminExportButton
             type="link"
-            icon={<DownloadOutlined />}
-            href="/templates/mau_import.xlsx"
-            download="mau_nhap_cau_hoi.xlsx"
+            href="/templates/mau_zip.zip"
+            download="mau_nhap_cau_hoi.zip"
           >
-            Tải file mẫu
-          </Button>
+            Tải folder mẫu
+          </AdminExportButton>
         }
         showIcon
         style={{ marginBottom: 24 }}
@@ -207,25 +209,21 @@ const QuestionImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
             marginTop: 30,
           }}
         >
-          <Button
-            icon={<CloudUploadOutlined />}
+          <AdminCheckButton
             loading={previewLoading}
             size="large"
             onClick={handlePreview}
           >
             Kiểm tra file
-          </Button>
-          <Button
-            type="default"
-            style={primaryModalButtonStyle}
+          </AdminCheckButton>
+          <AdminImportButton
             htmlType="submit"
-            icon={<ImportOutlined />}
             loading={loading}
             size="large"
             disabled={(isChaptersEmpty && chapters.length === 0) || previewResult?.invalidRows > 0}
           >
             Bắt đầu Upload
-          </Button>
+          </AdminImportButton>
         </div>
       </Form>
     </Modal>

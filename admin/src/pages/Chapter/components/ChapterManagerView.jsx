@@ -1,21 +1,27 @@
 import React from "react";
 import {
   Button,
-  Input,
-  Popconfirm,
   Segmented,
-  Select,
   Space,
-  Table,
 } from "antd";
 import {
   BookOutlined,
   DeleteOutlined,
   EditOutlined,
-  SearchOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
+import {
+  AdminFilterBar,
+  AdminFilterSelect,
+  AdminSearchInput,
+} from "../../../components/common/filters/AdminFilterControls";
+import AdminTable from "../../../components/common/table/AdminTable";
+import {
+  AdminActionButton,
+  AdminConfirmAction,
+  AdminTableActions,
+} from "../../../components/common/table/AdminTableActions";
 import AdminTableText from "../../../components/common/table/AdminTableText";
 import { buildSoftDeleteColumns } from "../../../components/common/table/softDeleteColumns";
 import { ChapterFormModal } from "./ChapterFormModal";
@@ -57,9 +63,7 @@ export const ChapterManagerView = ({
       width: 90,
       sorter: true,
       sortOrder: getSortOrder("chapterId"),
-      render: (text) => (
-        <AdminTableText type="secondary">{text}</AdminTableText>
-      ),
+      render: (text) => <AdminTableText>{text}</AdminTableText>,
     },
     {
       title: "Tên chương",
@@ -78,7 +82,7 @@ export const ChapterManagerView = ({
       width: 120,
       sorter: true,
       sortOrder: getSortOrder("subjectId"),
-      render: (text) => <AdminTableText code>{text}</AdminTableText>,
+      render: (text) => <AdminTableText>{text}</AdminTableText>,
     },
     {
       title: "Chương",
@@ -97,89 +101,84 @@ export const ChapterManagerView = ({
       fixed: "right",
       render: (_, record) =>
         viewMode === "active" ? (
-          <Space>
-            <Button
-              className="action-btn is-primary"
+          <AdminTableActions>
+            <AdminActionButton
+              title="Sửa chương"
+              variant="warning"
               icon={<EditOutlined />}
               disabled={!canOnSubject(record.subjectId, "CHAPTER", "UPDATE")}
               onClick={() => openUpdateModal(record.chapterId)}
             />
-            <Popconfirm
-              title="Chuyển chương vào thùng rác?"
+            <AdminConfirmAction
+              buttonTitle="Chuyển vào thùng rác"
+              confirmTitle="Chuyển chương vào thùng rác?"
               description="Các câu hỏi đang hoạt động thuộc chương này sẽ bị xóa mềm theo cascade."
               onConfirm={() => deleteChapter(record.chapterId)}
               okText="Chuyển vào thùng rác"
-              cancelText="Hủy"
-              okButtonProps={{ danger: true }}
+              danger
               disabled={!canOnSubject(record.subjectId, "CHAPTER", "DELETE")}
-            >
-              <Button
-                className="action-btn is-danger"
-                icon={<DeleteOutlined />}
-                disabled={!canOnSubject(record.subjectId, "CHAPTER", "DELETE")}
-              />
-            </Popconfirm>
-          </Space>
+              icon={<DeleteOutlined />}
+            />
+          </AdminTableActions>
         ) : (
-          <Popconfirm
-            title="Khôi phục chương?"
+          <AdminConfirmAction
+            buttonTitle="Khôi phục"
+            confirmTitle="Khôi phục chương?"
             description="Chỉ khôi phục được khi môn cha đang hoạt động."
             onConfirm={() => restoreChapter(record.chapterId)}
             okText="Khôi phục"
-            cancelText="Hủy"
-          >
-            <Button className="action-btn is-success" icon={<UndoOutlined />} />
-          </Popconfirm>
+            variant="success"
+            icon={<UndoOutlined />}
+          />
         ),
     },
   ];
 
   const filters = (
-    <Space wrap>
-      <Segmented
-        value={viewMode}
-        onChange={setViewMode}
-        disabled={isMod}
-        options={[
-          { label: "Đang hoạt động", value: "active" },
-          { label: "Thùng rác", value: "deleted" },
-        ]}
-      />
-      <Input
+    <AdminFilterBar
+      filters={
+        <>
+      <AdminSearchInput
         placeholder="Tìm tên chương..."
-        prefix={<SearchOutlined />}
         value={searchText}
         onChange={(event) => setSearchText(event.target.value)}
-        allowClear
-        style={{ width: 300 }}
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Khoa"
         value={categoryFilter}
         onChange={changeCategoryFilter}
-        allowClear
         showSearch
         optionFilterProp="label"
-        style={{ width: 180 }}
         options={categories.map((category) => ({
           value: category.categoryId,
           label: category.categoryName,
         }))}
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Môn học"
         value={subjectFilter}
         onChange={setSubjectFilter}
-        allowClear
         showSearch
         optionFilterProp="label"
-        style={{ width: 200 }}
         options={subjects.map((subject) => ({
           value: subject.subjectId,
           label: subject.name,
         }))}
       />
-    </Space>
+        </>
+      }
+      statusSwitch={
+        <Segmented
+          value={viewMode}
+          onChange={setViewMode}
+          disabled={isMod}
+          options={[
+            { label: "Đang hoạt động", value: "active" },
+            { label: "Thùng rác", value: "deleted" },
+          ]}
+        />
+      }
+    />
   );
 
   return (
@@ -192,14 +191,13 @@ export const ChapterManagerView = ({
         }
         filters={filters}
         table={
-          <Table
+          <AdminTable
             columns={columns}
             dataSource={chapters}
             rowKey="chapterId"
             loading={loading}
             pagination={{ pageSize: 7 }}
             scroll={{ x: viewMode === "active" ? 830 : 1000 }}
-            tableLayout="fixed"
             onChange={handleTableChange}
           />
         }

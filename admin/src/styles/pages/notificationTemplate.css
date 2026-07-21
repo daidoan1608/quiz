@@ -122,7 +122,7 @@
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--notification-accent) 9%, transparent), transparent 48%),
     var(--admin-surface-solid);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--admin-surface-solid) 50%, transparent);
 }
 
 .notification-template-preview-icon {
@@ -158,14 +158,14 @@
 .notification-template-submit,
 .ant-btn.notification-template-submit {
   min-width: 128px;
-  color: #fff !important;
+  color: var(--admin-on-primary) !important;
   background: var(--admin-primary) !important;
   border-color: var(--admin-primary) !important;
 }
 
 .notification-template-submit:hover,
 .ant-btn.notification-template-submit:hover {
-  color: #fff !important;
+  color: var(--admin-on-primary) !important;
   background: var(--admin-primary-hover) !important;
   border-color: var(--admin-primary-hover) !important;
 }

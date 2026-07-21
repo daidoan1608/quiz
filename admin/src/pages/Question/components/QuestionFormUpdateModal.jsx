@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import {
   Alert,
-  Button,
   Col,
   Divider,
   Form,
@@ -10,16 +9,16 @@ import {
   Row,
   Select,
   Skeleton,
-  Switch,
   Typography,
 } from "antd";
-import { CheckCircleOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import {
-  cancelModalButtonStyle,
-  primaryModalButtonStyle,
-} from "../../../utils/ui/antdModalButtonStyles";
+  AdminCancelButton,
+  AdminSaveButton,
+} from "../../../components/common/buttons/AdminButtons";
 import { useQuestionImageUpload } from "../hooks/useQuestionImageUpload";
 import { useQuestionUpdateForm } from "../hooks/useQuestionUpdateForm";
+import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch";
 import { MarkdownPreviewBox } from "./MarkdownPreviewBox";
 import { QuestionAnswerFields } from "./QuestionAnswerFields";
 import { QuestionImageField } from "./QuestionImageField";
@@ -70,17 +69,15 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
       open={isModalOpen}
       onCancel={onCancel}
       footer={[
-        <Button key="back" style={cancelModalButtonStyle} onClick={onCancel}>Hủy bỏ</Button>,
-        <Button
-          type="default"
-          style={primaryModalButtonStyle}
+        <AdminCancelButton key="back" onClick={onCancel} />,
+        <AdminSaveButton
           key="submit"
-          icon={<SaveOutlined />}
           loading={submitting}
+          disabled={submitting || uploadingImage}
           onClick={() => form.submit()}
         >
-          Lưu thay đổi
-        </Button>,
+          Lưu
+        </AdminSaveButton>,
       ]}
       width={800}
       centered
@@ -156,13 +153,13 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
 
           <Row gutter={24}>
             <Col xs={24} md={12}>
-              <Form.Item label="Dung trong de thi" name="examEnabled" valuePropName="checked">
-                <Switch />
+              <Form.Item label="Dùng trong đề thi" name="examEnabled" valuePropName="checked">
+                <AdminTableSwitch />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="Hien trong on tap" name="practiceEnabled" valuePropName="checked">
-                <Switch />
+              <Form.Item label="Hiện trong ôn tập" name="practiceEnabled" valuePropName="checked">
+                <AdminTableSwitch />
               </Form.Item>
             </Col>
           </Row>

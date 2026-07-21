@@ -72,11 +72,19 @@ export const useQuestionManager = () => {
               const matchesDifficulty =
                 !advancedFilters.difficulty ||
                 question.difficulty === advancedFilters.difficulty;
+              const matchesExamEnabled =
+                advancedFilters.examEnabled === undefined ||
+                (question.examEnabled !== false) === advancedFilters.examEnabled;
+              const matchesPracticeEnabled =
+                advancedFilters.practiceEnabled === undefined ||
+                (question.practiceEnabled !== false) === advancedFilters.practiceEnabled;
               return (
                 questionMatchesKeyword(question, trimmedKeyword) &&
                 matchesSubject &&
                 matchesChapter &&
-                matchesDifficulty
+                matchesDifficulty &&
+                matchesExamEnabled &&
+                matchesPracticeEnabled
               );
             });
           setQuestions(
@@ -98,6 +106,8 @@ export const useQuestionManager = () => {
           subjectId: advancedFilters.subjectId,
           chapterId: advancedFilters.chapterId,
           difficulty: advancedFilters.difficulty,
+          examEnabled: advancedFilters.examEnabled,
+          practiceEnabled: advancedFilters.practiceEnabled,
           creatorId: advancedFilters.creatorId,
           deleted: viewMode === "deleted",
           sortBy: tableSort.sortBy,
@@ -222,6 +232,33 @@ export const useQuestionManager = () => {
     }
   };
 
+  const toggleQuestionAvailability = async (question, field, checked) => {
+    try {
+      await questionApi.update(question.questionId, {
+        questionId: question.questionId,
+        content: question.content,
+        difficulty: question.difficulty,
+        imageUrl: question.imageUrl,
+        questionType: question.questionType,
+        examEnabled:
+          field === "examEnabled" ? checked : question.examEnabled !== false,
+        practiceEnabled:
+          field === "practiceEnabled" ? checked : question.practiceEnabled !== false,
+      });
+      message.success("Đã cập nhật trạng thái câu hỏi.");
+      setQuestions((prev) =>
+        prev.map((item) =>
+          item.questionId === question.questionId
+            ? { ...item, [field]: checked }
+            : item
+        )
+      );
+      fetchQuestions(searchText, pagination.current, pagination.pageSize);
+    } catch (error) {
+      message.error(getApiErrorMessage(error, "Không thể cập nhật trạng thái câu hỏi."));
+    }
+  };
+
   const openAddModal = () => setIsAddModalOpen(true);
   const openImportModal = () => setIsImportModalOpen(true);
 
@@ -288,6 +325,7 @@ export const useQuestionManager = () => {
     updateFilter,
     deleteQuestion,
     restoreQuestion,
+    toggleQuestionAvailability,
     openAddModal,
     openImportModal,
     openUpdateModal,

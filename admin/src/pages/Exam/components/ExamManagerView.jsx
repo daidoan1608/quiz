@@ -2,14 +2,9 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
-  Input,
-  Popconfirm,
   Segmented,
-  Select,
   Space,
-  Table,
   Tag,
-  Tooltip,
 } from "antd";
 import {
   ClockCircleOutlined,
@@ -18,16 +13,24 @@ import {
   EyeOutlined,
   FilePdfOutlined,
   FileTextOutlined,
-  SearchOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
+import {
+  AdminFilterBar,
+  AdminFilterSelect,
+  AdminSearchInput,
+} from "../../../components/common/filters/AdminFilterControls";
+import AdminTable from "../../../components/common/table/AdminTable";
+import {
+  AdminActionButton,
+  AdminConfirmAction,
+  AdminTableActions,
+} from "../../../components/common/table/AdminTableActions";
 import AdminTableText from "../../../components/common/table/AdminTableText";
 import { buildSoftDeleteColumns } from "../../../components/common/table/softDeleteColumns";
 import { EXAM_PAGE_SIZE_OPTIONS } from "../constants";
 import { ExamDetailModal } from "./ExamDetailModal";
-import ExamFormCreateModal from "./ExamFormCreateModal";
-import { ExamFormUpdateModal } from "./ExamFormUpdateModal";
 
 export const ExamManagerView = ({
   exams,
@@ -42,9 +45,7 @@ export const ExamManagerView = ({
   advancedFilters,
   pagination,
   isMod,
-  isAddModalOpen,
   isViewModalOpen,
-  isUpdateModalOpen,
   selectedExamId,
   canCreateExam,
   canOnSubject,
@@ -54,32 +55,27 @@ export const ExamManagerView = ({
   updateFilter,
   deleteExam,
   restoreExam,
-  openAddModal,
-  closeAddModal,
-  refreshExamList,
   openViewModal,
   closeViewModal,
-  openUpdateModal,
-  closeUpdateModal,
 }) => {
   const navigate = useNavigate();
   const columns = [
     {
-      title: "Ma de",
+      title: "Mã đề",
       dataIndex: "examCode",
       key: "examCode",
       width: 140,
       ellipsis: true,
       sorter: true,
       sortOrder: getSortOrder("examCode"),
-      render: (text) => <AdminTableText strong>{text}</AdminTableText>,
+      render: (text) => <AdminTableText>{text}</AdminTableText>,
     },
     {
       title: "Mã môn",
       dataIndex: "subjectId",
       key: "subjectId",
       width: 120,
-      render: (text) => <AdminTableText strong>{text}</AdminTableText>,
+      render: (text) => <AdminTableText>{text}</AdminTableText>,
       sorter: true,
       sortOrder: getSortOrder("subjectId"),
     },
@@ -141,119 +137,108 @@ export const ExamManagerView = ({
       fixed: "right",
       render: (_, record) =>
         viewMode === "active" ? (
-          <Space>
-            <Tooltip title="Xem đề thi">
-              <Button
-                className="action-btn"
-                icon={<EyeOutlined />}
-                onClick={() => openViewModal(record.examId)}
-              />
-            </Tooltip>
-            <Tooltip title="Preview PDF">
-              <Button
-                className="action-btn"
-                icon={<FilePdfOutlined />}
-                onClick={() => navigate(`/exams/${record.examId}/print-preview?mode=student`)}
-              />
-            </Tooltip>
-            <Tooltip title="Sua de thi">
-              <Button
-                className="action-btn"
-                icon={<EditOutlined />}
-                onClick={() => openUpdateModal(record.examId)}
-                disabled={!canOnSubject(record.subjectId, "EXAM", "UPDATE")}
-              />
-            </Tooltip>
-            <Popconfirm
-              title="Chuyển đề thi vào thùng rác?"
+          <AdminTableActions>
+            <AdminActionButton
+              title="Xem đề thi"
+              variant="info"
+              icon={<EyeOutlined />}
+              onClick={() => openViewModal(record.examId)}
+            />
+            <AdminActionButton
+              title="Preview PDF"
+              variant="accent"
+              icon={<FilePdfOutlined />}
+              onClick={() => navigate(`/exams/${record.examId}/print-preview?mode=student`)}
+            />
+            <AdminActionButton
+              title="Sửa đề thi"
+              variant="warning"
+              icon={<EditOutlined />}
+              onClick={() => navigate(`/exams/${record.examId}/edit`)}
+              disabled={!canOnSubject(record.subjectId, "EXAM", "UPDATE")}
+            />
+            <AdminConfirmAction
+              buttonTitle="Chuyển vào thùng rác"
+              confirmTitle="Chuyển đề thi vào thùng rác?"
               description="Lịch sử bài làm và attempt đang làm vẫn được giữ."
               onConfirm={() => deleteExam(record.examId)}
               okText="Chuyển vào thùng rác"
-              cancelText="Hủy"
-              okButtonProps={{ danger: true }}
+              danger
               disabled={!canOnSubject(record.subjectId, "EXAM", "DELETE")}
-            >
-              <Button
-                className="action-btn is-danger"
-                icon={<DeleteOutlined />}
-                disabled={!canOnSubject(record.subjectId, "EXAM", "DELETE")}
-              />
-            </Popconfirm>
-          </Space>
+              icon={<DeleteOutlined />}
+            />
+          </AdminTableActions>
         ) : (
-          <Popconfirm
-            title="Khôi phục đề thi?"
+          <AdminConfirmAction
+            buttonTitle="Khôi phục"
+            confirmTitle="Khôi phục đề thi?"
             onConfirm={() => restoreExam(record.examId)}
             okText="Khôi phục"
-            cancelText="Hủy"
-          >
-            <Button className="action-btn is-success" icon={<UndoOutlined />} />
-          </Popconfirm>
+            variant="success"
+            icon={<UndoOutlined />}
+          />
         ),
     },
   ];
 
   const filters = (
-    <Space wrap>
-      <Segmented
-        value={viewMode}
-        onChange={changeViewMode}
-        disabled={isMod}
-        options={[
-          { label: "Đang hoạt động", value: "active" },
-          { label: "Thùng rác", value: "deleted" },
-        ]}
-      />
-      <Input
+    <AdminFilterBar
+      filters={
+        <>
+      <AdminSearchInput
         placeholder="Tìm tên đề, mã môn..."
-        prefix={<SearchOutlined />}
         value={searchText}
         onChange={(event) => changeSearchText(event.target.value)}
-        allowClear
-        style={{ width: 300 }}
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Khoa"
         value={advancedFilters.categoryId}
         onChange={(value) => updateFilter("categoryId", value)}
-        allowClear
         showSearch
         optionFilterProp="label"
-        style={{ width: 180 }}
         options={categories.map((category) => ({
           value: category.categoryId,
           label: category.categoryName,
         }))}
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Môn học"
         value={advancedFilters.subjectId}
         onChange={(value) => updateFilter("subjectId", value)}
-        allowClear
         showSearch
         optionFilterProp="label"
-        style={{ width: 200 }}
         options={subjects.map((subject) => ({
           value: subject.subjectId,
           label: subject.name,
         }))}
       />
       {!isMod && (
-        <Select
+        <AdminFilterSelect
           placeholder="Người tạo"
           value={advancedFilters.createdBy}
           onChange={(value) => updateFilter("createdBy", value)}
-          allowClear
           showSearch
           optionFilterProp="label"
-          style={{ width: 180 }}
           options={creators.map((user) => ({
             value: user.userId,
             label: user.username,
           }))}
         />
       )}
-    </Space>
+        </>
+      }
+      statusSwitch={
+        <Segmented
+          value={viewMode}
+          onChange={changeViewMode}
+          disabled={isMod}
+          options={[
+            { label: "Đang hoạt động", value: "active" },
+            { label: "Thùng rác", value: "deleted" },
+          ]}
+        />
+      }
+    />
   );
 
   return (
@@ -266,7 +251,7 @@ export const ExamManagerView = ({
         }
         filters={filters}
         table={
-          <Table
+          <AdminTable
             columns={columns}
             dataSource={exams}
             rowKey="examId"
@@ -277,28 +262,16 @@ export const ExamManagerView = ({
               pageSizeOptions: EXAM_PAGE_SIZE_OPTIONS,
             }}
             scroll={{ x: viewMode === "active" ? 1250 : 1370 }}
-            tableLayout="fixed"
             onChange={handleTableChange}
           />
         }
         onReload={() => fetchExams(pagination.current, pagination.pageSize)}
-        onAdd={canCreateExam ? openAddModal : undefined}
+        onAdd={canCreateExam ? () => navigate("/exams/create") : undefined}
       />
 
-      <ExamFormCreateModal
-        isModalOpen={isAddModalOpen}
-        onCancel={closeAddModal}
-        onSuccess={refreshExamList}
-      />
       <ExamDetailModal
         open={isViewModalOpen}
         onCancel={closeViewModal}
-        examId={selectedExamId}
-      />
-      <ExamFormUpdateModal
-        open={isUpdateModalOpen}
-        onCancel={closeUpdateModal}
-        onSuccess={refreshExamList}
         examId={selectedExamId}
       />
     </>

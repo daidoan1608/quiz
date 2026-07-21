@@ -1,7 +1,6 @@
 import React from "react";
-import { Button, Form, Input, Radio, Typography, Upload } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import { primaryModalButtonStyle } from "../../../utils/ui/antdModalButtonStyles";
+import { Form, Input, Radio, Typography, Upload } from "antd";
+import { AdminUploadButton } from "../../../components/common/buttons/AdminButtons";
 import { resolveMediaUrl } from "../../../utils/mediaUrl";
 
 const { Text } = Typography;
@@ -47,14 +46,12 @@ export const QuestionImageField = ({
             maxCount={1}
             showUploadList={false}
           >
-            <Button
-              type="default"
-              icon={<UploadOutlined />}
+            <AdminUploadButton
               loading={uploadingImage}
-              style={{ ...primaryModalButtonStyle, width: "100%" }}
+              style={{ width: "100%" }}
             >
               {uploadingImage ? "Đang tải lên..." : "Chọn ảnh để upload"}
-            </Button>
+            </AdminUploadButton>
           </Upload>
           <Form.Item name="imageUrl" noStyle>
             <Input type="hidden" />
@@ -78,7 +75,7 @@ export const QuestionImageField = ({
               maxHeight: 100,
               maxWidth: "100%",
               borderRadius: 6,
-              border: "1px solid #d9d9d9",
+              border: "1px solid var(--admin-border)",
             }}
           />
         </div>

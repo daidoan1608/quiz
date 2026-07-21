@@ -1,23 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Button,
+  App as AntApp,
   Card,
   Segmented,
   Skeleton,
   Space,
   Tag,
   Typography,
-  message,
 } from "antd";
-import {
-  ArrowLeftOutlined,
-  DownloadOutlined,
-  FilePdfOutlined,
-  PrinterOutlined,
-} from "@ant-design/icons";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { getApiErrorMessage } from "../../api/axiosConfig";
 import { examApi } from "../../api/services";
+import { AdminExportButton } from "../../components/common/buttons/AdminButtons";
+import MainBackButton from "../../components/common/MainBackButton";
 import MarkdownLatex from "../../components/common/MarkdownLatex";
 import { typesetMath } from "../../utils/typesetMath";
 
@@ -45,10 +40,12 @@ const ExamPrintPreviewPage = () => {
   const [examDetail, setExamDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const { message } = AntApp.useApp();
   const paperRef = useRef(null);
   const navigate = useNavigate();
   const mode = searchParams.get("mode") === "answer" ? "answer" : "student";
   const questions = examDetail?.questions || [];
+  const examHeading = examDetail?.title || "";
 
   const fileName = useMemo(() => {
     const prefix = examDetail?.examCode || `exam-${examId}`;
@@ -81,50 +78,18 @@ const ExamPrintPreviewPage = () => {
     setSearchParams({ mode: nextMode });
   };
 
-  const handlePrint = () => {
-    document.title = fileName.replace(/\.pdf$/, "");
-    window.print();
-  };
-
   const handleExportPdf = async () => {
     if (!paperRef.current) return;
 
     setExporting(true);
     try {
       await typesetMath(paperRef.current);
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import("html2canvas"),
-        import("jspdf"),
-      ]);
-      const canvas = await html2canvas(paperRef.current, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        allowTaint: true,
-      });
-      const imageData = canvas.toDataURL("image/jpeg", 0.98);
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imageHeight = (canvas.height * pageWidth) / canvas.width;
-      let remainingHeight = imageHeight;
-      let y = 0;
-
-      pdf.addImage(imageData, "JPEG", 0, y, pageWidth, imageHeight);
-      remainingHeight -= pageHeight;
-
-      while (remainingHeight > 0) {
-        y -= pageHeight;
-        pdf.addPage();
-        pdf.addImage(imageData, "JPEG", 0, y, pageWidth, imageHeight);
-        remainingHeight -= pageHeight;
-      }
-
-      pdf.save(fileName);
+      document.title = fileName.replace(/\.pdf$/, "");
+      window.print();
     } catch (error) {
-      message.error("Không thể export PDF. Bạn có thể dùng nút Print và chọn Save as PDF.");
+      message.error("Không thể mở hộp thoại export PDF. Vui lòng thử lại sau.");
     } finally {
-      setExporting(false);
+      window.setTimeout(() => setExporting(false), 300);
     }
   };
 
@@ -136,114 +101,11 @@ const ExamPrintPreviewPage = () => {
 
   return (
     <div className="exam-print-preview-page">
-      <style>
-        {`
-          .exam-print-preview-page {
-            min-height: 100vh;
-            background: #eef1f5;
-            padding: 24px;
-          }
-          .exam-print-toolbar {
-            max-width: 210mm;
-            margin: 0 auto 16px;
-          }
-          .exam-print-paper {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0 auto;
-            padding: 18mm 16mm;
-            background: #fff;
-            color: #111827;
-            box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18);
-            font-family: "Times New Roman", serif;
-            font-size: 13pt;
-            line-height: 1.5;
-          }
-          .exam-print-header {
-            text-align: center;
-            border-bottom: 1px solid #111827;
-            padding-bottom: 12px;
-            margin-bottom: 18px;
-          }
-          .exam-print-meta {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px 24px;
-            margin: 12px 0 18px;
-            font-size: 12pt;
-          }
-          .exam-print-question {
-            break-inside: avoid;
-            page-break-inside: avoid;
-            margin-bottom: 16px;
-          }
-          .exam-print-question-title {
-            font-weight: 700;
-            margin-bottom: 6px;
-          }
-          .exam-print-answer {
-            display: grid;
-            grid-template-columns: 24px minmax(0, 1fr);
-            gap: 6px;
-            margin: 4px 0 4px 18px;
-          }
-          .exam-print-answer-key {
-            margin-top: 24px;
-            break-inside: avoid;
-            page-break-inside: avoid;
-          }
-          .exam-print-answer-key table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12pt;
-          }
-          .exam-print-answer-key th,
-          .exam-print-answer-key td {
-            border: 1px solid #111827;
-            padding: 6px 10px;
-            text-align: center;
-          }
-          .exam-print-answer-key th {
-            background: #f3f4f6;
-            font-weight: 700;
-          }
-          .exam-print-answer-key td:last-child {
-            font-weight: 700;
-            letter-spacing: 0;
-          }
-          .exam-print-image {
-            display: block;
-            max-width: 100%;
-            max-height: 90mm;
-            object-fit: contain;
-            margin: 8px auto;
-          }
-          @media print {
-            @page { size: A4; margin: 0; }
-            body { background: #fff !important; }
-            body * { visibility: hidden; }
-            .exam-print-paper, .exam-print-paper * { visibility: visible; }
-            .exam-print-paper {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 210mm;
-              min-height: 297mm;
-              padding: 18mm 16mm;
-              margin: 0;
-              box-shadow: none;
-            }
-            .exam-print-toolbar { display: none !important; }
-          }
-        `}
-      </style>
+      <MainBackButton onClick={() => navigate("/exams")} style={{ top: 96 }} />
 
-      <Card className="exam-print-toolbar" bordered={false}>
+      <Card className="exam-print-toolbar" variant="borderless">
         <Space wrap style={{ width: "100%", justifyContent: "space-between" }}>
           <Space wrap>
-            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/exams")}>
-              Quay lại
-            </Button>
             <Segmented
               value={mode}
               onChange={changeMode}
@@ -254,33 +116,33 @@ const ExamPrintPreviewPage = () => {
             />
           </Space>
           <Space wrap>
-            <Button icon={<PrinterOutlined />} onClick={handlePrint} disabled={loading || !examDetail}>
-              Print
-            </Button>
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
+            <AdminExportButton
               loading={exporting}
               onClick={handleExportPdf}
               disabled={loading || !examDetail}
             >
               Export PDF
-            </Button>
+            </AdminExportButton>
           </Space>
         </Space>
       </Card>
 
       {loading ? (
-        <Card className="exam-print-toolbar" bordered={false}>
+        <Card className="exam-print-toolbar" variant="borderless">
           <Skeleton active paragraph={{ rows: 8 }} />
         </Card>
       ) : examDetail ? (
         <main ref={paperRef} className="exam-print-paper">
           <header className="exam-print-header">
-            <Title level={3} style={{ margin: 0, fontFamily: "inherit" }}>
-              {examDetail.title}
+            <Title
+              level={3}
+              className="exam-print-title"
+            >
+              {examHeading}
             </Title>
-            <Text>{mode === "answer" ? "BẢN ĐỀ THI KÈM ĐÁP ÁN" : "ĐỀ THI"}</Text>
+            <Text className="exam-print-subtitle">
+              {mode === "answer" ? "BẢN ĐỀ THI KÈM ĐÁP ÁN" : "ĐỀ THI"}
+            </Text>
           </header>
 
           <section className="exam-print-meta">
@@ -291,7 +153,7 @@ const ExamPrintPreviewPage = () => {
           </section>
 
           {examDetail.description ? (
-            <section style={{ marginBottom: 18 }}>
+            <section className="exam-print-description">
               <strong>Ghi chú:</strong> <MarkdownLatex content={examDetail.description} as="span" />
             </section>
           ) : null}
@@ -299,10 +161,14 @@ const ExamPrintPreviewPage = () => {
           <section>
             {questions.map((question, questionIndex) => (
               <article className="exam-print-question" key={question.questionId || questionIndex}>
-                <div className="exam-print-question-title">
-                  Câu {questionIndex + 1}.
-                </div>
-                <MarkdownLatex content={question.content} />
+                <span className="exam-print-question-title">
+                  Câu {questionIndex + 1}:
+                </span>
+                <MarkdownLatex
+                  content={question.content}
+                  as="span"
+                  className="exam-print-question-content"
+                />
                 {question.imageUrl ? (
                   <img className="exam-print-image" src={question.imageUrl} alt={`Câu ${questionIndex + 1}`} />
                 ) : null}
@@ -320,7 +186,7 @@ const ExamPrintPreviewPage = () => {
 
           {mode === "answer" ? (
             <section className="exam-print-answer-key">
-              <Title level={4} style={{ fontFamily: "inherit" }}>
+              <Title level={4} className="exam-print-answer-key-title">
                 Bảng đáp án
               </Title>
               <table>
@@ -343,7 +209,7 @@ const ExamPrintPreviewPage = () => {
           ) : null}
         </main>
       ) : (
-        <Card className="exam-print-toolbar" bordered={false}>
+        <Card className="exam-print-toolbar" variant="borderless">
           <Tag color="red">Không có dữ liệu đề thi để preview.</Tag>
         </Card>
       )}

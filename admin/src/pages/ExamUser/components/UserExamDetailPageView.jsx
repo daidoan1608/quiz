@@ -45,7 +45,9 @@ export default function UserExamDetailPageView() {
   if (loading) {
     return (
       <div style={{ textAlign: "center", marginTop: 50 }}>
-        <Spin size="large" tip="Đang tải kết quả..." />
+        <Spin size="large">
+          <span>Đang tải kết quả...</span>
+        </Spin>
       </div>
     );
   }
@@ -109,7 +111,7 @@ export default function UserExamDetailPageView() {
       <Row gutter={[16, 16]}>
         <Col xs={24} md={8}>
           <Card
-            bordered={false}
+            variant="borderless"
             className="c-shadow"
             style={{ height: "100%", textAlign: "center" }}
           >
@@ -139,7 +141,7 @@ export default function UserExamDetailPageView() {
                 <FileTextOutlined /> Thông tin bài thi
               </>
             }
-            bordered={false}
+            variant="borderless"
             className="c-shadow"
             style={{ height: "100%" }}
           >
@@ -180,7 +182,7 @@ export default function UserExamDetailPageView() {
                 <UserOutlined /> Thông tin thí sinh
               </>
             }
-            bordered={false}
+            variant="borderless"
             className="c-shadow"
             style={{ height: "100%" }}
           >
@@ -214,7 +216,7 @@ export default function UserExamDetailPageView() {
 
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         {examQuestions.length === 0 && (
-          <Card bordered={false} className="c-shadow">
+          <Card variant="borderless" className="c-shadow">
             <Text type="secondary">Chưa có dữ liệu câu hỏi cho bài làm này.</Text>
           </Card>
         )}
@@ -226,7 +228,7 @@ export default function UserExamDetailPageView() {
             <Card
               key={question.questionId}
               title={<Text strong>Câu {index + 1}</Text>}
-              bordered={false}
+              variant="borderless"
               className="c-shadow"
             >
               <MarkdownLatex

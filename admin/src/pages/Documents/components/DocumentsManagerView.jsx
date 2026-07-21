@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Popconfirm, Space, Switch, Table, Tag } from "antd";
+import { Space } from "antd";
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -7,6 +7,13 @@ import {
   FolderOpenOutlined,
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
+import AdminTable from "../../../components/common/table/AdminTable";
+import {
+  AdminActionButton,
+  AdminConfirmAction,
+  AdminTableActions,
+} from "../../../components/common/table/AdminTableActions";
+import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch";
 import AdminTableText from "../../../components/common/table/AdminTableText";
 import { DocumentModal } from "./DocumentModal";
 import { formatDateTime, formatFileSize } from "../utils/documentFormatters";
@@ -71,23 +78,12 @@ export const DocumentsManagerView = ({
       dataIndex: "active",
       key: "activeSwitch",
       width: 110,
+      align: "center",
       render: (active, record) => (
-        <Switch
+        <AdminTableSwitch
           checked={active}
           onChange={(checked) => updateDocumentStatus(record.id, checked)}
         />
-      ),
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "active",
-      key: "active",
-      width: 130,
-      sorter: (a, b) => Number(a.active) - Number(b.active),
-      render: (active) => (
-        <Tag color={active ? "green" : "default"}>
-          {active ? "Đang chia sẻ" : "Đã ẩn"}
-        </Tag>
       ),
     },
     {
@@ -104,18 +100,29 @@ export const DocumentsManagerView = ({
       width: 190,
       fixed: "right",
       render: (_, record) => (
-        <Space>
-          <Button icon={<DownloadOutlined />} href={record.downloadUrl} target="_blank" />
-          <Button icon={<EditOutlined />} onClick={() => openEditModal(record)} />
-          <Popconfirm
-            title="Xóa tài liệu này?"
+        <AdminTableActions>
+          <AdminActionButton
+            title="Tải xuống"
+            variant="info"
+            icon={<DownloadOutlined />}
+            href={record.downloadUrl}
+            target="_blank"
+          />
+          <AdminActionButton
+            title="Sửa tài liệu"
+            variant="warning"
+            icon={<EditOutlined />}
+            onClick={() => openEditModal(record)}
+          />
+          <AdminConfirmAction
+            buttonTitle="Xóa tài liệu"
+            confirmTitle="Xóa tài liệu này?"
             okText="Xóa"
-            cancelText="Hủy"
             onConfirm={() => deleteDocument(record.id)}
-          >
-            <Button danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
+            danger
+            icon={<DeleteOutlined />}
+          />
+        </AdminTableActions>
       ),
     },
   ];
@@ -129,14 +136,13 @@ export const DocumentsManagerView = ({
           </Space>
         }
         table={
-          <Table
+          <AdminTable
             rowKey="id"
             columns={columns}
             dataSource={documents}
             loading={loading}
             pagination={{ pageSize: 10 }}
             scroll={{ x: 1420 }}
-            tableLayout="fixed"
           />
         }
         onReload={loadDocuments}

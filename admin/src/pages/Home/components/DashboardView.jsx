@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { Button, Result, Row, Select, Space, Statistic, Table, theme, Typography } from "antd";
+import { Result, Row, Select, Space, Statistic, Table, theme, Typography } from "antd";
 import {
   DndContext,
   PointerSensor,
@@ -14,7 +14,6 @@ import {
   PieChartOutlined,
   QuestionCircleOutlined,
   ReadOutlined,
-  ReloadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import {
@@ -24,6 +23,7 @@ import {
 import { DEFAULT_WIDGET_ORDER, LIMIT_OPTIONS } from "../constants";
 import { DashboardCard } from "./DashboardCard";
 import { SortableWidget } from "./SortableWidget";
+import { AdminResetButton } from "../../../components/common/buttons/AdminButtons";
 
 const { Title, Text } = Typography;
 
@@ -305,9 +305,9 @@ export function DashboardView({
           </Title>
           <Text type="secondary">Tổng quan vận hành hệ thống quiz.</Text>
         </div>
-        <Button icon={<ReloadOutlined />} onClick={resetLayout}>
+        <AdminResetButton onClick={resetLayout}>
           Khôi phục bố cục
-        </Button>
+        </AdminResetButton>
       </div>
 
       <DndContext

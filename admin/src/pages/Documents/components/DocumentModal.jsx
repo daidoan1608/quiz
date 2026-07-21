@@ -1,6 +1,7 @@
 import React from "react";
-import { Form, Input, Modal, Switch, Upload } from "antd";
+import { Form, Input, Modal, Upload } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
+import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch";
 
 const { Dragger } = Upload;
 
@@ -21,7 +22,7 @@ export const DocumentModal = ({
     confirmLoading={saving}
     okText={editing ? "Cập nhật" : "Tải lên"}
     cancelText="Hủy"
-    destroyOnClose
+    destroyOnHidden
   >
     <Form form={form} layout="vertical" initialValues={{ active: true }}>
       <Form.Item
@@ -35,7 +36,7 @@ export const DocumentModal = ({
         <Input.TextArea rows={3} placeholder="Mô tả ngắn về tài liệu" />
       </Form.Item>
       <Form.Item label="Hiển thị trên client" name="active" valuePropName="checked">
-        <Switch />
+        <AdminTableSwitch />
       </Form.Item>
 
       {!editing && (

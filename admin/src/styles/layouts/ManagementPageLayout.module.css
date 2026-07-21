@@ -13,9 +13,8 @@
   padding: 24px;
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius-xl);
-  background: var(--admin-surface);
+  background: var(--admin-surface-solid);
   box-shadow: var(--admin-shadow);
-  backdrop-filter: blur(18px);
 }
 
 .pageTitle {
@@ -27,23 +26,13 @@
   line-height: 1.2;
 }
 
-.pageTitle::after {
-  content: 'Quản lý dữ liệu hệ thống';
-  display: block;
-  margin-top: 6px;
-  color: var(--admin-subtle);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0;
-}
-
 .managementFilters {
   margin-bottom: 24px;
-  background: var(--admin-surface) !important;
+  background: var(--admin-surface-solid) !important;
 }
 
 .managementContent {
-  background: var(--admin-surface) !important;
+  background: var(--admin-surface-solid) !important;
 }
 
 .managementFilters :global(.ant-card-body),

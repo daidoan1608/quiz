@@ -44,18 +44,22 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
     usageFilter: "all",
   });
 
+  const resetManualSelection = useCallback(() => {
+    setManualQuestionIds([]);
+    setManualQuestionPage(1);
+    setManualQuestions([]);
+    setManualQuestionTotal(0);
+    setManualFilters({ keyword: "", chapterId: null, difficulty: null, usageFilter: "all" });
+  }, []);
+
   const resetQuestionConfig = useCallback(() => {
     setInputTotal(0);
     setInputDiff(INITIAL_DIFF_INPUT);
     setInputChapters([]);
-    setManualQuestions([]);
-    setManualQuestionTotal(0);
-    setManualQuestionIds([]);
-    setManualQuestionPage(1);
-    setManualFilters({ keyword: "", chapterId: null, difficulty: null, usageFilter: "all" });
+    resetManualSelection();
     setSelectedSubject(null);
     setMaxQuestions(EMPTY_LIMITS);
-  }, []);
+  }, [resetManualSelection]);
 
   const resetFormState = useCallback(() => {
     form.resetFields();
@@ -146,11 +150,22 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
     setSelectedSubject(subjectId);
     setInputTotal(0);
     setInputDiff(INITIAL_DIFF_INPUT);
-    setManualQuestionIds([]);
-    setManualQuestionPage(1);
-    setManualQuestions([]);
-    setManualQuestionTotal(0);
-    setManualFilters({ keyword: "", chapterId: null, difficulty: null, usageFilter: "all" });
+    resetManualSelection();
+  };
+
+  const changeGenerationMode = (nextMode) => {
+    if (nextMode === generationMode) return;
+
+    setInputTotal(0);
+    setInputDiff(INITIAL_DIFF_INPUT);
+    setInputChapters((prev) =>
+      prev.map((chapter) => ({
+        ...chapter,
+        selected: 0,
+      }))
+    );
+    resetManualSelection();
+    setGenerationMode(nextMode);
   };
 
   const calculateTotalSelected = useCallback(() => {
@@ -230,7 +245,7 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
     manualQuestions,
     maxQuestions,
     selectedSubject,
-    setGenerationMode,
+    setGenerationMode: changeGenerationMode,
     setInputChapters,
     setInputDiff,
     setInputTotal,

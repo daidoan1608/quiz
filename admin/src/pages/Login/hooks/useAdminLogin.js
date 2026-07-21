@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { message } from "antd";
+import { App as AntApp } from "antd";
 import { getApiErrorMessage, publicAxios } from "../../../api/axiosConfig";
 import { useAuth } from "../../../context/AuthProvider";
 import { ADMIN_ALLOWED_ROLES, LOGIN_MESSAGES } from "../constants";
@@ -8,6 +8,7 @@ const logoutSilently = () => publicAxios.post("/auth/logout").catch(() => {});
 
 export const useAdminLogin = () => {
   const { login } = useAuth();
+  const { message } = AntApp.useApp();
   const [loading, setLoading] = useState(false);
 
   const submitLogin = async (values) => {

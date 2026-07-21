@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Button,
   Divider,
   Form,
   Input,
@@ -12,13 +11,12 @@ import {
 import {
   EditOutlined,
   ReadOutlined,
-  ReloadOutlined,
-  SaveOutlined,
 } from "@ant-design/icons";
 import {
-  cancelModalButtonStyle,
-  primaryModalButtonStyle,
-} from "../../../utils/ui/antdModalButtonStyles";
+  AdminCancelButton,
+  AdminResetButton,
+  AdminSaveButton,
+} from "../../../components/common/buttons/AdminButtons";
 import { useSubjectForm } from "../hooks/useSubjectForm";
 
 const { Title } = Typography;
@@ -50,28 +48,22 @@ export const SubjectFormModal = ({
 
   const footer = [
     isEditMode && (
-      <Button
+      <AdminResetButton
         key="restore"
-        icon={<ReloadOutlined />}
         onClick={reload}
         disabled={loading}
       >
-        Khôi phục gốc
-      </Button>
+        Khôi phục
+      </AdminResetButton>
     ),
-    <Button key="back" style={cancelModalButtonStyle} onClick={cancel}>
-      Hủy bỏ
-    </Button>,
-    <Button
+    <AdminCancelButton key="back" onClick={cancel} />,
+    <AdminSaveButton
       key="submit"
-      type="default"
-      style={primaryModalButtonStyle}
-      icon={<SaveOutlined />}
       loading={submitting}
       onClick={() => form.submit()}
     >
-      {isEditMode ? "Lưu thay đổi" : "Lưu"}
-    </Button>,
+      Lưu
+    </AdminSaveButton>,
   ].filter(Boolean);
 
   return (

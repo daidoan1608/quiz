@@ -30,7 +30,7 @@ export const QuestionAnswerFields = ({
       : undefined,
     backgroundColor:
       isCorrect && !correctColor
-        ? token.colorSuccessBg || "rgba(34, 197, 94, 0.14)"
+        ? token.colorSuccessBg || "color-mix(in srgb, var(--admin-success) 14%, transparent)"
         : undefined,
     color: token.colorText,
   });
@@ -57,7 +57,7 @@ export const QuestionAnswerFields = ({
       return (
         <Radio value={index} style={{ marginRight: 16, marginTop: 6 }}>
           <Text strong style={isCorrect ? correctLabelStyle : undefined}>
-            Đáp án {label} {isCorrect && "(Đúng)"}
+            Đáp án {label}
           </Text>
         </Radio>
       );
@@ -70,7 +70,7 @@ export const QuestionAnswerFields = ({
           onChange={(event) => toggleMultipleAnswer(index, event.target.checked)}
         >
           <Text strong style={isCorrect ? correctLabelStyle : undefined}>
-            Đáp án {label} {isCorrect && "(Đúng)"}
+            Đáp án {label}
           </Text>
         </Checkbox>
       </div>

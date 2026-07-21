@@ -1,7 +1,11 @@
 import React from 'react';
-import { Button, Card, Checkbox, Collapse, Empty, List, Modal, Space, Spin, Table, Tag, Typography, theme } from 'antd';
+import { Card, Checkbox, Collapse, Empty, List, Modal, Space, Spin, Table, Tag, Typography, theme } from 'antd';
 import { SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons';
 import { useUserGroupAssignment } from '../hooks/useUserGroupAssignment';
+import {
+  AdminCancelButton,
+  AdminSaveButton,
+} from '../../../components/common/buttons/AdminButtons';
 
 const { Text } = Typography;
 
@@ -36,8 +40,8 @@ export default function UserGroupAssignmentModal({ isModalOpen, onCancel, user, 
       width={1120}
       style={{ top: 32 }}
       footer={[
-        <Button key="cancel" onClick={onCancel}>Đóng</Button>,
-        <Button key="save" type="primary" loading={saving} onClick={save}>Lưu nhóm quyền</Button>,
+        <AdminCancelButton key="cancel" onClick={onCancel}>Đóng</AdminCancelButton>,
+        <AdminSaveButton key="save" loading={saving} onClick={save}>Lưu</AdminSaveButton>,
       ]}
     >
       <Spin spinning={loading}>

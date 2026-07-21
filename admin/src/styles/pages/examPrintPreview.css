@@ -1,0 +1,199 @@
+.exam-print-preview-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--admin-bg);
+}
+
+.exam-print-toolbar {
+  position: sticky;
+  top: 96px;
+  z-index: 10;
+  max-width: 210mm;
+  margin: 0 auto 16px;
+}
+
+.exam-print-paper {
+  width: 210mm;
+  min-height: 297mm;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 18mm 16mm;
+  background: var(--admin-surface-solid);
+  color: var(--admin-text);
+  box-shadow: var(--admin-shadow);
+  font-family: "Times New Roman", serif;
+  font-size: 13pt;
+  line-height: 1.5;
+}
+
+.exam-print-header {
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--admin-text);
+  text-align: center;
+}
+
+.exam-print-title {
+  margin: 0 !important;
+  color: var(--admin-text) !important;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.exam-print-subtitle {
+  color: var(--admin-text);
+}
+
+.exam-print-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin: 12px 0 18px;
+  font-size: 12pt;
+}
+
+.exam-print-description {
+  margin-bottom: 18px;
+}
+
+.exam-print-question {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 16px;
+}
+
+.exam-print-question-title {
+  display: inline;
+  margin-right: 4px;
+  font-weight: 700;
+}
+
+.exam-print-question-content,
+.exam-print-question-content p {
+  display: inline;
+}
+
+.exam-print-question-content p {
+  margin: 0;
+}
+
+.exam-print-answer {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 6px;
+  margin: 4px 0 4px 18px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.exam-print-answer-key {
+  margin-top: 24px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.exam-print-answer-key-title {
+  font-family: inherit;
+}
+
+.exam-print-answer-key table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12pt;
+}
+
+.exam-print-answer-key th,
+.exam-print-answer-key td {
+  border: 1px solid var(--admin-text);
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.exam-print-answer-key th {
+  background: var(--admin-surface-muted);
+  font-weight: 700;
+}
+
+.exam-print-answer-key td:last-child {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.exam-print-image {
+  display: block;
+  max-width: 100%;
+  max-height: 90mm;
+  object-fit: contain;
+  margin: 8px auto;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm 12mm 12mm;
+  }
+
+  html,
+  body {
+    width: auto;
+    height: auto;
+    margin: 0;
+    background: var(--admin-print-bg) !important;
+  }
+
+  .admin-sidebar,
+  .admin-topbar,
+  .exam-print-toolbar {
+    display: none !important;
+  }
+
+  .admin-main-layout,
+  .admin-content,
+  .admin-content-card {
+    display: block !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: var(--admin-print-bg) !important;
+  }
+
+  .exam-print-preview-page {
+    padding: 0;
+    background: var(--admin-print-bg) !important;
+  }
+
+  .exam-print-paper {
+    width: auto;
+    min-height: auto;
+    margin: 0;
+    padding: 0;
+    background: var(--admin-print-bg) !important;
+    color: var(--admin-print-text) !important;
+    box-shadow: none;
+    break-after: auto;
+  }
+
+  .exam-print-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom-color: var(--admin-print-text) !important;
+  }
+
+  .exam-print-title,
+  .exam-print-subtitle {
+    color: var(--admin-print-text) !important;
+  }
+
+  .exam-print-meta {
+    margin: 8px 0 14px;
+  }
+
+  .exam-print-answer-key th,
+  .exam-print-answer-key td {
+    border-color: var(--admin-print-text) !important;
+  }
+
+  .exam-print-answer-key th {
+    background: var(--admin-print-muted-bg) !important;
+  }
+}

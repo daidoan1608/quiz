@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { message } from "antd";
 import { getApiErrorMessage } from "../../../api/axiosConfig";
 import { questionApi } from "../../../api/services/contentApi";
@@ -17,6 +17,12 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
   const [previewImgUrl, setPreviewImgUrl] = useState("");
   const [originalAnswers, setOriginalAnswers] = useState([]);
   const [imageType, setImageType] = useState("upload");
+  const onCancelRef = useRef(onCancel);
+  const submittingRef = useRef(false);
+
+  useEffect(() => {
+    onCancelRef.current = onCancel;
+  }, [onCancel]);
 
   const fetchQuestion = useCallback(async () => {
     if (!questionId || !isModalOpen) {
@@ -49,11 +55,11 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
     } catch (error) {
       console.error("Error:", error);
       message.error("Không thể tải thông tin câu hỏi!");
-      onCancel();
+      onCancelRef.current?.();
     } finally {
       setLoadingData(false);
     }
-  }, [form, isModalOpen, onCancel, questionId]);
+  }, [form, isModalOpen, questionId]);
 
   useEffect(() => {
     fetchQuestion();
@@ -65,6 +71,10 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
   };
 
   const submitQuestion = async (values) => {
+    if (submittingRef.current) {
+      return;
+    }
+
     const answerCount = values.answers?.length || 0;
     const validationMessage = validateCorrectAnswers(values.questionType, correctAnswers, answerCount);
     if (validationMessage) {
@@ -72,6 +82,7 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
       return;
     }
 
+    submittingRef.current = true;
     setSubmitting(true);
     try {
       await questionApi.update(questionId, {
@@ -90,6 +101,7 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
       console.error("Error:", error);
       message.error(getApiErrorMessage(error, "Không thể cập nhật câu hỏi. Vui lòng thử lại."));
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };

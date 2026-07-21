@@ -9,7 +9,7 @@ export default function LoginCard({ loading, onSubmit }) {
 
   return (
     <Card
-      bordered={false}
+      variant="borderless"
       className={styles.card}
       style={{ background: token.colorBgContainer }}
     >

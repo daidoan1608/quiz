@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Button,
   Col,
   Divider,
   Form,
@@ -15,13 +14,12 @@ import {
 import {
   BookOutlined,
   EditOutlined,
-  ReloadOutlined,
-  SaveOutlined,
 } from "@ant-design/icons";
 import {
-  cancelModalButtonStyle,
-  primaryModalButtonStyle,
-} from "../../../utils/ui/antdModalButtonStyles";
+  AdminCancelButton,
+  AdminResetButton,
+  AdminSaveButton,
+} from "../../../components/common/buttons/AdminButtons";
 import { useChapterForm } from "../hooks/useChapterForm";
 
 const { Title } = Typography;
@@ -54,22 +52,17 @@ export const ChapterFormModal = ({
   });
 
   const footer = [
-    <Button key="reset" icon={<ReloadOutlined />} onClick={reload} disabled={loading}>
-      {isEditMode ? "Khôi phục gốc" : "Làm mới"}
-    </Button>,
-    <Button key="back" style={cancelModalButtonStyle} onClick={cancel}>
-      Hủy bỏ
-    </Button>,
-    <Button
+    <AdminResetButton key="reset" onClick={reload} disabled={loading}>
+      Khôi phục
+    </AdminResetButton>,
+    <AdminCancelButton key="back" onClick={cancel} />,
+    <AdminSaveButton
       key="submit"
-      type="default"
-      style={primaryModalButtonStyle}
-      icon={<SaveOutlined />}
       loading={submitting}
       onClick={() => form.submit()}
     >
-      {isEditMode ? "Lưu thay đổi" : "Lưu Chương"}
-    </Button>,
+      Lưu
+    </AdminSaveButton>,
   ];
 
   return (

@@ -89,10 +89,10 @@ export default function UserExamDetailModal({ isModalOpen, onCancel, userExamId 
       footer={null}
       width={1080}
       centered
-      destroyOnClose
+      destroyOnHidden
       className="detail-modal"
     >
-      <Spin spinning={loading} tip="Đang tải chi tiết bài làm...">
+      <Spin spinning={loading}>
         {!examDetail ? (
           <div className="detail-modal-scroll">
             <Empty description="Không có dữ liệu bài làm" />
@@ -111,7 +111,7 @@ export default function UserExamDetailModal({ isModalOpen, onCancel, userExamId 
 
             <Row gutter={[14, 14]} style={{ marginBottom: 18 }}>
               <Col xs={24} md={8}>
-                <Card bordered={false} className="modern-card detail-summary-card">
+                <Card variant="borderless" className="modern-card detail-summary-card">
                   <Statistic
                     title="Điểm số"
                     value={userExamDto.score}
@@ -125,7 +125,7 @@ export default function UserExamDetailModal({ isModalOpen, onCancel, userExamId 
                 </Card>
               </Col>
               <Col xs={24} md={8}>
-                <Card bordered={false} className="modern-card detail-summary-card">
+                <Card variant="borderless" className="modern-card detail-summary-card">
                   <Text type="secondary">
                     <ClockCircleOutlined /> Thời gian làm bài
                   </Text>
@@ -138,7 +138,7 @@ export default function UserExamDetailModal({ isModalOpen, onCancel, userExamId 
                 </Card>
               </Col>
               <Col xs={24} md={8}>
-                <Card bordered={false} className="modern-card detail-summary-card">
+                <Card variant="borderless" className="modern-card detail-summary-card">
                   <Space>
                     <Avatar icon={<UserOutlined />} style={{ background: token.colorPrimary }} />
                     <div>
@@ -158,7 +158,7 @@ export default function UserExamDetailModal({ isModalOpen, onCancel, userExamId 
                 return (
                   <Card
                     key={question.questionId}
-                    bordered={false}
+                    variant="borderless"
                     className="modern-card detail-question-card"
                     title={
                       <Space>

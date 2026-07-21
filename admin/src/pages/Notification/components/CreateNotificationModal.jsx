@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Form, Input, Select, Spin, Button, Typography } from 'antd';
+import { Modal, Form, Input, Select, Spin, Typography } from 'antd';
 import {
   BellOutlined,
   SendOutlined,
@@ -7,6 +7,10 @@ import {
 } from '@ant-design/icons';
 import { NOTIFICATION_TEMPLATES } from "../constants";
 import { useNotificationForm } from "../hooks/useNotificationForm";
+import {
+  AdminCancelButton,
+  AdminSaveButton,
+} from "../../../components/common/buttons/AdminButtons";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -48,19 +52,18 @@ const CreateNotificationModal = ({ isModalOpen, onCancel, onSuccess, createForm,
       open={isModalOpen}
       onCancel={onCancel}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
+        <AdminCancelButton key="cancel" onClick={onCancel}>
           Hủy
-        </Button>,
-        <Button
+        </AdminCancelButton>,
+        <AdminSaveButton
           key="submit"
-          type="primary"
           className="notification-template-submit"
           icon={<SendOutlined />}
           loading={submitting}
           onClick={() => createForm.submit()}
         >
           Gửi ngay
-        </Button>,
+        </AdminSaveButton>,
       ]}
       width={680}
       centered

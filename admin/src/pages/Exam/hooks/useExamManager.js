@@ -27,9 +27,7 @@ export const useExamManager = () => {
     total: 0,
   });
   const [tableSort, setTableSort] = useState({});
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState(null);
   const { current: currentPage, pageSize } = pagination;
   const { user, capabilities, canOnSubject } = useAuth();
@@ -204,14 +202,6 @@ export const useExamManager = () => {
     }
   };
 
-  const openAddModal = () => setIsAddModalOpen(true);
-
-  const closeAddModal = () => setIsAddModalOpen(false);
-
-  const refreshExamList = () => {
-    fetchExams(pagination.current, pagination.pageSize);
-  };
-
   const openViewModal = (examId) => {
     setSelectedExamId(examId);
     setIsViewModalOpen(true);
@@ -219,16 +209,6 @@ export const useExamManager = () => {
 
   const closeViewModal = () => {
     setIsViewModalOpen(false);
-    setSelectedExamId(null);
-  };
-
-  const openUpdateModal = (examId) => {
-    setSelectedExamId(examId);
-    setIsUpdateModalOpen(true);
-  };
-
-  const closeUpdateModal = () => {
-    setIsUpdateModalOpen(false);
     setSelectedExamId(null);
   };
 
@@ -258,9 +238,7 @@ export const useExamManager = () => {
     advancedFilters,
     pagination,
     isMod,
-    isAddModalOpen,
     isViewModalOpen,
-    isUpdateModalOpen,
     selectedExamId,
     canCreateExam,
     canOnSubject,
@@ -270,12 +248,7 @@ export const useExamManager = () => {
     updateFilter,
     deleteExam,
     restoreExam,
-    openAddModal,
-    closeAddModal,
-    refreshExamList,
     openViewModal,
     closeViewModal,
-    openUpdateModal,
-    closeUpdateModal,
   };
 };

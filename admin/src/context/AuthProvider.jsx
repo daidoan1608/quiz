@@ -1,4 +1,3 @@
-import { message } from "antd";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -16,6 +15,7 @@ import {
   normalizeCapabilities,
 } from "../utils/adminAccessPolicy";
 import { getFirstAllowedAdminPath } from "../utils/adminNavigationPolicy";
+import { appMessage } from "../utils/ui/messageService";
 
 const AuthContext = createContext();
 
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
       clearAuthStorage();
       setIsLoggedIn(false);
       setUser(null);
-      message.error("Tài khoản người dùng không có quyền truy cập trang quản trị!");
+      appMessage.error("Tài khoản người dùng không có quyền truy cập trang quản trị!");
       return false;
     }
 
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoggedIn(false);
       setUser(null);
       setCapabilities(normalizeCapabilities());
-      message.error("Tài khoản MOD chưa được gán quyền truy cập trang quản trị.");
+      appMessage.error("Tài khoản MOD chưa được gán quyền truy cập trang quản trị.");
       return false;
     }
     navigate(firstAllowedPath, { replace: true });
@@ -133,7 +133,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoggedIn(false);
       setUser(null);
       setCapabilities(normalizeCapabilities());
-      message.success("Đăng xuất thành công!");
+      appMessage.success("Đăng xuất thành công!");
       navigate("/login", { replace: true });
       window.setTimeout(() => setExplicitLogoutInProgress(false), 1000);
     }

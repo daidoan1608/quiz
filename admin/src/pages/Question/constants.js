@@ -2,6 +2,8 @@ export const QUESTION_DEFAULT_FILTERS = {
   subjectId: undefined,
   chapterId: undefined,
   difficulty: undefined,
+  examEnabled: undefined,
+  practiceEnabled: undefined,
   creatorId: undefined,
 };
 

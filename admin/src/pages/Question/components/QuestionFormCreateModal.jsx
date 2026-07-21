@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Form, Input, Button, Select, Switch,
+  Form, Input, Select,
   Typography, Divider,
   Row, Col, Alert, Modal
 } from 'antd';
 import {
-  SaveOutlined,
   QuestionCircleOutlined,
   CheckCircleOutlined
 } from '@ant-design/icons';
 import {
-  cancelModalButtonStyle,
-  primaryModalButtonStyle,
-} from '../../../utils/ui/antdModalButtonStyles';
+  AdminCancelButton,
+  AdminSaveButton,
+} from '../../../components/common/buttons/AdminButtons';
 import { QUESTION_FORM_INITIAL_VALUES } from '../constants';
 import { useQuestionCreateForm } from '../hooks/useQuestionCreateForm';
 import { useQuestionImageUpload } from '../hooks/useQuestionImageUpload';
+import AdminTableSwitch from '../../../components/common/table/AdminTableSwitch';
 import { MarkdownPreviewBox } from './MarkdownPreviewBox';
 import { QuestionAnswerFields } from './QuestionAnswerFields';
 import { QuestionImageField } from './QuestionImageField';
@@ -70,18 +70,15 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
       open={isModalOpen}
       onCancel={handleCancel}
       footer={[
-        <Button key="back" style={cancelModalButtonStyle} onClick={handleCancel}>Hủy bỏ</Button>,
-        <Button
+        <AdminCancelButton key="back" onClick={handleCancel} />,
+        <AdminSaveButton
           key="submit"
-          type="default"
-          style={primaryModalButtonStyle}
-          icon={<SaveOutlined />}
           loading={loading}
           onClick={() => form.submit()}
           size="large"
         >
-          Lưu Câu Hỏi
-        </Button>,
+          Lưu
+        </AdminSaveButton>,
       ]}
       width={900}
       centered
@@ -224,13 +221,13 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
 
         <Row gutter={24}>
           <Col xs={24} md={12}>
-            <Form.Item label="Dung trong de thi" name="examEnabled" valuePropName="checked">
-              <Switch />
+            <Form.Item label="Dùng trong đề thi" name="examEnabled" valuePropName="checked">
+              <AdminTableSwitch />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item label="Hien trong on tap" name="practiceEnabled" valuePropName="checked">
-              <Switch />
+            <Form.Item label="Hiện trong ôn tập" name="practiceEnabled" valuePropName="checked">
+              <AdminTableSwitch />
             </Form.Item>
           </Col>
         </Row>
@@ -240,7 +237,7 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
           correctAnswers={correctAnswers}
           setCorrectAnswers={setCorrectAnswers}
           requiredMessage={(label) => `Nhập đáp án ${label}!`}
-          correctColor="#52c41a"
+          correctColor="var(--admin-success)"
         />
       </Form>
     </Modal>

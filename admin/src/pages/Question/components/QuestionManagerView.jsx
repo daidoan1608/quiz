@@ -1,27 +1,35 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Button,
-  Input,
-  Popconfirm,
   Segmented,
-  Select,
   Space,
-  Table,
   Tag,
   Tooltip,
   Typography,
 } from "antd";
 import {
   DeleteOutlined,
-  DownloadOutlined,
   EditOutlined,
-  ImportOutlined,
   QuestionCircleOutlined,
-  SearchOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
+import {
+  AdminFilterBar,
+  AdminFilterSelect,
+  AdminSearchInput,
+} from "../../../components/common/filters/AdminFilterControls";
+import AdminTable from "../../../components/common/table/AdminTable";
+import {
+  AdminActionButton,
+  AdminConfirmAction,
+  AdminTableActions,
+} from "../../../components/common/table/AdminTableActions";
+import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch";
+import {
+  AdminExportButton,
+  AdminImportButton,
+} from "../../../components/common/buttons/AdminButtons";
 import MarkdownLatex from "../../../components/common/MarkdownLatex";
 import { QUESTION_ANSWER_LABELS, QUESTION_PAGE_SIZE_OPTIONS } from "../constants";
 
@@ -33,18 +41,20 @@ const renderAnswerContent = (answers, index) => {
   return (
     <Tooltip
       title={<MarkdownLatex content={answer.content} style={{ maxWidth: 300 }} />}
-      overlayStyle={{ maxWidth: 320 }}
+      styles={{ root: { maxWidth: 320 } }}
     >
-      <MarkdownLatex
-        content={answer.content}
-        style={{
-          maxWidth: 150,
-          overflow: "hidden",
-          maxHeight: 60,
-          color: answer.isCorrect ? "#52c41a" : undefined,
-          fontWeight: answer.isCorrect ? "bold" : undefined,
-        }}
-      />
+      <span>
+        <MarkdownLatex
+          content={answer.content}
+          style={{
+            maxWidth: 150,
+            overflow: "hidden",
+            maxHeight: 60,
+            color: answer.isCorrect ? "var(--admin-success)" : undefined,
+            fontWeight: answer.isCorrect ? "bold" : undefined,
+          }}
+        />
+      </span>
     </Tooltip>
   );
 };
@@ -71,6 +81,7 @@ export const QuestionManagerView = ({
   updateFilter,
   deleteQuestion,
   restoreQuestion,
+  toggleQuestionAvailability,
   downloadQuestions,
 }) => {
   const navigate = useNavigate();
@@ -95,17 +106,19 @@ export const QuestionManagerView = ({
               style={{ maxWidth: 450, maxHeight: 300, overflowY: "auto" }}
             />
           }
-          overlayStyle={{ maxWidth: 480 }}
+          styles={{ root: { maxWidth: 480 } }}
         >
-          <MarkdownLatex
-            content={text}
-            style={{
-              maxWidth: 250,
-              maxHeight: 80,
-              overflow: "hidden",
-              fontWeight: "bold",
-            }}
-          />
+          <span>
+            <MarkdownLatex
+              content={text}
+              style={{
+                maxWidth: 250,
+                maxHeight: 80,
+                overflow: "hidden",
+                fontWeight: "bold",
+              }}
+            />
+          </span>
         </Tooltip>
       ),
     },
@@ -118,6 +131,44 @@ export const QuestionManagerView = ({
         <Tag color={diff === "HARD" ? "red" : diff === "EASY" ? "green" : "blue"}>
           {diff}
         </Tag>
+      ),
+    },
+    {
+      title: "Đề thi",
+      dataIndex: "examEnabled",
+      key: "examEnabled",
+      width: 110,
+      align: "center",
+      render: (enabled, record) => (
+        <AdminTableSwitch
+          checked={enabled !== false}
+          disabled={
+            viewMode !== "active" ||
+            !canOnSubject(record.subjectId, "QUESTION", "UPDATE")
+          }
+          onChange={(checked) =>
+            toggleQuestionAvailability(record, "examEnabled", checked)
+          }
+        />
+      ),
+    },
+    {
+      title: "Ôn tập",
+      dataIndex: "practiceEnabled",
+      key: "practiceEnabled",
+      width: 110,
+      align: "center",
+      render: (enabled, record) => (
+        <AdminTableSwitch
+          checked={enabled !== false}
+          disabled={
+            viewMode !== "active" ||
+            !canOnSubject(record.subjectId, "QUESTION", "UPDATE")
+          }
+          onChange={(checked) =>
+            toggleQuestionAvailability(record, "practiceEnabled", checked)
+          }
+        />
       ),
     },
     {
@@ -157,132 +208,129 @@ export const QuestionManagerView = ({
       fixed: "right",
       render: (_, record) =>
         viewMode === "active" ? (
-          <Space>
-            <Button
-              className="action-btn is-primary"
+          <AdminTableActions>
+            <AdminActionButton
+              title="Sửa câu hỏi"
+              variant="warning"
               icon={<EditOutlined />}
               disabled={!canOnSubject(record.subjectId, "QUESTION", "UPDATE")}
               onClick={() => navigate(`/questions/${record.questionId}/edit`)}
             />
-            <Popconfirm
-              title="Chuyển câu hỏi vào thùng rác?"
+            <AdminConfirmAction
+              buttonTitle="Xóa câu hỏi"
+              confirmTitle="Chuyển câu hỏi vào thùng rác?"
               description="Liên kết đề thi, câu trả lời và lịch sử bài làm vẫn được giữ."
               onConfirm={() => deleteQuestion(record.questionId)}
               okText="Chuyển vào thùng rác"
-              cancelText="Hủy"
-              okButtonProps={{ danger: true }}
+              danger
               disabled={!canOnSubject(record.subjectId, "QUESTION", "DELETE")}
-            >
-              <Button
-                className="action-btn is-danger"
-                icon={<DeleteOutlined />}
-                disabled={!canOnSubject(record.subjectId, "QUESTION", "DELETE")}
-              />
-            </Popconfirm>
-          </Space>
+              icon={<DeleteOutlined />}
+            />
+          </AdminTableActions>
         ) : (
-          <Popconfirm
-            title="Khôi phục câu hỏi?"
+          <AdminConfirmAction
+            buttonTitle="Khôi phục"
+            confirmTitle="Khôi phục câu hỏi?"
             description="Chỉ khôi phục được khi chương cha đang hoạt động."
             onConfirm={() => restoreQuestion(record.questionId)}
             okText="Khôi phục"
-            cancelText="Hủy"
-          >
-            <Button className="action-btn is-success" icon={<UndoOutlined />} />
-          </Popconfirm>
+            variant="success"
+            icon={<UndoOutlined />}
+          />
         ),
     },
   ];
 
   const filters = (
-    <Space wrap>
-      <Segmented
-        value={viewMode}
-        onChange={changeViewMode}
-        disabled={isMod}
-        options={[
-          { label: "Đang hoạt động", value: "active" },
-          { label: "Thùng rác", value: "deleted" },
-        ]}
-      />
-      <Input
+    <AdminFilterBar
+      filters={
+        <>
+      <AdminSearchInput
         placeholder="Tìm nội dung câu hỏi..."
-        prefix={<SearchOutlined />}
         value={searchText}
         onChange={(event) => changeSearchText(event.target.value)}
-        allowClear
-        style={{ width: 300 }}
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Môn học"
         value={advancedFilters.subjectId}
         onChange={(value) => updateFilter("subjectId", value)}
-        allowClear
-        style={{ width: 180 }}
         options={subjects.map((subject) => ({
           value: subject.subjectId,
           label: subject.name,
         }))}
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Chương"
         value={advancedFilters.chapterId}
         onChange={(value) => updateFilter("chapterId", value)}
-        allowClear
-        style={{ width: 180 }}
         options={chapters.map((chapter) => ({
           value: chapter.chapterId,
           label: chapter.name,
         }))}
       />
-      <Select
+      <AdminFilterSelect
         placeholder="Mức độ"
         value={advancedFilters.difficulty}
         onChange={(value) => updateFilter("difficulty", value)}
-        allowClear
-        style={{ width: 130 }}
         options={["EASY", "MEDIUM", "HARD"].map((value) => ({
           value,
           label: value,
         }))}
       />
+      <AdminFilterSelect
+        placeholder="Dùng trong đề thi"
+        value={advancedFilters.examEnabled}
+        onChange={(value) => updateFilter("examEnabled", value)}
+        options={[
+          { value: true, label: "Có dùng trong đề thi" },
+          { value: false, label: "Không dùng trong đề thi" },
+        ]}
+      />
+      <AdminFilterSelect
+        placeholder="Hiện trong ôn tập"
+        value={advancedFilters.practiceEnabled}
+        onChange={(value) => updateFilter("practiceEnabled", value)}
+        options={[
+          { value: true, label: "Có hiện ôn tập" },
+          { value: false, label: "Không hiện ôn tập" },
+        ]}
+      />
       {!isMod && (
-        <Select
+        <AdminFilterSelect
           placeholder="Người tạo"
           value={advancedFilters.creatorId}
           onChange={(value) => updateFilter("creatorId", value)}
-          allowClear
           showSearch
           optionFilterProp="label"
-          style={{ width: 180 }}
           options={creators.map((user) => ({
             value: user.userId,
             label: user.username,
           }))}
         />
       )}
-    </Space>
+        </>
+      }
+      statusSwitch={
+        <Segmented
+          value={viewMode}
+          onChange={changeViewMode}
+          disabled={isMod}
+          options={[
+            { label: "Đang hoạt động", value: "active" },
+            { label: "Thùng rác", value: "deleted" },
+          ]}
+        />
+      }
+    />
   );
 
   const extraActions = (
     <Space>
       {!isMod && (
-        <Button
-          className="toolbar-btn"
-          icon={<DownloadOutlined />}
-          onClick={downloadQuestions}
-        >
-          Export CSV
-        </Button>
+        <AdminExportButton onClick={downloadQuestions} />
       )}
       {canImportQuestion ? (
-        <Button
-          className="toolbar-btn"
-          icon={<ImportOutlined />}
-          onClick={() => navigate("/questions/import")}
-        >
-          Import
-        </Button>
+        <AdminImportButton onClick={() => navigate("/questions/import")} />
       ) : null}
     </Space>
   );
@@ -298,7 +346,7 @@ export const QuestionManagerView = ({
         filters={filters}
         extra={extraActions}
         table={
-          <Table
+          <AdminTable
             columns={columns}
             dataSource={questions}
             rowKey="questionId"
@@ -308,7 +356,7 @@ export const QuestionManagerView = ({
               showSizeChanger: true,
               pageSizeOptions: QUESTION_PAGE_SIZE_OPTIONS,
             }}
-            scroll={{ x: 2300 }}
+            scroll={{ x: 2520 }}
             onChange={handleTableChange}
           />
         }

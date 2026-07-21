@@ -1,3 +1,55 @@
+.admin-table .ant-table-thead > tr > th,
+.admin-table .ant-table-tbody > tr > td {
+  vertical-align: middle;
+}
+
+/* Pagination layout */
+.admin-table .ant-table-pagination {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  margin: 16px 0 0;
+}
+
+.admin-table .ant-pagination-total-text {
+  order: 2;
+  margin-left: auto;
+  color: var(--ant-color-text);
+}
+
+.admin-table .ant-pagination-options {
+  order: 3;
+  margin-left: 12px;
+}
+
+.admin-table .ant-pagination-prev,
+.admin-table .ant-pagination-item,
+.admin-table .ant-pagination-jump-prev,
+.admin-table .ant-pagination-jump-next,
+.admin-table .ant-pagination-next {
+  order: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.admin-table .ant-pagination-prev .ant-pagination-item-link,
+.admin-table .ant-pagination-next .ant-pagination-item-link,
+.admin-table .ant-pagination-item a,
+.admin-table .ant-pagination-options-size-changer .ant-select-selector {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-table .ant-pagination-options-size-changer {
+  display: inline-flex;
+  align-items: center;
+}
+
 .admin-table-text {
   display: inline-block;
   max-width: 100%;

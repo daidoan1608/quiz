@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Form, message } from "antd";
+import { App, Form } from "antd";
 import { authAxios, getApiErrorMessage } from "../../../api/axiosConfig";
 import { userApi } from "../../../api/services/userApi";
 import { useAuth } from "../../../context/AuthProvider";
@@ -12,6 +12,7 @@ export const useNotificationForm = ({
   notificationTemplates,
   onSuccess,
 }) => {
+  const { message: messageApi } = App.useApp();
   const { canGlobal, canOnSubject, getAllowedSubjectIds } = useAuth();
   const [subjects, setSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
@@ -54,11 +55,11 @@ export const useNotificationForm = ({
           : allSubjects
       );
     } catch (error) {
-      message.error("Không thể tải danh sách môn học.");
+      messageApi.error("Không thể tải danh sách môn học.");
     } finally {
       setLoadingSubjects(false);
     }
-  }, [allowedSubjectIds]);
+  }, [allowedSubjectIds, messageApi]);
 
   useEffect(() => {
     if (isModalOpen && notificationType === "SUBJECT" && subjects.length === 0) {
@@ -92,12 +93,12 @@ export const useNotificationForm = ({
       try {
         setUsers(await userApi.search(keyword.trim(), 20));
       } catch (error) {
-        message.error("Không thể tìm người dùng.");
+        messageApi.error("Không thể tìm người dùng.");
       } finally {
         setLoadingUsers(false);
       }
     },
-    [canSendPersonal]
+    [canSendPersonal, messageApi]
   );
 
   const searchUsers = useCallback(
@@ -140,21 +141,21 @@ export const useNotificationForm = ({
 
   const handleCreate = async (values) => {
     if (values.type === "GLOBAL" && !canSendGlobal) {
-      message.warning("Bạn chưa có quyền gửi thông báo toàn hệ thống.");
+      messageApi.warning("Bạn chưa có quyền gửi thông báo toàn hệ thống.");
       return;
     }
     if (
       (values.type === "PERSONAL" || values.type === "BATCH") &&
       !canSendPersonal
     ) {
-      message.warning("Bạn chưa có quyền chọn người nhận thông báo.");
+      messageApi.warning("Bạn chưa có quyền chọn người nhận thông báo.");
       return;
     }
     if (
       values.type === "SUBJECT" &&
       !canOnSubject(values.targetId, "NOTIFICATION", "SEND")
     ) {
-      message.warning("Bạn không có quyền gửi thông báo cho môn học này.");
+      messageApi.warning("Bạn không có quyền gửi thông báo cho môn học này.");
       return;
     }
 
@@ -180,10 +181,10 @@ export const useNotificationForm = ({
       }
 
       await authAxios.post(endpoint, payload);
-      message.success("Gửi thông báo thành công!");
+      messageApi.success("Gửi thông báo thành công!");
       onSuccess();
     } catch (error) {
-      message.error(
+      messageApi.error(
         getApiErrorMessage(error, "Không thể gửi thông báo. Vui lòng thử lại.")
       );
     } finally {

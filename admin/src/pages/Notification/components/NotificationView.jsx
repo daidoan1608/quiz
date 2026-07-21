@@ -1,8 +1,14 @@
 import React from "react";
-import { Button, Popconfirm, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Space, Tag } from "antd";
 import { DeleteOutlined, EyeOutlined, MessageOutlined } from "@ant-design/icons";
 import moment from "moment";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
+import AdminTable from "../../../components/common/table/AdminTable";
+import {
+  AdminActionButton,
+  AdminConfirmAction,
+  AdminTableActions,
+} from "../../../components/common/table/AdminTableActions";
 import AdminTableText from "../../../components/common/table/AdminTableText";
 import { ADMIN_DATE_TIME_FORMAT } from "../../../utils/dateFormatters";
 import CreateNotificationModal from "./CreateNotificationModal";
@@ -99,29 +105,26 @@ export const NotificationView = ({
       width: 130,
       fixed: "right",
       render: (_, record) => (
-        <Space size="middle">
+        <AdminTableActions>
           {record.sendType !== "GLOBAL" && canViewRecipients && (
-            <Tooltip title="Xem người nhận">
-              <Button
-                className="action-btn"
-                icon={<EyeOutlined />}
-                onClick={() => viewRecipients(record.id)}
-              />
-            </Tooltip>
+            <AdminActionButton
+              title="Xem người nhận"
+              icon={<EyeOutlined />}
+              onClick={() => viewRecipients(record.id)}
+            />
           )}
           {canRecall && (
-            <Popconfirm
-              title="Thu hồi thông báo này?"
+            <AdminConfirmAction
+              buttonTitle="Thu hồi"
+              confirmTitle="Thu hồi thông báo này?"
               description="Hành động này sẽ xóa thông báo khỏi máy người dùng."
               onConfirm={() => recallCampaign(record.id)}
               okText="Thu hồi"
-              cancelText="Hủy"
-              okButtonProps={{ danger: true }}
-            >
-              <Button className="action-btn is-danger" icon={<DeleteOutlined />} />
-            </Popconfirm>
+              danger
+              icon={<DeleteOutlined />}
+            />
           )}
-        </Space>
+        </AdminTableActions>
       ),
     },
   ];
@@ -146,14 +149,13 @@ export const NotificationView = ({
           />
         }
         table={
-          <Table
+          <AdminTable
             columns={columns}
             dataSource={campaigns}
             rowKey="id"
             loading={loading}
             pagination={{ ...pagination }}
             scroll={{ x: 1060 }}
-            tableLayout="fixed"
             onChange={handleTableChange}
           />
         }

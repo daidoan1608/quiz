@@ -44,7 +44,7 @@ export const useExamUpdateForm = ({ form, examId, open, onCancel, onSuccess }) =
     try {
       setSubjects(await subjectApi.getAll());
     } catch (error) {
-      message.warning("Khong the tai danh sach mon hoc.");
+      message.warning("Không thể tải danh sách môn học.");
     }
   }, []);
 
@@ -64,7 +64,7 @@ export const useExamUpdateForm = ({ form, examId, open, onCancel, onSuccess }) =
         duration: data.duration,
       });
     } catch (error) {
-      message.error(getApiErrorMessage(error, "Khong the tai thong tin de thi."));
+      message.error(getApiErrorMessage(error, "Không thể tải thông tin đề thi."));
     } finally {
       setDetailLoading(false);
     }
@@ -80,7 +80,7 @@ export const useExamUpdateForm = ({ form, examId, open, onCancel, onSuccess }) =
       setChapters(data.chapters || []);
     } catch (error) {
       setChapters([]);
-      message.warning("Khong the tai danh sach chuong.");
+      message.warning("Không thể tải danh sách chương.");
     }
   }, []);
 
@@ -103,7 +103,7 @@ export const useExamUpdateForm = ({ form, examId, open, onCancel, onSuccess }) =
       setQuestions(pageData.content || []);
       setQuestionTotal(pageData.totalElements || 0);
     } catch (error) {
-      message.error(getApiErrorMessage(error, "Khong the tai danh sach cau hoi."));
+      message.error(getApiErrorMessage(error, "Không thể tải danh sách câu hỏi."));
     } finally {
       setPickerLoading(false);
     }
@@ -137,7 +137,7 @@ export const useExamUpdateForm = ({ form, examId, open, onCancel, onSuccess }) =
 
   const submitExam = async (values) => {
     if (selectedQuestionIds.length === 0) {
-      message.error("Vui long chon it nhat 1 cau hoi.");
+      message.error("Vui lòng chọn ít nhất 1 câu hỏi.");
       return;
     }
 
@@ -151,11 +151,11 @@ export const useExamUpdateForm = ({ form, examId, open, onCancel, onSuccess }) =
         duration: values.duration,
         questions: selectedQuestionPayload,
       });
-      message.success("Cap nhat de thi thanh cong.");
+      message.success("Cập nhật đề thi thành công.");
       onSuccess();
       onCancel();
     } catch (error) {
-      message.error(getApiErrorMessage(error, "Khong the cap nhat de thi."));
+      message.error(getApiErrorMessage(error, "Không thể cập nhật đề thi."));
     } finally {
       setLoading(false);
     }

@@ -3,9 +3,9 @@ import { Form, message, notification } from "antd";
 import {
   authAxios,
   getApiErrorMessage,
-  publicAxios,
 } from "../../../api/axiosConfig";
-import { normalizeApiListResponse } from "../../../utils/apiResponseData";
+import { categoryApi, subjectApi } from "../../../api/services";
+import { chapterApi } from "../../../api/services/contentApi";
 
 export const useQuestionImport = ({ isModalOpen, onCancel, onSuccess }) => {
   const [form] = Form.useForm();
@@ -20,8 +20,7 @@ export const useQuestionImport = ({ isModalOpen, onCancel, onSuccess }) => {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await publicAxios.get("/public/categories");
-      setCategories(normalizeApiListResponse(response));
+      setCategories(await categoryApi.getAll());
     } catch (error) {
       message.error("Không thể tải danh sách khoa.");
     }
@@ -33,15 +32,24 @@ export const useQuestionImport = ({ isModalOpen, onCancel, onSuccess }) => {
     }
   }, [categories.length, fetchCategories, isModalOpen]);
 
-  const handleCategoryChange = (categoryId) => {
+  const handleCategoryChange = async (categoryId) => {
     form.setFieldsValue({ subjectId: null, chapterId: null });
     setSubjects([]);
     setChapters([]);
     setIsChaptersEmpty(false);
+    setPreviewResult(null);
 
-    const category = categories.find((item) => item.categoryId === categoryId);
-    if (category?.subjects) {
-      setSubjects(category.subjects);
+    if (!categoryId) return;
+
+    try {
+      const subjectData = await subjectApi.getByCategory(categoryId);
+      setSubjects(subjectData);
+
+      if (subjectData.length === 0) {
+        message.warning("Khoa này chưa có môn học nào.");
+      }
+    } catch (error) {
+      message.error("Không thể tải danh sách môn học.");
     }
   };
 
@@ -49,14 +57,12 @@ export const useQuestionImport = ({ isModalOpen, onCancel, onSuccess }) => {
     form.setFieldsValue({ chapterId: null });
     setChapters([]);
     setIsChaptersEmpty(false);
+    setPreviewResult(null);
 
     if (!subjectId) return;
 
     try {
-      const response = await authAxios.get(
-        `/public/chapters/subject/${subjectId}`
-      );
-      const data = response.data.data || [];
+      const data = await chapterApi.getBySubject(subjectId);
 
       if (data.length > 0) {
         setChapters(data);

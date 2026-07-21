@@ -1,6 +1,10 @@
 import React from "react";
-import { Button, DatePicker, Form, Input, Select, Space } from "antd";
-import { ClearOutlined, SearchOutlined } from "@ant-design/icons";
+import { DatePicker, Form, Input, Select } from "antd";
+import {
+  AdminFilterBar,
+  AdminFilterSelect,
+  AdminSearchInput,
+} from "../../../components/common/filters/AdminFilterControls";
 
 const { RangePicker } = DatePicker;
 
@@ -11,45 +15,48 @@ export const NotificationFilters = ({
   canSendSubject,
   canSendPersonal,
   handleFilter,
-  clearFilters,
 }) => (
-  <Form form={filterForm} layout="inline" onFinish={handleFilter}>
-    <Form.Item name="keyword">
-      <Input
-        allowClear
-        placeholder="Tìm tiêu đề/nội dung"
-        prefix={<SearchOutlined />}
-      />
-    </Form.Item>
-    <Form.Item name="sendType">
-      <Select allowClear placeholder="Loại gửi" style={{ width: 180 }}>
-        {canSendGlobal && (
-          <Select.Option value="GLOBAL">Toàn hệ thống</Select.Option>
-        )}
-        {canSendPersonal && <Select.Option value="PERSONAL">Cá nhân</Select.Option>}
-        {canSendPersonal && <Select.Option value="BATCH">Danh sách</Select.Option>}
-        {canSendSubject && (
-          <Select.Option value="SUBJECT_ID">Theo môn học</Select.Option>
-        )}
-      </Select>
-    </Form.Item>
-    {!isMod && (
-      <Form.Item name="createdBy">
-        <Input allowClear placeholder="User ID người tạo" style={{ width: 240 }} />
-      </Form.Item>
-    )}
-    <Form.Item name="dateRange">
-      <RangePicker format="DD/MM/YYYY" />
-    </Form.Item>
-    <Form.Item>
-      <Space>
-        <Button htmlType="submit" icon={<SearchOutlined />}>
-          Lọc
-        </Button>
-        <Button icon={<ClearOutlined />} onClick={clearFilters}>
-          Xóa lọc
-        </Button>
-      </Space>
-    </Form.Item>
+  <Form
+    form={filterForm}
+    onValuesChange={() => handleFilter(filterForm.getFieldsValue())}
+  >
+    <AdminFilterBar
+      filters={
+        <>
+          <Form.Item name="keyword" style={{ marginBottom: 0 }}>
+            <AdminSearchInput placeholder="Tìm tiêu đề/nội dung" />
+          </Form.Item>
+          <Form.Item name="sendType" style={{ marginBottom: 0 }}>
+            <AdminFilterSelect placeholder="Loại gửi">
+              {canSendGlobal && (
+                <Select.Option value="GLOBAL">Toàn hệ thống</Select.Option>
+              )}
+              {canSendPersonal && (
+                <Select.Option value="PERSONAL">Cá nhân</Select.Option>
+              )}
+              {canSendPersonal && (
+                <Select.Option value="BATCH">Danh sách</Select.Option>
+              )}
+              {canSendSubject && (
+                <Select.Option value="SUBJECT_ID">Theo môn học</Select.Option>
+              )}
+            </AdminFilterSelect>
+          </Form.Item>
+          {!isMod && (
+            <Form.Item name="createdBy" style={{ marginBottom: 0 }}>
+              <Input allowClear placeholder="User ID người tạo" style={{ width: 220 }} />
+            </Form.Item>
+          )}
+          <Form.Item name="dateRange" style={{ marginBottom: 0 }}>
+            <RangePicker
+              format="DD/MM/YYYY"
+              allowClear
+              style={{ width: 220 }}
+              placeholder={["Từ ngày", "Đến ngày"]}
+            />
+          </Form.Item>
+        </>
+      }
+    />
   </Form>
 );

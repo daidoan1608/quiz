@@ -1,10 +1,10 @@
 import React from "react";
-import { Button, Divider, Form, Input, Modal, Skeleton, Typography } from "antd";
-import { AppstoreAddOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
+import { Divider, Form, Input, Modal, Skeleton, Typography } from "antd";
+import { AppstoreAddOutlined, EditOutlined } from "@ant-design/icons";
 import {
-  cancelModalButtonStyle,
-  primaryModalButtonStyle,
-} from "../../../utils/ui/antdModalButtonStyles";
+  AdminCancelButton,
+  AdminSaveButton,
+} from "../../../components/common/buttons/AdminButtons";
 import { useCategoryForm } from "../hooks/useCategoryForm";
 
 const { Title } = Typography;
@@ -44,19 +44,14 @@ export const CategoryFormModal = ({
       open={open}
       onCancel={cancel}
       footer={[
-        <Button key="back" style={cancelModalButtonStyle} onClick={cancel}>
-          Hủy bỏ
-        </Button>,
-        <Button
+        <AdminCancelButton key="back" onClick={cancel} />,
+        <AdminSaveButton
           key="submit"
-          type="default"
-          style={primaryModalButtonStyle}
-          icon={<SaveOutlined />}
           loading={submitting}
           onClick={() => form.submit()}
         >
-          {isEditMode ? "Lưu thay đổi" : "Lưu"}
-        </Button>,
+          Lưu
+        </AdminSaveButton>,
       ]}
       width={500}
       centered

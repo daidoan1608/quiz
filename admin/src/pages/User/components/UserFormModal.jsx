@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Alert,
-  Button,
   Col,
   Divider,
   Form,
@@ -16,14 +15,13 @@ import {
   EditOutlined,
   LockOutlined,
   MailOutlined,
-  SaveOutlined,
   UserAddOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import {
-  cancelModalButtonStyle,
-  primaryModalButtonStyle,
-} from "../../../utils/ui/antdModalButtonStyles";
+  AdminCancelButton,
+  AdminSaveButton,
+} from "../../../components/common/buttons/AdminButtons";
 import { USER_FORM_INITIAL_VALUES, USER_ROLE_OPTIONS } from "../constants";
 import { useUserForm } from "../hooks/useUserForm";
 
@@ -71,19 +69,14 @@ export const UserFormModal = ({
       open={open}
       onCancel={cancel}
       footer={isEditMode ? null : [
-        <Button key="back" style={cancelModalButtonStyle} onClick={cancel}>
-          Hủy bỏ
-        </Button>,
-        <Button
+        <AdminCancelButton key="back" onClick={cancel} />,
+        <AdminSaveButton
           key="submit"
-          type="default"
-          style={primaryModalButtonStyle}
-          icon={<SaveOutlined />}
           loading={submitting}
           onClick={() => form.submit()}
         >
-          Lưu người dùng
-        </Button>,
+          Lưu
+        </AdminSaveButton>,
       ]}
       width={isEditMode ? 720 : 700}
       centered
@@ -214,18 +207,15 @@ export const UserFormModal = ({
                     </Form.Item>
                     <Form.Item label="Hành động">
                       <Space style={{ width: "100%", justifyContent: "flex-end" }}>
-                        <Button style={cancelModalButtonStyle} onClick={cancel}>
+                        <AdminCancelButton onClick={cancel}>
                           Hủy
-                        </Button>
-                        <Button
-                          type="default"
-                          style={primaryModalButtonStyle}
+                        </AdminCancelButton>
+                        <AdminSaveButton
                           htmlType="submit"
-                          icon={<SaveOutlined />}
                           loading={submitting}
                         >
-                          Lưu vai trò
-                        </Button>
+                          Lưu
+                        </AdminSaveButton>
                       </Space>
                     </Form.Item>
                   </>

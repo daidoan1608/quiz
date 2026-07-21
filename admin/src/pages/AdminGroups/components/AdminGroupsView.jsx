@@ -1,38 +1,39 @@
 import React from "react";
-import { Button, Popconfirm, Space, Table, Tag } from "antd";
+import { Modal, Space } from "antd";
 import {
   DeleteOutlined,
+  EditOutlined,
   SafetyCertificateOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
-import { AdminGroupModal } from "./AdminGroupModal";
+import AdminTable from "../../../components/common/table/AdminTable";
+import {
+  AdminActionButton,
+  AdminTableActions,
+} from "../../../components/common/table/AdminTableActions";
+import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch";
 
 export const AdminGroupsView = ({
   groups,
-  subjects,
   loading,
-  loadingSubjects,
-  editingGroup,
-  selectedSubjectIds,
-  selectedPresetKeys,
-  setSelectedPresetKeys,
-  modalOpen,
-  form,
-  subjectMap,
-  previewRows,
-  summary,
   fetchGroups,
-  openModal,
-  closeModal,
-  saveGroup,
   removeGroup,
-  setPermission,
-  isChecked,
-  applySelectedPresets,
-  clearSubjectPermissions,
-  handleSubjectSelection,
+  toggleGroupActive,
 }) => {
+  const navigate = useNavigate();
+
+  const confirmRemoveGroup = (record) => {
+    Modal.confirm({
+      title: "Xóa nhóm quyền?",
+      content: `Nhóm "${record.name || record.code}" sẽ bị xóa khỏi hệ thống.`,
+      okText: "Xóa",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      onOk: () => removeGroup(record.id),
+    });
+  };
+
   const columns = [
     { title: "Mã", dataIndex: "code", width: 220 },
     { title: "Tên nhóm", dataIndex: "name", width: 260 },
@@ -41,8 +42,12 @@ export const AdminGroupsView = ({
       title: "Trạng thái",
       dataIndex: "active",
       width: 120,
-      render: (active) => (
-        <Tag color={active ? "green" : "default"}>{active ? "ACTIVE" : "OFF"}</Tag>
+      align: "center",
+      render: (active, record) => (
+        <AdminTableSwitch
+          checked={active !== false}
+          onChange={(checked) => toggleGroupActive(record, checked)}
+        />
       ),
     },
     {
@@ -50,24 +55,20 @@ export const AdminGroupsView = ({
       key: "action",
       width: 120,
       render: (_, record) => (
-        <Space>
-          <Button
-            className="action-btn"
-            icon={<SettingOutlined />}
-            onClick={() => openModal(record)}
+        <AdminTableActions>
+          <AdminActionButton
+            title="Sửa nhóm quyền"
+            variant="warning"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/groups/${record.id}/edit`)}
           />
-          <Popconfirm
-            title="Xóa nhóm quyền?"
-            onConfirm={() => removeGroup(record.id)}
-            disabled={record.systemManaged}
-          >
-            <Button
-              className="action-btn is-danger"
-              icon={<DeleteOutlined />}
-              disabled={record.systemManaged}
-            />
-          </Popconfirm>
-        </Space>
+          <AdminActionButton
+            title="Xóa nhóm quyền"
+            variant="danger"
+            icon={<DeleteOutlined />}
+            onClick={() => confirmRemoveGroup(record)}
+          />
+        </AdminTableActions>
       ),
     },
   ];
@@ -81,7 +82,7 @@ export const AdminGroupsView = ({
           </Space>
         }
         table={
-          <Table
+          <AdminTable
             rowKey="id"
             columns={columns}
             dataSource={groups}
@@ -90,28 +91,7 @@ export const AdminGroupsView = ({
           />
         }
         onReload={fetchGroups}
-        onAdd={() => openModal()}
-      />
-
-      <AdminGroupModal
-        editingGroup={editingGroup}
-        modalOpen={modalOpen}
-        closeModal={closeModal}
-        form={form}
-        saveGroup={saveGroup}
-        loadingSubjects={loadingSubjects}
-        subjects={subjects}
-        selectedSubjectIds={selectedSubjectIds}
-        handleSubjectSelection={handleSubjectSelection}
-        selectedPresetKeys={selectedPresetKeys}
-        setSelectedPresetKeys={setSelectedPresetKeys}
-        applySelectedPresets={applySelectedPresets}
-        previewRows={previewRows}
-        summary={summary}
-        subjectMap={subjectMap}
-        clearSubjectPermissions={clearSubjectPermissions}
-        isChecked={isChecked}
-        setPermission={setPermission}
+        onAdd={() => navigate("/groups/create")}
       />
     </>
   );
