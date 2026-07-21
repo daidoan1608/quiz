@@ -42,6 +42,12 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    public List<SubjectSummaryDto> getRandomSubjects(int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 20));
+        return mapSubjectsToSummaryDtos(subjectRepository.findRandomActiveSubjects(safeLimit));
+    }
+
+    @Override
     public List<SubjectSummaryDto> getDeletedSubjects() {
         return mapSubjectsToSummaryDtos(subjectRepository.findByDeletedTrue());
     }

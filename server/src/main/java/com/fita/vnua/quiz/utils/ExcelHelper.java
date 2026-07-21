@@ -102,8 +102,12 @@ public class ExcelHelper {
 
         String imageUrl = getCellValue(currentRow, formatter, columns.imageUrlColumn()).trim();
         String questionType = getCellValue(currentRow, formatter, columns.questionTypeColumn()).trim().toUpperCase();
+        String examEnabled = getCellValue(currentRow, formatter, columns.examEnabledColumn()).trim();
+        String practiceEnabled = getCellValue(currentRow, formatter, columns.practiceEnabledColumn()).trim();
         questionDto.setImageUrl(imageUrl.isBlank() ? null : imageUrl);
         questionDto.setQuestionType(questionType.isBlank() ? "SINGLE_CHOICE" : questionType);
+        questionDto.setExamEnabled(parseOptionalBoolean(examEnabled));
+        questionDto.setPracticeEnabled(parseOptionalBoolean(practiceEnabled));
         questionDto.setAnswers(answers);
         return questionDto;
     }
@@ -114,7 +118,7 @@ public class ExcelHelper {
     }
 
     private static boolean isBlankRow(Row row, DataFormatter formatter, ImportColumns columns) {
-        for (int index = 0; index <= columns.questionTypeColumn(); index++) {
+        for (int index = 0; index <= columns.practiceEnabledColumn(); index++) {
             if (!getCellValue(row, formatter, index).trim().isBlank()) {
                 return false;
             }
@@ -181,8 +185,12 @@ public class ExcelHelper {
 
         String imageUrl = getCsvValue(row, columns.imageUrlColumn()).trim();
         String questionType = getCsvValue(row, columns.questionTypeColumn()).trim().toUpperCase();
+        String examEnabled = getCsvValue(row, columns.examEnabledColumn()).trim();
+        String practiceEnabled = getCsvValue(row, columns.practiceEnabledColumn()).trim();
         questionDto.setImageUrl(imageUrl.isBlank() ? null : imageUrl);
         questionDto.setQuestionType(questionType.isBlank() ? "SINGLE_CHOICE" : questionType);
+        questionDto.setExamEnabled(parseOptionalBoolean(examEnabled));
+        questionDto.setPracticeEnabled(parseOptionalBoolean(practiceEnabled));
         questionDto.setAnswers(answers);
         return questionDto;
     }
@@ -266,13 +274,32 @@ public class ExcelHelper {
                 .collect(Collectors.toSet());
     }
 
-    private record ImportColumns(int correctOptionsColumn, int imageUrlColumn, int questionTypeColumn) {
+    private static Boolean parseOptionalBoolean(String value) {
+        if (value == null || value.trim().isBlank()) {
+            return null;
+        }
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .trim()
+                .toLowerCase();
+        if (normalized.equals("true") || normalized.equals("1") || normalized.equals("yes")
+                || normalized.equals("y") || normalized.equals("co") || normalized.equals("bat")) {
+            return true;
+        }
+        if (normalized.equals("false") || normalized.equals("0") || normalized.equals("no")
+                || normalized.equals("n") || normalized.equals("khong") || normalized.equals("tat")) {
+            return false;
+        }
+        throw new CustomApiException("Giá trị bật/tắt không hợp lệ: " + value, HttpStatus.BAD_REQUEST);
+    }
+
+    private record ImportColumns(int correctOptionsColumn, int imageUrlColumn, int questionTypeColumn, int examEnabledColumn, int practiceEnabledColumn) {
         static ImportColumns current() {
-            return new ImportColumns(10, 11, 12);
+            return new ImportColumns(10, 11, 12, 13, 14);
         }
 
         static ImportColumns legacy() {
-            return new ImportColumns(6, 7, 8);
+            return new ImportColumns(6, 7, 8, 9, 10);
         }
 
         static ImportColumns fromHeader(Row header, DataFormatter formatter) {
@@ -297,7 +324,7 @@ public class ExcelHelper {
             if (correctColumn <= legacy().correctOptionsColumn()) {
                 return legacy();
             }
-            return new ImportColumns(correctColumn, correctColumn + 1, correctColumn + 2);
+            return new ImportColumns(correctColumn, correctColumn + 1, correctColumn + 2, correctColumn + 3, correctColumn + 4);
         }
 
         int answerLimit() {

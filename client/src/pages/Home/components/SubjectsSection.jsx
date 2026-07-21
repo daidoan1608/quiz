@@ -33,7 +33,13 @@ function SubjectCard({ subject, t, onClick }) {
       minHeightClassName="min-h-[180px]"
       onClick={onClick}
       subjectName={subject.name}
-      subtitle={t('home.questionCount', { count: subject.totalQuestions })}
+      subtitle={
+        <span>
+          {subject.totalChapters || 0} {t('subject.chapters', 'chương')} •{' '}
+          {subject.totalQuestions || 0} {t('subject.questions', 'câu hỏi')} •{' '}
+          {subject.totalExams || 0} {t('subject.examsCount', 'đề thi')}
+        </span>
+      }
     />
   );
 }

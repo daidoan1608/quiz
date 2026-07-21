@@ -38,10 +38,13 @@ export const PracticeQuestionPanel = ({
       onNext={onNext}
       onPrevious={onPrevious}
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <h3 className="text-left text-xl font-bold leading-tight text-primary">
-          Câu {currentQuestionIndex + 1}
-        </h3>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <QuestionContent
+            label={`Câu ${currentQuestionIndex + 1}:`}
+            question={currentQuestion}
+          />
+        </div>
         {isMarkingEnabled && (
           <MarkedQuestionButton
             isMarked={isMarked}
@@ -49,7 +52,6 @@ export const PracticeQuestionPanel = ({
           />
         )}
       </div>
-      <QuestionContent question={currentQuestion} />
       <div className="space-y-4">
         {visibleAnswers.map((answer, index) => {
           const isSelected = isMultiple

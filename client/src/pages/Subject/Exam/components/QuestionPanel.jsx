@@ -27,11 +27,9 @@ export const QuestionPanel = ({
       onNext={onNext}
       onPrevious={onPrevious}
     >
-      <h3 className="pb-2 text-left text-xl font-bold leading-tight text-primary">
-        {texts.questionLabel || "Câu"} {questionIndex + 1}
-      </h3>
       <QuestionContent
         imageAlt={texts.questionIllustration || "Minh họa câu hỏi"}
+        label={`${texts.questionLabel || "Câu"} ${questionIndex + 1}:`}
         question={question}
       />
       <div className="space-y-4">

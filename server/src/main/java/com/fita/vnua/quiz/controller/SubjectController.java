@@ -32,6 +32,15 @@ public class SubjectController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học thành công", subjects));
     }
 
+    @GetMapping("public/subjects/random")
+    @Operation(summary = "Lấy danh sách môn học ngẫu nhiên")
+    public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> getRandomSubjects(
+            @RequestParam(defaultValue = "4") int limit
+    ) {
+        List<SubjectSummaryDto> subjects = subjectService.getRandomSubjects(limit);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học ngẫu nhiên thành công", subjects));
+    }
+
     @GetMapping("public/subjects/search")
     @Operation(summary = "Tìm kiếm môn học theo tên hoặc mô tả")
     public ResponseEntity<ApiResponse<List<SubjectSummaryDto>>> searchSubjects(@RequestParam("q") String keyword) {

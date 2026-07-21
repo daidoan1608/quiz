@@ -2,6 +2,9 @@ package com.fita.vnua.quiz.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
@@ -41,6 +44,7 @@ public class RedisCacheConfig {
     ) {
         return builder -> builder
                 .withCacheConfiguration("publicCategories", cacheWithTtl(Duration.ofMinutes(30), keyPrefix))
+                .withCacheConfiguration("publicSubjects", cacheWithTtl(Duration.ofMinutes(30), keyPrefix))
                 .withCacheConfiguration("publicSubjectsByCategory", cacheWithTtl(Duration.ofMinutes(30), keyPrefix))
                 .withCacheConfiguration("publicSubjectDetail", cacheWithTtl(Duration.ofMinutes(15), keyPrefix))
                 .withCacheConfiguration("publicChaptersBySubject", cacheWithTtl(Duration.ofMinutes(30), keyPrefix))
@@ -96,6 +100,16 @@ public class RedisCacheConfig {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        PolymorphicTypeValidator typeValidator = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType("com.fita.vnua.quiz")
+                .allowIfSubType("java.util")
+                .allowIfSubType("java.lang")
+                .build();
+        objectMapper.activateDefaultTyping(
+                typeValidator,
+                ObjectMapper.DefaultTyping.EVERYTHING,
+                JsonTypeInfo.As.WRAPPER_ARRAY
+        );
         return new GenericJackson2JsonRedisSerializer(objectMapper);
     }
 }

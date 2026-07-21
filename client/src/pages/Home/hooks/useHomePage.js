@@ -25,7 +25,7 @@ export const useHomePage = () => {
   const userId = getCurrentUserId();
 
   const displayedSubjects = useMemo(
-    () => subjects.slice(0, MAX_DISPLAYED_SUBJECTS),
+    () => subjects,
     [subjects]
   );
   const displayedAttempts = useMemo(
@@ -35,7 +35,9 @@ export const useHomePage = () => {
 
   const fetchSubjects = useCallback(async () => {
     try {
-      const subjectsData = await subjectApi.getPublicSubjects();
+      const subjectsData = await subjectApi.getRandomPublicSubjects(
+        MAX_DISPLAYED_SUBJECTS
+      );
       setSubjects(subjectsData || []);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách môn học:', error);

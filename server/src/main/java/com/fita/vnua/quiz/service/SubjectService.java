@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface SubjectService {
     List<SubjectSummaryDto> getAllSubject();
 
+    List<SubjectSummaryDto> getRandomSubjects(int limit);
+
     List<SubjectSummaryDto> getDeletedSubjects();
 
     List<SubjectSummaryDto> searchSubjects(String keyword);

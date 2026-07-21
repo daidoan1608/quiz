@@ -6,6 +6,12 @@ export const subjectApi = {
     return publicAxios.get("/public/subjects").then((response) => getResponseData(response, []));
   },
 
+  getRandomPublicSubjects(limit = 4) {
+    return publicAxios
+      .get("/public/subjects/random", { params: { limit } })
+      .then((response) => getResponseData(response, []));
+  },
+
   getPublicCategories() {
     return publicAxios.get("/public/categories").then((response) => getResponseData(response, []));
   },

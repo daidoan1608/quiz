@@ -14,6 +14,15 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
     @Query("SELECT s FROM Subject s JOIN FETCH s.category WHERE s.deleted = false")
     List<Subject> findByDeletedFalse();
 
+    @Query(value = """
+            SELECT s.*
+            FROM subject s
+            WHERE s.deleted = false
+            ORDER BY RAND()
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Subject> findRandomActiveSubjects(@Param("limit") int limit);
+
     @Query("SELECT s FROM Subject s JOIN FETCH s.category WHERE s.deleted = true")
     List<Subject> findByDeletedTrue();
 
