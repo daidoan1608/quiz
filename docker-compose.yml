@@ -24,7 +24,7 @@ services:
       args:
         VITE_API_URL: ${CLIENT_API_URL:-https://api.quizvnua.com/api/v1/}
         VITE_AVATAR_URL: ${CLIENT_AVATAR_URL:-https://api.quizvnua.com}
-        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-995894234177-1b4ri2jqtthfkpilgchdrv39c50mpn5o.apps.googleusercontent.com}
     restart: unless-stopped
     expose:
       - "3000"

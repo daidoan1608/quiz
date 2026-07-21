@@ -9,9 +9,10 @@ services:
       DB_HOST: db
       DB_PORT: 3306
       REDIS_HOST: redis
+      SPRING_FLYWAY_ENABLED: "false"
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     depends_on:
       db:
         condition: service_healthy
@@ -24,10 +25,10 @@ services:
       args:
         VITE_API_URL: /api/v1/
         VITE_AVATAR_URL: ""
-        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-995894234177-1b4ri2jqtthfkpilgchdrv39c50mpn5o.apps.googleusercontent.com}
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
 
   admin:
     build:
@@ -36,8 +37,8 @@ services:
         VITE_API_URL: /api/v1/
         VITE_ADMIN_BASENAME: /
     restart: unless-stopped
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
 
   db:
     image: mysql:8.0
@@ -50,8 +51,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       MYSQL_DATABASE: ${DB_NAME:-quiz}
-    ports:
-      - "3306:3306"
+    expose:
+      - "3306"
     volumes:
       - ./mysql.init:/docker-entrypoint-initdb.d:ro
       - db-data-local:/var/lib/mysql
