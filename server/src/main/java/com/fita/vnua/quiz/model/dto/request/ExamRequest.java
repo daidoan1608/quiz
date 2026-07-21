@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -17,4 +18,6 @@ public class ExamRequest {
     private int hardQuestions;
     private int mediumQuestions;
     private Map<Long,Integer> totalQuestionByChapter;
+    private String generationMode;
+    private List<Long> questionIds;
 }

@@ -8,12 +8,15 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 3306
+      REDIS_HOST: redis
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
     expose:
       - "8080"
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
   user:
     build:
@@ -57,6 +60,13 @@ services:
       retries: 12
       start_period: 30s
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+
   nginx:
     image: nginx:alpine
     restart: unless-stopped
@@ -76,3 +86,4 @@ services:
 
 volumes:
   db-data:
+  redis-data:

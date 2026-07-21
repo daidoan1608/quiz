@@ -16,6 +16,8 @@ import com.fita.vnua.quiz.repository.NotificationRepository;
 import com.fita.vnua.quiz.service.AdminCapabilityService;
 import com.fita.vnua.quiz.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "notificationUnreadCount", allEntries = true)
     public void sendGlobalNotification(String title, String message) {
         NotificationHistory history = NotificationHistory.builder()
                 .title(title)
@@ -69,6 +72,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "notificationUnreadCount", allEntries = true)
     public void sendSubjectNotification(Long subjectId, String subjectName, Long examId) {
         List<UUID> userIds = favoriteRepository.findUserIdsBySubjectId(subjectId);
         if (userIds.isEmpty()) return;
@@ -100,6 +104,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "notificationUnreadCount", key = "#userId")
     public void sendPersonalNotification(UUID userId, String title, String message) {
         NotificationHistory history = NotificationHistory.builder()
                 .title(title)
@@ -124,6 +129,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "notificationUnreadCount", allEntries = true)
     public void sendBatchNotification(List<UUID> userIds, String title, String message) {
         if (userIds == null || userIds.isEmpty()) return;
 
@@ -246,12 +252,14 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional(readOnly = true)
     @Override
+    @Cacheable(value = "notificationUnreadCount", key = "#currentUserId")
     public long getUnreadCount(UUID currentUserId) {
         return notificationRepository.countUnreadForUser(currentUserId);
     }
 
     @Transactional
     @Override
+    @CacheEvict(value = "notificationUnreadCount", key = "#currentUserId")
     public void markAsRead(Long notificationId, UUID currentUserId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy thông báo", HttpStatus.NOT_FOUND));
@@ -280,6 +288,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "notificationUnreadCount", key = "#userId")
     public void markAllAsRead(UUID userId) {
         notificationRepository.markAllPersonalAsRead(userId);
 

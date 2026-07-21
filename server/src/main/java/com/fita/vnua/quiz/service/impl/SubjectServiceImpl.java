@@ -14,6 +14,8 @@ import com.fita.vnua.quiz.repository.*;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.SubjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -71,6 +73,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    @Cacheable(value = "publicSubjectsByCategory", key = "#categoryId")
     public List<SubjectSummaryDto> getSubjectsByCategoryId(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
@@ -81,6 +84,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    @Cacheable(value = "publicSubjectDetail", key = "#subjectId")
     public SubjectDto getSubjectById(Long subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
@@ -93,6 +97,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail"}, allEntries = true)
     public SubjectDto create(SubjectDto subjectDto) {
         Category category = categoryRepository.findById(subjectDto.getCategoryId())
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
@@ -109,6 +114,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail"}, allEntries = true)
     public SubjectDto update(Long subjectId, SubjectDto subjectDto) {
         var existingSubject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
@@ -122,6 +128,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail"}, allEntries = true)
     public Response delete(Long subjectId) {
         softDeleteService.deleteSubject(subjectId, null);
         return Response.builder()
@@ -130,6 +137,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail"}, allEntries = true)
     public SubjectDto restore(Long subjectId) {
         softDeleteService.restoreSubject(subjectId);
         Subject subject = subjectRepository.findById(subjectId)

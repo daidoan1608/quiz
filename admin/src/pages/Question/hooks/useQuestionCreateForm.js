@@ -5,6 +5,7 @@ import { categoryApi } from "../../../api/services/categoryApi";
 import { chapterApi, questionApi } from "../../../api/services/contentApi";
 import { subjectApi } from "../../../api/services/subjectApi";
 import { buildNewQuestionAnswers, validateCorrectAnswers } from "../../../utils/questionForm";
+import { QUESTION_FORM_INITIAL_VALUES } from "../constants";
 
 const INITIAL_QUESTION_TYPE = "SINGLE_CHOICE";
 
@@ -19,6 +20,7 @@ export const useQuestionCreateForm = ({ form, isModalOpen, onCancel, onSuccess }
 
   const resetFormState = useCallback(() => {
     form.resetFields();
+    form.setFieldsValue({ answers: QUESTION_FORM_INITIAL_VALUES.answers });
     setCorrectAnswers([]);
     setPreviewImgUrl("");
     setQuestionType(INITIAL_QUESTION_TYPE);
@@ -79,7 +81,8 @@ export const useQuestionCreateForm = ({ form, isModalOpen, onCancel, onSuccess }
   };
 
   const submitQuestion = async (values) => {
-    const validationMessage = validateCorrectAnswers(values.questionType, correctAnswers);
+    const answerCount = values.answers?.length || 0;
+    const validationMessage = validateCorrectAnswers(values.questionType, correctAnswers, answerCount);
     if (validationMessage) {
       message.error(validationMessage);
       return;
@@ -94,6 +97,8 @@ export const useQuestionCreateForm = ({ form, isModalOpen, onCancel, onSuccess }
         chapterId: values.chapterId,
         imageUrl: values.imageUrl,
         questionType: values.questionType,
+        examEnabled: values.examEnabled,
+        practiceEnabled: values.practiceEnabled,
         answers: buildNewQuestionAnswers(values, correctAnswers),
       });
       message.success("Thêm câu hỏi thành công!");

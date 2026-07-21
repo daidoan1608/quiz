@@ -194,6 +194,7 @@ public class ExamController {
         String property = switch (sortBy == null ? "" : sortBy) {
             case "subjectId" -> "subject.subjectId";
             case "subjectName" -> "subject.name";
+            case "examCode" -> "examCode";
             case "title" -> "title";
             case "description" -> "description";
             case "duration" -> "duration";

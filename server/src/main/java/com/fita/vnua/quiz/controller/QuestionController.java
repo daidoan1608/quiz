@@ -157,9 +157,11 @@ public class QuestionController {
             @RequestParam(required = false) Long chapterId,
             @RequestParam(required = false) String difficulty,
             @RequestParam(required = false) Boolean deleted,
+            @RequestParam(required = false) Boolean examEnabled,
+            @RequestParam(required = false) Boolean practiceEnabled,
             @RequestParam(required = false) UUID creatorId
     ) {
-        List<QuestionDto> questions = questionService.filterQuestions(keyword, subjectId, chapterId, difficulty, deleted, creatorId);
+        List<QuestionDto> questions = questionService.filterQuestions(keyword, subjectId, chapterId, difficulty, deleted, examEnabled, practiceEnabled, creatorId);
         return ResponseEntity.ok(ApiResponse.success("Lọc câu hỏi thành công", questions));
     }
 
@@ -172,7 +174,12 @@ public class QuestionController {
             @RequestParam(required = false) Long chapterId,
             @RequestParam(required = false) String difficulty,
             @RequestParam(required = false) Boolean deleted,
+            @RequestParam(required = false) Boolean examEnabled,
+            @RequestParam(required = false) Boolean practiceEnabled,
             @RequestParam(required = false) UUID creatorId,
+            @RequestParam(defaultValue = "all") String usageFilter,
+            @RequestParam(required = false) Long excludeExamId,
+            @RequestParam(defaultValue = "false") Boolean excludeUsedInSubject,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sortBy,
@@ -189,7 +196,12 @@ public class QuestionController {
                 chapterId,
                 difficulty,
                 deleted,
+                examEnabled,
+                practiceEnabled,
                 creatorId,
+                usageFilter,
+                excludeExamId,
+                excludeUsedInSubject,
                 pageable
         );
         return ResponseEntity.ok(ApiResponse.success("Lọc câu hỏi thành công", questions));

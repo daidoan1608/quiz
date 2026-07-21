@@ -1,7 +1,6 @@
 **/node_modules/
 **/.vscode/
 **/target/
-**/build/
 **/dist/
 **/coverage/
 .pnp
@@ -62,7 +61,6 @@ output/playwright/
 
 # Local design references
 DESIGN.md
-DESIGN (1).md
 
 # IDE / editor project files
 *.iml

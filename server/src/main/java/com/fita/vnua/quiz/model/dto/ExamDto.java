@@ -11,6 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ExamDto {
     private Long examId;
+    private String examCode;
     private Long subjectId;
     private String subjectName;
     private String title;

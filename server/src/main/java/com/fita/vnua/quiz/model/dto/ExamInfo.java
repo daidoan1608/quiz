@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExamInfo {
     private Long examId;
+    private String examCode;
     private String title;
     private String description;
     private Integer duration;

@@ -1,5 +1,8 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
@@ -22,6 +25,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -31,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +57,7 @@ public class UserExamServiceImpl implements UserExamService {
     private final UserExamQuestionRepository userExamQuestionRepository;
     private final ModelMapper modelMapper;
     private final SubjectService subjectService;
+    private final ObjectMapper objectMapper;
 
     @Override
     public List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate) {
@@ -60,6 +67,10 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     @Override
+    @Cacheable(
+            value = "ranking",
+            key = "'rankings:' + (#fromDate == null ? 'all' : #fromDate.toString()) + ':' + (#toDate == null ? 'all' : #toDate.toString()) + ':' + (#subjectName == null ? 'all' : #subjectName) + ':' + #criteria + ':' + #limit + ':' + (#currentUserId == null ? 'anonymous' : #currentUserId.toString())"
+    )
     public RankingResponse getRankings(
             LocalDateTime fromDate,
             LocalDateTime toDate,
@@ -148,12 +159,13 @@ public class UserExamServiceImpl implements UserExamService {
                 .title(userExam.getExam().getTitle())
                 .username(userExam.getUser().getUsername())
                 .fullName(userExam.getUser().getFullName())
-                .questions(getAttemptQuestions(userExam).stream().map(this::mapQuestionToDto).toList())
+                .questions(getAttemptQuestionDtos(userExam))
                 .build();
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "ranking", allEntries = true)
     public UserExamDto createUserExam(UserExamRequest userExamRequest, UUID currentUserId) {
         UserExamDto userExamDto = userExamRequest.getUserExamDto();
         List<UserAnswerDto> userAnswerDtos = userExamRequest.getUserAnswerDtos();
@@ -346,7 +358,9 @@ public class UserExamServiceImpl implements UserExamService {
         userExam.setUpdatedAt(LocalDateTime.now());
 
         UserExam savedAttempt = userExamRepository.save(userExam);
-        saveAttemptQuestionSnapshot(savedAttempt, questionRepository.findQuestionsByExamId(exam.getExamId()));
+        List<Question> attemptQuestions = new ArrayList<>(questionRepository.findQuestionsByExamId(exam.getExamId()));
+        Collections.shuffle(attemptQuestions);
+        saveAttemptQuestionSnapshot(savedAttempt, attemptQuestions);
         return buildAttemptResponse(savedAttempt);
     }
 
@@ -416,6 +430,7 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "ranking", allEntries = true)
     public UserExamDto submitAttempt(Long userExamId, UUID currentUserId) {
         UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
         return submitAttemptInternal(userExam, userExamId);
@@ -432,6 +447,19 @@ public class UserExamServiceImpl implements UserExamService {
             throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN);
         }
         return getAttemptQuestions(userExam);
+    }
+
+    @Override
+    public List<QuestionDto> getAttemptQuestionDtosForSubmittedAttempt(Long userExamId, UUID currentUserId) {
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new CustomApiException("Ban khong co quyen thuc hien thao tac nay", HttpStatus.FORBIDDEN));
+        UserExam userExam = (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MOD)
+                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Ban khong co quyen thuc hien thao tac nay", HttpStatus.FORBIDDEN))
+                : getUserExamForCurrentUser(userExamId, currentUserId);
+        if (!"SUBMITTED".equals(userExam.getStatus())) {
+            throw new CustomApiException("Ban khong co quyen thuc hien thao tac nay", HttpStatus.FORBIDDEN);
+        }
+        return getAttemptQuestionDtos(userExam);
     }
 
     private UserExamDto submitAttemptInternal(UserExam userExam, Long userExamId) {
@@ -525,7 +553,8 @@ public class UserExamServiceImpl implements UserExamService {
                     return dto;
                 })
                 .collect(Collectors.toList());
-        int totalQuestions = getAttemptQuestions(userExam).size();
+        List<QuestionDto> questions = getAttemptQuestionDtos(userExam);
+        int totalQuestions = questions.size();
 
         return ExamAttemptResponse.builder()
                 .userExamId(userExam.getUserExamId())
@@ -543,6 +572,7 @@ public class UserExamServiceImpl implements UserExamService {
                 .totalQuestions(totalQuestions)
                 .score(userExam.getScore())
                 .userAnswerDtos(answers)
+                .questions(questions)
                 .build();
     }
 
@@ -594,11 +624,35 @@ public class UserExamServiceImpl implements UserExamService {
             return;
         }
         for (int i = 0; i < questions.size(); i++) {
+            Question question = questions.get(i);
             UserExamQuestion snapshot = new UserExamQuestion();
             snapshot.setUserExam(userExam);
-            snapshot.setQuestion(questions.get(i));
+            snapshot.setQuestion(question);
             snapshot.setPosition(i);
+            snapshot.setQuestionContentSnapshot(question.getContent());
+            snapshot.setQuestionImageUrlSnapshot(question.getImageUrl());
+            snapshot.setQuestionDifficultySnapshot(question.getDifficulty() == null ? null : question.getDifficulty().name());
+            snapshot.setQuestionTypeSnapshot(question.getQuestionType() == null ? null : question.getQuestionType().name());
+            snapshot.setAnswersSnapshotJson(toAnswersSnapshotJson(question));
             userExamQuestionRepository.save(snapshot);
+        }
+    }
+
+    private String toAnswersSnapshotJson(Question question) {
+        try {
+            List<AnswerDto> answerDtos = question.getAnswers().stream()
+                    .map(answer -> {
+                        AnswerDto answerDto = new AnswerDto();
+                        answerDto.setOptionId(answer.getOptionId());
+                        answerDto.setQuestionId(question.getQuestionId());
+                        answerDto.setContent(answer.getContent());
+                        answerDto.setIsCorrect(answer.getIsCorrect());
+                        return answerDto;
+                    })
+                    .toList();
+            return objectMapper.writeValueAsString(answerDtos);
+        } catch (JsonProcessingException exception) {
+            throw new CustomApiException("Khong the tao snapshot dap an cho luot thi", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -611,6 +665,48 @@ public class UserExamServiceImpl implements UserExamService {
             return snapshots.stream().map(UserExamQuestion::getQuestion).toList();
         }
         return getExamQuestionsIncludingDeleted(userExam.getExam().getExamId());
+    }
+
+    private List<QuestionDto> getAttemptQuestionDtos(UserExam userExam) {
+        List<UserExamQuestion> snapshots = userExamQuestionRepository.findByUserExamUserExamIdOrderByPositionAsc(userExam.getUserExamId());
+        if (!snapshots.isEmpty() && snapshots.stream().allMatch(snapshot -> snapshot.getQuestionContentSnapshot() != null)) {
+            return snapshots.stream()
+                    .map(this::mapSnapshotToQuestionDto)
+                    .toList();
+        }
+        return getAttemptQuestions(userExam).stream()
+                .map(this::mapQuestionToDto)
+                .toList();
+    }
+
+    private QuestionDto mapSnapshotToQuestionDto(UserExamQuestion snapshot) {
+        Question question = snapshot.getQuestion();
+        QuestionDto dto = new QuestionDto();
+        dto.setQuestionId(question.getQuestionId());
+        dto.setContent(snapshot.getQuestionContentSnapshot());
+        dto.setImageUrl(snapshot.getQuestionImageUrlSnapshot());
+        dto.setDifficulty(snapshot.getQuestionDifficultySnapshot());
+        dto.setQuestionType(snapshot.getQuestionTypeSnapshot());
+        if (question.getChapter() != null) {
+            dto.setChapterId(question.getChapter().getChapterId());
+            dto.setChapterName(question.getChapter().getName());
+        }
+        dto.setExamEnabled(question.getExamEnabled());
+        dto.setPracticeEnabled(question.getPracticeEnabled());
+        dto.setAnswers(readAnswersSnapshot(snapshot));
+        return dto;
+    }
+
+    private List<AnswerDto> readAnswersSnapshot(UserExamQuestion snapshot) {
+        if (snapshot.getAnswersSnapshotJson() == null || snapshot.getAnswersSnapshotJson().isBlank()) {
+            return mapQuestionToDto(snapshot.getQuestion()).getAnswers();
+        }
+        try {
+            return objectMapper.readValue(snapshot.getAnswersSnapshotJson(), new TypeReference<List<AnswerDto>>() {
+            });
+        } catch (JsonProcessingException exception) {
+            return mapQuestionToDto(snapshot.getQuestion()).getAnswers();
+        }
     }
 
     private List<Question> getExamQuestionsIncludingDeleted(Long examId) {

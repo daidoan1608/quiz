@@ -7,7 +7,11 @@ const DocumentsManager = React.lazy(() => import("../pages/Documents"));
 const GetCategories = React.lazy(() => import("../pages/Categories"));
 const GetChapter = React.lazy(() => import("../pages/Chapter"));
 const GetExam = React.lazy(() => import("../pages/Exam"));
+const ExamPrintPreviewPage = React.lazy(() => import("../pages/Exam/ExamPrintPreviewPage"));
 const GetQuestion = React.lazy(() => import("../pages/Question"));
+const QuestionCreatePage = React.lazy(() => import("../pages/Question/QuestionCreatePage"));
+const QuestionImportPage = React.lazy(() => import("../pages/Question/QuestionImportPage"));
+const QuestionUpdatePage = React.lazy(() => import("../pages/Question/QuestionUpdatePage"));
 const GetSubject = React.lazy(() => import("../pages/Subject"));
 const GetUser = React.lazy(() => import("../pages/User"));
 const GetUserExam = React.lazy(() => import("../pages/ExamUser"));
@@ -36,5 +40,25 @@ export const adminDetailRoutes = [
     path: "/userexam/:userExamId",
     Component: UserExamDetailPageView,
     parentPath: "/userexams",
+  },
+  {
+    path: "/questions/create",
+    Component: QuestionCreatePage,
+    parentPath: "/questions",
+  },
+  {
+    path: "/questions/import",
+    Component: QuestionImportPage,
+    parentPath: "/questions",
+  },
+  {
+    path: "/questions/:questionId/edit",
+    Component: QuestionUpdatePage,
+    parentPath: "/questions",
+  },
+  {
+    path: "/exams/:examId/print-preview",
+    Component: ExamPrintPreviewPage,
+    parentPath: "/exams",
   },
 ];

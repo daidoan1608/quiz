@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Input,
@@ -21,11 +22,8 @@ import {
   UndoOutlined,
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
-import QuestionFormCreateModal from "./QuestionFormCreateModal";
-import QuestionFormUpdateModal from "./QuestionFormUpdateModal";
-import QuestionImportModal from "./QuestionImportModal";
 import MarkdownLatex from "../../../components/common/MarkdownLatex";
-import { QUESTION_PAGE_SIZE_OPTIONS } from "../constants";
+import { QUESTION_ANSWER_LABELS, QUESTION_PAGE_SIZE_OPTIONS } from "../constants";
 
 const { Text } = Typography;
 
@@ -64,10 +62,6 @@ export const QuestionManagerView = ({
   advancedFilters,
   pagination,
   isMod,
-  isAddModalOpen,
-  isUpdateModalOpen,
-  isImportModalOpen,
-  questionIdToUpdate,
   canCreateQuestion,
   canImportQuestion,
   canOnSubject,
@@ -77,13 +71,9 @@ export const QuestionManagerView = ({
   updateFilter,
   deleteQuestion,
   restoreQuestion,
-  openAddModal,
-  openImportModal,
-  openUpdateModal,
-  closeModal,
-  refreshAndCloseModal,
   downloadQuestions,
 }) => {
+  const navigate = useNavigate();
   const columns = [
     {
       title: "ID",
@@ -136,30 +126,12 @@ export const QuestionManagerView = ({
       key: "chapterName",
       width: 150,
     },
-    {
-      title: "Đáp án A",
-      key: "ansA",
+    ...QUESTION_ANSWER_LABELS.map((label, index) => ({
+      title: `Đáp án ${label}`,
+      key: `ans${label}`,
       width: 150,
-      render: (_, record) => renderAnswerContent(record.answers, 0),
-    },
-    {
-      title: "Đáp án B",
-      key: "ansB",
-      width: 150,
-      render: (_, record) => renderAnswerContent(record.answers, 1),
-    },
-    {
-      title: "Đáp án C",
-      key: "ansC",
-      width: 150,
-      render: (_, record) => renderAnswerContent(record.answers, 2),
-    },
-    {
-      title: "Đáp án D",
-      key: "ansD",
-      width: 150,
-      render: (_, record) => renderAnswerContent(record.answers, 3),
-    },
+      render: (_, record) => renderAnswerContent(record.answers, index),
+    })),
     ...(viewMode === "deleted"
       ? [
           {
@@ -190,7 +162,7 @@ export const QuestionManagerView = ({
               className="action-btn is-primary"
               icon={<EditOutlined />}
               disabled={!canOnSubject(record.subjectId, "QUESTION", "UPDATE")}
-              onClick={() => openUpdateModal(record.questionId)}
+              onClick={() => navigate(`/questions/${record.questionId}/edit`)}
             />
             <Popconfirm
               title="Chuyển câu hỏi vào thùng rác?"
@@ -307,7 +279,7 @@ export const QuestionManagerView = ({
         <Button
           className="toolbar-btn"
           icon={<ImportOutlined />}
-          onClick={openImportModal}
+          onClick={() => navigate("/questions/import")}
         >
           Import
         </Button>
@@ -336,36 +308,16 @@ export const QuestionManagerView = ({
               showSizeChanger: true,
               pageSizeOptions: QUESTION_PAGE_SIZE_OPTIONS,
             }}
-            scroll={{ x: 1700 }}
+            scroll={{ x: 2300 }}
             onChange={handleTableChange}
           />
         }
         onReload={() =>
           fetchQuestions(searchText, pagination.current, pagination.pageSize)
         }
-        onAdd={canCreateQuestion ? openAddModal : undefined}
+        onAdd={canCreateQuestion ? () => navigate("/questions/create") : undefined}
       />
 
-      <QuestionFormCreateModal
-        isModalOpen={isAddModalOpen}
-        onCancel={closeModal}
-        onSuccess={refreshAndCloseModal}
-      />
-
-      {questionIdToUpdate && (
-        <QuestionFormUpdateModal
-          isModalOpen={isUpdateModalOpen}
-          onCancel={closeModal}
-          onSuccess={refreshAndCloseModal}
-          questionId={questionIdToUpdate}
-        />
-      )}
-
-      <QuestionImportModal
-        isModalOpen={isImportModalOpen}
-        onCancel={closeModal}
-        onSuccess={refreshAndCloseModal}
-      />
     </>
   );
 };

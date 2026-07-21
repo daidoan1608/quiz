@@ -8,7 +8,20 @@ export const resolveQuestionType = (question) => {
   return correctCount > 1 ? "MULTIPLE_CHOICE" : "SINGLE_CHOICE";
 };
 
-export const validateCorrectAnswers = (questionType, correctAnswers) => {
+export const validateCorrectAnswers = (
+  questionType,
+  correctAnswers,
+  answerCount
+) => {
+  if (answerCount < 2) {
+    return "Câu hỏi phải có ít nhất 2 đáp án!";
+  }
+  if (answerCount > 8) {
+    return "Câu hỏi chỉ được có tối đa 8 đáp án!";
+  }
+  if (correctAnswers.some((index) => index >= answerCount)) {
+    return "Đáp án đúng không hợp lệ với số lượng đáp án hiện có!";
+  }
   if (correctAnswers.length === 0) {
     return "Vui lòng chọn ít nhất một đáp án đúng!";
   }
@@ -21,20 +34,18 @@ export const validateCorrectAnswers = (questionType, correctAnswers) => {
   return "";
 };
 
-export const buildNewQuestionAnswers = (values, correctAnswers) => [
-  { content: values.answerA, isCorrect: correctAnswers.includes(0) },
-  { content: values.answerB, isCorrect: correctAnswers.includes(1) },
-  { content: values.answerC, isCorrect: correctAnswers.includes(2) },
-  { content: values.answerD, isCorrect: correctAnswers.includes(3) },
-];
+export const buildQuestionAnswers = (values, correctAnswers, originalAnswers = []) =>
+  (values.answers || []).map((answer, index) => ({
+    optionId: originalAnswers[index]?.optionId,
+    content: answer?.content,
+    isCorrect: correctAnswers.includes(index),
+  }));
+
+export const buildNewQuestionAnswers = (values, correctAnswers) =>
+  buildQuestionAnswers(values, correctAnswers);
 
 export const buildUpdatedQuestionAnswers = (
   values,
   originalAnswers,
   correctAnswers
-) =>
-  originalAnswers.map((answer, index) => ({
-    optionId: answer.optionId,
-    content: values[`answer_${index}`],
-    isCorrect: correctAnswers.includes(index),
-  }));
+) => buildQuestionAnswers(values, correctAnswers, originalAnswers);

@@ -39,7 +39,9 @@ export const useLoadExamAttempt = ({
         ]);
         const data = examResponse.data.data;
         const attempt = attemptResponse?.data?.data;
-        const examQuestions = data.questions || [];
+        const examQuestions = attempt?.questions?.length
+          ? attempt.questions
+          : data.questions || [];
         setSubjectName(data.subjectName);
         setTitle(data.title);
         setDuration(data.duration);

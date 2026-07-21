@@ -10,6 +10,7 @@ import {
   Row,
   Select,
   Skeleton,
+  Switch,
   Typography,
 } from "antd";
 import { CheckCircleOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
@@ -48,10 +49,7 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
   });
 
   const content = Form.useWatch("content", form);
-  const answer_0 = Form.useWatch("answer_0", form);
-  const answer_1 = Form.useWatch("answer_1", form);
-  const answer_2 = Form.useWatch("answer_2", form);
-  const answer_3 = Form.useWatch("answer_3", form);
+  const answers = Form.useWatch("answers", form);
 
   useEffect(() => {
     if (window.MathJax && window.MathJax.typesetPromise) {
@@ -60,7 +58,7 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [content, answer_0, answer_1, answer_2, answer_3]);
+  }, [content, answers]);
 
   return (
     <Modal
@@ -156,12 +154,23 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
             style={{ marginBottom: 20 }}
           />
 
+          <Row gutter={24}>
+            <Col xs={24} md={12}>
+              <Form.Item label="Dung trong de thi" name="examEnabled" valuePropName="checked">
+                <Switch />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item label="Hien trong on tap" name="practiceEnabled" valuePropName="checked">
+                <Switch />
+              </Form.Item>
+            </Col>
+          </Row>
+
           <QuestionAnswerFields
             questionType={questionType}
             correctAnswers={correctAnswers}
             setCorrectAnswers={setCorrectAnswers}
-            fieldNames={["answer_0", "answer_1", "answer_2", "answer_3"]}
-            answerValues={[answer_0, answer_1, answer_2, answer_3]}
           />
         </Form>
       )}

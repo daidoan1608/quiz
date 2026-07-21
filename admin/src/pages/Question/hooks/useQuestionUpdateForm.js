@@ -41,11 +41,10 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
         content: data.content,
         difficulty: data.difficulty,
         imageUrl: data.imageUrl,
+        examEnabled: data.examEnabled !== false,
+        practiceEnabled: data.practiceEnabled !== false,
         questionType: qType,
-        answer_0: data.answers[0]?.content,
-        answer_1: data.answers[1]?.content,
-        answer_2: data.answers[2]?.content,
-        answer_3: data.answers[3]?.content,
+        answers: (data.answers || []).map((answer) => ({ content: answer.content })),
       });
     } catch (error) {
       console.error("Error:", error);
@@ -66,7 +65,8 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
   };
 
   const submitQuestion = async (values) => {
-    const validationMessage = validateCorrectAnswers(values.questionType, correctAnswers);
+    const answerCount = values.answers?.length || 0;
+    const validationMessage = validateCorrectAnswers(values.questionType, correctAnswers, answerCount);
     if (validationMessage) {
       message.error(validationMessage);
       return;
@@ -80,6 +80,8 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
         difficulty: values.difficulty,
         imageUrl: values.imageUrl,
         questionType: values.questionType,
+        examEnabled: values.examEnabled,
+        practiceEnabled: values.practiceEnabled,
         answers: buildUpdatedQuestionAnswers(values, originalAnswers, correctAnswers),
       });
       message.success("Cập nhật câu hỏi thành công!");

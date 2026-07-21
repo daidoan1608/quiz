@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Form, Input, Button, Select,
+  Form, Input, Button, Select, Switch,
   Typography, Divider,
   Row, Col, Alert, Modal
 } from 'antd';
@@ -49,10 +49,7 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
   });
 
   const content = Form.useWatch("content", form);
-  const answerA = Form.useWatch("answerA", form);
-  const answerB = Form.useWatch("answerB", form);
-  const answerC = Form.useWatch("answerC", form);
-  const answerD = Form.useWatch("answerD", form);
+  const answers = Form.useWatch("answers", form);
 
   useEffect(() => {
     if (window.MathJax && window.MathJax.typesetPromise) {
@@ -61,7 +58,7 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [content, answerA, answerB, answerC, answerD]);
+  }, [content, answers]);
 
   return (
     <Modal
@@ -225,12 +222,23 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
           style={{ marginBottom: 20 }}
         />
 
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item label="Dung trong de thi" name="examEnabled" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label="Hien trong on tap" name="practiceEnabled" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </Col>
+        </Row>
+
         <QuestionAnswerFields
           questionType={questionType}
           correctAnswers={correctAnswers}
           setCorrectAnswers={setCorrectAnswers}
-          fieldNames={["answerA", "answerB", "answerC", "answerD"]}
-          answerValues={[answerA, answerB, answerC, answerD]}
           requiredMessage={(label) => `Nhập đáp án ${label}!`}
           correctColor="#52c41a"
         />

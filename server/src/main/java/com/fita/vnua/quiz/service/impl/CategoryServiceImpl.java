@@ -11,6 +11,8 @@ import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.CategoryService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final SoftDeleteService softDeleteService;
 
     @Override
+    @Cacheable(value = "publicCategories", key = "'all'")
     public List<CategorySummaryDto> getAllCategories() {
         return categoryRepository.findByDeletedFalse().stream()
                 .map(this::mapCategoryToSummaryDto)
@@ -83,6 +86,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public CategoryDto addCategory(CategoryDto categoryDto) {
         Category category = new Category();
         category.setCategoryName(categoryDto.getCategoryName());
@@ -93,6 +97,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
@@ -106,11 +111,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public void deleteCategory(Long id) {
         softDeleteService.deleteCategory(id, null);
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public CategoryDto restoreCategory(Long id) {
         softDeleteService.restoreCategory(id);
         Category category = categoryRepository.findById(id)

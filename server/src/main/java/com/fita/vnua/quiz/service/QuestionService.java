@@ -29,9 +29,9 @@ public interface QuestionService {
 
     List<QuestionDto> searchQuestions(String keyword);
 
-    List<QuestionDto> filterQuestions(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId);
+    List<QuestionDto> filterQuestions(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, Boolean examEnabled, Boolean practiceEnabled, UUID creatorId);
 
-    Page<QuestionDto> filterQuestionsPage(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId, Pageable pageable);
+    Page<QuestionDto> filterQuestionsPage(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, Boolean examEnabled, Boolean practiceEnabled, UUID creatorId, String usageFilter, Long excludeExamId, Boolean excludeUsedInSubject, Pageable pageable);
 
     List<QuestionDto> getQuestionsBySubject(Long subjectId);
 

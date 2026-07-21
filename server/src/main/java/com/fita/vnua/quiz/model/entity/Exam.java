@@ -20,7 +20,10 @@ public class Exam {
     @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "exam_code", nullable = false, unique = true, length = 64)
+    private String examCode;
+
+    @Column(nullable = false)
     private String title;
 
     @Column

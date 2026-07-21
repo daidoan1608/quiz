@@ -36,12 +36,21 @@ const ExamFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
     inputDiff,
     inputTotal,
     loading,
+    manualFilters,
+    manualPickerLoading,
+    manualQuestionIds,
+    manualQuestionPage,
+    manualQuestionTotal,
+    manualQuestions,
     maxQuestions,
     selectedSubject,
     setGenerationMode,
     setInputChapters,
     setInputDiff,
     setInputTotal,
+    setManualFilters,
+    setManualQuestionIds,
+    setManualQuestionPage,
     subjects,
     submitExam,
   } = useExamCreateForm({ form, isModalOpen, onCancel, onSuccess });
@@ -118,6 +127,10 @@ const ExamFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
           </Col>
         </Row>
 
+        <Form.Item label="Ma de" name="examCode">
+          <Input placeholder="VD: JAVA-CK-001" />
+        </Form.Item>
+
         <Form.Item
           label="Tên bài thi"
           name="title"
@@ -158,6 +171,15 @@ const ExamFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
           setInputDiff={setInputDiff}
           inputChapters={inputChapters}
           setInputChapters={setInputChapters}
+          manualFilters={manualFilters}
+          manualPickerLoading={manualPickerLoading}
+          manualQuestionIds={manualQuestionIds}
+          manualQuestionPage={manualQuestionPage}
+          manualQuestionTotal={manualQuestionTotal}
+          manualQuestions={manualQuestions}
+          setManualFilters={setManualFilters}
+          setManualQuestionIds={setManualQuestionIds}
+          setManualQuestionPage={setManualQuestionPage}
           calculateTotalSelected={calculateTotalSelected}
         />
       </Form>
