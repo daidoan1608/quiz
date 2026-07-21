@@ -94,6 +94,8 @@ export const useQuestionCreateForm = ({ form, isModalOpen, onCancel, onSuccess }
         chapterId: values.chapterId,
         imageUrl: values.imageUrl,
         questionType: values.questionType,
+        examEnabled: values.examEnabled,
+        practiceEnabled: values.practiceEnabled,
         answers: buildNewQuestionAnswers(values, correctAnswers),
       });
       message.success("Thêm câu hỏi thành công!");

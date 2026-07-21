@@ -10,12 +10,16 @@ import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.repository.AnswerRepository;
 import com.fita.vnua.quiz.repository.AuditLogRepository;
 import com.fita.vnua.quiz.repository.ChapterRepository;
+import com.fita.vnua.quiz.repository.ExamQuestionRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.UserAnswerRepository;
+import com.fita.vnua.quiz.repository.UserExamQuestionRepository;
 import com.fita.vnua.quiz.service.QuestionService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.mapper.QuestionMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +36,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -49,6 +54,8 @@ public class QuestionServiceImpl implements QuestionService {
     private final SoftDeleteService softDeleteService;
     private final AuditLogRepository auditLogRepository;
     private final UserAnswerRepository userAnswerRepository;
+    private final ExamQuestionRepository examQuestionRepository;
+    private final UserExamQuestionRepository userExamQuestionRepository;
 
     @Override
     public Optional<QuestionDto> getQuestionById(Long questionId) {
@@ -62,13 +69,19 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(
+            value = "practiceQuestions",
+            key = "#chapterId + ':' + (#limit == null ? 'default' : #limit) + ':' + (#difficulty == null ? 'ALL' : #difficulty)",
+            condition = "#mode == null || !#mode.equalsIgnoreCase('wrong')"
+    )
     public List<QuestionDto> getPracticeQuestionsByChapter(Long chapterId, Integer limit, String difficulty, String mode, UUID userId) {
         int safeLimit = limit == null || limit <= 0 ? 50 : Math.min(limit, 100);
         String normalizedDifficulty = difficulty == null || difficulty.isBlank() || "ALL".equalsIgnoreCase(difficulty)
                 ? null
                 : questionMapper.parseDifficulty(difficulty).name();
 
-        List<Question> questions = questionRepository.findQuestionsByChapterAndDifficulty(chapterId, normalizedDifficulty, safeLimit);
+        List<Question> questions = questionRepository.findPracticeQuestionsByChapterAndDifficulty(chapterId, normalizedDifficulty, safeLimit);
         if ("wrong".equalsIgnoreCase(mode)) {
             if (userId == null) {
                 throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
@@ -95,6 +108,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         Map<AttemptQuestionKey, List<com.fita.vnua.quiz.model.entity.UserAnswer>> answersByAttemptQuestion =
                 userAnswerRepository.findSubmittedAnswersByUserForPractice(userId, subjectId, chapterId).stream()
+                        .filter(userAnswer -> Boolean.TRUE.equals(userAnswer.getQuestion().getPracticeEnabled()))
                         .filter(userAnswer -> normalizedDifficulty == null || normalizedDifficulty.equals(userAnswer.getQuestion().getDifficulty()))
                         .collect(Collectors.groupingBy(
                                 userAnswer -> new AttemptQuestionKey(
@@ -174,7 +188,7 @@ public class QuestionServiceImpl implements QuestionService {
                 ));
 
         Set<Long> wrongQuestionIds = new HashSet<>();
-        questionRepository.findByChapter(chapterId).forEach(question -> {
+        questionRepository.findPracticeByChapter(chapterId).forEach(question -> {
             Set<Long> correctAnswerIds = question.getAnswers().stream()
                     .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
                     .map(answer -> answer.getOptionId())
@@ -274,12 +288,12 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<QuestionDto> filterQuestions(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId) {
+    public List<QuestionDto> filterQuestions(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, Boolean examEnabled, Boolean practiceEnabled, UUID creatorId) {
         String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
         Question.Difficulty normalizedDifficulty = difficulty == null || difficulty.isBlank()
                 ? null
                 : questionMapper.parseDifficulty(difficulty);
-        List<Question> questions = questionRepository.filterQuestions(normalizedKeyword, subjectId, chapterId, normalizedDifficulty, deleted);
+        List<Question> questions = questionRepository.filterQuestions(normalizedKeyword, subjectId, chapterId, normalizedDifficulty, deleted, examEnabled, practiceEnabled);
         if (creatorId != null) {
             var createdQuestionIds = auditLogRepository.findByEntityTypeAndActionAndActorId("QUESTION", "CREATE", creatorId).stream()
                     .map(log -> {
@@ -301,7 +315,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Page<QuestionDto> filterQuestionsPage(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, UUID creatorId, Pageable pageable) {
+    public Page<QuestionDto> filterQuestionsPage(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, Boolean examEnabled, Boolean practiceEnabled, UUID creatorId, String usageFilter, Long excludeExamId, Boolean excludeUsedInSubject, Pageable pageable) {
         String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
         Question.Difficulty normalizedDifficulty = difficulty == null || difficulty.isBlank()
                 ? null
@@ -320,8 +334,13 @@ public class QuestionServiceImpl implements QuestionService {
                 chapterId,
                 normalizedDifficulty,
                 deleted,
+                examEnabled,
+                practiceEnabled,
                 creatorFilterEnabled,
                 creatorQuestionIds,
+                normalizeUsageFilter(usageFilter),
+                excludeExamId,
+                Boolean.TRUE.equals(excludeUsedInSubject),
                 pageable
         );
         List<Long> questionIds = questionIdPage.getContent();
@@ -353,6 +372,16 @@ public class QuestionServiceImpl implements QuestionService {
                 .toList();
     }
 
+    private String normalizeUsageFilter(String usageFilter) {
+        if ("used".equalsIgnoreCase(usageFilter)) {
+            return "used";
+        }
+        if ("unused".equalsIgnoreCase(usageFilter)) {
+            return "unused";
+        }
+        return "all";
+    }
+
     @Override
     public ImportPreviewResponse previewImportQuestions(MultipartFile file, Long categoryId, Long subjectId, Long chapterId) throws IOException {
         validateImportTarget(subjectId, chapterId);
@@ -374,6 +403,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public QuestionDto create(QuestionDto questionDto) {
         Chapter chapter = chapterRepository.findById(questionDto.getChapterId())
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
@@ -390,10 +420,24 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public QuestionDto update(Long questionId, QuestionDto questionDto) {
         // Tìm câu hỏi hiện tại
         var existingQuestion = questionRepository.findByQuestionIdAndDeletedFalse(questionId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
+
+        if (userExamQuestionRepository.existsSnapshotByQuestionIdAndStatuses(questionId, List.of("IN_PROGRESS", "SUBMITTED"))) {
+            if (hasLockedQuestionChanges(existingQuestion, questionDto)) {
+                throw new CustomApiException("Cau hoi da co trong ket qua thi, khong the sua noi dung hoac dap an. Hay tao cau hoi moi va thay trong de.", HttpStatus.BAD_REQUEST);
+            }
+            updateAvailabilityFlags(existingQuestion, questionDto);
+            return questionMapper.toDto(questionRepository.save(existingQuestion));
+        }
+
+        if (examQuestionRepository.existsByQuestionQuestionIdAndExamDeletedFalse(questionId)
+                && hasLockedQuestionChanges(existingQuestion, questionDto)) {
+            throw new CustomApiException("Cau hoi dang nam trong de thi, khong the sua noi dung hoac dap an. Hay tao cau hoi moi va thay trong de.", HttpStatus.BAD_REQUEST);
+        }
 
         questionMapper.updateEntity(existingQuestion, questionDto);
 
@@ -411,6 +455,52 @@ public class QuestionServiceImpl implements QuestionService {
 
         // Trả về phản hồi
         return questionMapper.toDto(question);
+    }
+
+    private boolean hasLockedQuestionChanges(Question existingQuestion, QuestionDto questionDto) {
+        if (!Objects.equals(existingQuestion.getContent(), questionDto.getContent())) {
+            return true;
+        }
+        if (!Objects.equals(existingQuestion.getImageUrl(), questionDto.getImageUrl())) {
+            return true;
+        }
+        if (!Objects.equals(existingQuestion.getDifficulty(), questionMapper.parseDifficulty(questionDto.getDifficulty()))) {
+            return true;
+        }
+        Question.QuestionType incomingType = questionMapper.parseQuestionType(questionDto.getQuestionType());
+        Question.QuestionType existingType = existingQuestion.getQuestionType() == null
+                ? Question.QuestionType.SINGLE_CHOICE
+                : existingQuestion.getQuestionType();
+        if (!Objects.equals(existingType, incomingType)) {
+            return true;
+        }
+        if (questionDto.getAnswers() == null) {
+            return false;
+        }
+        if (existingQuestion.getAnswers().size() != questionDto.getAnswers().size()) {
+            return true;
+        }
+        Map<Long, AnswerDto> incomingAnswers = questionDto.getAnswers().stream()
+                .filter(answer -> answer.getOptionId() != null)
+                .collect(Collectors.toMap(AnswerDto::getOptionId, answer -> answer));
+        if (incomingAnswers.size() != existingQuestion.getAnswers().size()) {
+            return true;
+        }
+        return existingQuestion.getAnswers().stream().anyMatch(answer -> {
+            AnswerDto incoming = incomingAnswers.get(answer.getOptionId());
+            return incoming == null
+                    || !Objects.equals(answer.getContent(), incoming.getContent())
+                    || !Objects.equals(Boolean.TRUE.equals(answer.getIsCorrect()), Boolean.TRUE.equals(incoming.getIsCorrect()));
+        });
+    }
+
+    private void updateAvailabilityFlags(Question question, QuestionDto questionDto) {
+        if (questionDto.getExamEnabled() != null) {
+            question.setExamEnabled(questionDto.getExamEnabled());
+        }
+        if (questionDto.getPracticeEnabled() != null) {
+            question.setPracticeEnabled(questionDto.getPracticeEnabled());
+        }
     }
 
     private void validateCorrectAnswers(QuestionDto questionDto) {
@@ -433,7 +523,12 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public Response delete(Long questionId) {
+        if (examQuestionRepository.existsByQuestionQuestionIdAndExamDeletedFalse(questionId)) {
+            throw new CustomApiException("Cau hoi dang nam trong de thi. Vui long go cau hoi khoi de truoc khi xoa.", HttpStatus.BAD_REQUEST);
+        }
+
         softDeleteService.deleteQuestion(questionId, null);
 
         return Response.builder()
@@ -442,6 +537,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public QuestionDto restore(Long questionId) {
         softDeleteService.restoreQuestion(questionId);
         Question restoredQuestion = questionRepository.findById(questionId)

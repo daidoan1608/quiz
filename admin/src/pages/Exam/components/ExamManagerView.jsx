@@ -13,6 +13,7 @@ import {
 import {
   ClockCircleOutlined,
   DeleteOutlined,
+  EditOutlined,
   EyeOutlined,
   FileTextOutlined,
   SearchOutlined,
@@ -24,6 +25,7 @@ import { buildSoftDeleteColumns } from "../../../components/common/table/softDel
 import { EXAM_PAGE_SIZE_OPTIONS } from "../constants";
 import { ExamDetailModal } from "./ExamDetailModal";
 import ExamFormCreateModal from "./ExamFormCreateModal";
+import { ExamFormUpdateModal } from "./ExamFormUpdateModal";
 
 export const ExamManagerView = ({
   exams,
@@ -40,6 +42,7 @@ export const ExamManagerView = ({
   isMod,
   isAddModalOpen,
   isViewModalOpen,
+  isUpdateModalOpen,
   selectedExamId,
   canCreateExam,
   canOnSubject,
@@ -54,8 +57,20 @@ export const ExamManagerView = ({
   refreshExamList,
   openViewModal,
   closeViewModal,
+  openUpdateModal,
+  closeUpdateModal,
 }) => {
   const columns = [
+    {
+      title: "Ma de",
+      dataIndex: "examCode",
+      key: "examCode",
+      width: 140,
+      ellipsis: true,
+      sorter: true,
+      sortOrder: getSortOrder("examCode"),
+      render: (text) => <AdminTableText strong>{text}</AdminTableText>,
+    },
     {
       title: "Mã môn",
       dataIndex: "subjectId",
@@ -119,7 +134,7 @@ export const ExamManagerView = ({
     {
       title: "Hành động",
       key: "action",
-      width: viewMode === "active" ? 130 : 90,
+      width: viewMode === "active" ? 180 : 90,
       fixed: "right",
       render: (_, record) =>
         viewMode === "active" ? (
@@ -129,6 +144,14 @@ export const ExamManagerView = ({
                 className="action-btn"
                 icon={<EyeOutlined />}
                 onClick={() => openViewModal(record.examId)}
+              />
+            </Tooltip>
+            <Tooltip title="Sua de thi">
+              <Button
+                className="action-btn"
+                icon={<EditOutlined />}
+                onClick={() => openUpdateModal(record.examId)}
+                disabled={!canOnSubject(record.subjectId, "EXAM", "UPDATE")}
               />
             </Tooltip>
             <Popconfirm
@@ -243,7 +266,7 @@ export const ExamManagerView = ({
               showSizeChanger: true,
               pageSizeOptions: EXAM_PAGE_SIZE_OPTIONS,
             }}
-            scroll={{ x: viewMode === "active" ? 1110 : 1230 }}
+            scroll={{ x: viewMode === "active" ? 1250 : 1370 }}
             tableLayout="fixed"
             onChange={handleTableChange}
           />
@@ -260,6 +283,12 @@ export const ExamManagerView = ({
       <ExamDetailModal
         open={isViewModalOpen}
         onCancel={closeViewModal}
+        examId={selectedExamId}
+      />
+      <ExamFormUpdateModal
+        open={isUpdateModalOpen}
+        onCancel={closeUpdateModal}
+        onSuccess={refreshExamList}
         examId={selectedExamId}
       />
     </>

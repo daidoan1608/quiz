@@ -69,8 +69,19 @@ export const examApi = {
     return unwrapApiData(response, {});
   },
 
+  async getDetail(examId) {
+    const response = await authAxios.get(
+      `/public/exams/${examId}?includeCorrectAnswers=true`
+    );
+    return unwrapApiData(response, null);
+  },
+
   create(payload) {
     return authAxios.post("/admin/exams", payload);
+  },
+
+  update(examId, payload) {
+    return authAxios.put(`/admin/exams/${examId}`, payload);
   },
 
   remove(examId) {

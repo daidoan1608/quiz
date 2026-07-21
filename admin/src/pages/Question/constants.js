@@ -11,5 +11,7 @@ export const QUESTION_ANSWER_LABELS = ["A", "B", "C", "D"];
 
 export const QUESTION_FORM_INITIAL_VALUES = {
   difficulty: "MEDIUM",
+  examEnabled: true,
+  practiceEnabled: true,
   questionType: "SINGLE_CHOICE",
 };

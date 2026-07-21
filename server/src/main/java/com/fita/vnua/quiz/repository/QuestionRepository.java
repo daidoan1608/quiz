@@ -36,6 +36,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     List<Question> findByChapter(@Param("chapterId") Long chapterId);
 
     @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
+    @Query("SELECT q FROM Question q WHERE q.chapter.chapterId = :chapterId AND q.deleted = false AND q.practiceEnabled = true")
+    List<Question> findPracticeByChapter(@Param("chapterId") Long chapterId);
+
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     @Query("SELECT q FROM Question q JOIN q.chapter c JOIN c.subject s WHERE s.subjectId = :subjectId AND q.deleted = false")
     List<Question> findQuestionsBySubjectId(@Param("subjectId") Long subjectId);
 
@@ -43,6 +47,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             "JOIN chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.subject_id = :subjectId " +
             "AND q.deleted = false " +
+            "AND q.exam_enabled = true " +
             "AND (:difficulty IS NULL OR q.difficulty = :difficulty) " +
             "ORDER BY RAND() " +
             "LIMIT :number", nativeQuery = true)
@@ -55,10 +60,24 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             "JOIN chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.chapter_id = :chapterId " +
             "AND q.deleted = false " +
+            "AND q.exam_enabled = true " +
             "AND (:difficulty IS NULL OR q.difficulty = :difficulty) " +
             "ORDER BY RAND() " +
             "LIMIT :number", nativeQuery = true)
     List<Question> findQuestionsByChapterAndDifficulty(
+            @Param("chapterId") Long chapterId,
+            @Param("difficulty") String difficulty,
+            @Param("number") int number);
+
+    @Query(value = "SELECT q.* FROM question q " +
+            "JOIN chapter c ON q.chapter_id = c.chapter_id " +
+            "WHERE c.chapter_id = :chapterId " +
+            "AND q.deleted = false " +
+            "AND q.practice_enabled = true " +
+            "AND (:difficulty IS NULL OR q.difficulty = :difficulty) " +
+            "ORDER BY RAND() " +
+            "LIMIT :number", nativeQuery = true)
+    List<Question> findPracticeQuestionsByChapterAndDifficulty(
             @Param("chapterId") Long chapterId,
             @Param("difficulty") String difficulty,
             @Param("number") int number);
@@ -72,6 +91,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             "JOIN chapter c ON q.chapter_id = c.chapter_id " +
             "WHERE c.subject_id = :subjectId " +
             "AND q.deleted = false " +
+            "AND q.exam_enabled = true " +
             "ORDER BY RAND() LIMIT :number", nativeQuery = true)
     List<Question> findRandomQuestionsBySubject(
             @Param("subjectId") Long subjectId,
@@ -123,6 +143,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             FROM Question q
             WHERE q.chapter.chapterId IN :chapterIds
             AND q.deleted = false
+            AND q.examEnabled = true
             GROUP BY q.chapter.chapterId
             """)
     List<Object[]> countActiveQuestionsByChapterIds(@Param("chapterIds") List<Long> chapterIds);
@@ -132,6 +153,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             FROM Question q
             WHERE q.chapter.subject.subjectId IN :subjectIds
             AND q.deleted = false
+            AND q.examEnabled = true
             GROUP BY q.chapter.subject.subjectId
             """)
     List<Object[]> countActiveQuestionsBySubjectIds(@Param("subjectIds") List<Long> subjectIds);
@@ -150,6 +172,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            "FROM Question q " +
            "WHERE q.chapter.subject.subjectId = :subjectId " +
            "AND q.deleted = false " +
+           "AND q.examEnabled = true " +
            "GROUP BY q.chapter.chapterId, q.difficulty")
     List<Object[]> countQuestionsBySubjectGroupedByChapterAndDifficulty(@Param("subjectId") Long subjectId);
 
@@ -161,6 +184,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
               AND (:chapterId IS NULL OR q.chapter.chapterId = :chapterId)
               AND (:difficulty IS NULL OR q.difficulty = :difficulty)
               AND (:deleted IS NULL OR q.deleted = :deleted)
+              AND (:examEnabled IS NULL OR q.examEnabled = :examEnabled)
+              AND (:practiceEnabled IS NULL OR q.practiceEnabled = :practiceEnabled)
             ORDER BY q.questionId DESC
             """)
     List<Question> filterQuestions(
@@ -168,7 +193,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("subjectId") Long subjectId,
             @Param("chapterId") Long chapterId,
             @Param("difficulty") Question.Difficulty difficulty,
-            @Param("deleted") Boolean deleted);
+            @Param("deleted") Boolean deleted,
+            @Param("examEnabled") Boolean examEnabled,
+            @Param("practiceEnabled") Boolean practiceEnabled);
 
     @Query(
             value = """
@@ -180,7 +207,27 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
               AND (:chapterId IS NULL OR c.chapterId = :chapterId)
               AND (:difficulty IS NULL OR q.difficulty = :difficulty)
               AND (:deleted IS NULL OR q.deleted = :deleted)
+              AND (:examEnabled IS NULL OR q.examEnabled = :examEnabled)
+              AND (:practiceEnabled IS NULL OR q.practiceEnabled = :practiceEnabled)
               AND (:creatorFilterEnabled = false OR q.questionId IN :creatorQuestionIds)
+              AND (:excludeExamId IS NULL OR NOT EXISTS (
+                  SELECT eq FROM ExamQuestion eq
+                  WHERE eq.question.questionId = q.questionId
+                    AND eq.exam.examId = :excludeExamId
+              ))
+              AND (:usageFilter <> 'unused' OR NOT EXISTS (
+                  SELECT eq FROM ExamQuestion eq
+                  WHERE eq.question.questionId = q.questionId
+              ))
+              AND (:usageFilter <> 'used' OR EXISTS (
+                  SELECT eq FROM ExamQuestion eq
+                  WHERE eq.question.questionId = q.questionId
+              ))
+              AND (:excludeUsedInSubject = false OR NOT EXISTS (
+                  SELECT eq FROM ExamQuestion eq
+                  WHERE eq.question.questionId = q.questionId
+                    AND eq.exam.subject.subjectId = :subjectId
+              ))
             """,
             countQuery = """
             SELECT COUNT(q) FROM Question q
@@ -191,7 +238,27 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
               AND (:chapterId IS NULL OR c.chapterId = :chapterId)
               AND (:difficulty IS NULL OR q.difficulty = :difficulty)
               AND (:deleted IS NULL OR q.deleted = :deleted)
+              AND (:examEnabled IS NULL OR q.examEnabled = :examEnabled)
+              AND (:practiceEnabled IS NULL OR q.practiceEnabled = :practiceEnabled)
               AND (:creatorFilterEnabled = false OR q.questionId IN :creatorQuestionIds)
+              AND (:excludeExamId IS NULL OR NOT EXISTS (
+                  SELECT eq FROM ExamQuestion eq
+                  WHERE eq.question.questionId = q.questionId
+                    AND eq.exam.examId = :excludeExamId
+              ))
+              AND (:usageFilter <> 'unused' OR NOT EXISTS (
+                  SELECT eq FROM ExamQuestion eq
+                  WHERE eq.question.questionId = q.questionId
+              ))
+              AND (:usageFilter <> 'used' OR EXISTS (
+                  SELECT eq FROM ExamQuestion eq
+                  WHERE eq.question.questionId = q.questionId
+              ))
+              AND (:excludeUsedInSubject = false OR NOT EXISTS (
+                  SELECT eq FROM ExamQuestion eq
+                  WHERE eq.question.questionId = q.questionId
+                    AND eq.exam.subject.subjectId = :subjectId
+              ))
             """
     )
     Page<Long> filterQuestionIds(
@@ -200,8 +267,13 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("chapterId") Long chapterId,
             @Param("difficulty") Question.Difficulty difficulty,
             @Param("deleted") Boolean deleted,
+            @Param("examEnabled") Boolean examEnabled,
+            @Param("practiceEnabled") Boolean practiceEnabled,
             @Param("creatorFilterEnabled") boolean creatorFilterEnabled,
             @Param("creatorQuestionIds") List<Long> creatorQuestionIds,
+            @Param("usageFilter") String usageFilter,
+            @Param("excludeExamId") Long excludeExamId,
+            @Param("excludeUsedInSubject") boolean excludeUsedInSubject,
             Pageable pageable
     );
 

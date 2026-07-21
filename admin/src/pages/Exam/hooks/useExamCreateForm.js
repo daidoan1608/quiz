@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { message } from "antd";
 import { categoryApi } from "../../../api/services/categoryApi";
-import { examApi } from "../../../api/services/contentApi";
+import { examApi, questionApi } from "../../../api/services/contentApi";
 import { subjectApi } from "../../../api/services/subjectApi";
 
 const EMPTY_LIMITS = {
@@ -32,11 +32,27 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
   const [inputTotal, setInputTotal] = useState(0);
   const [inputDiff, setInputDiff] = useState(INITIAL_DIFF_INPUT);
   const [inputChapters, setInputChapters] = useState([]);
+  const [manualQuestions, setManualQuestions] = useState([]);
+  const [manualQuestionTotal, setManualQuestionTotal] = useState(0);
+  const [manualQuestionIds, setManualQuestionIds] = useState([]);
+  const [manualQuestionPage, setManualQuestionPage] = useState(1);
+  const [manualPickerLoading, setManualPickerLoading] = useState(false);
+  const [manualFilters, setManualFilters] = useState({
+    keyword: "",
+    chapterId: null,
+    difficulty: null,
+    usageFilter: "all",
+  });
 
   const resetQuestionConfig = useCallback(() => {
     setInputTotal(0);
     setInputDiff(INITIAL_DIFF_INPUT);
     setInputChapters([]);
+    setManualQuestions([]);
+    setManualQuestionTotal(0);
+    setManualQuestionIds([]);
+    setManualQuestionPage(1);
+    setManualFilters({ keyword: "", chapterId: null, difficulty: null, usageFilter: "all" });
     setSelectedSubject(null);
     setMaxQuestions(EMPTY_LIMITS);
   }, []);
@@ -79,6 +95,35 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
     }
   }, [fetchQuestionLimits, selectedSubject]);
 
+  const fetchManualQuestions = useCallback(async () => {
+    if (!selectedSubject || generationMode !== "manual") return;
+    setManualPickerLoading(true);
+    try {
+      const pageData = await questionApi.filterPage({
+        subjectId: selectedSubject,
+        keyword: manualFilters.keyword || undefined,
+        chapterId: manualFilters.chapterId || undefined,
+        difficulty: manualFilters.difficulty || undefined,
+        usageFilter: manualFilters.usageFilter,
+        deleted: false,
+        examEnabled: true,
+        page: manualQuestionPage - 1,
+        size: 20,
+      });
+      setManualQuestions(pageData.content || []);
+      setManualQuestionTotal(pageData.totalElements || 0);
+    } catch (error) {
+      console.error("Lỗi tải câu hỏi thủ công:", error);
+      message.error("Không thể tải danh sách câu hỏi để chọn.");
+    } finally {
+      setManualPickerLoading(false);
+    }
+  }, [generationMode, manualFilters, manualQuestionPage, selectedSubject]);
+
+  useEffect(() => {
+    fetchManualQuestions();
+  }, [fetchManualQuestions]);
+
   const handleCategoryChange = async (categoryId) => {
     form.setFieldsValue({ subjectId: null });
     setSelectedSubject(null);
@@ -101,6 +146,11 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
     setSelectedSubject(subjectId);
     setInputTotal(0);
     setInputDiff(INITIAL_DIFF_INPUT);
+    setManualQuestionIds([]);
+    setManualQuestionPage(1);
+    setManualQuestions([]);
+    setManualQuestionTotal(0);
+    setManualFilters({ keyword: "", chapterId: null, difficulty: null, usageFilter: "all" });
   };
 
   const calculateTotalSelected = useCallback(() => {
@@ -109,8 +159,9 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
     if (generationMode === "chapter") {
       return inputChapters.reduce((sum, chapter) => sum + chapter.selected, 0);
     }
+    if (generationMode === "manual") return manualQuestionIds.length;
     return 0;
-  }, [generationMode, inputChapters, inputDiff, inputTotal]);
+  }, [generationMode, inputChapters, inputDiff, inputTotal, manualQuestionIds.length]);
 
   const submitExam = async (values) => {
     const totalSelected = calculateTotalSelected();
@@ -123,6 +174,7 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
     try {
       await examApi.create({
         examDto: {
+          examCode: values.examCode,
           subjectId: values.subjectId,
           title: values.title,
           description: values.description,
@@ -140,6 +192,8 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
                 return acc;
               }, {})
             : {},
+        generationMode: generationMode.toUpperCase(),
+        questionIds: generationMode === "manual" ? manualQuestionIds : [],
       });
       message.success("Thêm bài thi thành công!");
       resetFormState();
@@ -168,12 +222,21 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
     inputDiff,
     inputTotal,
     loading,
+    manualFilters,
+    manualPickerLoading,
+    manualQuestionIds,
+    manualQuestionPage,
+    manualQuestionTotal,
+    manualQuestions,
     maxQuestions,
     selectedSubject,
     setGenerationMode,
     setInputChapters,
     setInputDiff,
     setInputTotal,
+    setManualFilters,
+    setManualQuestionIds,
+    setManualQuestionPage,
     subjects,
     submitExam,
   };

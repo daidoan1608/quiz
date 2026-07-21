@@ -5,8 +5,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       DB_HOST: db
+      REDIS_HOST: redis
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/quiz?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
     ports:
       - "8080:8080"

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Form, Input, Button, Select,
+  Form, Input, Button, Select, Switch,
   Typography, Divider,
   Row, Col, Alert, Modal
 } from 'antd';
@@ -224,6 +224,19 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
           showIcon
           style={{ marginBottom: 20 }}
         />
+
+        <Row gutter={24}>
+          <Col xs={24} md={12}>
+            <Form.Item label="Dung trong de thi" name="examEnabled" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label="Hien trong on tap" name="practiceEnabled" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </Col>
+        </Row>
 
         <QuestionAnswerFields
           questionType={questionType}

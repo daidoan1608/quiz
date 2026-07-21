@@ -10,6 +10,7 @@ import {
   Row,
   Select,
   Skeleton,
+  Switch,
   Typography,
 } from "antd";
 import { CheckCircleOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
@@ -155,6 +156,19 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
             showIcon
             style={{ marginBottom: 20 }}
           />
+
+          <Row gutter={24}>
+            <Col xs={24} md={12}>
+              <Form.Item label="Dung trong de thi" name="examEnabled" valuePropName="checked">
+                <Switch />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item label="Hien trong on tap" name="practiceEnabled" valuePropName="checked">
+                <Switch />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <QuestionAnswerFields
             questionType={questionType}

@@ -35,6 +35,12 @@ public class Question {
     @Column(nullable = false)
     private Boolean deleted = false;
 
+    @Column(name = "exam_enabled", nullable = false)
+    private Boolean examEnabled = true;
+
+    @Column(name = "practice_enabled", nullable = false)
+    private Boolean practiceEnabled = true;
+
     private LocalDateTime deletedAt;
 
     private UUID deletedBy;
@@ -69,6 +75,12 @@ public class Question {
     private void ensureDefaults() {
         if (deleted == null) {
             deleted = false;
+        }
+        if (examEnabled == null) {
+            examEnabled = true;
+        }
+        if (practiceEnabled == null) {
+            practiceEnabled = true;
         }
         if (questionType == null) {
             questionType = QuestionType.SINGLE_CHOICE;

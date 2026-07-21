@@ -76,6 +76,7 @@ export const ExamDetailModal = ({ open, onCancel, examId }) => {
                   {examDetail.title}
                 </Title>
                 <Text type="secondary">{examDetail.subjectName}</Text>
+                <Text type="secondary">Ma de: {examDetail.examCode}</Text>
               </Space>
             </div>
 

@@ -10,6 +10,8 @@ import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.ChapterService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final SoftDeleteService softDeleteService;
 
     @Override
+    @Cacheable(value = "publicChaptersBySubject", key = "#subjectId")
     public List<ChapterDto> getChapterBySubject(Long subjectId) {
         List<Chapter> chapters = chapterRepository.findBySubject(subjectId);
         Map<Long, Long> questionCounts = countQuestionsByChapter(chapters);
@@ -89,6 +92,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public ChapterDto create(ChapterDto chapterDto) {
         var subject = subjectRepository.findById(chapterDto.getSubjectId())
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
@@ -107,6 +111,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public ChapterDto update(Long chapterId, ChapterDto chapterDto) {
         var existingChapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
@@ -121,6 +126,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public Response delete(Long chapterId) {
         softDeleteService.deleteChapter(chapterId, null);
         return Response.builder()
@@ -129,6 +135,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public ChapterDto restore(Long chapterId) {
         softDeleteService.restoreChapter(chapterId);
         Chapter chapter = chapterRepository.findById(chapterId)

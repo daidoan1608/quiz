@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.service;
 
+import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.UserExamDto;
 import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
 import com.fita.vnua.quiz.model.entity.Question;
@@ -57,4 +58,6 @@ public interface UserExamService {
     UserExamDto submitAttempt(Long userExamId, UUID currentUserId);
 
     List<Question> getAttemptQuestionsForSubmittedAttempt(Long userExamId, UUID currentUserId);
+
+    List<QuestionDto> getAttemptQuestionDtosForSubmittedAttempt(Long userExamId, UUID currentUserId);
 }

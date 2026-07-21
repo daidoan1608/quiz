@@ -8,7 +8,7 @@ import { EXAM_DEFAULT_FILTERS } from "../constants";
 
 const examMatchesKeyword = (exam, keyword) =>
   !keyword ||
-  `${exam.title || ""} ${exam.description || ""} ${exam.subjectName || ""} ${exam.subjectId || ""}`
+  `${exam.examCode || ""} ${exam.title || ""} ${exam.description || ""} ${exam.subjectName || ""} ${exam.subjectId || ""}`
     .toLowerCase()
     .includes(keyword);
 
@@ -29,6 +29,7 @@ export const useExamManager = () => {
   const [tableSort, setTableSort] = useState({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState(null);
   const { current: currentPage, pageSize } = pagination;
   const { user, capabilities, canOnSubject } = useAuth();
@@ -221,6 +222,16 @@ export const useExamManager = () => {
     setSelectedExamId(null);
   };
 
+  const openUpdateModal = (examId) => {
+    setSelectedExamId(examId);
+    setIsUpdateModalOpen(true);
+  };
+
+  const closeUpdateModal = () => {
+    setIsUpdateModalOpen(false);
+    setSelectedExamId(null);
+  };
+
   const canCreateExam =
     viewMode === "active" &&
     (!isMod ||
@@ -249,6 +260,7 @@ export const useExamManager = () => {
     isMod,
     isAddModalOpen,
     isViewModalOpen,
+    isUpdateModalOpen,
     selectedExamId,
     canCreateExam,
     canOnSubject,
@@ -263,5 +275,7 @@ export const useExamManager = () => {
     refreshExamList,
     openViewModal,
     closeViewModal,
+    openUpdateModal,
+    closeUpdateModal,
   };
 };

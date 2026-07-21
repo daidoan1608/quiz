@@ -6,10 +6,12 @@ services:
       - "8080"
     depends_on:
       - db
+      - redis
     env_file:
       - ./server/.env.production
     environment:
       - DB_HOST=db
+      - REDIS_HOST=redis
 
   user:
     build:
@@ -45,6 +47,13 @@ services:
       - ./mysql.init:/docker-entrypoint-initdb.d
       - db-data:/var/lib/mysql
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+
   nginx:
     image: nginx:alpine
     restart: always
@@ -61,3 +70,4 @@ services:
 
 volumes:
   db-data:
+  redis-data:

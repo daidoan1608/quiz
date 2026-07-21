@@ -25,6 +25,10 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
 
     Optional<Exam> findByExamIdAndDeletedFalse(Long examId);
 
+    boolean existsByExamCodeIgnoreCase(String examCode);
+
+    boolean existsByExamCodeIgnoreCaseAndExamIdNot(String examCode, Long examId);
+
     @Query("""
             SELECT e FROM Exam e
             JOIN FETCH e.subject s
@@ -35,6 +39,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             AND (:createdBy IS NULL OR cb.userId = :createdBy)
             AND (
                 :keyword IS NULL OR :keyword = ''
+                OR LOWER(e.examCode) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(e.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -60,6 +65,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             AND (:createdBy IS NULL OR cb.userId = :createdBy)
             AND (
                 :keyword IS NULL OR :keyword = ''
+                OR LOWER(e.examCode) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(e.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -76,6 +82,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             AND (:createdBy IS NULL OR cb.userId = :createdBy)
             AND (
                 :keyword IS NULL OR :keyword = ''
+                OR LOWER(e.examCode) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(e.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))

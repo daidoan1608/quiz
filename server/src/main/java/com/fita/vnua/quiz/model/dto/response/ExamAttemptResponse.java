@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.model.dto.response;
 
+import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.UserAnswerDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,4 +30,5 @@ public class ExamAttemptResponse {
     private Integer totalQuestions;
     private Float score;
     private List<UserAnswerDto> userAnswerDtos;
+    private List<QuestionDto> questions;
 }

@@ -27,6 +27,8 @@ public class QuestionMapper {
         question.setDifficulty(parseDifficulty(dto.getDifficulty()));
         question.setImageUrl(imageUrlResolver.apply(dto.getImageUrl()));
         question.setQuestionType(parseQuestionType(dto.getQuestionType()));
+        question.setExamEnabled(dto.getExamEnabled() == null || Boolean.TRUE.equals(dto.getExamEnabled()));
+        question.setPracticeEnabled(dto.getPracticeEnabled() == null || Boolean.TRUE.equals(dto.getPracticeEnabled()));
         question.setChapter(chapter);
         question.setAnswers(toAnswers(dto.getAnswers(), question));
         return question;
@@ -37,6 +39,12 @@ public class QuestionMapper {
         question.setDifficulty(parseDifficulty(dto.getDifficulty()));
         question.setImageUrl(dto.getImageUrl());
         question.setQuestionType(parseQuestionType(dto.getQuestionType()));
+        if (dto.getExamEnabled() != null) {
+            question.setExamEnabled(dto.getExamEnabled());
+        }
+        if (dto.getPracticeEnabled() != null) {
+            question.setPracticeEnabled(dto.getPracticeEnabled());
+        }
     }
 
     public List<Answer> toAnswers(List<AnswerDto> answerDtos, Question question) {
@@ -58,6 +66,8 @@ public class QuestionMapper {
         dto.setChapterName(question.getChapter() == null ? null : question.getChapter().getName());
         dto.setImageUrl(question.getImageUrl());
         dto.setQuestionType(resolveQuestionType(question).name());
+        dto.setExamEnabled(question.getExamEnabled());
+        dto.setPracticeEnabled(question.getPracticeEnabled());
         dto.setDeleted(question.getDeleted());
         dto.setDeletedAt(question.getDeletedAt());
         dto.setDeletedBy(question.getDeletedBy());

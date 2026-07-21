@@ -21,4 +21,19 @@ public class UserExamQuestion {
 
     @Column(nullable = false)
     private Integer position;
+
+    @Column(name = "question_content_snapshot", columnDefinition = "TEXT")
+    private String questionContentSnapshot;
+
+    @Column(name = "question_image_url_snapshot", length = 1000)
+    private String questionImageUrlSnapshot;
+
+    @Column(name = "question_difficulty_snapshot", length = 32)
+    private String questionDifficultySnapshot;
+
+    @Column(name = "question_type_snapshot", length = 32)
+    private String questionTypeSnapshot;
+
+    @Column(name = "answers_snapshot_json", columnDefinition = "json")
+    private String answersSnapshotJson;
 }
