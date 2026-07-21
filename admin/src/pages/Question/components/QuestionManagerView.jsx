@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Input,
@@ -21,9 +22,6 @@ import {
   UndoOutlined,
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
-import QuestionFormCreateModal from "./QuestionFormCreateModal";
-import QuestionFormUpdateModal from "./QuestionFormUpdateModal";
-import QuestionImportModal from "./QuestionImportModal";
 import MarkdownLatex from "../../../components/common/MarkdownLatex";
 import { QUESTION_PAGE_SIZE_OPTIONS } from "../constants";
 
@@ -64,10 +62,6 @@ export const QuestionManagerView = ({
   advancedFilters,
   pagination,
   isMod,
-  isAddModalOpen,
-  isUpdateModalOpen,
-  isImportModalOpen,
-  questionIdToUpdate,
   canCreateQuestion,
   canImportQuestion,
   canOnSubject,
@@ -77,13 +71,9 @@ export const QuestionManagerView = ({
   updateFilter,
   deleteQuestion,
   restoreQuestion,
-  openAddModal,
-  openImportModal,
-  openUpdateModal,
-  closeModal,
-  refreshAndCloseModal,
   downloadQuestions,
 }) => {
+  const navigate = useNavigate();
   const columns = [
     {
       title: "ID",
@@ -190,7 +180,7 @@ export const QuestionManagerView = ({
               className="action-btn is-primary"
               icon={<EditOutlined />}
               disabled={!canOnSubject(record.subjectId, "QUESTION", "UPDATE")}
-              onClick={() => openUpdateModal(record.questionId)}
+              onClick={() => navigate(`/questions/${record.questionId}/edit`)}
             />
             <Popconfirm
               title="Chuyển câu hỏi vào thùng rác?"
@@ -307,7 +297,7 @@ export const QuestionManagerView = ({
         <Button
           className="toolbar-btn"
           icon={<ImportOutlined />}
-          onClick={openImportModal}
+          onClick={() => navigate("/questions/import")}
         >
           Import
         </Button>
@@ -343,29 +333,9 @@ export const QuestionManagerView = ({
         onReload={() =>
           fetchQuestions(searchText, pagination.current, pagination.pageSize)
         }
-        onAdd={canCreateQuestion ? openAddModal : undefined}
+        onAdd={canCreateQuestion ? () => navigate("/questions/create") : undefined}
       />
 
-      <QuestionFormCreateModal
-        isModalOpen={isAddModalOpen}
-        onCancel={closeModal}
-        onSuccess={refreshAndCloseModal}
-      />
-
-      {questionIdToUpdate && (
-        <QuestionFormUpdateModal
-          isModalOpen={isUpdateModalOpen}
-          onCancel={closeModal}
-          onSuccess={refreshAndCloseModal}
-          questionId={questionIdToUpdate}
-        />
-      )}
-
-      <QuestionImportModal
-        isModalOpen={isImportModalOpen}
-        onCancel={closeModal}
-        onSuccess={refreshAndCloseModal}
-      />
     </>
   );
 };

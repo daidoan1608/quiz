@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Input,
@@ -15,6 +16,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
+  FilePdfOutlined,
   FileTextOutlined,
   SearchOutlined,
   UndoOutlined,
@@ -60,6 +62,7 @@ export const ExamManagerView = ({
   openUpdateModal,
   closeUpdateModal,
 }) => {
+  const navigate = useNavigate();
   const columns = [
     {
       title: "Ma de",
@@ -134,7 +137,7 @@ export const ExamManagerView = ({
     {
       title: "Hành động",
       key: "action",
-      width: viewMode === "active" ? 180 : 90,
+      width: viewMode === "active" ? 220 : 90,
       fixed: "right",
       render: (_, record) =>
         viewMode === "active" ? (
@@ -144,6 +147,13 @@ export const ExamManagerView = ({
                 className="action-btn"
                 icon={<EyeOutlined />}
                 onClick={() => openViewModal(record.examId)}
+              />
+            </Tooltip>
+            <Tooltip title="Preview PDF">
+              <Button
+                className="action-btn"
+                icon={<FilePdfOutlined />}
+                onClick={() => navigate(`/exams/${record.examId}/print-preview?mode=student`)}
               />
             </Tooltip>
             <Tooltip title="Sua de thi">

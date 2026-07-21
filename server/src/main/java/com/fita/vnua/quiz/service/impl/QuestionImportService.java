@@ -87,7 +87,10 @@ public class QuestionImportService {
                 || (originalFilename != null && originalFilename.endsWith(".zip"));
 
         if (!isZip) {
-            return new ImportedQuestionFile(ExcelHelper.excelToQuestions(file.getInputStream()), Map.of());
+            return new ImportedQuestionFile(
+                    ExcelHelper.importToQuestions(file.getInputStream(), originalFilename),
+                    Map.of()
+            );
         }
 
         return readZipImportFile(file);
@@ -96,6 +99,7 @@ public class QuestionImportService {
     private ImportedQuestionFile readZipImportFile(MultipartFile file) throws IOException {
         Map<String, byte[]> images = new HashMap<>();
         byte[] excelBytes = null;
+        String excelFilename = null;
 
         try (ZipInputStream zipInputStream = new ZipInputStream(file.getInputStream())) {
             ZipEntry entry;
@@ -105,8 +109,9 @@ public class QuestionImportService {
                 }
 
                 String simpleName = Paths.get(entry.getName()).getFileName().toString();
-                if (simpleName.endsWith(".xlsx")) {
+                if (isSpreadsheetFile(simpleName)) {
                     excelBytes = zipInputStream.readAllBytes();
+                    excelFilename = simpleName;
                 } else if (isImageFile(simpleName)) {
                     images.put(simpleName.toLowerCase(), zipInputStream.readAllBytes());
                 }
@@ -116,12 +121,17 @@ public class QuestionImportService {
         }
 
         if (excelBytes == null) {
-            throw new CustomApiException("Không tìm thấy file Excel (.xlsx) trong file nén ZIP!", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Không tìm thấy file Excel/CSV trong file nén ZIP!", HttpStatus.BAD_REQUEST);
         }
 
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(excelBytes)) {
-            return new ImportedQuestionFile(ExcelHelper.excelToQuestions(inputStream), images);
+            return new ImportedQuestionFile(ExcelHelper.importToQuestions(inputStream, excelFilename), images);
         }
+    }
+
+    private boolean isSpreadsheetFile(String filename) {
+        String lower = filename.toLowerCase();
+        return lower.endsWith(".xlsx") || lower.endsWith(".xls") || lower.endsWith(".csv");
     }
 
     private Question toQuestion(QuestionDto dto, Chapter chapter, Map<String, byte[]> images) {

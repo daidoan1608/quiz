@@ -1,17 +1,15 @@
 import React from "react";
-import { Checkbox, Form, Input, Radio, Typography, theme } from "antd";
+import { Checkbox, Form, Radio, Typography, theme } from "antd";
+import MarkdownLatexEditor from "../../../components/common/MarkdownLatexEditor";
 import { QUESTION_ANSWER_LABELS } from "../constants";
-import { MarkdownPreviewBox } from "./MarkdownPreviewBox";
 
 const { Text } = Typography;
-const { TextArea } = Input;
 
 export const QuestionAnswerFields = ({
   questionType,
   correctAnswers,
   setCorrectAnswers,
   fieldNames,
-  answerValues,
   requiredMessage,
   correctColor,
 }) => {
@@ -56,22 +54,19 @@ export const QuestionAnswerFields = ({
           ]}
           style={{ margin: 0 }}
         >
-          <TextArea
+          <MarkdownLatexEditor
             className={
               isCorrect
                 ? "question-answer-input is-correct"
                 : "question-answer-input"
             }
-            placeholder={`Nhập đáp án ${label} (hỗ trợ LaTeX và Markdown, Enter để xuống dòng)`}
-            autoSize={{ minRows: 1, maxRows: 5 }}
+            placeholder={`Nhập đáp án ${label} (hỗ trợ Markdown và LaTeX)`}
+            minRows={2}
+            maxRows={6}
+            compact
             style={getAnswerInputStyle(isCorrect)}
           />
         </Form.Item>
-        <MarkdownPreviewBox
-          content={answerValues[index]}
-          label={`Xem trước ${label}:`}
-          compact
-        />
       </div>
     );
   };
