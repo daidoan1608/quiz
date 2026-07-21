@@ -23,7 +23,7 @@ import {
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
 import MarkdownLatex from "../../../components/common/MarkdownLatex";
-import { QUESTION_PAGE_SIZE_OPTIONS } from "../constants";
+import { QUESTION_ANSWER_LABELS, QUESTION_PAGE_SIZE_OPTIONS } from "../constants";
 
 const { Text } = Typography;
 
@@ -126,30 +126,12 @@ export const QuestionManagerView = ({
       key: "chapterName",
       width: 150,
     },
-    {
-      title: "Đáp án A",
-      key: "ansA",
+    ...QUESTION_ANSWER_LABELS.map((label, index) => ({
+      title: `Đáp án ${label}`,
+      key: `ans${label}`,
       width: 150,
-      render: (_, record) => renderAnswerContent(record.answers, 0),
-    },
-    {
-      title: "Đáp án B",
-      key: "ansB",
-      width: 150,
-      render: (_, record) => renderAnswerContent(record.answers, 1),
-    },
-    {
-      title: "Đáp án C",
-      key: "ansC",
-      width: 150,
-      render: (_, record) => renderAnswerContent(record.answers, 2),
-    },
-    {
-      title: "Đáp án D",
-      key: "ansD",
-      width: 150,
-      render: (_, record) => renderAnswerContent(record.answers, 3),
-    },
+      render: (_, record) => renderAnswerContent(record.answers, index),
+    })),
     ...(viewMode === "deleted"
       ? [
           {
@@ -326,7 +308,7 @@ export const QuestionManagerView = ({
               showSizeChanger: true,
               pageSizeOptions: QUESTION_PAGE_SIZE_OPTIONS,
             }}
-            scroll={{ x: 1700 }}
+            scroll={{ x: 2300 }}
             onChange={handleTableChange}
           />
         }

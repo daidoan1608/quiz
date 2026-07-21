@@ -5,7 +5,6 @@ import {
   Segmented,
   Skeleton,
   Space,
-  Table,
   Tag,
   Typography,
   message,
@@ -23,7 +22,7 @@ import MarkdownLatex from "../../components/common/MarkdownLatex";
 import { typesetMath } from "../../utils/typesetMath";
 
 const { Text, Title } = Typography;
-const ANSWER_LABELS = ["A", "B", "C", "D"];
+const ANSWER_LABELS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
 const sanitizeFileName = (value) =>
   (value || "de-thi")
@@ -129,20 +128,6 @@ const ExamPrintPreviewPage = () => {
     }
   };
 
-  const answerColumns = [
-    {
-      title: "Câu",
-      dataIndex: "index",
-      key: "index",
-      width: 80,
-    },
-    {
-      title: "Đáp án",
-      dataIndex: "answer",
-      key: "answer",
-    },
-  ];
-
   const answerData = questions.map((question, index) => ({
     key: question.questionId || index,
     index: index + 1,
@@ -206,6 +191,25 @@ const ExamPrintPreviewPage = () => {
             margin-top: 24px;
             break-inside: avoid;
             page-break-inside: avoid;
+          }
+          .exam-print-answer-key table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12pt;
+          }
+          .exam-print-answer-key th,
+          .exam-print-answer-key td {
+            border: 1px solid #111827;
+            padding: 6px 10px;
+            text-align: center;
+          }
+          .exam-print-answer-key th {
+            background: #f3f4f6;
+            font-weight: 700;
+          }
+          .exam-print-answer-key td:last-child {
+            font-weight: 700;
+            letter-spacing: 0;
           }
           .exam-print-image {
             display: block;
@@ -319,13 +323,22 @@ const ExamPrintPreviewPage = () => {
               <Title level={4} style={{ fontFamily: "inherit" }}>
                 Bảng đáp án
               </Title>
-              <Table
-                columns={answerColumns}
-                dataSource={answerData}
-                pagination={false}
-                size="small"
-                bordered
-              />
+              <table>
+                <thead>
+                  <tr>
+                    <th>Câu</th>
+                    <th>Đáp án đúng</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {answerData.map((item) => (
+                    <tr key={item.key}>
+                      <td>{item.index}</td>
+                      <td>{item.answer}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </section>
           ) : null}
         </main>

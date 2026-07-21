@@ -129,7 +129,6 @@ const QuestionUpdatePage = () => {
               questionType={questionType}
               correctAnswers={correctAnswers}
               setCorrectAnswers={setCorrectAnswers}
-              fieldNames={["answer_0", "answer_1", "answer_2", "answer_3"]}
             />
             <Space style={{ display: "flex", justifyContent: "flex-end" }}>
               <Button onClick={goBack}>Hủy bỏ</Button>

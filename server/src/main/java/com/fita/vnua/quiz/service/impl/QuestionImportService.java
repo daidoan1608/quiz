@@ -31,6 +31,8 @@ import java.util.zip.ZipInputStream;
 @Service
 @RequiredArgsConstructor
 public class QuestionImportService {
+    private static final int MIN_ANSWERS = 2;
+    private static final int MAX_ANSWERS = 8;
 
     private final QuestionRepository questionRepository;
     private final ChapterRepository chapterRepository;
@@ -83,8 +85,9 @@ public class QuestionImportService {
     private ImportedQuestionFile readImportFile(MultipartFile file) throws IOException {
         String contentType = file.getContentType();
         String originalFilename = file.getOriginalFilename();
-        boolean isZip = (contentType != null && contentType.equals("application/zip"))
-                || (originalFilename != null && originalFilename.endsWith(".zip"));
+        boolean isZip = (contentType != null
+                && (contentType.equals("application/zip") || contentType.equals("application/x-zip-compressed")))
+                || (originalFilename != null && originalFilename.toLowerCase().endsWith(".zip"));
 
         if (!isZip) {
             return new ImportedQuestionFile(
@@ -113,7 +116,9 @@ public class QuestionImportService {
                     excelBytes = zipInputStream.readAllBytes();
                     excelFilename = simpleName;
                 } else if (isImageFile(simpleName)) {
-                    images.put(simpleName.toLowerCase(), zipInputStream.readAllBytes());
+                    byte[] imageBytes = zipInputStream.readAllBytes();
+                    images.put(entry.getName().toLowerCase(), imageBytes);
+                    images.put(simpleName.toLowerCase(), imageBytes);
                 }
             }
         } catch (Exception e) {
@@ -145,6 +150,9 @@ public class QuestionImportService {
 
         String normalizedImage = imageNameOrUrl.trim();
         byte[] imageBytes = images.get(normalizedImage.toLowerCase());
+        if (imageBytes == null) {
+            imageBytes = images.get(getSimpleFileKey(normalizedImage));
+        }
         if (imageBytes != null) {
             return saveQuestionImage(normalizedImage, imageBytes);
         }
@@ -191,8 +199,8 @@ public class QuestionImportService {
         }
 
         List<AnswerDto> answers = question.getAnswers();
-        if (answers == null || answers.size() < 2 || answers.size() > 4) {
-            addRowError(errors, invalidRows, rowNumber, "cần có từ 2 đến 4 đáp án.");
+        if (answers == null || answers.size() < MIN_ANSWERS || answers.size() > MAX_ANSWERS) {
+            addRowError(errors, invalidRows, rowNumber, "cần có từ 2 đến 8 đáp án.");
         } else {
             long correctCount = answers.stream().filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect())).count();
             if (correctCount == 0) {
@@ -221,11 +229,18 @@ public class QuestionImportService {
         String imageUrl = question.getImageUrl();
         if (imageUrl != null && !imageUrl.isBlank()) {
             String normalizedImage = imageUrl.trim();
-            boolean foundInZip = images.containsKey(normalizedImage.toLowerCase());
+            boolean foundInZip = images.containsKey(normalizedImage.toLowerCase())
+                    || images.containsKey(getSimpleFileKey(normalizedImage));
             if (!foundInZip && !isExternalOrPublicUrl(normalizedImage)) {
                 addRowError(errors, invalidRows, rowNumber, "không tìm thấy ảnh '" + normalizedImage + "' trong ZIP.");
             }
         }
+    }
+
+    private String getSimpleFileKey(String value) {
+        String normalized = value.replace("\\", "/");
+        int slashIndex = normalized.lastIndexOf('/');
+        return (slashIndex >= 0 ? normalized.substring(slashIndex + 1) : normalized).toLowerCase();
     }
 
     private void addRowError(List<String> errors, Set<Integer> invalidRows, int rowNumber, String message) {

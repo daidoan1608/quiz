@@ -45,6 +45,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements QuestionService {
+    private static final int MIN_ANSWERS = 2;
+    private static final int MAX_ANSWERS = 8;
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
     private final ChapterRepository chapterRepository;
@@ -507,6 +509,15 @@ public class QuestionServiceImpl implements QuestionService {
         List<AnswerDto> answers = questionDto.getAnswers();
         if (answers == null || answers.isEmpty()) {
             throw new CustomApiException("Vui lòng nhập danh sách đáp án", HttpStatus.BAD_REQUEST);
+        }
+        if (answers.size() < MIN_ANSWERS || answers.size() > MAX_ANSWERS) {
+            throw new CustomApiException("Câu hỏi cần có từ 2 đến 8 đáp án", HttpStatus.BAD_REQUEST);
+        }
+        for (int index = 0; index < answers.size(); index++) {
+            AnswerDto answer = answers.get(index);
+            if (answer == null || answer.getContent() == null || answer.getContent().trim().isEmpty()) {
+                throw new CustomApiException("Đáp án " + (char) ('A' + index) + " không được để trống", HttpStatus.BAD_REQUEST);
+            }
         }
 
         long correctAnswerCount = answers.stream()

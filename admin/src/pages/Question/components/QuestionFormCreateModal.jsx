@@ -49,10 +49,7 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
   });
 
   const content = Form.useWatch("content", form);
-  const answerA = Form.useWatch("answerA", form);
-  const answerB = Form.useWatch("answerB", form);
-  const answerC = Form.useWatch("answerC", form);
-  const answerD = Form.useWatch("answerD", form);
+  const answers = Form.useWatch("answers", form);
 
   useEffect(() => {
     if (window.MathJax && window.MathJax.typesetPromise) {
@@ -61,7 +58,7 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [content, answerA, answerB, answerC, answerD]);
+  }, [content, answers]);
 
   return (
     <Modal
@@ -242,8 +239,6 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
           questionType={questionType}
           correctAnswers={correctAnswers}
           setCorrectAnswers={setCorrectAnswers}
-          fieldNames={["answerA", "answerB", "answerC", "answerD"]}
-          answerValues={[answerA, answerB, answerC, answerD]}
           requiredMessage={(label) => `Nhập đáp án ${label}!`}
           correctColor="#52c41a"
         />

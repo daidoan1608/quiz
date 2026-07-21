@@ -169,7 +169,6 @@ const QuestionCreatePage = () => {
             questionType={questionType}
             correctAnswers={correctAnswers}
             setCorrectAnswers={setCorrectAnswers}
-            fieldNames={["answerA", "answerB", "answerC", "answerD"]}
             requiredMessage={(label) => `Nhập đáp án ${label}!`}
             correctColor="#52c41a"
           />

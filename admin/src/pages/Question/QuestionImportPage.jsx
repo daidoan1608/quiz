@@ -71,6 +71,8 @@ const QuestionImportPage = () => {
               ví dụ thư mục <code>images/</code> trong ZIP.
               Các cột nội dung câu hỏi và đáp án hỗ trợ Markdown/LaTeX như
               <code> **in đậm**</code>, <code>$x^2$</code>, <code>{"$$\\frac{a}{b}$$"}</code>.
+              Mỗi câu cần 2 đến 8 đáp án. Đáp án phải nhập liền từ A đến H;
+              không bỏ trống đáp án ở giữa rồi nhập đáp án phía sau.
             </div>
           }
           action={

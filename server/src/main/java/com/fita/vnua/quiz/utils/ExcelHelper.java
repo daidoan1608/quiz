@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +24,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ExcelHelper {
+    private static final int MIN_ANSWERS = 2;
+    private static final int MAX_ANSWERS = 8;
+    private static final String[] OPTIONS = {"A", "B", "C", "D", "E", "F", "G", "H"};
 
     public static List<QuestionDto> excelToQuestions(InputStream is) {
         return spreadsheetToQuestions(is);
@@ -40,14 +44,19 @@ public class ExcelHelper {
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rows = sheet.iterator();
             List<QuestionDto> questionList = new ArrayList<>();
+            DataFormatter formatter = new DataFormatter();
 
+            ImportColumns columns = ImportColumns.current();
             if (rows.hasNext()) {
-                rows.next();
+                columns = ImportColumns.fromHeader(rows.next(), formatter);
             }
 
-            DataFormatter formatter = new DataFormatter();
             while (rows.hasNext()) {
-                questionList.add(rowToQuestion(rows.next(), formatter));
+                Row row = rows.next();
+                if (isBlankRow(row, formatter, columns)) {
+                    continue;
+                }
+                questionList.add(rowToQuestion(row, formatter, columns));
             }
 
             return questionList;
@@ -58,7 +67,7 @@ public class ExcelHelper {
         }
     }
 
-    private static QuestionDto rowToQuestion(Row currentRow, DataFormatter formatter) {
+    private static QuestionDto rowToQuestion(Row currentRow, DataFormatter formatter, ImportColumns columns) {
         QuestionDto questionDto = new QuestionDto();
         List<AnswerDto> answers = new ArrayList<>();
 
@@ -67,23 +76,32 @@ public class ExcelHelper {
         validateDifficulty(difficulty);
         questionDto.setDifficulty(difficulty);
 
-        Set<String> correctOptions = parseCorrectOptions(getCellValue(currentRow, formatter, 6).trim().toUpperCase());
-        String[] options = {"A", "B", "C", "D"};
+        Set<String> correctOptions = parseCorrectOptions(getCellValue(currentRow, formatter, columns.correctOptionsColumn()).trim().toUpperCase());
+        boolean hasBlankAnswerBeforeFilledAnswer = false;
+        boolean seenBlankAnswer = false;
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < columns.answerLimit(); i++) {
             String answerContent = getCellValue(currentRow, formatter, i + 2).trim();
             if (answerContent.isBlank()) {
+                seenBlankAnswer = true;
                 continue;
+            }
+            if (seenBlankAnswer) {
+                hasBlankAnswerBeforeFilledAnswer = true;
             }
 
             AnswerDto answerDto = new AnswerDto();
             answerDto.setContent(answerContent);
-            answerDto.setIsCorrect(correctOptions.contains(options[i]));
+            answerDto.setIsCorrect(correctOptions.contains(OPTIONS[i]));
             answers.add(answerDto);
         }
+        if (hasBlankAnswerBeforeFilledAnswer) {
+            throw new CustomApiException("Các đáp án phải nhập liền từ A, không được bỏ trống đáp án ở giữa.", HttpStatus.BAD_REQUEST);
+        }
+        validateCorrectOptionsWithinAnswerRange(correctOptions, answers.size());
 
-        String imageUrl = getCellValue(currentRow, formatter, 7).trim();
-        String questionType = getCellValue(currentRow, formatter, 8).trim().toUpperCase();
+        String imageUrl = getCellValue(currentRow, formatter, columns.imageUrlColumn()).trim();
+        String questionType = getCellValue(currentRow, formatter, columns.questionTypeColumn()).trim().toUpperCase();
         questionDto.setImageUrl(imageUrl.isBlank() ? null : imageUrl);
         questionDto.setQuestionType(questionType.isBlank() ? "SINGLE_CHOICE" : questionType);
         questionDto.setAnswers(answers);
@@ -95,17 +113,29 @@ public class ExcelHelper {
         return cell != null ? formatter.formatCellValue(cell) : "";
     }
 
+    private static boolean isBlankRow(Row row, DataFormatter formatter, ImportColumns columns) {
+        for (int index = 0; index <= columns.questionTypeColumn(); index++) {
+            if (!getCellValue(row, formatter, index).trim().isBlank()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static List<QuestionDto> csvToQuestions(InputStream is) {
         try {
             List<List<String>> rows = parseCsv(is);
             List<QuestionDto> questionList = new ArrayList<>();
+            ImportColumns columns = rows.isEmpty()
+                    ? ImportColumns.current()
+                    : ImportColumns.fromHeader(rows.get(0));
 
             for (int rowIndex = 1; rowIndex < rows.size(); rowIndex++) {
                 List<String> row = rows.get(rowIndex);
                 if (row.stream().allMatch(value -> value == null || value.isBlank())) {
                     continue;
                 }
-                questionList.add(rowToQuestion(row));
+                questionList.add(rowToQuestion(row, columns));
             }
 
             return questionList;
@@ -116,32 +146,41 @@ public class ExcelHelper {
         }
     }
 
-    private static QuestionDto rowToQuestion(List<String> row) {
+    private static QuestionDto rowToQuestion(List<String> row, ImportColumns columns) {
         QuestionDto questionDto = new QuestionDto();
         List<AnswerDto> answers = new ArrayList<>();
         String difficulty = getCsvValue(row, 1).trim();
         validateDifficulty(difficulty);
 
-        Set<String> correctOptions = parseCorrectOptions(getCsvValue(row, 6).trim().toUpperCase());
-        String[] options = {"A", "B", "C", "D"};
+        Set<String> correctOptions = parseCorrectOptions(getCsvValue(row, columns.correctOptionsColumn()).trim().toUpperCase());
+        boolean hasBlankAnswerBeforeFilledAnswer = false;
+        boolean seenBlankAnswer = false;
 
         questionDto.setContent(getCsvValue(row, 0));
         questionDto.setDifficulty(difficulty);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < columns.answerLimit(); i++) {
             String answerContent = getCsvValue(row, i + 2).trim();
             if (answerContent.isBlank()) {
+                seenBlankAnswer = true;
                 continue;
+            }
+            if (seenBlankAnswer) {
+                hasBlankAnswerBeforeFilledAnswer = true;
             }
 
             AnswerDto answerDto = new AnswerDto();
             answerDto.setContent(answerContent);
-            answerDto.setIsCorrect(correctOptions.contains(options[i]));
+            answerDto.setIsCorrect(correctOptions.contains(OPTIONS[i]));
             answers.add(answerDto);
         }
+        if (hasBlankAnswerBeforeFilledAnswer) {
+            throw new CustomApiException("Các đáp án phải nhập liền từ A, không được bỏ trống đáp án ở giữa.", HttpStatus.BAD_REQUEST);
+        }
+        validateCorrectOptionsWithinAnswerRange(correctOptions, answers.size());
 
-        String imageUrl = getCsvValue(row, 7).trim();
-        String questionType = getCsvValue(row, 8).trim().toUpperCase();
+        String imageUrl = getCsvValue(row, columns.imageUrlColumn()).trim();
+        String questionType = getCsvValue(row, columns.questionTypeColumn()).trim().toUpperCase();
         questionDto.setImageUrl(imageUrl.isBlank() ? null : imageUrl);
         questionDto.setQuestionType(questionType.isBlank() ? "SINGLE_CHOICE" : questionType);
         questionDto.setAnswers(answers);
@@ -211,10 +250,66 @@ public class ExcelHelper {
         }
     }
 
+    private static void validateCorrectOptionsWithinAnswerRange(Set<String> correctOptions, int answerCount) {
+        for (String option : correctOptions) {
+            int optionIndex = option.charAt(0) - 'A';
+            if (optionIndex >= answerCount) {
+                throw new CustomApiException("Đáp án đúng " + option + " không có nội dung đáp án tương ứng.", HttpStatus.BAD_REQUEST);
+            }
+        }
+    }
+
     private static Set<String> parseCorrectOptions(String correctOption) {
         return correctOption.chars()
                 .mapToObj(value -> String.valueOf((char) value))
-                .filter(value -> value.matches("[A-D]"))
+                .filter(value -> value.matches("[A-H]"))
                 .collect(Collectors.toSet());
+    }
+
+    private record ImportColumns(int correctOptionsColumn, int imageUrlColumn, int questionTypeColumn) {
+        static ImportColumns current() {
+            return new ImportColumns(10, 11, 12);
+        }
+
+        static ImportColumns legacy() {
+            return new ImportColumns(6, 7, 8);
+        }
+
+        static ImportColumns fromHeader(Row header, DataFormatter formatter) {
+            for (int index = 0; index <= 12; index++) {
+                if (isCorrectAnswerHeader(getCellValue(header, formatter, index))) {
+                    return fromCorrectColumn(index);
+                }
+            }
+            return current();
+        }
+
+        static ImportColumns fromHeader(List<String> header) {
+            for (int index = 0; index < header.size() && index <= 12; index++) {
+                if (isCorrectAnswerHeader(getCsvValue(header, index))) {
+                    return fromCorrectColumn(index);
+                }
+            }
+            return current();
+        }
+
+        private static ImportColumns fromCorrectColumn(int correctColumn) {
+            if (correctColumn <= legacy().correctOptionsColumn()) {
+                return legacy();
+            }
+            return new ImportColumns(correctColumn, correctColumn + 1, correctColumn + 2);
+        }
+
+        int answerLimit() {
+            return Math.min(MAX_ANSWERS, Math.max(MIN_ANSWERS, correctOptionsColumn - 2));
+        }
+
+        private static boolean isCorrectAnswerHeader(String value) {
+            String normalized = Normalizer.normalize(value == null ? "" : value, Normalizer.Form.NFD)
+                    .replaceAll("\\p{M}", "")
+                    .toLowerCase()
+                    .replaceAll("[^a-z]", "");
+            return normalized.equals("dapandung");
+        }
     }
 }
