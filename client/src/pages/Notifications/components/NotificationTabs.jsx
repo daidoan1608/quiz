@@ -9,9 +9,10 @@ export const NotificationTabs = ({ filter, setFilter }) => (
         onClick={() => setFilter(tab.id)}
         className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
           filter === tab.id
-            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+            ? 'bg-primary text-white shadow-md shadow-primary/20'
             : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
+        type="button"
       >
         {tab.label}
       </button>

@@ -28,7 +28,8 @@ export const SubjectToolbar = ({
       </div>
       <button
         onClick={() => setIsMobileSidebarOpen(true)}
-        className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50 active:scale-95 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 lg:hidden"
+        className="aura-button aura-button-subtle px-5 py-2.5 text-sm lg:hidden"
+        type="button"
       >
         <span className="material-symbols-outlined">filter_list</span>
         {texts.filterLabel || 'Bộ lọc'}

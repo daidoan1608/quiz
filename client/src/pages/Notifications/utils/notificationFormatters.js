@@ -1,3 +1,32 @@
+const notificationTypeInfo = {
+  BATCH_MSG: {
+    icon: 'groups',
+    color: 'text-green-600 bg-green-100 dark:bg-green-900/30',
+    label: 'Thông báo lớp',
+  },
+  EXAM: {
+    icon: 'assignment',
+    color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
+    label: 'Đề thi',
+  },
+  PERSONAL_MSG: {
+    icon: 'person',
+    color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30',
+    label: 'Cá nhân',
+  },
+  SYSTEM: {
+    icon: 'dns',
+    color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30',
+    label: 'Hệ thống',
+  },
+};
+
+const defaultNotificationTypeInfo = {
+  icon: 'notifications',
+  color: 'text-gray-600 bg-gray-200 dark:bg-gray-800',
+  label: 'Thông báo',
+};
+
 export const formatTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -12,37 +41,5 @@ export const formatTime = (dateString) => {
   return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
 };
 
-export const getIconInfo = (relatedType) => {
-  switch (relatedType) {
-    case 'EXAM':
-      return {
-        icon: 'assignment',
-        color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
-        label: 'Đề thi',
-      };
-    case 'SYSTEM':
-      return {
-        icon: 'dns',
-        color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30',
-        label: 'Hệ thống',
-      };
-    case 'PERSONAL_MSG':
-      return {
-        icon: 'person',
-        color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30',
-        label: 'Cá nhân',
-      };
-    case 'BATCH_MSG':
-      return {
-        icon: 'groups',
-        color: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-        label: 'Thông báo lớp',
-      };
-    default:
-      return {
-        icon: 'notifications',
-        color: 'text-gray-600 bg-gray-200 dark:bg-gray-800',
-        label: 'Thông báo',
-      };
-  }
-};
+export const getIconInfo = (relatedType) =>
+  notificationTypeInfo[relatedType] || defaultNotificationTypeInfo;

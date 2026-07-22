@@ -1,21 +1,21 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 
 const CAT_QUOTES = [
   // Nhóm động viên
-  'Hôm nay bạn đã học được gì mới chưa? 📚',
-  'Cố lên! Top 1 server đang chờ bạn đó! 🏆',
-  'Kiến thức là sức mạnh, còn Pate là chân ái! 🐟',
-  'Đừng nhìn người khác, hãy vượt qua chính mình hôm qua! 💪',
+  'Hôm nay bạn đã học được gì mới chưa?',
+  'Cố lên! Top 1 server đang chờ bạn đó!',
+  'Kiến thức là sức mạnh, còn nghỉ ngơi đúng lúc là bí quyết.',
+  'Đừng nhìn người khác, hãy vượt qua chính mình hôm qua!',
 
   // Nhóm hài hước/IT
-  'Code không bug, đời không nể! 🐛',
-  'Đang loading nhân phẩm... vui lòng chờ 😼',
-  'Meow! Nhìn bảng xếp hạng áp lực quá nhỉ? 😹',
-  'Sen ơi, nhớ uống nước và giữ lưng thẳng nhé! 💧',
+  'Code không bug, đời không nể!',
+  'Đang loading tinh thần học tập... vui lòng chờ.',
+  'Nhìn bảng xếp hạng áp lực quá nhỉ?',
+  'Nhớ uống nước và giữ lưng thẳng nhé!',
 
   // Nhóm "cà khịa" nhẹ
-  'Sao hôm nay tụt hạng thế? Lười biếng à? 🤨',
-  'Bạn ở đâu trong cái danh sách dài dằng dặc này? 🧐',
+  'Sao hôm nay tụt hạng thế? Mình làm lại nào.',
+  'Bạn ở đâu trong danh sách xếp hạng hôm nay?',
 ];
 
 export default function CatMascot() {
@@ -39,12 +39,6 @@ export default function CatMascot() {
     setTimeout(() => setIsAnimating(false), 300);
   }, []);
 
-  // Tự động đổi câu thoại mỗi 10 giây cho sinh động
-  useEffect(() => {
-    const interval = setInterval(pokeCat, 10000);
-    return () => clearInterval(interval);
-  }, [pokeCat]);
-
   return (
     <div
       onClick={pokeCat}
@@ -52,7 +46,7 @@ export default function CatMascot() {
     >
       {/* 1. Phần Avatar Mèo (Có hiệu ứng rung khi click) */}
       <div
-        className={`relative shrink-0 ${isAnimating ? 'animate-bounce' : ''}`}
+        className={`relative shrink-0 ${isAnimating ? 'aura-tap-pop' : ''}`}
       >
         <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-orange-200 bg-orange-50 dark:border-orange-900/30 dark:bg-gray-700">
           {/* Bạn có thể thay link ảnh GIF khác nếu muốn */}
@@ -60,6 +54,8 @@ export default function CatMascot() {
             src="https://cdn.dribbble.com/userupload/23259628/file/original-609336522ed2395ba43595bf5103031c.gif"
             alt="Cat Mascot"
             className="h-14 w-14 object-cover mix-blend-multiply dark:mix-blend-normal"
+            decoding="async"
+            loading="lazy"
           />
         </div>
         {/* Chấm xanh online */}

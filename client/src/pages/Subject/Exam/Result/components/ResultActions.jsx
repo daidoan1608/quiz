@@ -13,7 +13,8 @@ export const ResultActions = ({ examData, examId, navigate, subjectId }) => (
           },
         });
       }}
-      className="flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98]"
+      className="aura-button aura-button-primary px-5 text-sm"
+      type="button"
     >
       <span className="material-symbols-outlined text-base">school</span>
       Ôn tập câu sai
@@ -30,7 +31,8 @@ export const ResultActions = ({ examData, examId, navigate, subjectId }) => (
           },
         });
       }}
-      className="flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:border-primary/40 hover:text-primary dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+      className="aura-button aura-button-subtle px-5 text-sm"
+      type="button"
     >
       <span className="material-symbols-outlined text-base">refresh</span>
       Làm lại bài kiểm tra
@@ -42,7 +44,8 @@ export const ResultActions = ({ examData, examId, navigate, subjectId }) => (
           state: { subjectId: currentSubjectId },
         });
       }}
-      className="flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:border-primary/40 hover:text-primary dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+      className="aura-button aura-button-subtle px-5 text-sm"
+      type="button"
     >
       <span className="material-symbols-outlined text-base">list_alt</span>
       Quay về danh sách

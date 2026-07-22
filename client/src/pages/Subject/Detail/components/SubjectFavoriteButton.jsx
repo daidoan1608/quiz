@@ -1,6 +1,7 @@
 import React from 'react';
 
 const SubjectFavoriteButton = ({
+  canToggleFavorite,
   isFavorited,
   subjectData,
   subjectId,
@@ -9,7 +10,7 @@ const SubjectFavoriteButton = ({
 }) => (
   <button
     onClick={() => toggleFavorite(subjectId, subjectData.name)}
-    disabled={!localStorage.getItem('userId')}
+    disabled={!canToggleFavorite}
     className={`shrink-0 rounded-xl border p-3 transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
       isFavorited
         ? 'border-red-200 bg-red-50 text-red-500 dark:border-red-900/60 dark:bg-red-900/20'

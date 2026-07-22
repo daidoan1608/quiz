@@ -1,4 +1,5 @@
 import React from 'react';
+import { SectionLoadingState } from '../../../components/common/PageState';
 import { LeaderboardRow } from './LeaderboardRow';
 
 export const LeaderboardTable = ({
@@ -26,13 +27,7 @@ export const LeaderboardTable = ({
 
       <div className="divide-y divide-gray-100 dark:divide-gray-700">
         {isLoading ? (
-          <div className="py-20 text-center">
-            <div
-              className="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-blue-600 rounded-full"
-              role="status"
-              aria-label="loading"
-            />
-          </div>
+          <SectionLoadingState className="py-20" minHeightClassName="min-h-40" />
         ) : displayedLeaderboard.length > 0 ? (
           displayedLeaderboard.map((item) => (
             <LeaderboardRow

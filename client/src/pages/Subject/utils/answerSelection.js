@@ -55,6 +55,12 @@ export const countAnsweredQuestions = ({
     return answered ? count + 1 : count;
   }, 0);
 
+export const getNextQuestionIndex = (currentIndex, questionCount) =>
+  Math.min(Math.max(questionCount - 1, 0), currentIndex + 1);
+
+export const getPreviousQuestionIndex = (currentIndex) =>
+  Math.max(0, currentIndex - 1);
+
 export const getUniqueAnswers = (answers = []) => {
   const seen = new Set();
 

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { message } from 'antd';
+﻿import { useEffect } from 'react';
+import { appMessage } from 'utils/appMessage';
 import { examApi } from 'api/services/examApi';
 import { readExamDraft } from '../utils/examAttemptDraft';
 import {
@@ -87,7 +87,7 @@ export const useLoadExamAttempt = ({
         setIsDraftReady(true);
       } catch (error) {
         console.error('Lỗi tải đề:', error);
-        message.error('Không thể tải đề thi.');
+        appMessage.error('Không thể tải đề thi.');
         navigate(-1);
       } finally {
         setIsLoading(false);
@@ -115,3 +115,4 @@ export const useLoadExamAttempt = ({
     userId,
   ]);
 };
+

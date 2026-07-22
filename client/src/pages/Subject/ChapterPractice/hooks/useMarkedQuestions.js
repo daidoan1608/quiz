@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { getStorageItem, setStorageItem } from 'utils/storage';
 
 const createMarkedStorageKey = (userId, chapterId) =>
   `chapter-practice-marked:${userId}:${chapterId || "unknown"}`;
 
 const readMarkedIds = (storageKey) =>
-  new Set(JSON.parse(localStorage.getItem(storageKey) || "[]").map(Number));
+  new Set(JSON.parse(getStorageItem(storageKey, "[]")).map(Number));
 
 export const useMarkedQuestions = ({ chapterId, userId }) => {
   const markedStorageKey = createMarkedStorageKey(userId, chapterId);
@@ -49,8 +50,8 @@ export const useMarkedQuestions = ({ chapterId, userId }) => {
       nextMarked.add(numericQuestionId);
     }
     setMarkedQuestions(nextMarked);
-    localStorage.setItem(targetStorageKey, JSON.stringify([...currentMarked]));
-    localStorage.setItem(fallbackStorageKey, JSON.stringify([...fallbackMarked]));
+    setStorageItem(targetStorageKey, JSON.stringify([...currentMarked]));
+    setStorageItem(fallbackStorageKey, JSON.stringify([...fallbackMarked]));
   };
 
   return {

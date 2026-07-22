@@ -1,14 +1,15 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
-import { message } from 'antd';
+import { appMessage } from 'utils/appMessage';
 import { favoriteApi } from 'api/services/favoriteApi';
 import { useAuth } from 'context/auth/AuthProvider';
+import { getCurrentUserId } from 'utils/storage';
 
 export const useFavoritesState = () => {
   const { isLoggedIn } = useAuth();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const userId = localStorage.getItem('userId');
+  const userId = getCurrentUserId();
 
   const loadFavorites = useCallback(async () => {
     setLoading(true);
@@ -35,16 +36,16 @@ export const useFavoritesState = () => {
   const addFavorite = useCallback(
     async (subjectId, subjectName) => {
       if (!userId) {
-        message.error('Vui lòng đăng nhập để thêm môn yêu thích');
+        appMessage.error('Vui lòng đăng nhập để thêm môn yêu thích');
         return;
       }
 
       try {
         await favoriteApi.add({ userId, subjectId, subjectName });
         setFavorites((prev) => [...prev, { subjectId, subjectName }]);
-        message.success('Thêm môn yêu thích thành công');
+        appMessage.success('Thêm môn yêu thích thành công');
       } catch (favoriteError) {
-        message.error('Thêm môn yêu thích thất bại');
+        appMessage.error('Thêm môn yêu thích thất bại');
       }
     },
     [userId]
@@ -61,9 +62,9 @@ export const useFavoritesState = () => {
         setFavorites((prev) =>
           prev.filter((favorite) => favorite.subjectId !== subjectId)
         );
-        message.success('Xóa môn yêu thích thành công');
+        appMessage.success('Xóa môn yêu thích thành công');
       } catch (favoriteError) {
-        message.error('Xóa môn yêu thích thất bại');
+        appMessage.error('Xóa môn yêu thích thất bại');
       }
     },
     [userId]
@@ -92,3 +93,4 @@ export const useFavoritesState = () => {
     toggleFavorite,
   };
 };
+

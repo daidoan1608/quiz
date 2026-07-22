@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
+import { PageLoadingState } from 'components/common/PageState';
 import { isClientUser } from './authState';
 import { useAuthSession } from './useAuthSession';
 
@@ -20,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={contextValue}>
-      {loading ? <div>Loading...</div> : children}
+      {loading ? <PageLoadingState label="Đang khởi tạo phiên đăng nhập..." /> : children}
     </AuthContext.Provider>
   );
 };

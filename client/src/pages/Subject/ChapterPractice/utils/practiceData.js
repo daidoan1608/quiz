@@ -3,10 +3,15 @@ import { SMART_WRONG_MODES } from '../constants/practiceOptions';
 export const createPracticeRequestParams = ({
   isSubjectPractice,
   maxQuestionLimit,
+  practiceConfig,
+  safeQuestionLimit,
 }) => ({
-  difficulty: undefined,
+  difficulty:
+    practiceConfig?.difficulty && practiceConfig.difficulty !== 'ALL'
+      ? practiceConfig.difficulty
+      : undefined,
   includeCorrectAnswers: true,
-  limit: isSubjectPractice ? 100 : maxQuestionLimit || 100,
+  limit: isSubjectPractice ? safeQuestionLimit || 100 : safeQuestionLimit || maxQuestionLimit || 100,
 });
 
 export const loadMarkedSubjectQuestions = async ({

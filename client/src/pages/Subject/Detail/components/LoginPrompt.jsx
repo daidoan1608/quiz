@@ -3,10 +3,10 @@ import React from 'react';
 const LoginPrompt = ({ onLoginRedirect, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity duration-300">
-      <div className="w-full max-w-sm transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left shadow-2xl transition-all border border-gray-100 dark:border-gray-700">
+      <div className="aura-surface-panel w-full max-w-sm transform overflow-hidden rounded-2xl p-6 text-left shadow-2xl transition-all">
         <div className="flex flex-col items-center text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
-            <span className="material-symbols-outlined text-3xl text-blue-600 dark:text-blue-400">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+            <span className="material-symbols-outlined text-3xl text-primary">
               lock
             </span>
           </div>
@@ -23,14 +23,16 @@ const LoginPrompt = ({ onLoginRedirect, onClose }) => {
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button
             onClick={onClose}
-            className="flex w-full justify-center rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="aura-button aura-button-subtle w-full px-4 py-2.5 text-sm"
+            type="button"
           >
             Đóng
           </button>
 
           <button
             onClick={onLoginRedirect}
-            className="flex w-full justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors"
+            className="aura-button aura-button-primary w-full px-4 py-2.5 text-sm"
+            type="button"
           >
             Đăng nhập ngay
           </button>

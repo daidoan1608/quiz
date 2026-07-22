@@ -22,16 +22,16 @@ const GuestHeaderActions = ({
       </span>
     </HeaderIconButton>
 
-    <div className="hidden gap-2 md:flex">
+    <div className="hidden shrink-0 gap-2 xl:flex">
       <Link
         to="/login"
-        className="!no-underline rounded-lg px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
+        className="aura-button aura-button-subtle min-h-0 min-w-28 whitespace-nowrap px-4 py-2 text-sm !no-underline"
       >
         {t('auth.login')}
       </Link>
       <Link
         to="/register"
-        className="!no-underline rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-blue-700"
+        className="aura-button aura-button-primary min-h-0 min-w-24 whitespace-nowrap px-4 py-2 text-sm !no-underline"
       >
         {t('auth.register')}
       </Link>

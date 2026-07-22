@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { message } from 'antd';
+﻿import { useState } from 'react';
+import { appMessage } from 'utils/appMessage';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from 'api/services/authApi';
 import { getApiErrorMessage } from 'api/http/apiError';
@@ -20,12 +20,12 @@ export const useForgotPasswordFlow = (form) => {
       if (response.status === 200 && response.data?.status === 'success') {
         onSuccess(response.data);
       } else {
-        message.error(
+        appMessage.error(
           response.data?.message || 'Có lỗi xảy ra, vui lòng thử lại!'
         );
       }
     } catch (error) {
-      message.error(
+      appMessage.error(
         getApiErrorMessage(
           error,
           'Không thể xử lý yêu cầu. Vui lòng thử lại!'
@@ -38,7 +38,7 @@ export const useForgotPasswordFlow = (form) => {
 
   const handleSendOtp = (values) => {
     handleApiRequest('otp/send', { email: values.email }, () => {
-      message.success('Mã OTP đã được gửi!');
+      appMessage.success('Mã OTP đã được gửi!');
       setEmail(values.email);
       setStep(2);
     });
@@ -46,12 +46,12 @@ export const useForgotPasswordFlow = (form) => {
 
   const handleVerifyOtp = () => {
     if (otpValue.length !== 6) {
-      message.error('Mã OTP phải gồm 6 ký tự!');
+      appMessage.error('Mã OTP phải gồm 6 ký tự!');
       return;
     }
 
     handleApiRequest('otp/verify', { email, otp: otpValue }, (res) => {
-      message.success('Xác thực thành công!');
+      appMessage.success('Xác thực thành công!');
       setToken(res.data);
       setStep(3);
       form.resetFields();
@@ -66,7 +66,7 @@ export const useForgotPasswordFlow = (form) => {
         newPassword: values.password,
       },
       () => {
-        message.success('Đổi mật khẩu thành công!');
+        appMessage.success('Đổi mật khẩu thành công!');
         navigate('/login');
       }
     );
@@ -84,3 +84,4 @@ export const useForgotPasswordFlow = (form) => {
     step,
   };
 };
+

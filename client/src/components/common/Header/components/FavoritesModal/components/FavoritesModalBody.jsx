@@ -1,4 +1,5 @@
 import React from 'react';
+import { SectionLoadingState } from '../../../../PageState';
 import FavoriteSubjectCard from './FavoriteSubjectCard';
 import FavoritesEmptyState from './FavoritesEmptyState';
 
@@ -13,15 +14,13 @@ export default function FavoritesModalBody({
 }) {
   if (loading) {
     return (
-      <div className="flex min-h-40 items-center justify-center text-gray-500 dark:text-gray-400">
-        Đang tải danh sách yêu thích...
-      </div>
+      <SectionLoadingState label="Đang tải danh sách yêu thích..." />
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-center text-red-600 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
+      <div className="aura-alert-error p-5 text-center">
         {error}
       </div>
     );

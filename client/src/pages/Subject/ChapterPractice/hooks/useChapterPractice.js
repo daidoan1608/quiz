@@ -1,10 +1,15 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
-import { message } from 'antd';
+import { appMessage } from 'utils/appMessage';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { subjectApi } from 'api/services/subjectApi';
 import { useLanguage } from 'context/language/LanguageProvider';
+import { getCurrentUserId } from 'utils/storage';
 import { typesetMath } from 'utils/typesetMath';
-import { buildNextSelectedAnswers } from 'pages/Subject/utils/answerSelection';
+import {
+  buildNextSelectedAnswers,
+  getNextQuestionIndex,
+  getPreviousQuestionIndex,
+} from 'pages/Subject/utils/answerSelection';
 import { DEFAULT_PRACTICE_CONFIG } from '../constants/practiceOptions';
 import { useMarkedQuestions } from './useMarkedQuestions';
 import { usePracticeDerivedState } from './usePracticeDerivedState';
@@ -43,7 +48,7 @@ export const useChapterPractice = () => {
         }
       : DEFAULT_PRACTICE_CONFIG
   );
-  const userId = localStorage.getItem('userId') || 'guest';
+  const userId = getCurrentUserId() || 'guest';
   const {
     markedQuestions,
     loadFallbackMarkedQuestions,
@@ -150,14 +155,6 @@ export const useChapterPractice = () => {
     subjectName,
   ]);
 
-  useEffect(() => {
-    if (!isSubjectPractice && !hasRequested && !isLoading) {
-      handleStartPractice();
-    }
-    // Route theo chương đã xác định chapterId, nên tự tải câu hỏi một lần.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSubjectPractice, hasRequested, isLoading]);
-
   const handleAnswerSelect = (answerIndex) => {
     if (!currentQuestion || hasAnswered) return;
 
@@ -175,7 +172,7 @@ export const useChapterPractice = () => {
   const handleConfirmMultipleAnswer = () => {
     const selections = selectedAnswers[currentQuestionIndex] || [];
     if (!Array.isArray(selections) || selections.length === 0) {
-      message.warning('Vui lòng chọn ít nhất một đáp án!');
+      appMessage.warning('Vui lòng chọn ít nhất một đáp án!');
       return;
     }
     setConfirmedAnswers((prev) => ({ ...prev, [currentQuestionIndex]: true }));
@@ -191,10 +188,10 @@ export const useChapterPractice = () => {
     emptyText,
     goToNextQuestion: () =>
       setCurrentQuestionIndex((prev) =>
-        Math.min(questions.length - 1, prev + 1)
+        getNextQuestionIndex(prev, questions.length)
       ),
     goToPreviousQuestion: () =>
-      setCurrentQuestionIndex((prev) => Math.max(0, prev - 1)),
+      setCurrentQuestionIndex(getPreviousQuestionIndex),
     handleAnswerSelect,
     handleConfirmMultipleAnswer,
     handleStartPractice,
@@ -220,3 +217,4 @@ export const useChapterPractice = () => {
     visibleAnswers,
   };
 };
+

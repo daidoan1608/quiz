@@ -1,13 +1,19 @@
 ﻿import { useCallback, useEffect, useRef, useState } from 'react';
-import { message } from 'antd';
+import { appMessage } from 'utils/appMessage';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { examApi } from 'api/services/examApi';
 import { useLanguage } from 'context/language/LanguageProvider';
 import { typesetMath } from 'utils/typesetMath';
-import { createExamDraftKey, getCurrentUserId } from 'utils/storage';
+import {
+  createExamDraftKey,
+  getCurrentUserId,
+  removeStorageItem,
+} from 'utils/storage';
 import {
   buildNextSelectedAnswers,
   countAnsweredQuestions,
+  getNextQuestionIndex,
+  getPreviousQuestionIndex,
 } from 'pages/Subject/utils/answerSelection';
 import { buildUserAnswerDtos } from '../utils/buildUserAnswerDtos';
 import { buildSaveAnswerPayload } from '../utils/examAttemptAnswers';
@@ -29,9 +35,11 @@ export const useExamAttempt = () => {
   const [isDraftReady, setIsDraftReady] = useState(false);
   const [userExamId, setUserExamId] = useState(null);
   const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const endTimeRef = useRef(null);
   const handleSubmitRef = useRef(null);
+  const isSubmittingRef = useRef(false);
   const userExamIdRef = useRef(null);
 
   const navigate = useNavigate();
@@ -48,6 +56,11 @@ export const useExamAttempt = () => {
   }, [userExamId]);
 
   const handleSubmit = useCallback(async () => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+    setIsSubmitConfirmOpen(false);
     const endTime = new Date().toISOString();
     const userAnswerDtos = buildUserAnswerDtos(questions, selectedAnswers);
 
@@ -61,8 +74,8 @@ export const useExamAttempt = () => {
 
       if (response.status === 200) {
         setUserExamId(null);
-        if (examDraftKey) localStorage.removeItem(examDraftKey);
-        message.success('Nộp bài thành công!');
+        if (examDraftKey) removeStorageItem(examDraftKey);
+        appMessage.success('Nộp bài thành công!');
         const submittedUserExamId = response.data.data.userExamId;
         navigate(
           `/subjects/${subjectId}/exams/${examId}/result?userExamId=${submittedUserExamId}`,
@@ -79,11 +92,13 @@ export const useExamAttempt = () => {
       }
     } catch (error) {
       console.error('Lỗi nộp bài:', error);
-      message.error(
+      appMessage.error(
         error.response?.status === 403
           ? 'Phiên đăng nhập hết hạn.'
           : 'Lỗi khi nộp bài.'
       );
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
     }
   }, [
     duration,
@@ -195,6 +210,16 @@ export const useExamAttempt = () => {
 
   const safeTimeLeft = timeLeft ?? 0;
   const answeredCount = countAnsweredQuestions({ questions, selectedAnswers });
+  const hasUnansweredQuestions = answeredCount < questions.length;
+
+  const requestSubmitExam = () => {
+    if (isSubmittingRef.current) return;
+    if (hasUnansweredQuestions) {
+      setIsSubmitConfirmOpen(true);
+      return;
+    }
+    handleSubmit();
+  };
 
   return {
     answeredCount,
@@ -207,17 +232,18 @@ export const useExamAttempt = () => {
     currentQuestionIndex,
     goToNextQuestion: () =>
       setCurrentQuestionIndex((prev) =>
-        Math.min(questions.length - 1, prev + 1)
+        getNextQuestionIndex(prev, questions.length)
       ),
     goToPreviousQuestion: () =>
-      setCurrentQuestionIndex((prev) => Math.max(0, prev - 1)),
+      setCurrentQuestionIndex(getPreviousQuestionIndex),
     handleAnswerSelect,
     hours: Math.floor(safeTimeLeft / 3600),
     isLoading,
+    isSubmitting,
     isSubmitConfirmOpen,
     minutes: Math.floor((safeTimeLeft % 3600) / 60),
     navigate,
-    openSubmitConfirm: () => setIsSubmitConfirmOpen(true),
+    requestSubmitExam,
     progressPercent: questions.length
       ? (answeredCount / questions.length) * 100
       : 0,
@@ -231,3 +257,4 @@ export const useExamAttempt = () => {
     title,
   };
 };
+

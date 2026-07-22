@@ -2,6 +2,8 @@ const isBrowser = typeof window !== "undefined";
 
 export const storageKeys = {
   userId: "userId",
+  savedUsername: "savedUsername",
+  role: "role",
   fullName: "fullName",
   avatarUrl: "avatarUrl",
   appLanguage: "appLanguage",

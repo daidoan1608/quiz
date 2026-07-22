@@ -1,10 +1,10 @@
 import React from 'react';
 import { PageContainer } from 'components/common/PageContainer';
-import { PerformanceChart } from './PerformanceChart';
-import { QuestionReviewList } from './QuestionReviewList';
+import { AnswerDistributionChart } from 'pages/Subject/components/AnswerDistributionChart';
+import { ExamAnswerSummaryStats } from 'pages/Subject/components/ExamAnswerSummaryStats';
+import QuestionReviewListBase from 'pages/Subject/components/QuestionReview/QuestionReviewListBase';
 import { ResultActions } from './ResultActions';
 import { ResultHeader } from './ResultHeader';
-import { ResultStats } from './ResultStats';
 
 export const ResultExamView = ({
   examData,
@@ -22,13 +22,13 @@ export const ResultExamView = ({
           rawScore={summary.rawScore}
           userExam={userAnswers?.userExamDto}
         />
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <section className="aura-surface-panel p-6">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <ResultStats
+            <ExamAnswerSummaryStats
               accuracyOnAnswered={summary.accuracyOnAnswered}
               rawScore={summary.rawScore}
             />
-            <PerformanceChart {...summary} />
+            <AnswerDistributionChart {...summary} />
           </div>
         </section>
         <ResultActions
@@ -37,7 +37,7 @@ export const ResultExamView = ({
           navigate={navigate}
           subjectId={subjectId}
         />
-        <QuestionReviewList questionResults={summary.questionResults} />
+        <QuestionReviewListBase questionResults={summary.questionResults} />
       </div>
     </PageContainer>
   </div>

@@ -1,7 +1,4 @@
-import { getCurrentUserId, getStoredAvatarUrl } from "utils/storage";
-export { getAttemptProgress } from "utils/attemptProgress";
-
-export { getCurrentUserId };
+import { getStoredAvatarUrl } from "utils/storage";
 
 export const normalizeExams = (examData = []) => {
   return examData
@@ -93,15 +90,6 @@ export const buildProfilePayload = (profileValues) => ({
   email: profileValues.email?.trim(),
   phone: profileValues.phone?.trim(),
   address: profileValues.address?.trim(),
-});
-
-export const buildExamAttemptLocation = (attempt) => ({
-  pathname: `/subjects/${attempt.subjectId}/exams/${attempt.examId}`,
-  state: {
-    subjectId: attempt.subjectId,
-    examId: attempt.examId,
-    title: attempt.title,
-  },
 });
 
 export const resolveAvatarUrl = ({ userData, avatarUrl }) => {

@@ -1,6 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import { GoogleOutlined } from '@ant-design/icons';
-import { message } from 'antd';
+import { appMessage } from 'utils/appMessage';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import { GOOGLE_CLIENT_ID } from 'config/env';
 
@@ -19,7 +19,7 @@ export const GoogleLoginButton = ({ onSuccess }) => (
           await onSuccess(idToken);
         }}
         onError={() => {
-          message.error('Đăng nhập Google thất bại!');
+          appMessage.error('Đăng nhập Google thất bại!');
         }}
         useOneTap
         type="icon"
@@ -82,3 +82,4 @@ export const GoogleLoginButton = ({ onSuccess }) => (
     `}</style>
   </GoogleOAuthProvider>
 );
+

@@ -1,5 +1,5 @@
+import { MetricCard } from 'components/common/MetricCard';
 import { formatScore } from './roadmapFormatters';
-import StatCard from './StatCard';
 
 export default function LearningStatsSection({ learningStats }) {
   return (
@@ -13,17 +13,17 @@ export default function LearningStatsSection({ learningStats }) {
         </h3>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <StatCard
+        <MetricCard
           icon="workspace_premium"
           label="Điểm trung bình"
           value={formatScore(learningStats?.averageScore)}
         />
-        <StatCard
+        <MetricCard
           icon="local_fire_department"
           label="Streak học tập"
           value={`${learningStats?.streak || 0} ngày`}
         />
-        <StatCard
+        <MetricCard
           icon="assignment_turned_in"
           label="Bài đã nộp"
           value={learningStats?.totalAttempts || 0}

@@ -1,11 +1,8 @@
 import React from 'react';
-import {
-  isMultipleChoice,
-  normalizeSelectedIndexes,
-} from 'pages/Subject/utils/questionUtils';
+import { isMultipleChoice } from 'pages/Subject/utils/questionUtils';
 import QuestionContent from 'pages/Subject/components/QuestionPanelShared/QuestionContent';
 import QuestionPanelShell from 'pages/Subject/components/QuestionPanelShared/QuestionPanelShell';
-import SelectableAnswerOption from 'pages/Subject/components/QuestionPanelShared/SelectableAnswerOption';
+import SelectableAnswerList from 'pages/Subject/components/QuestionPanelShared/SelectableAnswerList';
 import { getPracticeAnswerClassName } from '../utils/practiceAnswerStyles';
 import ConfirmMultipleAnswerButton from './ConfirmMultipleAnswerButton';
 import MarkedQuestionButton from './MarkedQuestionButton';
@@ -52,46 +49,35 @@ export const PracticeQuestionPanel = ({
           />
         )}
       </div>
-      <div className="space-y-4">
-        {visibleAnswers.map((answer, index) => {
-          const isSelected = isMultiple
-            ? normalizeSelectedIndexes(selectedValue).includes(index)
-            : selectedValue === index;
-          const isCorrect = Boolean(answer.isCorrect);
-          const answerClass = getPracticeAnswerClassName({
+      <SelectableAnswerList
+        answers={visibleAnswers}
+        disabled={hasAnswered}
+        getAnswerClassName={({ answer, isSelected }) =>
+          getPracticeAnswerClassName({
             hasAnswered,
-            isCorrect,
+            isCorrect: Boolean(answer.isCorrect),
             isSelected,
-          });
-
-          return (
-            <SelectableAnswerOption
-              answer={answer}
-              answerClassName={answerClass}
-              disabled={hasAnswered}
-              inputName={`question-${currentQuestionIndex}`}
-              inputType={isMultiple ? 'checkbox' : 'radio'}
-              isSelected={isSelected}
-              key={answer.optionId || index}
-              onSelect={() => onAnswerSelect(index)}
-              suffix={
-                <>
-                  {hasAnswered && isCorrect && (
-                    <span className="material-symbols-outlined ml-3 text-green-600">
-                      check_circle
-                    </span>
-                  )}
-                  {hasAnswered && isSelected && !isCorrect && (
-                    <span className="material-symbols-outlined ml-3 text-red-600">
-                      cancel
-                    </span>
-                  )}
-                </>
-              }
-            />
-          );
-        })}
-      </div>
+          })
+        }
+        getAnswerSuffix={({ answer, isSelected }) => (
+          <>
+            {hasAnswered && answer.isCorrect && (
+              <span className="material-symbols-outlined ml-3 text-green-600">
+                check_circle
+              </span>
+            )}
+            {hasAnswered && isSelected && !answer.isCorrect && (
+              <span className="material-symbols-outlined ml-3 text-red-600">
+                cancel
+              </span>
+            )}
+          </>
+        )}
+        inputName={`question-${currentQuestionIndex}`}
+        onAnswerSelect={onAnswerSelect}
+        question={currentQuestion}
+        selectedValue={selectedValue}
+      />
 
       {isMultiple && !confirmedAnswers[currentQuestionIndex] && (
         <ConfirmMultipleAnswerButton onClick={onConfirmMultipleAnswer} />

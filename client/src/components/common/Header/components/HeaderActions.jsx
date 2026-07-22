@@ -27,7 +27,7 @@ export default function HeaderActions({
   unreadCount,
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-0 items-center justify-end gap-3">
       {isLoggedIn && (
         <NotificationButton navigate={navigate} unreadCount={unreadCount} />
       )}
@@ -68,6 +68,7 @@ export default function HeaderActions({
       )}
 
       <MobileMenuButton
+        isLoggedIn={isLoggedIn}
         setShowMobileMenu={setShowMobileMenu}
         showMobileMenu={showMobileMenu}
       />

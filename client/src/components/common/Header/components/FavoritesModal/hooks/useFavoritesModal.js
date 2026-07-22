@@ -1,4 +1,4 @@
-﻿import { message } from 'antd';
+﻿import { appMessage } from 'utils/appMessage';
 import { useNavigate } from 'react-router-dom';
 import { useFavorites } from 'context/favorites/FavoritesContext';
 
@@ -13,7 +13,7 @@ export const useFavoritesModal = ({ onClose }) => {
 
   const handleDelete = (subjectId, subjectName) => {
     toggleFavorite(subjectId, subjectName);
-    message.success('Đã xóa khỏi danh sách yêu thích.');
+    appMessage.success('Đã xóa khỏi danh sách yêu thích.');
   };
 
   const handleOpenSubject = (subjectId) => {
@@ -42,3 +42,4 @@ export const useFavoritesModal = ({ onClose }) => {
     loading,
   };
 };
+

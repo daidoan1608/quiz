@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageContainer } from 'components/common/PageContainer';
+import { MetricCard } from 'components/common/MetricCard';
 
 export const DocumentsHero = ({ stats }) => (
   <section>
@@ -17,18 +18,8 @@ export const DocumentsHero = ({ stats }) => (
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:min-w-72">
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Số tài liệu</p>
-          <p className="mt-1 text-2xl font-black text-gray-950 dark:text-white">
-            {stats.count}
-          </p>
-        </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Dung lượng</p>
-          <p className="mt-1 text-2xl font-black text-gray-950 dark:text-white">
-            {stats.totalSize}
-          </p>
-        </div>
+        <MetricCard label="Số tài liệu" value={stats.count} />
+        <MetricCard label="Dung lượng" value={stats.totalSize} />
       </div>
     </PageContainer>
   </section>

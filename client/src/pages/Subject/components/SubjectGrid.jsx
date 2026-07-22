@@ -1,8 +1,10 @@
 import React from 'react';
 import { Pagination } from 'antd';
+import { PageEmptyState } from 'components/common/PageState';
 import { SubjectCard } from './SubjectCard';
 
 export const SubjectGrid = ({
+  canToggleFavorite,
   clearFilters,
   currentPage,
   favorites,
@@ -16,11 +18,12 @@ export const SubjectGrid = ({
   texts,
   toggleFavorite,
 }) => (
-  <section className="flex min-w-0 flex-1 flex-col gap-8 lg:row-start-2">
+  <section className="flex min-w-0 flex-1 flex-col lg:row-start-2">
     {paginatedSubjects.length > 0 ? (
-      <section className="grid grid-cols-1 content-start gap-6 md:min-h-[840px] md:grid-cols-2 xl:min-h-[560px] xl:grid-cols-3">
+      <section className="grid min-h-[2040px] grid-cols-1 content-start gap-6 md:min-h-[1008px] md:grid-cols-2 xl:min-h-[664px] xl:grid-cols-3">
         {paginatedSubjects.map((subject, index) => (
           <SubjectCard
+            canToggleFavorite={canToggleFavorite}
             key={subject.subjectId}
             favorites={favorites}
             getProgress={getProgress}
@@ -34,28 +37,28 @@ export const SubjectGrid = ({
         ))}
       </section>
     ) : (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800">
-        <span className="material-symbols-outlined mb-4 text-6xl text-gray-300">
-          search_off
-        </span>
-        <h3 className="mb-2 text-xl font-black text-gray-950 dark:text-white">
-          {texts.noSubjectsFound || 'Không tìm thấy môn học'}
-        </h3>
-        <p className="mb-5 max-w-sm text-gray-500 dark:text-gray-400">
-          {texts.noSubjectsSuggestion ||
-            'Thử đổi từ khóa tìm kiếm hoặc chọn khoa khác để xem thêm môn học.'}
-        </p>
-        <button
-          onClick={clearFilters}
-          className="rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg active:scale-95"
-        >
-          {texts.viewAllSubjects || 'Xem tất cả môn học'}
-        </button>
-      </div>
+      <PageEmptyState
+        action={
+          <button
+            onClick={clearFilters}
+            className="aura-button aura-button-primary mt-5 px-5 text-sm"
+            type="button"
+          >
+            {texts.viewAllSubjects || 'Xem tất cả môn học'}
+          </button>
+        }
+        className="py-16"
+        description={
+          texts.noSubjectsSuggestion ||
+          'Thử đổi từ khóa tìm kiếm hoặc chọn khoa khác để xem thêm môn học.'
+        }
+        icon="search_off"
+        title={texts.noSubjectsFound || 'Không tìm thấy môn học'}
+      />
     )}
 
-    {filteredSubjects.length > pageSize && (
-      <div className="flex justify-center pt-2">
+    <div className="flex min-h-14 items-start justify-center pt-8">
+      {filteredSubjects.length > pageSize && (
         <Pagination
           current={currentPage}
           pageSize={pageSize}
@@ -64,7 +67,7 @@ export const SubjectGrid = ({
           showSizeChanger={false}
           className="aura-pagination"
         />
-      </div>
-    )}
+      )}
+    </div>
   </section>
 );

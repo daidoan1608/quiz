@@ -1,12 +1,12 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message } from 'antd';
+import { appMessage } from 'utils/appMessage';
 import { accountApi } from 'api/services/accountApi';
 import { useAuth } from 'context/auth/AuthProvider';
 import { useLanguage } from 'context/language/LanguageProvider';
+import { buildContinueExamAttemptLocation } from 'pages/Subject/utils/subjectNavigation';
 import { ACCOUNT_SECTIONS } from '../constants/accountSections';
 import {
-  buildExamAttemptLocation,
   buildAvatarFormData,
   buildLearningStats,
   buildProfilePayload,
@@ -56,7 +56,7 @@ export const useAccountPage = () => {
       setInProgressAttempts(accountData.inProgressAttempts);
     } catch (error) {
       console.error('Lỗi tải dữ liệu:', error);
-      message.error('Không thể tải thông tin tài khoản.');
+      appMessage.error('Không thể tải thông tin tài khoản.');
     } finally {
       setLoading(false);
     }
@@ -73,16 +73,16 @@ export const useAccountPage = () => {
     try {
       const result = await accountApi.changePassword(userId, values);
       if (result === 'Mật khẩu không đúng') {
-        message.error(texts.wrongPassword || 'Mật khẩu cũ không đúng!');
+        appMessage.error(texts.wrongPassword || 'Mật khẩu cũ không đúng!');
         return;
       }
 
-      message.success(
+      appMessage.success(
         texts.changePasswordSuccess || 'Đổi mật khẩu thành công!'
       );
       setShowChangePassword(false);
     } catch (error) {
-      message.error('Lỗi đổi mật khẩu.');
+      appMessage.error('Lỗi đổi mật khẩu.');
     }
   };
 
@@ -101,12 +101,12 @@ export const useAccountPage = () => {
       if (newAvatarUrl) {
         updateAvatar(newAvatarUrl);
       }
-      message.success(
+      appMessage.success(
         texts.uploadAvatarSuccess || 'Tải lên avatar thành công!'
       );
     } catch (error) {
       console.error(error);
-      message.error('Lỗi tải ảnh lên.');
+      appMessage.error('Lỗi tải ảnh lên.');
     } finally {
       setLoading(false);
     }
@@ -122,10 +122,10 @@ export const useAccountPage = () => {
       const updatedUser = await accountApi.updateProfile(userId, payload);
 
       setUser((prevUser) => mergeUpdatedUser(prevUser, updatedUser));
-      message.success('Cập nhật thông tin cá nhân thành công!');
+      appMessage.success('Cập nhật thông tin cá nhân thành công!');
     } catch (error) {
       console.error('Lỗi cập nhật thông tin:', error);
-      message.error('Không thể cập nhật thông tin cá nhân.');
+      appMessage.error('Không thể cập nhật thông tin cá nhân.');
       throw error;
     } finally {
       setSavingProfile(false);
@@ -133,7 +133,7 @@ export const useAccountPage = () => {
   };
 
   const handleContinueAttempt = (attempt) => {
-    navigate(buildExamAttemptLocation(attempt));
+    navigate(buildContinueExamAttemptLocation(attempt));
   };
 
   const groupedExams = useMemo(() => groupExamsBySubject(exams), [exams]);
@@ -160,3 +160,4 @@ export const useAccountPage = () => {
     user,
   };
 };
+

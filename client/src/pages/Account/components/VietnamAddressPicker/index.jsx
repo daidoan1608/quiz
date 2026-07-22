@@ -2,15 +2,12 @@ import AddressCombobox from './components/AddressCombobox';
 import { useVietnamAddressPicker } from './hooks/useVietnamAddressPicker';
 import { textOrFallback } from './utils/addressText';
 
-const fieldClassName =
-  'mt-2 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white';
-
 export default function VietnamAddressPicker({ label, value, onChange, texts }) {
   const addressPicker = useVietnamAddressPicker({ onChange, value });
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800 sm:col-span-2">
-      <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+    <div className="aura-soft-panel p-4 shadow-sm sm:col-span-2">
+      <span className="aura-form-label">
         {label}
       </span>
 
@@ -55,7 +52,7 @@ export default function VietnamAddressPicker({ label, value, onChange, texts }) 
         </div>
 
         <label className="sm:col-span-2">
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <span className="aura-form-label">
             {textOrFallback(texts, 'detailAddress', 'Địa chỉ chi tiết')}
           </span>
           <input
@@ -68,7 +65,7 @@ export default function VietnamAddressPicker({ label, value, onChange, texts }) 
               'enterDetailAddress',
               'Số nhà, đường, thôn/xóm...'
             )}
-            className={fieldClassName}
+            className="aura-input w-full px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
           />
         </label>
       </div>

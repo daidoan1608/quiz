@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { setStorageItem } from 'utils/storage';
 import { createExamDraft } from '../utils/examAttemptDraft';
 
 export const useExamDraftPersistence = ({
@@ -17,7 +18,7 @@ export const useExamDraftPersistence = ({
       return;
     }
 
-    localStorage.setItem(
+    setStorageItem(
       examDraftKey,
       JSON.stringify(
         createExamDraft({

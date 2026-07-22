@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { message } from 'antd';
+﻿import { useCallback } from 'react';
+import { appMessage } from 'utils/appMessage';
 import { examApi } from 'api/services/examApi';
 import { SMART_WRONG_MODES } from '../constants/practiceOptions';
 import {
@@ -44,6 +44,8 @@ export const useStartPracticeSession = ({
       const commonParams = createPracticeRequestParams({
         isSubjectPractice,
         maxQuestionLimit,
+        practiceConfig,
+        safeQuestionLimit,
       });
 
       if (!chapterId && practiceConfig.mode === 'markedSubject') {
@@ -102,7 +104,7 @@ export const useStartPracticeSession = ({
         setQuestions([]);
         return;
       }
-      message.error('Không thể tải câu hỏi ôn tập.');
+      appMessage.error('Không thể tải câu hỏi ôn tập.');
     } finally {
       setIsLoading(false);
     }
@@ -132,3 +134,4 @@ export const useStartPracticeSession = ({
     texts.practiceQuestions,
     texts.subjects,
   ]);
+

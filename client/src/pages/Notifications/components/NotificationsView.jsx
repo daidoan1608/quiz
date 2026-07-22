@@ -18,7 +18,8 @@ export const NotificationsView = ({
         </h2>
         <button
           onClick={handleMarkAllAsRead}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-bold text-gray-800 dark:text-gray-200"
+          className="aura-button aura-button-subtle min-h-0 px-4 py-2 text-sm"
+          type="button"
         >
           <span className="material-symbols-outlined text-lg">done_all</span>
           <span>Đọc tất cả</span>

@@ -1,4 +1,4 @@
-import { message } from 'antd';
+﻿import { appMessage } from 'utils/appMessage';
 import { getApiErrorMessage } from './apiError';
 import { getCookieValue, isUnsafeMethod } from './csrf';
 import { isExplicitLogoutInProgress } from './explicitLogout';
@@ -33,7 +33,7 @@ export const createCsrfRetryHandler =
   };
 
 export const handleForbiddenResponse = (error) => {
-  message.error(
+  appMessage.error(
     getApiErrorMessage(error, 'Bạn không có quyền thực hiện thao tác này!')
   );
   return Promise.reject(error);
@@ -60,7 +60,7 @@ export const createUnauthorizedRetryHandler =
       refreshQueue.processQueue(refreshError);
 
       if (!isExplicitLogoutInProgress()) {
-        message.error(
+        appMessage.error(
           getApiErrorMessage(
             refreshError,
             'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!'
@@ -74,3 +74,4 @@ export const createUnauthorizedRetryHandler =
       refreshQueue.setRefreshing(false);
     }
   };
+

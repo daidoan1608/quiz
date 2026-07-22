@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageErrorState, PageLoadingState } from 'components/common/PageState';
 import { AttemptDetailView } from './components/AttemptDetailView';
 import { useExamAttemptDetail } from './hooks/useExamAttemptDetail';
 
@@ -7,25 +8,23 @@ export default function ResultExam() {
 
   if (detail.loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        Đang tải kết quả...
-      </div>
+      <PageLoadingState label="Đang tải kết quả..." minHeightClassName="h-screen" />
     );
   }
 
   if (detail.error) {
     return (
-      <div className="flex h-screen items-center justify-center text-red-500">
-        {detail.error}
-      </div>
+      <PageErrorState className="m-6" description={detail.error} title="Không thể tải kết quả" />
     );
   }
 
   if (!detail.examData || !detail.userAnswers?.userExamDto) {
     return (
-      <div className="flex h-screen items-center justify-center text-red-500">
-        Lỗi: Không tìm thấy dữ liệu bài thi chi tiết.
-      </div>
+      <PageErrorState
+        className="m-6"
+        description="Không tìm thấy dữ liệu bài thi chi tiết."
+        title="Thiếu dữ liệu"
+      />
     );
   }
 

@@ -1,14 +1,16 @@
+import { removeStorageItem, setStorageItem, storageKeys } from 'utils/storage';
+
 export const clearAuthStorage = () => {
-  localStorage.removeItem("userId");
-  localStorage.removeItem("role");
-  localStorage.removeItem("fullName");
-  localStorage.removeItem("avatarUrl");
+  removeStorageItem(storageKeys.userId);
+  removeStorageItem(storageKeys.role);
+  removeStorageItem(storageKeys.fullName);
+  removeStorageItem(storageKeys.avatarUrl);
 };
 
 export const cacheUser = (userData) => {
   if (!userData) return;
-  localStorage.setItem("userId", userData.userId || "");
-  localStorage.setItem("role", userData.role || "");
-  localStorage.setItem("fullName", userData.fullName || "");
-  localStorage.setItem("avatarUrl", userData.avatarUrl || "");
+  setStorageItem(storageKeys.userId, userData.userId || "");
+  setStorageItem(storageKeys.role, userData.role || "");
+  setStorageItem(storageKeys.fullName, userData.fullName || "");
+  setStorageItem(storageKeys.avatarUrl, userData.avatarUrl || "");
 };

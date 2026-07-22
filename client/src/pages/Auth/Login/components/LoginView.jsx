@@ -1,9 +1,10 @@
 import React from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Checkbox, Form, Input } from 'antd';
+import { Checkbox, Form } from 'antd';
 import { Link } from 'react-router-dom';
 import { AuthCard } from 'pages/Auth/components/AuthCard';
 import { AuthFooterLink } from 'pages/Auth/components/AuthFooterLink';
+import { AuthFormField } from 'pages/Auth/components/AuthFormField';
 import { AuthSubmitButton } from 'pages/Auth/components/AuthSubmitButton';
 import { GoogleLoginButton } from 'pages/Auth/components/GoogleLoginButton';
 
@@ -28,34 +29,27 @@ export const LoginView = ({
       className="auth-form mt-8 space-y-6"
       size="large"
     >
-      <Form.Item
+      <AuthFormField
+        className="mb-4"
+        icon={<UserOutlined className="auth-input-icon" />}
         name="username"
+        placeholder="Tên đăng nhập hoặc email"
         rules={[
           {
             required: true,
             message: 'Vui lòng nhập tên đăng nhập hoặc email!',
           },
         ]}
-        className="mb-4"
-      >
-        <Input
-          prefix={<UserOutlined className="auth-input-icon" />}
-          placeholder="Tên đăng nhập hoặc email"
-          className="rounded-lg py-2.5"
-        />
-      </Form.Item>
+      />
 
-      <Form.Item
-        name="password"
-        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+      <AuthFormField
         className="mb-4"
-      >
-        <Input.Password
-          prefix={<LockOutlined className="auth-input-icon" />}
-          placeholder="Mật khẩu"
-          className="rounded-lg py-2.5"
-        />
-      </Form.Item>
+        icon={<LockOutlined className="auth-input-icon" />}
+        name="password"
+        placeholder="Mật khẩu"
+        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+        type="password"
+      />
 
       <Form.Item name="remember" valuePropName="checked" className="mb-4">
         <div className="flex items-center justify-between">

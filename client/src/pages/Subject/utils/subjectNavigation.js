@@ -34,7 +34,17 @@ export const buildExamAttemptLocation = ({
     startTime: new Date().toISOString(),
     subjectId,
     title: exam.title,
-    userExamId: inProgressAttempt?.userExamId,
+    userExamId: inProgressAttempt?.userExamId || inProgressAttempt?.attemptId,
+  },
+});
+
+export const buildContinueExamAttemptLocation = (attempt) => ({
+  pathname: `/subjects/${attempt.subjectId}/exams/${attempt.examId}`,
+  state: {
+    examId: attempt.examId,
+    subjectId: attempt.subjectId,
+    title: attempt.title,
+    userExamId: attempt.userExamId || attempt.attemptId,
   },
 });
 

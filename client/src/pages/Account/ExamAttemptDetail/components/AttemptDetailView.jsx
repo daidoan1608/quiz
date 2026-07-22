@@ -1,9 +1,9 @@
 import React from 'react';
 import { PageContainer } from 'components/common/PageContainer';
+import { AnswerDistributionChart } from 'pages/Subject/components/AnswerDistributionChart';
+import { ExamAnswerSummaryStats } from 'pages/Subject/components/ExamAnswerSummaryStats';
 import { AttemptDetailHeader } from './AttemptDetailHeader';
-import { AttemptPerformanceChart } from './AttemptPerformanceChart';
 import { AttemptQuestionReviewList } from './AttemptQuestionReviewList';
-import { AttemptStats } from './AttemptStats';
 
 export const AttemptDetailView = ({ examData, navigate, summary, userAnswers }) => (
   <div className="relative flex min-h-screen w-full flex-col bg-background-light font-display text-[#111418] dark:bg-background-dark dark:text-gray-200">
@@ -21,13 +21,14 @@ export const AttemptDetailView = ({ examData, navigate, summary, userAnswers }) 
           examData={examData}
           userExam={userAnswers?.userExamDto}
         />
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <section className="aura-surface-panel p-6">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <AttemptStats
+            <ExamAnswerSummaryStats
               accuracyOnAnswered={summary.accuracyOnAnswered}
               rawScore={summary.rawScore}
+              scoreSeparator=" / "
             />
-            <AttemptPerformanceChart {...summary} />
+            <AnswerDistributionChart {...summary} showPercentage={false} />
           </div>
         </section>
         <AttemptQuestionReviewList questionResults={summary.questionResults} />

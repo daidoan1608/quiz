@@ -34,6 +34,8 @@ export default function QuestionContent({
             src={resolveMediaUrl(question.imageUrl)}
             alt={imageAlt}
             className="mx-auto max-h-64 max-w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700"
+            decoding="async"
+            loading="lazy"
           />
         </div>
       )}

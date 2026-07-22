@@ -24,6 +24,10 @@ export const PracticeNavigator = ({
     }
     labels={{
       title: texts.table || 'Bảng trả lời',
+      current: texts.currentQuestion || 'Câu hiện tại',
+      answered: texts.answered || 'Đã trả lời',
+      marked: texts.marked || 'Đã đánh dấu',
+      notAnswered: texts.notAnswered || 'Chưa trả lời',
     }}
     questions={questions}
     setCurrentQuestionIndex={setCurrentQuestionIndex}

@@ -1,8 +1,3 @@
-export { getAttemptProgress } from 'utils/attemptProgress';
-
-export const getAttemptKey = (attempt) =>
-  attempt.attemptId || attempt.userExamId || attempt.examId;
-
 export const formatRemainingTime = (seconds, t) => {
   const value = Number(seconds);
 

@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 
-const selectButtonClassName =
-  'mt-2 flex w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm font-medium text-gray-900 outline-none transition hover:border-primary/60 focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white';
-
 export default function AddressCombobox({
   disabled = false,
   label,
@@ -31,14 +28,14 @@ export default function AddressCombobox({
 
   return (
     <div className="relative" ref={wrapperRef}>
-      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+      <span className="aura-form-label">
         {label}
       </span>
       <button
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen((current) => !current)}
-        className={selectButtonClassName}
+        className="aura-input flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm font-medium hover:border-primary/60 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className={value ? '' : 'text-gray-400 dark:text-gray-500'}>
           {value || placeholder}
@@ -49,14 +46,14 @@ export default function AddressCombobox({
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
+        <div className="aura-floating-panel absolute z-30 mt-2 w-full">
           <div className="border-b border-gray-100 p-2 dark:border-gray-700">
             <input
               autoFocus
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
               placeholder={placeholder}
-              className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              className="aura-input w-full px-3 py-2 text-sm font-medium"
             />
           </div>
           <div className="max-h-64 overflow-y-auto py-1">

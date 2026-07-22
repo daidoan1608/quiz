@@ -1,11 +1,13 @@
+import { getStorageItem, setStorageItem } from 'utils/storage';
 import {
   THEME_COLOR_STORAGE_KEY,
   THEME_MODE_STORAGE_KEY,
 } from './themeConstants';
 
 export const getInitialMode = () => {
-  if (typeof window !== 'undefined' && localStorage.getItem(THEME_MODE_STORAGE_KEY)) {
-    return localStorage.getItem(THEME_MODE_STORAGE_KEY);
+  const storedMode = getStorageItem(THEME_MODE_STORAGE_KEY);
+  if (storedMode) {
+    return storedMode;
   }
 
   if (
@@ -19,14 +21,15 @@ export const getInitialMode = () => {
 };
 
 export const getInitialColorTheme = () => {
-  if (typeof window !== 'undefined' && localStorage.getItem(THEME_COLOR_STORAGE_KEY)) {
-    return localStorage.getItem(THEME_COLOR_STORAGE_KEY);
+  const storedColorTheme = getStorageItem(THEME_COLOR_STORAGE_KEY);
+  if (storedColorTheme) {
+    return storedColorTheme;
   }
 
   return 'blue';
 };
 
 export const persistThemePreference = ({ colorTheme, mode }) => {
-  localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
-  localStorage.setItem(THEME_COLOR_STORAGE_KEY, colorTheme);
+  setStorageItem(THEME_MODE_STORAGE_KEY, mode);
+  setStorageItem(THEME_COLOR_STORAGE_KEY, colorTheme);
 };

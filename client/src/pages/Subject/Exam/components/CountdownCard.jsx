@@ -1,7 +1,7 @@
 import React from "react";
 
 export const CountdownCard = ({ texts, hours, minutes, seconds }) => (
-  <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+  <div className="aura-surface-panel rounded-2xl p-5">
     <h4 className="mb-4 text-center text-base font-semibold">
       {texts.countDown || texts.conutDown || "Thời gian còn lại"}
     </h4>
