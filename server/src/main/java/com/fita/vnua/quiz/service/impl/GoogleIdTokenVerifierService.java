@@ -15,10 +15,12 @@ import java.util.Date;
 
 @Service
 public class GoogleIdTokenVerifierService {
-    private static final String GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs";
 
     @Value("${google.client.id}")
     private String clientId;
+
+    @Value("${google.jwks-url}")
+    private String googleJwksUrl;
 
     public boolean verify(String idToken) {
         try {
@@ -26,7 +28,7 @@ public class GoogleIdTokenVerifierService {
             String kid = signedJWT.getHeader().getKeyID();
 
             // lấy public key từ Google
-            JWKSet jwkSet = JWKSet.load(new URL(GOOGLE_JWKS_URL));
+            JWKSet jwkSet = JWKSet.load(new URL(googleJwksUrl));
             JWK jwk = jwkSet.getKeyByKeyId(kid);
             if (jwk == null) return false;
 
