@@ -1,8 +1,10 @@
 import React from 'react';
-import { Checkbox, Collapse, Empty, List, Modal, Space, Spin, Table, Tag, Typography } from 'antd';
+import { Checkbox, Collapse, List, Modal, Space, Table, Tag, Typography } from 'antd';
 import { SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons';
 import { useUserGroupAssignment } from '../hooks/useUserGroupAssignment';
 import { buildAdminModalFooter } from '../../../components/common/forms/AdminFormActions';
+import AdminEmptyState from '../../../components/common/states/AdminEmptyState';
+import AdminLoadingState from '../../../components/common/states/AdminLoadingState';
 import { PermissionSummaryCards } from '../../AdminGroups/components/PermissionSummaryCards';
 import { UserGroupOptionCard } from './UserGroupOptionCard';
 
@@ -44,7 +46,9 @@ export default function UserGroupAssignmentModal({ isModalOpen, onCancel, user, 
         onSubmit: save,
       })}
     >
-      <Spin spinning={loading}>
+      {loading ? (
+        <AdminLoadingState skeleton rows={5} />
+      ) : (
         <Space className="user-group-assignment-stack" direction="vertical" size={18}>
           <Space wrap>
             <Tag color="blue">{selectedGroups.length} nhóm đã chọn</Tag>
@@ -60,7 +64,7 @@ export default function UserGroupAssignmentModal({ isModalOpen, onCancel, user, 
                 <Text strong>Chọn nhóm quyền</Text>
               </Space>
               {groups.length === 0 ? (
-                <Empty description="Chưa có nhóm quyền đang kích hoạt" />
+                <AdminEmptyState description="Chưa có nhóm quyền đang kích hoạt" />
               ) : (
                 <Checkbox.Group
                   value={selectedGroupIds}
@@ -117,7 +121,7 @@ export default function UserGroupAssignmentModal({ isModalOpen, onCancel, user, 
             </section>
           </div>
         </Space>
-      </Spin>
+      )}
     </Modal>
   );
 }

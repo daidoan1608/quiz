@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  Segmented,
-  Space,
-} from "antd";
+import { Space } from "antd";
 import {
   BookOutlined,
   DeleteOutlined,
@@ -11,9 +8,10 @@ import {
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
 import {
+  AdminEntityFilterSet,
   AdminFilterBar,
-  AdminFilterSelect,
   AdminSearchInput,
+  AdminStatusSegmented,
 } from "../../../components/common/filters/AdminFilterControls";
 import AdminTable from "../../../components/common/table/AdminTable";
 import {
@@ -142,39 +140,22 @@ export const ChapterManagerView = ({
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
           />
-          <AdminFilterSelect
-            placeholder="Khoa"
-            value={categoryFilter}
-            onChange={changeCategoryFilter}
-            showSearch
-            optionFilterProp="label"
-            options={categories.map((category) => ({
-              value: category.categoryId,
-              label: category.categoryName,
-            }))}
-          />
-          <AdminFilterSelect
-            placeholder="Môn học"
-            value={subjectFilter}
-            onChange={setSubjectFilter}
-            showSearch
-            optionFilterProp="label"
-            options={subjects.map((subject) => ({
-              value: subject.subjectId,
-              label: subject.name,
-            }))}
+          <AdminEntityFilterSet
+            categories={categories}
+            categoryValue={categoryFilter}
+            onCategoryChange={changeCategoryFilter}
+            subjects={subjects}
+            subjectValue={subjectFilter}
+            onSubjectChange={setSubjectFilter}
+            hideChapter
           />
         </>
       }
       statusSwitch={
-        <Segmented
+        <AdminStatusSegmented
           value={viewMode}
           onChange={setViewMode}
           disabled={isMod}
-          options={[
-            { label: "Đang hoạt động", value: "active" },
-            { label: "Thùng rác", value: "deleted" },
-          ]}
         />
       }
     />

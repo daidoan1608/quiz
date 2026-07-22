@@ -1,19 +1,19 @@
 import React from "react";
 import {
   Alert,
-  Card,
   Col,
   Form,
   Input,
   InputNumber,
   Row,
-  Skeleton,
   Space,
   Typography,
 } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
+import AdminFormSection from "../../components/common/forms/AdminFormSection";
 import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
+import AdminLoadingState from "../../components/common/states/AdminLoadingState";
 import {
   AdminFilterBar,
   AdminFilterSelect,
@@ -61,9 +61,9 @@ const ExamUpdatePage = () => {
       onBack={handleCancel}
       title={<><EditOutlined /> Sửa đề thi #{examId}</>}
     >
-      <Card variant="borderless">
+      <AdminFormSection size="default">
         {detailLoading ? (
-          <Skeleton active paragraph={{ rows: 10 }} />
+          <AdminLoadingState skeleton rows={10} />
         ) : (
           <>
             <Alert
@@ -207,7 +207,7 @@ const ExamUpdatePage = () => {
             </Form>
           </>
         )}
-      </Card>
+      </AdminFormSection>
     </AdminFormPageLayout>
   );
 };

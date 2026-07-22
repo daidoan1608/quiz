@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Segmented,
   Space,
   Tag,
 } from "antd";
@@ -16,9 +15,10 @@ import {
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
 import {
+  AdminEntityFilterSet,
   AdminFilterBar,
-  AdminFilterSelect,
   AdminSearchInput,
+  AdminStatusSegmented,
 } from "../../../components/common/filters/AdminFilterControls";
 import AdminTable from "../../../components/common/table/AdminTable";
 import {
@@ -189,52 +189,26 @@ export const ExamManagerView = ({
             value={searchText}
             onChange={(event) => changeSearchText(event.target.value)}
           />
-          <AdminFilterSelect
-            placeholder="Khoa"
-            value={advancedFilters.categoryId}
-            onChange={(value) => updateFilter("categoryId", value)}
-            showSearch
-            optionFilterProp="label"
-            options={categories.map((category) => ({
-              value: category.categoryId,
-              label: category.categoryName,
-            }))}
+          <AdminEntityFilterSet
+            categories={categories}
+            categoryValue={advancedFilters.categoryId}
+            onCategoryChange={(value) => updateFilter("categoryId", value)}
+            subjects={subjects}
+            subjectValue={advancedFilters.subjectId}
+            onSubjectChange={(value) => updateFilter("subjectId", value)}
+            creators={creators}
+            creatorValue={advancedFilters.createdBy}
+            onCreatorChange={(value) => updateFilter("createdBy", value)}
+            hideChapter
+            hideCreator={isMod}
           />
-          <AdminFilterSelect
-            placeholder="Môn học"
-            value={advancedFilters.subjectId}
-            onChange={(value) => updateFilter("subjectId", value)}
-            showSearch
-            optionFilterProp="label"
-            options={subjects.map((subject) => ({
-              value: subject.subjectId,
-              label: subject.name,
-            }))}
-          />
-          {!isMod && (
-            <AdminFilterSelect
-              placeholder="Người tạo"
-              value={advancedFilters.createdBy}
-              onChange={(value) => updateFilter("createdBy", value)}
-              showSearch
-              optionFilterProp="label"
-              options={creators.map((user) => ({
-                value: user.userId,
-                label: user.username,
-              }))}
-            />
-          )}
         </>
       }
       statusSwitch={
-        <Segmented
+        <AdminStatusSegmented
           value={viewMode}
           onChange={changeViewMode}
           disabled={isMod}
-          options={[
-            { label: "Đang hoạt động", value: "active" },
-            { label: "Thùng rác", value: "deleted" },
-          ]}
         />
       }
     />

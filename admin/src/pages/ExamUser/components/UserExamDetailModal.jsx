@@ -3,11 +3,9 @@ import {
   Avatar,
   Card,
   Col,
-  Empty,
   Modal,
   Row,
   Space,
-  Spin,
   Statistic,
   Tag,
   Typography,
@@ -22,6 +20,8 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import MarkdownLatex from '../../../components/common/MarkdownLatex';
+import AdminEmptyState from '../../../components/common/states/AdminEmptyState';
+import AdminLoadingState from '../../../components/common/states/AdminLoadingState';
 import { useUserExamDetailModal } from '../hooks/useUserExamDetailModal';
 
 const { Text, Title } = Typography;
@@ -74,12 +74,13 @@ export default function UserExamDetailModal({ isModalOpen, onCancel, userExamId 
       destroyOnHidden
       className="detail-modal"
     >
-      <Spin spinning={loading}>
-        {!examDetail ? (
+      {loading ? (
+        <AdminLoadingState text="Đang tải chi tiết bài làm..." />
+      ) : !examDetail ? (
           <div className="detail-modal-scroll">
-            <Empty description="Không có dữ liệu bài làm" />
+            <AdminEmptyState description="Không có dữ liệu bài làm" />
           </div>
-        ) : (
+      ) : (
           <div className="detail-modal-scroll">
             <div className="detail-modal-hero">
               <Space direction="vertical" size={4}>
@@ -182,8 +183,7 @@ export default function UserExamDetailModal({ isModalOpen, onCancel, userExamId 
               })}
             </Space>
           </div>
-        )}
-      </Spin>
+      )}
     </Modal>
   );
 }

@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  Segmented,
-  Space,
-} from "antd";
+import { Space } from "antd";
 import {
   AppstoreOutlined,
   DeleteOutlined,
@@ -13,6 +10,7 @@ import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
 import {
   AdminFilterBar,
   AdminSearchInput,
+  AdminStatusSegmented,
 } from "../../../components/common/filters/AdminFilterControls";
 import AdminTable from "../../../components/common/table/AdminTable";
 import {
@@ -128,13 +126,9 @@ export const CategoryManagerView = ({
         />
       }
       statusSwitch={
-        <Segmented
+        <AdminStatusSegmented
           value={viewMode}
           onChange={setViewMode}
-          options={[
-            { label: "Đang hoạt động", value: "active" },
-            { label: "Thùng rác", value: "deleted" },
-          ]}
         />
       }
     />

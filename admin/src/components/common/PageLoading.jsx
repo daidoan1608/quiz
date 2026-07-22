@@ -1,12 +1,8 @@
 import React from "react";
-import { Spin } from "antd";
+import AdminLoadingState from "./states/AdminLoadingState";
 
 export default function PageLoading() {
   return (
-    <div className="admin-page-loading">
-      <Spin>
-        <span>Đang tải...</span>
-      </Spin>
-    </div>
+    <AdminLoadingState className="admin-page-loading" />
   );
 }

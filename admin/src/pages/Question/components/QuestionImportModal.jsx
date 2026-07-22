@@ -1,13 +1,14 @@
 import React from 'react';
 import {
-  Form, Modal,
-  Typography, Divider,
+  Form,
+  Divider,
 } from "antd";
 import { ImportOutlined } from "@ant-design/icons";
 import {
   AdminCheckButton,
   AdminImportButton,
 } from "../../../components/common/buttons/AdminButtons";
+import AdminModalFormShell from "../../../components/common/modal/AdminModalFormShell";
 import { useQuestionImport } from "../hooks/useQuestionImport";
 import {
   QuestionImportClassificationFields,
@@ -15,8 +16,6 @@ import {
   QuestionImportPreviewAlert,
   QuestionImportUploadField,
 } from "./QuestionImportFormParts";
-
-const { Title } = Typography;
 
 const QuestionImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
   const {
@@ -38,12 +37,9 @@ const QuestionImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
   } = useQuestionImport({ isModalOpen, onCancel, onSuccess });
 
   return (
-    <Modal
-      title={
-        <Title className="question-import-modal-title" level={4}>
-          <ImportOutlined /> Import Câu Hỏi
-        </Title>
-      }
+    <AdminModalFormShell
+      title="Import Câu Hỏi"
+      icon={<ImportOutlined />}
       open={isModalOpen}
       onCancel={handleCancel}
       footer={null}
@@ -92,7 +88,7 @@ const QuestionImportModal = ({ isModalOpen, onCancel, onSuccess }) => {
           </AdminImportButton>
         </div>
       </Form>
-    </Modal>
+    </AdminModalFormShell>
   );
 };
 

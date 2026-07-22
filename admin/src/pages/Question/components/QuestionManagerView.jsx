@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Segmented,
   Space,
   Tag,
   Tooltip,
@@ -15,9 +14,11 @@ import {
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
 import {
+  AdminEntityFilterSet,
   AdminFilterBar,
   AdminFilterSelect,
   AdminSearchInput,
+  AdminStatusSegmented,
 } from "../../../components/common/filters/AdminFilterControls";
 import AdminTable from "../../../components/common/table/AdminTable";
 import {
@@ -234,80 +235,63 @@ export const QuestionManagerView = ({
     <AdminFilterBar
       filters={
         <>
-      <AdminSearchInput
-        placeholder="Tìm nội dung câu hỏi..."
-        value={searchText}
-        onChange={(event) => changeSearchText(event.target.value)}
-      />
-      <AdminFilterSelect
-        placeholder="Môn học"
-        value={advancedFilters.subjectId}
-        onChange={(value) => updateFilter("subjectId", value)}
-        options={subjects.map((subject) => ({
-          value: subject.subjectId,
-          label: subject.name,
-        }))}
-      />
-      <AdminFilterSelect
-        placeholder="Chương"
-        value={advancedFilters.chapterId}
-        onChange={(value) => updateFilter("chapterId", value)}
-        options={chapters.map((chapter) => ({
-          value: chapter.chapterId,
-          label: chapter.name,
-        }))}
-      />
-      <AdminFilterSelect
-        placeholder="Mức độ"
-        value={advancedFilters.difficulty}
-        onChange={(value) => updateFilter("difficulty", value)}
-        options={["EASY", "MEDIUM", "HARD"].map((value) => ({
-          value,
-          label: value,
-        }))}
-      />
-      <AdminFilterSelect
-        placeholder="Dùng trong đề thi"
-        value={advancedFilters.examEnabled}
-        onChange={(value) => updateFilter("examEnabled", value)}
-        options={[
-          { value: true, label: "Có dùng trong đề thi" },
-          { value: false, label: "Không dùng trong đề thi" },
-        ]}
-      />
-      <AdminFilterSelect
-        placeholder="Hiện trong ôn tập"
-        value={advancedFilters.practiceEnabled}
-        onChange={(value) => updateFilter("practiceEnabled", value)}
-        options={[
-          { value: true, label: "Có hiện ôn tập" },
-          { value: false, label: "Không hiện ôn tập" },
-        ]}
-      />
-      {!isMod && (
-        <AdminFilterSelect
-          placeholder="Người tạo"
-          value={advancedFilters.creatorId}
-          onChange={(value) => updateFilter("creatorId", value)}
-          showSearch
-          optionFilterProp="label"
-          options={creators.map((user) => ({
-            value: user.userId,
-            label: user.username,
-          }))}
-        />
-      )}
+          <AdminSearchInput
+            placeholder="Tìm nội dung câu hỏi..."
+            value={searchText}
+            onChange={(event) => changeSearchText(event.target.value)}
+          />
+          <AdminEntityFilterSet
+            subjects={subjects}
+            subjectValue={advancedFilters.subjectId}
+            onSubjectChange={(value) => updateFilter("subjectId", value)}
+            chapters={chapters}
+            chapterValue={advancedFilters.chapterId}
+            onChapterChange={(value) => updateFilter("chapterId", value)}
+            hideCategory
+          />
+          <AdminFilterSelect
+            placeholder="Mức độ"
+            value={advancedFilters.difficulty}
+            onChange={(value) => updateFilter("difficulty", value)}
+            options={["EASY", "MEDIUM", "HARD"].map((value) => ({
+              value,
+              label: value,
+            }))}
+          />
+          <AdminFilterSelect
+            placeholder="Dùng trong đề thi"
+            value={advancedFilters.examEnabled}
+            onChange={(value) => updateFilter("examEnabled", value)}
+            options={[
+              { value: true, label: "Có dùng trong đề thi" },
+              { value: false, label: "Không dùng trong đề thi" },
+            ]}
+          />
+          <AdminFilterSelect
+            placeholder="Hiện trong ôn tập"
+            value={advancedFilters.practiceEnabled}
+            onChange={(value) => updateFilter("practiceEnabled", value)}
+            options={[
+              { value: true, label: "Có hiện ôn tập" },
+              { value: false, label: "Không hiện ôn tập" },
+            ]}
+          />
+          <AdminEntityFilterSet
+            creators={creators}
+            creatorValue={advancedFilters.creatorId}
+            onCreatorChange={(value) => updateFilter("creatorId", value)}
+            hideCategory
+            hideSubject
+            hideChapter
+            hideCreator={isMod}
+          />
         </>
       }
       statusSwitch={
-        <Segmented
+        <AdminStatusSegmented
           value={viewMode}
           onChange={changeViewMode}
           disabled={isMod}
-          options={[
-            { label: "Đang hoạt động", value: "active" },
-            { label: "Thùng rác", value: "deleted" },
-          ]}
         />
       }
     />

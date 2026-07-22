@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   Form, Input, Select,
-  Divider,
   Row, Col, Alert, Modal
 } from 'antd';
 import {
@@ -19,7 +18,7 @@ import AdminTableSwitch from '../../../components/common/table/AdminTableSwitch'
 import { MarkdownPreviewBox } from './MarkdownPreviewBox';
 import { QuestionAnswerFields } from './QuestionAnswerFields';
 import { QuestionImageField } from './QuestionImageField';
-import AdminModalTitle from '../../../components/common/modal/AdminModalTitle';
+import AdminModalFormShell from '../../../components/common/modal/AdminModalFormShell';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -61,12 +60,9 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
   }, [content, answers]);
 
   return (
-    <Modal
-      title={
-        <AdminModalTitle icon={<QuestionCircleOutlined />}>
-          Thêm Câu Hỏi Mới
-        </AdminModalTitle>
-      }
+    <AdminModalFormShell
+      title="Thêm Câu Hỏi Mới"
+      icon={<QuestionCircleOutlined />}
       open={isModalOpen}
       onCancel={handleCancel}
       footer={[
@@ -84,7 +80,6 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
       centered
       maskClosable={false}
     >
-      <Divider className="admin-modal-divider" />
       <Form
         form={form}
         layout="vertical"
@@ -240,7 +235,7 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
           correctColor="var(--admin-success)"
         />
       </Form>
-    </Modal>
+    </AdminModalFormShell>
   );
 };
 

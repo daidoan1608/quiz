@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Alert,
-  Card,
   Col,
   Divider,
   Form,
@@ -17,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import {
   AdminFormActions,
 } from "../../components/common/forms/AdminFormActions";
+import AdminFormSection from "../../components/common/forms/AdminFormSection";
 import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import AdminTableSwitch from "../../components/common/table/AdminTableSwitch";
 import MarkdownLatexEditor from "../../components/common/MarkdownLatexEditor";
@@ -72,7 +72,7 @@ const QuestionCreatePage = () => {
         initialValues={QUESTION_FORM_INITIAL_VALUES}
       >
         <Space className="question-form-stack" direction="vertical" size={16}>
-          <Card variant="borderless" size="small">
+          <AdminFormSection>
             <Row gutter={16}>
               <Col xs={24} md={12} xl={6}>
                 <Form.Item label="Khoa" name="categoryId" rules={[{ required: true, message: "Vui lòng chọn khoa!" }]}>
@@ -129,18 +129,18 @@ const QuestionCreatePage = () => {
                 </Form.Item>
               </Col>
             </Row>
-          </Card>
+          </AdminFormSection>
 
           <Row gutter={16}>
             <Col xs={24} xl={16}>
-              <Card variant="borderless" size="small" title="Nội dung câu hỏi">
+              <AdminFormSection title="Nội dung câu hỏi">
                 <Form.Item className="question-form-content-item" name="content" rules={[{ required: true, message: "Nhập nội dung câu hỏi!" }]}>
                   <MarkdownLatexEditor placeholder="Nhập câu hỏi, công thức LaTeX hoặc Markdown..." minRows={7} maxRows={16} />
                 </Form.Item>
-              </Card>
+              </AdminFormSection>
             </Col>
             <Col xs={24} xl={8}>
-              <Card variant="borderless" size="small" title="Ảnh minh họa">
+              <AdminFormSection title="Ảnh minh họa">
                 <QuestionImageField
                   form={form}
                   imageType={imageType}
@@ -150,11 +150,11 @@ const QuestionCreatePage = () => {
                   uploadingImage={uploadingImage}
                   handleUploadImage={handleUploadImage}
                 />
-              </Card>
+              </AdminFormSection>
             </Col>
           </Row>
 
-          <Card variant="borderless" size="small">
+          <AdminFormSection>
             <Divider className="question-form-answer-divider" orientation="left"><CheckCircleOutlined /> Thiết lập đáp án</Divider>
             <Alert
               className="question-form-answer-alert"
@@ -169,7 +169,7 @@ const QuestionCreatePage = () => {
               requiredMessage={(label) => `Nhập đáp án ${label}!`}
               correctColor="var(--admin-success)"
             />
-          </Card>
+          </AdminFormSection>
 
           <AdminFormActions
             sticky

@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Card,
   Col,
   Form,
   Input,
@@ -10,6 +9,7 @@ import {
 } from "antd";
 import { FileAddOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import AdminFormSection from "../../components/common/forms/AdminFormSection";
 import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import { AdminFilterSelect } from "../../components/common/filters/AdminFilterControls";
 import { useExamCreateForm } from "./hooks/useExamCreateForm";
@@ -62,7 +62,7 @@ const ExamCreatePage = () => {
       onBack={handleCancel}
       title={<><FileAddOutlined /> Tạo đề thi mới</>}
     >
-      <Card variant="borderless">
+      <AdminFormSection size="default">
         <Form form={form} layout="vertical" onFinish={submitExam} size="large">
           <Row gutter={24}>
             <Col xs={24} md={12}>
@@ -180,7 +180,7 @@ const ExamCreatePage = () => {
           />
 
         </Form>
-      </Card>
+      </AdminFormSection>
     </AdminFormPageLayout>
   );
 };

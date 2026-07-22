@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { appMessage as message } from "../../utils/ui/messageService";
-import { Card, Checkbox, Col, Collapse, Form, Input, Row, Select, Skeleton, Space, Table, Tag, Typography } from "antd";
+import { Checkbox, Col, Collapse, Form, Input, Row, Select, Space, Table, Tag, Typography } from "antd";
 import {
   EyeOutlined,
   SafetyCertificateOutlined,
@@ -13,7 +13,9 @@ import {
   AdminToolbarButton,
 } from "../../components/common/buttons/AdminButtons";
 import { AdminFormActions } from "../../components/common/forms/AdminFormActions";
+import AdminFormSection from "../../components/common/forms/AdminFormSection";
 import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
+import AdminLoadingState from "../../components/common/states/AdminLoadingState";
 import AdminTableSwitch from "../../components/common/table/AdminTableSwitch";
 import {
   GLOBAL_ACTIONS,
@@ -222,13 +224,11 @@ const AdminGroupFormPage = () => {
       }
     >
       {loading ? (
-        <Card variant="borderless">
-          <Skeleton active paragraph={{ rows: 12 }} />
-        </Card>
+        <AdminLoadingState card skeleton rows={12} />
       ) : (
         <Form form={form} layout="vertical" onFinish={saveGroup} size="middle">
           <Space className="admin-group-form-stack" direction="vertical" size={16}>
-            <Card variant="borderless" size="small">
+            <AdminFormSection>
               <Row gutter={16}>
                 <Col xs={24} md={8}>
                   <Form.Item
@@ -259,9 +259,9 @@ const AdminGroupFormPage = () => {
                   </Form.Item>
                 </Col>
               </Row>
-            </Card>
+            </AdminFormSection>
 
-            <Card variant="borderless" size="small" title="Phạm vi và mẫu quyền">
+            <AdminFormSection title="Phạm vi và mẫu quyền">
               <Space className="admin-group-form-stack" direction="vertical" size={12}>
                 <Select
                   mode="multiple"
@@ -291,9 +291,9 @@ const AdminGroupFormPage = () => {
                   Áp dụng mẫu quyền
                 </AdminToolbarButton>
               </Space>
-            </Card>
+            </AdminFormSection>
 
-            <Card variant="borderless" size="small">
+            <AdminFormSection>
               <PermissionSummaryCards
                 badges={
                   <>
@@ -306,7 +306,7 @@ const AdminGroupFormPage = () => {
                 title="Tóm tắt quyền sẽ lưu"
                 titleIcon={<EyeOutlined />}
               />
-            </Card>
+            </AdminFormSection>
 
             <Collapse
               items={[

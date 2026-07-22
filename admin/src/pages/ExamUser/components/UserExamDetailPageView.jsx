@@ -8,7 +8,6 @@ import {
   Divider,
   Row,
   Space,
-  Spin,
   Statistic,
   Tag,
   Typography,
@@ -23,6 +22,8 @@ import {
   TrophyOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import AdminEmptyState from "../../../components/common/states/AdminEmptyState";
+import AdminLoadingState from "../../../components/common/states/AdminLoadingState";
 import MarkdownLatex from "../../../components/common/MarkdownLatex";
 import { useUserExamDetailPage } from "../hooks/useUserExamDetailPage";
 
@@ -42,22 +43,20 @@ export default function UserExamDetailPageView() {
 
   if (loading) {
     return (
-      <div className="detail-page-loading">
-        <Spin size="large">
-          <span>Đang tải kết quả...</span>
-        </Spin>
-      </div>
+      <AdminLoadingState className="detail-page-loading" size="large" text="Đang tải kết quả..." />
     );
   }
 
   if (!examDetail) {
     return (
-      <Card>
-        <div className="detail-page-empty">
-          <Title level={4}>Không tìm thấy dữ liệu bài thi</Title>
-          <Button onClick={onBack}>Quay lại</Button>
-        </div>
-      </Card>
+      <AdminEmptyState
+        actionText="Quay lại"
+        card
+        className="detail-page-empty"
+        description="Không có dữ liệu để hiển thị"
+        onAction={onBack}
+        title="Không tìm thấy dữ liệu bài thi"
+      />
     );
   }
 

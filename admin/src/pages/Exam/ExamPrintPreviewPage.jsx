@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   Card,
   Segmented,
-  Skeleton,
   Space,
   Tag,
   Typography,
@@ -13,6 +12,7 @@ import { examApi } from "../../api/services";
 import { AdminExportButton } from "../../components/common/buttons/AdminButtons";
 import MainBackButton from "../../components/common/MainBackButton";
 import MarkdownLatex from "../../components/common/MarkdownLatex";
+import AdminLoadingState from "../../components/common/states/AdminLoadingState";
 import { appMessage as message } from "../../utils/ui/messageService";
 import { typesetMath } from "../../utils/typesetMath";
 
@@ -128,7 +128,7 @@ const ExamPrintPreviewPage = () => {
 
       {loading ? (
         <Card className="exam-print-toolbar" variant="borderless">
-          <Skeleton active paragraph={{ rows: 8 }} />
+          <AdminLoadingState skeleton rows={8} />
         </Card>
       ) : examDetail ? (
         <main ref={paperRef} className="exam-print-paper">

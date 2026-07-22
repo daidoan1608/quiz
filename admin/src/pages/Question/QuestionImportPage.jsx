@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Card,
   Divider,
   Form,
 } from "antd";
@@ -11,6 +10,7 @@ import {
   AdminCheckButton,
   AdminImportButton,
 } from "../../components/common/buttons/AdminButtons";
+import AdminFormSection from "../../components/common/forms/AdminFormSection";
 import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import { useQuestionImport } from "./hooks/useQuestionImport";
 import {
@@ -50,7 +50,7 @@ const QuestionImportPage = () => {
       onBack={handleCancel}
       title={<><ImportOutlined /> Import câu hỏi</>}
     >
-      <Card variant="borderless">
+      <AdminFormSection size="default">
         <QuestionImportInfoAlert />
 
         <Form form={form} layout="vertical" onFinish={handleUpload} size="large">
@@ -85,7 +85,7 @@ const QuestionImportPage = () => {
             </AdminImportButton>
           </div>
         </Form>
-      </Card>
+      </AdminFormSection>
     </AdminFormPageLayout>
   );
 };

@@ -1,7 +1,8 @@
 import React from "react";
-import { Form, Input, Modal, Upload } from "antd";
-import { InboxOutlined } from "@ant-design/icons";
+import { Form, Input, Upload } from "antd";
+import { FileTextOutlined, InboxOutlined } from "@ant-design/icons";
 import { buildAdminModalFooter } from "../../../components/common/forms/AdminFormActions";
+import AdminModalFormShell from "../../../components/common/modal/AdminModalFormShell";
 import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch";
 
 const { Dragger } = Upload;
@@ -15,8 +16,9 @@ export const DocumentModal = ({
   saveDocument,
   setSelectedFile,
 }) => (
-  <Modal
+  <AdminModalFormShell
     title={editing ? "Cập nhật tài liệu" : "Thêm tài liệu"}
+    icon={<FileTextOutlined />}
     open={modalOpen}
     onCancel={closeModal}
     footer={buildAdminModalFooter({
@@ -63,5 +65,5 @@ export const DocumentModal = ({
         </Form.Item>
       )}
     </Form>
-  </Modal>
+  </AdminModalFormShell>
 );

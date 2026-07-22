@@ -6,7 +6,6 @@ import {
   Modal,
   Row,
   Space,
-  Spin,
   Statistic,
   Typography,
 } from "antd";
@@ -16,6 +15,8 @@ import {
   ControlOutlined,
 } from "@ant-design/icons";
 import MarkdownLatex from "../../../components/common/MarkdownLatex";
+import AdminEmptyState from "../../../components/common/states/AdminEmptyState";
+import AdminLoadingState from "../../../components/common/states/AdminLoadingState";
 import { useExamDetail } from "../hooks/useExamDetail";
 
 const { Title, Text } = Typography;
@@ -54,8 +55,9 @@ export const ExamDetailModal = ({ open, onCancel, examId }) => {
       destroyOnHidden
       className="detail-modal"
     >
-      <Spin spinning={loading}>
-        {examDetail ? (
+      {loading ? (
+        <AdminLoadingState text="Đang tải chi tiết đề thi..." />
+      ) : examDetail ? (
           <div className="detail-modal-scroll">
             <div className="detail-modal-hero">
               <Space direction="vertical" size={4}>
@@ -112,10 +114,9 @@ export const ExamDetailModal = ({ open, onCancel, examId }) => {
               ))}
             </Space>
           </div>
-        ) : (
-          <Text type="secondary">Không có dữ liệu đề thi để hiển thị.</Text>
-        )}
-      </Spin>
+      ) : (
+        <AdminEmptyState description="Không có dữ liệu đề thi để hiển thị." />
+      )}
     </Modal>
   );
 };

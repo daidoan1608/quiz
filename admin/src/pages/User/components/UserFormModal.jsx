@@ -2,13 +2,10 @@ import React from "react";
 import {
   Alert,
   Col,
-  Divider,
   Form,
   Input,
-  Modal,
   Row,
   Select,
-  Typography,
 } from "antd";
 import {
   EditOutlined,
@@ -21,11 +18,9 @@ import {
   AdminFormActions,
   buildAdminModalFooter,
 } from "../../../components/common/forms/AdminFormActions";
-import AdminModalTitle from "../../../components/common/modal/AdminModalTitle";
+import AdminModalFormShell from "../../../components/common/modal/AdminModalFormShell";
 import { USER_FORM_INITIAL_VALUES, USER_ROLE_OPTIONS } from "../constants";
 import { useUserForm } from "../hooks/useUserForm";
-
-const { Text } = Typography;
 
 export const UserFormModal = ({
   mode,
@@ -52,14 +47,12 @@ export const UserFormModal = ({
   });
 
   return (
-    <Modal
-      title={
-        <AdminModalTitle icon={isEditMode ? <EditOutlined /> : <UserAddOutlined />}>
-          {isEditMode ? "Cập nhật người dùng" : "Thêm người dùng mới"}
-        </AdminModalTitle>
-      }
+    <AdminModalFormShell
+      title={isEditMode ? "Cập nhật người dùng" : "Thêm người dùng mới"}
+      icon={isEditMode ? <EditOutlined /> : <UserAddOutlined />}
       open={open}
       onCancel={cancel}
+      loading={loading}
       footer={
         isEditMode
           ? null
@@ -74,50 +67,43 @@ export const UserFormModal = ({
       maskClosable={!loading}
       confirmLoading={loading}
     >
-      <Divider className="admin-modal-divider" />
-      {loading ? (
-        <div className="admin-modal-loading">
-          <Text type="secondary">Đang tải dữ liệu...</Text>
-        </div>
-      ) : (
-        <>
-          {isEditMode && isEditingSelf && (
-            <Alert
-              className="admin-modal-alert"
-              type="info"
-              showIcon
-              message="Tài khoản hiện tại"
-              description="Bạn không thể tự thay đổi vai trò của chính mình để tránh mất quyền quản trị."
-            />
-          )}
+      {isEditMode && isEditingSelf && (
+        <Alert
+          className="admin-modal-alert"
+          type="info"
+          showIcon
+          message="Tài khoản hiện tại"
+          description="Bạn không thể tự thay đổi vai trò của chính mình để tránh mất quyền quản trị."
+        />
+      )}
 
-          {isEditMode && originalRole === "ADMIN" && !isEditingSelf && (
-            <Alert
-              className="admin-modal-alert"
-              type="warning"
-              showIcon
-              message="Tài khoản ADMIN"
-              description="Backend sẽ không cho hạ quyền nếu đây là ADMIN cuối cùng của hệ thống."
-            />
-          )}
+      {isEditMode && originalRole === "ADMIN" && !isEditingSelf && (
+        <Alert
+          className="admin-modal-alert"
+          type="warning"
+          showIcon
+          message="Tài khoản ADMIN"
+          description="Backend sẽ không cho hạ quyền nếu đây là ADMIN cuối cùng của hệ thống."
+        />
+      )}
 
-          {isEditMode && originalRole === "MOD" && (
-            <Alert
-              className="admin-modal-alert"
-              type="warning"
-              showIcon
-              message="Tài khoản MOD"
-              description="Nếu đổi sang USER hoặc ADMIN, các quyền theo môn sẽ bị backend thu hồi."
-            />
-          )}
+      {isEditMode && originalRole === "MOD" && (
+        <Alert
+          className="admin-modal-alert"
+          type="warning"
+          showIcon
+          message="Tài khoản MOD"
+          description="Nếu đổi sang USER hoặc ADMIN, các quyền theo môn sẽ bị backend thu hồi."
+        />
+      )}
 
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={submit}
-            initialValues={USER_FORM_INITIAL_VALUES}
-            size="large"
-          >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={submit}
+        initialValues={USER_FORM_INITIAL_VALUES}
+        size="large"
+      >
             <Row gutter={24}>
               <Col xs={24} md={12}>
                 {!isEditMode && (
@@ -224,9 +210,7 @@ export const UserFormModal = ({
                 )}
               </Col>
             </Row>
-          </Form>
-        </>
-      )}
-    </Modal>
+      </Form>
+    </AdminModalFormShell>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Badge, Button, Drawer, Empty, List, Space, Spin, Tag, Typography } from "antd";
+import { Alert, Badge, Button, Drawer, List, Space, Tag, Typography } from "antd";
 import {
   AuditOutlined,
   CheckOutlined,
@@ -13,6 +13,8 @@ import {
   WarningOutlined,
 } from "@ant-design/icons";
 import { useAdminAlerts } from "../../hooks/useAdminAlerts";
+import AdminEmptyState from "./states/AdminEmptyState";
+import AdminLoadingState from "./states/AdminLoadingState";
 import { formatAlertTime, getBadgeStatus } from "../../utils/adminAlerts/adminAlertBuilders";
 
 const { Text, Title } = Typography;
@@ -62,64 +64,64 @@ export const NotificationSidebar = ({ isOpen, onClose, onCountChange }) => {
         )
       }
     >
-      <Spin spinning={loading}>
-        <div className="admin-notification-drawer__body">
-          <Alert
-            className="admin-notification-drawer__intro"
-            type="info"
-            showIcon
-            icon={<AuditOutlined />}
-            message="Tổng hợp từ dữ liệu quản trị hiện có"
-            description="Bao gồm audit log, câu hỏi, đề thi và trạng thái người dùng. Không hiển thị thông báo giả."
-          />
+      <div className="admin-notification-drawer__body">
+        <Alert
+          className="admin-notification-drawer__intro"
+          type="info"
+          showIcon
+          icon={<AuditOutlined />}
+          message="Tổng hợp từ dữ liệu quản trị hiện có"
+          description="Bao gồm audit log, câu hỏi, đề thi và trạng thái người dùng. Không hiển thị thông báo giả."
+        />
 
-          {!loading && visibleAlerts.length === 0 ? (
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có cảnh báo cần xử lý" />
-          ) : (
-            Object.entries(groupedAlerts).map(([group, items]) => (
-              <div className="admin-notification-group" key={group}>
-                <Title className="admin-notification-group__title" level={5}>
-                  {group}
-                </Title>
-                <List
-                  itemLayout="horizontal"
-                  dataSource={items}
-                  renderItem={(item) => (
-                    <List.Item
-                      className="admin-notification-item"
-                      onClick={() => dismissAlert(item.id)}
-                    >
-                      <List.Item.Meta
-                        avatar={
-                          <Badge status={getBadgeStatus(item.level)}>
-                            <span
-                              className={`admin-notification-item__icon admin-notification-item__icon--${item.level}`}
-                            >
-                              {alertIcons[item.iconType] || <WarningOutlined />}
-                            </span>
-                          </Badge>
-                        }
-                        title={<Text strong>{item.title}</Text>}
-                        description={
-                          <Space direction="vertical" size={4}>
-                            <Text type="secondary">{item.description}</Text>
-                            <Text className="admin-notification-item__meta" type="secondary">
-                              <ClockCircleOutlined /> {formatAlertTime(item.time)}
-                            </Text>
-                            <Text className="admin-notification-item__meta" type="secondary">
-                              Bấm để đánh dấu đã xử lý
-                            </Text>
-                          </Space>
-                        }
-                      />
-                    </List.Item>
-                  )}
-                />
-              </div>
-            ))
-          )}
-        </div>
-      </Spin>
+        {loading ? (
+          <AdminLoadingState skeleton rows={4} />
+        ) : visibleAlerts.length === 0 ? (
+          <AdminEmptyState description="Chưa có cảnh báo cần xử lý" />
+        ) : (
+          Object.entries(groupedAlerts).map(([group, items]) => (
+            <div className="admin-notification-group" key={group}>
+              <Title className="admin-notification-group__title" level={5}>
+                {group}
+              </Title>
+              <List
+                itemLayout="horizontal"
+                dataSource={items}
+                renderItem={(item) => (
+                  <List.Item
+                    className="admin-notification-item"
+                    onClick={() => dismissAlert(item.id)}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <Badge status={getBadgeStatus(item.level)}>
+                          <span
+                            className={`admin-notification-item__icon admin-notification-item__icon--${item.level}`}
+                          >
+                            {alertIcons[item.iconType] || <WarningOutlined />}
+                          </span>
+                        </Badge>
+                      }
+                      title={<Text strong>{item.title}</Text>}
+                      description={
+                        <Space direction="vertical" size={4}>
+                          <Text type="secondary">{item.description}</Text>
+                          <Text className="admin-notification-item__meta" type="secondary">
+                            <ClockCircleOutlined /> {formatAlertTime(item.time)}
+                          </Text>
+                          <Text className="admin-notification-item__meta" type="secondary">
+                            Bấm để đánh dấu đã xử lý
+                          </Text>
+                        </Space>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </div>
+          ))
+        )}
+      </div>
     </Drawer>
   );
 };

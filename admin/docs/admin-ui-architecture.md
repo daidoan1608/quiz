@@ -17,10 +17,14 @@ Các điểm neo đã có:
 - `src/components/common/table/AdminTable.jsx`: wrapper chuẩn cho Ant Design Table.
 - `src/components/common/table/AdminTableActions.jsx`: action button và confirm action trong table.
 - `src/components/common/table/AdminTableText.jsx`: text chuẩn trong table cell.
-- `src/components/common/filters/AdminFilterControls.jsx`: control chuẩn cho filter bar.
+- `src/components/common/filters/AdminFilterControls.jsx`: control chuẩn cho filter bar, gồm `AdminStatusSegmented` cho trạng thái active/deleted và `AdminEntityFilterSet` cho bộ lọc Khoa/Môn/Chương/Người tạo.
 - `src/components/common/forms/AdminFormActions.jsx`: action bar/footer chuẩn cho form page và modal form.
+- `src/components/common/forms/AdminFormSection.jsx`: section card chuẩn cho form page dài, mặc định `variant="borderless"` và `size="small"`.
 - `src/components/common/layout/AdminFormPageLayout.jsx`: shell chuẩn cho form page dài có back button, header và nội dung form.
+- `src/components/common/modal/AdminModalFormShell.jsx`: shell chuẩn cho modal form có title icon, divider và loading skeleton.
 - `src/components/common/modal/AdminModalTitle.jsx`: title chuẩn cho modal có icon.
+- `src/components/common/states/AdminLoadingState.jsx`: loading state chuẩn cho `Spin` và `Skeleton`.
+- `src/components/common/states/AdminEmptyState.jsx`: empty state chuẩn có thể kèm title/action/card.
 - `src/pages/AdminGroups/components/PermissionSummaryCards.jsx`: summary card chuẩn cho menu/quyền toàn hệ thống/quyền theo môn.
 - `src/pages/AdminGroups/components/PermissionPresetGrid.jsx`: grid chọn mẫu quyền, tránh inline grid trong form phân quyền.
 - `src/pages/Exam/components/ExamQuestionConfigHeader.jsx`: header cấu hình câu hỏi dùng chung cho tạo/sửa đề.
@@ -165,7 +169,10 @@ Quy tắc:
 - Modal form nên dùng cùng footer pattern: `AdminCancelButton` + `AdminSaveButton`.
 - Form page nên dùng `AdminFormActions` thay vì tự dựng `Space`/inline style cho nút Lưu/Hủy.
 - Form page dài nên dùng `AdminFormPageLayout` thay vì tự dựng `div style={{ padding: 24 }}`, `MainBackButton` và title riêng.
+- Form page có nhiều `Card variant="borderless" size="small"` nên dùng `AdminFormSection` để thống nhất section surface.
 - Filter bar nên dùng component trong `AdminFilterControls`.
+- Filter trạng thái active/deleted dùng `AdminStatusSegmented` thay vì tự dựng `Segmented` lặp lại.
+- Bộ lọc Khoa/Môn/Chương/Người tạo dùng `AdminEntityFilterSet` khi page chỉ cần map option và truyền `value/onChange`.
 - Toast thao tác dùng `appMessage` từ `utils/ui/messageService`, không import trực tiếp `message` hoặc `notification` từ `antd` trong page/hook.
 
 ## Page Patterns
@@ -219,7 +226,9 @@ Chuẩn:
 - Primary action dùng `modal-primary-btn` hoặc `AdminSaveButton` nếu phù hợp.
 - Cancel action dùng `AdminCancelButton`.
 - Modal form dùng `buildAdminModalFooter` khi footer chỉ gồm extra action + Hủy + Lưu.
+- Modal form CRUD nên dùng `AdminModalFormShell`; chỉ giữ `Modal` trực tiếp cho detail modal, modal JSON/audit, assignment modal hoặc modal có composition đặc thù.
 - Modal có icon trong title dùng `AdminModalTitle` thay vì tự style `Title` và icon margin.
+- Loading/empty state dùng `AdminLoadingState` và `AdminEmptyState` khi không cần overlay đặc thù.
 - UI tóm tắt quyền dùng `PermissionSummaryCards` để tránh lặp card/tag/empty text.
 - UI chọn mẫu quyền trong nhóm admin dùng `PermissionPresetGrid` để thống nhất responsive grid và card.
 - Header cấu hình câu hỏi trong Exam create/update dùng `ExamQuestionConfigHeader` để thống nhất title, tổng câu hỏi và action.
@@ -233,6 +242,7 @@ Chuẩn:
 - `AdminFilterControls` được phép nhận `style`, `width`, `fullWidth` để tính kích thước control động.
 - `SortableWidget` được phép dùng inline `transform`/`transition` từ `@dnd-kit`.
 - `CreateNotificationModal` được phép set CSS variable/accent color động theo notification template.
+- `CreateNotificationModal` được phép dùng `Modal` trực tiếp vì có hero, template picker và preview panel riêng thay vì form shell chuẩn.
 - `QuestionAnswerFields` được phép set CSS variable động cho màu đáp án đúng khi caller truyền `correctColor`.
 - `MainBackButton` được phép set CSS variable động cho `topOffset`.
 - `LoginCard` được phép lấy `token.colorBgContainer` từ Ant Design theme.

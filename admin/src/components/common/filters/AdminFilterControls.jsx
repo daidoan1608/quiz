@@ -1,5 +1,5 @@
 import React from "react";
-import { Input, Select } from "antd";
+import { Input, Segmented, Select } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
 export const ADMIN_FILTER_WIDTH = 220;
@@ -63,4 +63,96 @@ export const AdminFilterBar = ({ filters, statusSwitch }) => (
       </div>
     )}
   </div>
+);
+
+export const AdminStatusSegmented = ({
+  activeLabel = "Đang hoạt động",
+  deletedLabel = "Thùng rác",
+  disabled,
+  onChange,
+  value,
+}) => (
+  <Segmented
+    value={value}
+    onChange={onChange}
+    disabled={disabled}
+    options={[
+      { label: activeLabel, value: "active" },
+      { label: deletedLabel, value: "deleted" },
+    ]}
+  />
+);
+
+export const AdminEntityFilterSet = ({
+  categories,
+  categoryValue,
+  chapters,
+  chapterValue,
+  creators,
+  creatorValue,
+  hideCategory = false,
+  hideChapter = false,
+  hideCreator = true,
+  hideSubject = false,
+  onCategoryChange,
+  onChapterChange,
+  onCreatorChange,
+  onSubjectChange,
+  subjects,
+  subjectValue,
+}) => (
+  <>
+    {!hideCategory && (
+      <AdminFilterSelect
+        placeholder="Khoa"
+        value={categoryValue}
+        onChange={onCategoryChange}
+        showSearch
+        optionFilterProp="label"
+        options={(categories || []).map((category) => ({
+          value: category.categoryId,
+          label: category.categoryName,
+        }))}
+      />
+    )}
+    {!hideSubject && (
+      <AdminFilterSelect
+        placeholder="Môn học"
+        value={subjectValue}
+        onChange={onSubjectChange}
+        showSearch
+        optionFilterProp="label"
+        options={(subjects || []).map((subject) => ({
+          value: subject.subjectId,
+          label: subject.name,
+        }))}
+      />
+    )}
+    {!hideChapter && (
+      <AdminFilterSelect
+        placeholder="Chương"
+        value={chapterValue}
+        onChange={onChapterChange}
+        showSearch
+        optionFilterProp="label"
+        options={(chapters || []).map((chapter) => ({
+          value: chapter.chapterId,
+          label: chapter.name,
+        }))}
+      />
+    )}
+    {!hideCreator && (
+      <AdminFilterSelect
+        placeholder="Người tạo"
+        value={creatorValue}
+        onChange={onCreatorChange}
+        showSearch
+        optionFilterProp="label"
+        options={(creators || []).map((user) => ({
+          value: user.userId,
+          label: user.username,
+        }))}
+      />
+    )}
+  </>
 );

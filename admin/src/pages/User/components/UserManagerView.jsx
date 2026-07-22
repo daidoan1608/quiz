@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Segmented,
   Select,
   Space,
   Tag,
@@ -17,6 +16,7 @@ import {
   AdminFilterBar,
   AdminFilterSelect,
   AdminSearchInput,
+  AdminStatusSegmented,
 } from "../../../components/common/filters/AdminFilterControls";
 import AdminTable from "../../../components/common/table/AdminTable";
 import {
@@ -182,45 +182,42 @@ export const UserManagerView = ({
     <AdminFilterBar
       filters={
         <>
-      <AdminFilterSelect value={selectedRole} onChange={setSelectedRole}>
-        <Option value="all">Tất cả</Option>
-        <Option value="ADMIN">ADMIN</Option>
-        <Option value="MOD">MOD</Option>
-        <Option value="USER">USER</Option>
-      </AdminFilterSelect>
-      <AdminFilterSelect
-        value={selectedProvider}
-        onChange={setSelectedProvider}
-      >
-        <Option value="all">Mọi nguồn</Option>
-        <Option value="LOCAL">LOCAL</Option>
-        <Option value="GOOGLE">GOOGLE</Option>
-        <Option value="FACEBOOK">FACEBOOK</Option>
-        <Option value="GITHUB">GITHUB</Option>
-      </AdminFilterSelect>
-      <AdminFilterSelect
-        value={selectedEmailVerified}
-        onChange={setSelectedEmailVerified}
-      >
-        <Option value="all">Mọi email</Option>
-        <Option value="verified">Đã xác thực</Option>
-        <Option value="unverified">Chưa xác thực</Option>
-      </AdminFilterSelect>
-      <AdminSearchInput
-        placeholder="Tìm username, tên..."
-        value={searchText}
-        onChange={(event) => setSearchText(event.target.value)}
-      />
+          <AdminFilterSelect value={selectedRole} onChange={setSelectedRole}>
+            <Option value="all">Tất cả</Option>
+            <Option value="ADMIN">ADMIN</Option>
+            <Option value="MOD">MOD</Option>
+            <Option value="USER">USER</Option>
+          </AdminFilterSelect>
+          <AdminFilterSelect
+            value={selectedProvider}
+            onChange={setSelectedProvider}
+          >
+            <Option value="all">Mọi nguồn</Option>
+            <Option value="LOCAL">LOCAL</Option>
+            <Option value="GOOGLE">GOOGLE</Option>
+            <Option value="FACEBOOK">FACEBOOK</Option>
+            <Option value="GITHUB">GITHUB</Option>
+          </AdminFilterSelect>
+          <AdminFilterSelect
+            value={selectedEmailVerified}
+            onChange={setSelectedEmailVerified}
+          >
+            <Option value="all">Mọi email</Option>
+            <Option value="verified">Đã xác thực</Option>
+            <Option value="unverified">Chưa xác thực</Option>
+          </AdminFilterSelect>
+          <AdminSearchInput
+            placeholder="Tìm username, tên..."
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+          />
         </>
       }
       statusSwitch={
-        <Segmented
+        <AdminStatusSegmented
           value={viewMode}
           onChange={setViewMode}
-          options={[
-            { label: "Đang hoạt động", value: "active" },
-            { label: "Đã vô hiệu hóa", value: "deleted" },
-          ]}
+          deletedLabel="Đã vô hiệu hóa"
         />
       }
     />

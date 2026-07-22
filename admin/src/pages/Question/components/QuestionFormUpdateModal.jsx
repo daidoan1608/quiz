@@ -2,13 +2,10 @@ import React, { useEffect } from "react";
 import {
   Alert,
   Col,
-  Divider,
   Form,
   Input,
-  Modal,
   Row,
   Select,
-  Skeleton,
 } from "antd";
 import { CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import {
@@ -21,7 +18,8 @@ import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch"
 import { MarkdownPreviewBox } from "./MarkdownPreviewBox";
 import { QuestionAnswerFields } from "./QuestionAnswerFields";
 import { QuestionImageField } from "./QuestionImageField";
-import AdminModalTitle from "../../../components/common/modal/AdminModalTitle";
+import AdminModalFormShell from "../../../components/common/modal/AdminModalFormShell";
+import AdminLoadingState from "../../../components/common/states/AdminLoadingState";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -59,14 +57,13 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
   }, [content, answers]);
 
   return (
-    <Modal
-      title={
-        <AdminModalTitle icon={<EditOutlined />}>
-          Cập nhật câu hỏi ID: {questionId}
-        </AdminModalTitle>
-      }
+    <AdminModalFormShell
+      title={`Cập nhật câu hỏi ID: ${questionId}`}
+      icon={<EditOutlined />}
       open={isModalOpen}
       onCancel={onCancel}
+      loading={loadingData}
+      loadingRows={6}
       footer={[
         <AdminCancelButton key="back" onClick={onCancel} />,
         <AdminSaveButton
@@ -82,11 +79,7 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
       centered
       maskClosable={false}
     >
-      <Divider className="admin-modal-divider" />
-      {loadingData ? (
-        <Skeleton active paragraph={{ rows: 6 }} />
-      ) : (
-        <Form form={form} layout="vertical" onFinish={submitQuestion} size="large">
+      <Form form={form} layout="vertical" onFinish={submitQuestion} size="large">
           <Row gutter={24}>
             <Col xs={24} md={12}>
               <Form.Item
@@ -168,9 +161,8 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
             correctAnswers={correctAnswers}
             setCorrectAnswers={setCorrectAnswers}
           />
-        </Form>
-      )}
-    </Modal>
+      </Form>
+    </AdminModalFormShell>
   );
 };
 
