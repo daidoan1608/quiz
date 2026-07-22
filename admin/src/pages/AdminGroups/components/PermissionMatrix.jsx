@@ -26,7 +26,7 @@ export const PermissionMatrix = ({
         render: (label, record) => (
           <Space direction="vertical" size={0}>
             <Text strong>{label}</Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>
+            <Text className="admin-table-caption" type="secondary">
               {record.resource}
             </Text>
           </Space>

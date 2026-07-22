@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  App as AntApp,
   Card,
   Segmented,
   Skeleton,
@@ -14,6 +13,7 @@ import { examApi } from "../../api/services";
 import { AdminExportButton } from "../../components/common/buttons/AdminButtons";
 import MainBackButton from "../../components/common/MainBackButton";
 import MarkdownLatex from "../../components/common/MarkdownLatex";
+import { appMessage as message } from "../../utils/ui/messageService";
 import { typesetMath } from "../../utils/typesetMath";
 
 const { Text, Title } = Typography;
@@ -40,7 +40,6 @@ const ExamPrintPreviewPage = () => {
   const [examDetail, setExamDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
-  const { message } = AntApp.useApp();
   const paperRef = useRef(null);
   const navigate = useNavigate();
   const mode = searchParams.get("mode") === "answer" ? "answer" : "student";
@@ -101,10 +100,10 @@ const ExamPrintPreviewPage = () => {
 
   return (
     <div className="exam-print-preview-page">
-      <MainBackButton onClick={() => navigate("/exams")} style={{ top: 96 }} />
+      <MainBackButton onClick={() => navigate("/exams")} />
 
       <Card className="exam-print-toolbar" variant="borderless">
-        <Space wrap style={{ width: "100%", justifyContent: "space-between" }}>
+        <Space className="exam-print-toolbar-inner" wrap>
           <Space wrap>
             <Segmented
               value={mode}

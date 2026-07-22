@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Checkbox, Form, Radio, Space, Tooltip, Typography, theme } from "antd";
+import { Button, Checkbox, Form, Radio, Space, Tooltip, Typography } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import MarkdownLatexEditor from "../../../components/common/MarkdownLatexEditor";
 import {
@@ -17,23 +17,11 @@ export const QuestionAnswerFields = ({
   requiredMessage,
   correctColor,
 }) => {
-  const { token } = theme.useToken();
   const answerCount = Form.useWatch("answers")?.length || QUESTION_MIN_ANSWERS;
 
-  const correctLabelStyle = {
-    color: correctColor || token.colorSuccessText || token.colorSuccess,
-  };
-
-  const getAnswerInputStyle = (isCorrect) => ({
-    borderColor: isCorrect
-      ? token.colorSuccessBorder || token.colorSuccess || "var(--admin-success)"
-      : undefined,
-    backgroundColor:
-      isCorrect && !correctColor
-        ? token.colorSuccessBg || "color-mix(in srgb, var(--admin-success) 14%, transparent)"
-        : undefined,
-    color: token.colorText,
-  });
+  const correctColorStyle = correctColor
+    ? { "--question-answer-correct-color": correctColor }
+    : undefined;
 
   const toggleMultipleAnswer = (index, checked) => {
     if (checked) {
@@ -55,8 +43,12 @@ export const QuestionAnswerFields = ({
     const isCorrect = correctAnswers.includes(index);
     if (questionType === "SINGLE_CHOICE") {
       return (
-        <Radio value={index} style={{ marginRight: 16, marginTop: 6 }}>
-          <Text strong style={isCorrect ? correctLabelStyle : undefined}>
+        <Radio className="question-answer-selector" value={index}>
+          <Text
+            className={isCorrect ? "question-answer-label is-correct" : "question-answer-label"}
+            strong
+            style={isCorrect ? correctColorStyle : undefined}
+          >
             Đáp án {label}
           </Text>
         </Radio>
@@ -64,12 +56,16 @@ export const QuestionAnswerFields = ({
     }
 
     return (
-      <div style={{ marginRight: 16, width: 120, paddingTop: 6 }}>
+      <div className="question-answer-checkbox-selector">
         <Checkbox
           checked={isCorrect}
           onChange={(event) => toggleMultipleAnswer(index, event.target.checked)}
         >
-          <Text strong style={isCorrect ? correctLabelStyle : undefined}>
+          <Text
+            className={isCorrect ? "question-answer-label is-correct" : "question-answer-label"}
+            strong
+            style={isCorrect ? correctColorStyle : undefined}
+          >
             Đáp án {label}
           </Text>
         </Checkbox>
@@ -84,12 +80,9 @@ export const QuestionAnswerFields = ({
         const isCorrect = correctAnswers.includes(index);
 
         return (
-          <div
-            key={field.key}
-            style={{ display: "flex", alignItems: "flex-start", marginBottom: 16 }}
-          >
+          <div className="question-answer-row" key={field.key}>
             {renderSelector(index, label)}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <div className="question-answer-editor">
               <Form.Item
                 name={[field.name, "content"]}
                 rules={[
@@ -99,7 +92,7 @@ export const QuestionAnswerFields = ({
                     message: requiredMessage?.(label) || "Không được để trống!",
                   },
                 ]}
-                style={{ margin: 0 }}
+                className="question-answer-form-item"
               >
                 <MarkdownLatexEditor
                   className={
@@ -111,7 +104,7 @@ export const QuestionAnswerFields = ({
                   minRows={2}
                   maxRows={6}
                   compact
-                  style={getAnswerInputStyle(isCorrect)}
+                  style={isCorrect ? correctColorStyle : undefined}
                 />
               </Form.Item>
             </div>
@@ -125,14 +118,14 @@ export const QuestionAnswerFields = ({
                   remove(field.name);
                   removeCorrectAnswerAt(index);
                 }}
-                style={{ marginLeft: 8, marginTop: 4 }}
+                className="question-answer-remove"
               />
             </Tooltip>
           </div>
         );
       })}
 
-      <Space style={{ marginBottom: 16 }}>
+      <Space className="question-answer-add-row">
         <Button
           icon={<PlusOutlined />}
           onClick={() => add({ content: "" })}
@@ -152,14 +145,14 @@ export const QuestionAnswerFields = ({
       {(fields, operations) =>
         questionType === "SINGLE_CHOICE" ? (
           <Radio.Group
+            className="question-answer-group"
             onChange={(event) => setCorrectAnswers([event.target.value])}
             value={correctAnswers[0]}
-            style={{ width: "100%" }}
           >
             {renderFields(fields, operations)}
           </Radio.Group>
         ) : (
-          <div style={{ width: "100%" }}>{renderFields(fields, operations)}</div>
+          <div className="question-answer-group">{renderFields(fields, operations)}</div>
         )
       }
     </Form.List>

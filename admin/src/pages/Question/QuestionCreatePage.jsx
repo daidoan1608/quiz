@@ -8,7 +8,6 @@ import {
   Row,
   Select,
   Space,
-  Typography,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -16,10 +15,9 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import {
-  AdminCancelButton,
-  AdminSaveButton,
-} from "../../components/common/buttons/AdminButtons";
-import MainBackButton from "../../components/common/MainBackButton";
+  AdminFormActions,
+} from "../../components/common/forms/AdminFormActions";
+import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import AdminTableSwitch from "../../components/common/table/AdminTableSwitch";
 import MarkdownLatexEditor from "../../components/common/MarkdownLatexEditor";
 import { QUESTION_FORM_INITIAL_VALUES } from "./constants";
@@ -28,18 +26,7 @@ import { QuestionImageField } from "./components/QuestionImageField";
 import { useQuestionCreateForm } from "./hooks/useQuestionCreateForm";
 import { useQuestionImageUpload } from "./hooks/useQuestionImageUpload";
 
-const { Title } = Typography;
 const { Option } = Select;
-
-const actionBarStyle = {
-  position: "sticky",
-  bottom: 0,
-  zIndex: 8,
-  display: "flex",
-  justifyContent: "flex-end",
-  padding: "12px 0 0",
-  background: "var(--admin-bg)",
-};
 
 const QuestionCreatePage = () => {
   const [form] = Form.useForm();
@@ -73,15 +60,10 @@ const QuestionCreatePage = () => {
   });
 
   return (
-    <div style={{ padding: 24 }}>
-      <MainBackButton onClick={handleCancel} />
-
-      <Space style={{ marginBottom: 16 }}>
-        <Title level={3} style={{ margin: 0 }}>
-          <QuestionCircleOutlined /> Thêm câu hỏi mới
-        </Title>
-      </Space>
-
+    <AdminFormPageLayout
+      onBack={handleCancel}
+      title={<><QuestionCircleOutlined /> Thêm câu hỏi mới</>}
+    >
       <Form
         form={form}
         layout="vertical"
@@ -89,7 +71,7 @@ const QuestionCreatePage = () => {
         size="middle"
         initialValues={QUESTION_FORM_INITIAL_VALUES}
       >
-        <Space direction="vertical" size={16} style={{ width: "100%" }}>
+        <Space className="question-form-stack" direction="vertical" size={16}>
           <Card variant="borderless" size="small">
             <Row gutter={16}>
               <Col xs={24} md={12} xl={6}>
@@ -152,7 +134,7 @@ const QuestionCreatePage = () => {
           <Row gutter={16}>
             <Col xs={24} xl={16}>
               <Card variant="borderless" size="small" title="Nội dung câu hỏi">
-                <Form.Item name="content" rules={[{ required: true, message: "Nhập nội dung câu hỏi!" }]} style={{ marginBottom: 0 }}>
+                <Form.Item className="question-form-content-item" name="content" rules={[{ required: true, message: "Nhập nội dung câu hỏi!" }]}>
                   <MarkdownLatexEditor placeholder="Nhập câu hỏi, công thức LaTeX hoặc Markdown..." minRows={7} maxRows={16} />
                 </Form.Item>
               </Card>
@@ -173,12 +155,12 @@ const QuestionCreatePage = () => {
           </Row>
 
           <Card variant="borderless" size="small">
-            <Divider orientation="left" style={{ marginTop: 0 }}><CheckCircleOutlined /> Thiết lập đáp án</Divider>
+            <Divider className="question-form-answer-divider" orientation="left"><CheckCircleOutlined /> Thiết lập đáp án</Divider>
             <Alert
+              className="question-form-answer-alert"
               message={questionType === "SINGLE_CHOICE" ? "Chọn một đáp án đúng." : "Có thể chọn nhiều đáp án đúng."}
               type="info"
               showIcon
-              style={{ marginBottom: 16 }}
             />
             <QuestionAnswerFields
               questionType={questionType}
@@ -189,17 +171,15 @@ const QuestionCreatePage = () => {
             />
           </Card>
 
-          <div style={actionBarStyle}>
-            <Space>
-              <AdminCancelButton onClick={handleCancel} />
-              <AdminSaveButton loading={loading} onClick={() => form.submit()}>
-                Lưu
-              </AdminSaveButton>
-            </Space>
-          </div>
+          <AdminFormActions
+            sticky
+            loading={loading}
+            onCancel={handleCancel}
+            onSubmit={() => form.submit()}
+          />
         </Space>
       </Form>
-    </div>
+    </AdminFormPageLayout>
   );
 };
 

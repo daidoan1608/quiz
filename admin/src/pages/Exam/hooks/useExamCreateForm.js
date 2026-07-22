@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { message } from "antd";
+import { appMessage as message } from "../../../utils/ui/messageService";
 import { categoryApi } from "../../../api/services/categoryApi";
 import { examApi, questionApi } from "../../../api/services/contentApi";
 import { subjectApi } from "../../../api/services/subjectApi";

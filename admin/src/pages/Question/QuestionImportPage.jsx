@@ -1,33 +1,24 @@
 import React from "react";
 import {
-  Alert,
   Card,
-  Col,
   Divider,
   Form,
-  Row,
-  Select,
-  Space,
-  Typography,
-  Upload,
 } from "antd";
-import {
-  CloudUploadOutlined,
-  ImportOutlined,
-} from "@ant-design/icons";
+import { ImportOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import {
   AdminCancelButton,
   AdminCheckButton,
-  AdminExportButton,
   AdminImportButton,
 } from "../../components/common/buttons/AdminButtons";
-import MainBackButton from "../../components/common/MainBackButton";
+import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import { useQuestionImport } from "./hooks/useQuestionImport";
-
-const { Title } = Typography;
-const { Option } = Select;
-const { Dragger } = Upload;
+import {
+  QuestionImportClassificationFields,
+  QuestionImportInfoAlert,
+  QuestionImportPreviewAlert,
+  QuestionImportUploadField,
+} from "./components/QuestionImportFormParts";
 
 const QuestionImportPage = () => {
   const navigate = useNavigate();
@@ -55,158 +46,29 @@ const QuestionImportPage = () => {
   });
 
   return (
-    <div style={{ padding: 24 }}>
-      <MainBackButton onClick={handleCancel} />
-
-      <Space style={{ marginBottom: 16 }}>
-        <Title level={3} style={{ margin: 0 }}>
-          <ImportOutlined /> Import câu hỏi
-        </Title>
-      </Space>
-
+    <AdminFormPageLayout
+      onBack={handleCancel}
+      title={<><ImportOutlined /> Import câu hỏi</>}
+    >
       <Card variant="borderless">
-        <Alert
-          type="info"
-          message={
-            <div>
-              Chức năng này dùng để nhập dữ liệu câu hỏi hàng loạt từ file Excel/CSV
-              hoặc <b>file ZIP</b> chứa cả file Excel và thư mục ảnh minh họa,
-              ví dụ thư mục <code>images/</code> trong ZIP.
-              Các cột nội dung câu hỏi và đáp án hỗ trợ Markdown/LaTeX như
-              <code> **in đậm**</code>, <code>$x^2$</code>, <code>{"$$\\frac{a}{b}$$"}</code>.
-              Mỗi câu cần 2 đến 8 đáp án. Đáp án phải nhập liền từ A đến H;
-              không bỏ trống đáp án ở giữa rồi nhập đáp án phía sau.
-            </div>
-          }
-          action={
-            <AdminExportButton
-              type="link"
-              href="/templates/mau_zip.zip"
-              download="mau_nhap_cau_hoi.zip"
-            >
-              Tải folder mẫu
-            </AdminExportButton>
-          }
-          showIcon
-          style={{ marginBottom: 24 }}
-        />
+        <QuestionImportInfoAlert />
 
         <Form form={form} layout="vertical" onFinish={handleUpload} size="large">
           <Divider orientation="left">Thông tin phân loại</Divider>
-          <Row gutter={24}>
-            <Col xs={24} md={8}>
-              <Form.Item
-                label="Khoa"
-                name="categoryId"
-                rules={[{ required: true, message: "Vui lòng chọn khoa!" }]}
-              >
-                <Select
-                  placeholder="Chọn khoa"
-                  onChange={handleCategoryChange}
-                  showSearch
-                  optionFilterProp="children"
-                >
-                  {categories.map((cat) => (
-                    <Option key={cat.categoryId} value={cat.categoryId}>
-                      {cat.categoryName}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} md={8}>
-              <Form.Item
-                label="Môn học"
-                name="subjectId"
-                rules={[{ required: true, message: "Vui lòng chọn môn!" }]}
-              >
-                <Select
-                  placeholder={subjects.length === 0 ? "Chọn khoa trước" : "Chọn môn"}
-                  onChange={handleSubjectChange}
-                  disabled={subjects.length === 0}
-                  showSearch
-                  optionFilterProp="children"
-                >
-                  {subjects.map((sub) => (
-                    <Option key={sub.subjectId} value={sub.subjectId}>
-                      {sub.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} md={8}>
-              <Form.Item
-                label="Chương"
-                name="chapterId"
-                rules={[{ required: true, message: "Vui lòng chọn chương!" }]}
-              >
-                <Select
-                  placeholder={chapters.length === 0 ? "Chọn môn trước" : "Chọn chương"}
-                  disabled={chapters.length === 0}
-                  showSearch
-                  optionFilterProp="children"
-                >
-                  {chapters.map((chap) => (
-                    <Option key={chap.chapterId} value={chap.chapterId}>
-                      {chap.name} (Chương {chap.chapterNumber})
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              {isChaptersEmpty && (
-                <Alert
-                  type="warning"
-                  message="Không có chương nào khả dụng"
-                  showIcon
-                  style={{ marginTop: -10 }}
-                />
-              )}
-            </Col>
-          </Row>
+          <QuestionImportClassificationFields
+            categories={categories}
+            chapters={chapters}
+            handleCategoryChange={handleCategoryChange}
+            handleSubjectChange={handleSubjectChange}
+            isChaptersEmpty={isChaptersEmpty}
+            subjects={subjects}
+          />
 
           <Divider orientation="left">Chọn tập tin</Divider>
-          <Form.Item
-            name="fileUpload"
-            rules={[{ required: !selectedFile, message: "Vui lòng chọn file!" }]}
-          >
-            <Dragger {...uploadProps} style={{ padding: 24 }}>
-              <p className="ant-upload-drag-icon">
-                <CloudUploadOutlined />
-              </p>
-              <p className="ant-upload-text">
-                Kéo thả file vào đây hoặc nhấn để chọn file
-              </p>
-              <p className="ant-upload-hint">
-                Hỗ trợ *.xlsx, *.xls, *.csv, *.zip. CSV nên lưu UTF-8; nếu có dấu phẩy
-                hoặc xuống dòng trong Markdown/LaTeX, hãy bọc ô bằng dấu nháy kép.
-              </p>
-            </Dragger>
-          </Form.Item>
+          <QuestionImportUploadField selectedFile={selectedFile} uploadProps={uploadProps} />
+          <QuestionImportPreviewAlert previewResult={previewResult} />
 
-          {previewResult && (
-            <Alert
-              type={previewResult.invalidRows > 0 ? "warning" : "success"}
-              showIcon
-              style={{ marginTop: 16 }}
-              message={`Kiểm tra: ${previewResult.validRows}/${previewResult.totalRows} dòng hợp lệ`}
-              description={
-                previewResult.errors?.length > 0 ? (
-                  <div style={{ maxHeight: 260, overflowY: "auto" }}>
-                    {previewResult.errors.map((error, index) => (
-                      <div key={`${error}-${index}`}>{error}</div>
-                    ))}
-                  </div>
-                ) : (
-                  "Không phát hiện lỗi định dạng cơ bản."
-                )
-              }
-            />
-          )}
-
-          <Space style={{ display: "flex", justifyContent: "flex-end", marginTop: 30 }}>
+          <div className="admin-form-actions admin-form-actions--spaced">
             <AdminCancelButton onClick={handleCancel} />
             <AdminCheckButton
               loading={previewLoading}
@@ -221,10 +83,10 @@ const QuestionImportPage = () => {
             >
               Bắt đầu import
             </AdminImportButton>
-          </Space>
+          </div>
         </Form>
       </Card>
-    </div>
+    </AdminFormPageLayout>
   );
 };
 

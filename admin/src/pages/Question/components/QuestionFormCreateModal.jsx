@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Form, Input, Select,
-  Typography, Divider,
+  Divider,
   Row, Col, Alert, Modal
 } from 'antd';
 import {
@@ -19,8 +19,8 @@ import AdminTableSwitch from '../../../components/common/table/AdminTableSwitch'
 import { MarkdownPreviewBox } from './MarkdownPreviewBox';
 import { QuestionAnswerFields } from './QuestionAnswerFields';
 import { QuestionImageField } from './QuestionImageField';
+import AdminModalTitle from '../../../components/common/modal/AdminModalTitle';
 
-const { Title } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -63,9 +63,9 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
   return (
     <Modal
       title={
-        <Title level={4} style={{ margin: 0 }}>
-          <QuestionCircleOutlined style={{ marginRight: 8 }} /> Thêm Câu Hỏi Mới
-        </Title>
+        <AdminModalTitle icon={<QuestionCircleOutlined />}>
+          Thêm Câu Hỏi Mới
+        </AdminModalTitle>
       }
       open={isModalOpen}
       onCancel={handleCancel}
@@ -84,7 +84,7 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
       centered
       maskClosable={false}
     >
-      <Divider style={{ margin: '16px 0' }} />
+      <Divider className="admin-modal-divider" />
       <Form
         form={form}
         layout="vertical"
@@ -209,6 +209,7 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
         <Divider orientation="left"><CheckCircleOutlined /> Thiết lập đáp án</Divider>
 
         <Alert
+          className="question-form-answer-alert"
           message={
             questionType === 'SINGLE_CHOICE'
               ? "Nhập 4 đáp án và tích chọn vào ô tròn cạnh đáp án đúng."
@@ -216,7 +217,6 @@ const QuestionFormCreateModal = ({ isModalOpen, onCancel, onSuccess }) => {
           }
           type="info"
           showIcon
-          style={{ marginBottom: 20 }}
         />
 
         <Row gutter={24}>

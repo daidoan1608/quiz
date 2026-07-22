@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Button, Input, Space, Tooltip, theme } from "antd";
+import { Button, Input, Space, Tooltip } from "antd";
 import {
   BoldOutlined,
   CodeOutlined,
@@ -35,7 +35,6 @@ const MarkdownLatexEditor = ({
   style,
 }) => {
   const inputRef = useRef(null);
-  const { token } = theme.useToken();
 
   const updateValue = (nextValue) => {
     onChange?.(nextValue);
@@ -59,7 +58,7 @@ const MarkdownLatexEditor = ({
 
   return (
     <div className={className} style={style}>
-      <Space size={4} wrap style={{ marginBottom: 8 }}>
+      <Space className="markdown-latex-editor__toolbar" size={4} wrap>
         {EDITOR_ACTIONS.map((action) => (
           <Tooltip key={action.key} title={action.title}>
             <Button
@@ -80,15 +79,7 @@ const MarkdownLatexEditor = ({
       />
       {value ? (
         <div
-          style={{
-            marginTop: 8,
-            padding: compact ? "6px 8px" : "10px 12px",
-            border: `1px dashed ${token.colorBorder}`,
-            borderRadius: 6,
-            background: token.colorFillQuaternary,
-            maxHeight: compact ? 120 : 260,
-            overflowY: "auto",
-          }}
+          className={`markdown-latex-editor__preview${compact ? " markdown-latex-editor__preview--compact" : ""}`}
         >
           <MarkdownLatex content={value} />
         </div>

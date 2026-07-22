@@ -7,10 +7,7 @@ import {
 } from '@ant-design/icons';
 import { NOTIFICATION_TEMPLATES } from "../constants";
 import { useNotificationForm } from "../hooks/useNotificationForm";
-import {
-  AdminCancelButton,
-  AdminSaveButton,
-} from "../../../components/common/buttons/AdminButtons";
+import { buildAdminModalFooter } from "../../../components/common/forms/AdminFormActions";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -51,20 +48,14 @@ const CreateNotificationModal = ({ isModalOpen, onCancel, onSuccess, createForm,
       title={null}
       open={isModalOpen}
       onCancel={onCancel}
-      footer={[
-        <AdminCancelButton key="cancel" onClick={onCancel}>
-          Hủy
-        </AdminCancelButton>,
-        <AdminSaveButton
-          key="submit"
-          className="notification-template-submit"
-          icon={<SendOutlined />}
-          loading={submitting}
-          onClick={() => createForm.submit()}
-        >
-          Gửi ngay
-        </AdminSaveButton>,
-      ]}
+      footer={buildAdminModalFooter({
+        loading: submitting,
+        onCancel,
+        onSubmit: () => createForm.submit(),
+        saveClassName: "notification-template-submit",
+        saveIcon: <SendOutlined />,
+        saveText: "Gửi ngay",
+      })}
       width={680}
       centered
     >

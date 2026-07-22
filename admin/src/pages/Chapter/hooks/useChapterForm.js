@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Form, message } from "antd";
+import { appMessage as message } from "../../../utils/ui/messageService";
+import { Form } from "antd";
 import { authAxios, getApiErrorMessage } from "../../../api/axiosConfig";
 import { normalizeApiListResponse } from "../../../utils/apiResponseData";
 

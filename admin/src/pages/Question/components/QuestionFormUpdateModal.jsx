@@ -9,7 +9,6 @@ import {
   Row,
   Select,
   Skeleton,
-  Typography,
 } from "antd";
 import { CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import {
@@ -22,8 +21,8 @@ import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch"
 import { MarkdownPreviewBox } from "./MarkdownPreviewBox";
 import { QuestionAnswerFields } from "./QuestionAnswerFields";
 import { QuestionImageField } from "./QuestionImageField";
+import AdminModalTitle from "../../../components/common/modal/AdminModalTitle";
 
-const { Title } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -62,9 +61,9 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
   return (
     <Modal
       title={
-        <Title level={4} style={{ margin: 0 }}>
-          <EditOutlined style={{ marginRight: 8 }} /> Cập nhật câu hỏi ID: {questionId}
-        </Title>
+        <AdminModalTitle icon={<EditOutlined />}>
+          Cập nhật câu hỏi ID: {questionId}
+        </AdminModalTitle>
       }
       open={isModalOpen}
       onCancel={onCancel}
@@ -83,7 +82,7 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
       centered
       maskClosable={false}
     >
-      <Divider style={{ margin: "16px 0" }} />
+      <Divider className="admin-modal-divider" />
       {loadingData ? (
         <Skeleton active paragraph={{ rows: 6 }} />
       ) : (
@@ -141,6 +140,7 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
           </Divider>
 
           <Alert
+            className="question-form-answer-alert"
             message={
               questionType === "SINGLE_CHOICE"
                 ? "Chọn một đáp án đúng bằng nút Radio."
@@ -148,7 +148,6 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
             }
             type="info"
             showIcon
-            style={{ marginBottom: 20 }}
           />
 
           <Row gutter={24}>

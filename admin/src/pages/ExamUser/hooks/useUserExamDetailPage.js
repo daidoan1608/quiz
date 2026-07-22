@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { message } from "antd";
+import { appMessage as message } from "../../../utils/ui/messageService";
 import { authAxios } from "../../../api/axiosConfig";
 
 export const useUserExamDetailPage = (userExamId) => {

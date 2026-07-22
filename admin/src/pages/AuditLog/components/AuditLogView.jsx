@@ -73,7 +73,7 @@ export const AuditLogView = ({ logs, loading, fetchLogs }) => {
       sorter: (a, b) =>
         String(a.description || "").localeCompare(String(b.description || "")),
       render: (value) => (
-        <div style={{ maxWidth: 320, minWidth: 0 }}>
+        <div className="audit-log-description-cell">
           <AdminTableText>{value}</AdminTableText>
         </div>
       ),
@@ -129,7 +129,7 @@ export const AuditLogView = ({ logs, loading, fetchLogs }) => {
               {selectedLog.actorUsername || selectedLog.actorId || "System"}
             </Descriptions.Item>
             <Descriptions.Item label="Mô tả">
-              <Paragraph style={{ marginBottom: 0, whiteSpace: "pre-wrap" }}>
+              <Paragraph className="audit-log-description">
                 {selectedLog.description || "-"}
               </Paragraph>
             </Descriptions.Item>

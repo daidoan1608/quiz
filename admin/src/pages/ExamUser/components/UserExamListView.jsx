@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import ManagementPageLayout from "../../../layouts/ManagementPageLayout";
 import {
+  AdminFilterBar,
   AdminFilterSelect,
   AdminSearchInput,
 } from "../../../components/common/filters/AdminFilterControls";
@@ -68,7 +69,7 @@ export const UserExamListView = ({
           String(b.fullName || b.username || "")
         ),
       render: (_, record) => (
-        <div style={{ minWidth: 0 }}>
+        <div className="admin-table-cell-stack">
           <AdminTableText strong>{record.fullName}</AdminTableText>
           <br />
           <AdminTableText type="secondary">@{record.username}</AdminTableText>
@@ -84,7 +85,7 @@ export const UserExamListView = ({
       render: (score) => {
         const color = score >= 80 ? "success" : score >= 50 ? "warning" : "error";
         return (
-          <Tag color={color} style={{ fontWeight: "bold" }}>
+          <Tag className="admin-table-score-tag" color={color}>
             {score}
           </Tag>
         );
@@ -96,7 +97,7 @@ export const UserExamListView = ({
       width: 250,
       sorter: (a, b) => new Date(a.startTime || 0) - new Date(b.startTime || 0),
       render: (_, record) => (
-        <div style={{ fontSize: 13 }}>
+        <div className="admin-table-compact-text">
           <div>Bắt đầu: {new Date(record.startTime).toLocaleString()}</div>
           <div>Kết thúc: {new Date(record.endTime).toLocaleString()}</div>
         </div>
@@ -138,40 +139,44 @@ export const UserExamListView = ({
     }));
 
   const filters = (
-    <Space wrap>
-      <AdminSearchInput
-        placeholder="Tìm đề thi, môn học, user..."
-        value={searchText}
-        onChange={(event) => setSearchText(event.target.value)}
-      />
-      <AdminFilterSelect
-        placeholder="Khoa"
-        value={advancedFilters.categoryId}
-        onChange={(value) => updateFilter("categoryId", value)}
-        showSearch
-        optionFilterProp="label"
-        options={categories.map((category) => ({
-          value: category.categoryId,
-          label: category.categoryName,
-        }))}
-      />
-      <AdminFilterSelect
-        placeholder="Môn học"
-        value={advancedFilters.subjectId}
-        onChange={(value) => updateFilter("subjectId", value)}
-        showSearch
-        optionFilterProp="label"
-        options={filteredSubjects}
-      />
-      <DatePicker.RangePicker
-        value={advancedFilters.startRange}
-        onChange={(value) => updateFilter("startRange", value)}
-        format="DD/MM/YYYY"
-        placeholder={["Bắt đầu từ", "Bắt đầu đến"]}
-        allowClear
-        style={{ width: 220 }}
-      />
-    </Space>
+    <AdminFilterBar
+      filters={
+        <>
+          <AdminSearchInput
+            placeholder="Tìm đề thi, môn học, user..."
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+          />
+          <AdminFilterSelect
+            placeholder="Khoa"
+            value={advancedFilters.categoryId}
+            onChange={(value) => updateFilter("categoryId", value)}
+            showSearch
+            optionFilterProp="label"
+            options={categories.map((category) => ({
+              value: category.categoryId,
+              label: category.categoryName,
+            }))}
+          />
+          <AdminFilterSelect
+            placeholder="Môn học"
+            value={advancedFilters.subjectId}
+            onChange={(value) => updateFilter("subjectId", value)}
+            showSearch
+            optionFilterProp="label"
+            options={filteredSubjects}
+          />
+          <DatePicker.RangePicker
+            className="management-filter-control"
+            value={advancedFilters.startRange}
+            onChange={(value) => updateFilter("startRange", value)}
+            format="DD/MM/YYYY"
+            placeholder={["Bắt đầu từ", "Bắt đầu đến"]}
+            allowClear
+          />
+        </>
+      }
+    />
   );
 
   return (

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { App, Form } from "antd";
+import { Form } from "antd";
 import { authAxios } from "../../../api/axiosConfig";
 import { useAuth } from "../../../context/AuthProvider";
+import { appMessage as message } from "../../../utils/ui/messageService";
 
 const toApiSortDirection = (sortDir) =>
   sortDir === "ascend" ? "asc" : sortDir === "descend" ? "desc" : undefined;
 
 export const useNotification = () => {
-  const { message: messageApi } = App.useApp();
   const { user, canGlobal, canAnySubject, canAny } = useAuth();
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -65,7 +65,7 @@ export const useNotification = () => {
         total: response.data.totalElements,
       }));
     } catch (error) {
-      messageApi.error("Không thể tải danh sách thông báo");
+      message.error("Không thể tải danh sách thông báo");
     } finally {
       setLoading(false);
     }
@@ -103,10 +103,10 @@ export const useNotification = () => {
   const recallCampaign = async (id) => {
     try {
       await authAxios.delete(`/admin/notifications/history/${id}`);
-      messageApi.success("Đã thu hồi chiến dịch thông báo");
+      message.success("Đã thu hồi chiến dịch thông báo");
       fetchCampaigns(pagination.current, filters, tableSort);
     } catch (error) {
-      messageApi.error("Không thể thu hồi");
+      message.error("Không thể thu hồi");
     }
   };
 
@@ -128,7 +128,7 @@ export const useNotification = () => {
       setNotificationType("GLOBAL");
       createForm.setFieldsValue({ type: "GLOBAL" });
     } else {
-      messageApi.warning("Bạn chưa có quyền tạo thông báo.");
+      message.warning("Bạn chưa có quyền tạo thông báo.");
       return;
     }
     setIsCreateModalOpen(true);

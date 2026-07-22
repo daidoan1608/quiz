@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Button,
   Segmented,
   Space,
   Tag,
@@ -185,46 +184,46 @@ export const ExamManagerView = ({
     <AdminFilterBar
       filters={
         <>
-      <AdminSearchInput
-        placeholder="Tìm tên đề, mã môn..."
-        value={searchText}
-        onChange={(event) => changeSearchText(event.target.value)}
-      />
-      <AdminFilterSelect
-        placeholder="Khoa"
-        value={advancedFilters.categoryId}
-        onChange={(value) => updateFilter("categoryId", value)}
-        showSearch
-        optionFilterProp="label"
-        options={categories.map((category) => ({
-          value: category.categoryId,
-          label: category.categoryName,
-        }))}
-      />
-      <AdminFilterSelect
-        placeholder="Môn học"
-        value={advancedFilters.subjectId}
-        onChange={(value) => updateFilter("subjectId", value)}
-        showSearch
-        optionFilterProp="label"
-        options={subjects.map((subject) => ({
-          value: subject.subjectId,
-          label: subject.name,
-        }))}
-      />
-      {!isMod && (
-        <AdminFilterSelect
-          placeholder="Người tạo"
-          value={advancedFilters.createdBy}
-          onChange={(value) => updateFilter("createdBy", value)}
-          showSearch
-          optionFilterProp="label"
-          options={creators.map((user) => ({
-            value: user.userId,
-            label: user.username,
-          }))}
-        />
-      )}
+          <AdminSearchInput
+            placeholder="Tìm tên đề, mã môn..."
+            value={searchText}
+            onChange={(event) => changeSearchText(event.target.value)}
+          />
+          <AdminFilterSelect
+            placeholder="Khoa"
+            value={advancedFilters.categoryId}
+            onChange={(value) => updateFilter("categoryId", value)}
+            showSearch
+            optionFilterProp="label"
+            options={categories.map((category) => ({
+              value: category.categoryId,
+              label: category.categoryName,
+            }))}
+          />
+          <AdminFilterSelect
+            placeholder="Môn học"
+            value={advancedFilters.subjectId}
+            onChange={(value) => updateFilter("subjectId", value)}
+            showSearch
+            optionFilterProp="label"
+            options={subjects.map((subject) => ({
+              value: subject.subjectId,
+              label: subject.name,
+            }))}
+          />
+          {!isMod && (
+            <AdminFilterSelect
+              placeholder="Người tạo"
+              value={advancedFilters.createdBy}
+              onChange={(value) => updateFilter("createdBy", value)}
+              showSearch
+              optionFilterProp="label"
+              options={creators.map((user) => ({
+                value: user.userId,
+                label: user.username,
+              }))}
+            />
+          )}
         </>
       }
       statusSwitch={

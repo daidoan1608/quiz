@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { App } from "antd";
 import { fetchNotificationRecipients } from "../../../api/services/notificationApi";
+import { appMessage as message } from "../../../utils/ui/messageService";
 
 export const useNotificationRecipients = ({ isModalOpen, historyId }) => {
-  const { message: messageApi } = App.useApp();
   const [recipients, setRecipients] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +20,7 @@ export const useNotificationRecipients = ({ isModalOpen, historyId }) => {
         if (mounted) setRecipients(data);
       } catch (error) {
         if (mounted) {
-          messageApi.error("Lỗi tải danh sách người nhận");
+          message.error("Lỗi tải danh sách người nhận");
           setRecipients([]);
         }
       } finally {
@@ -33,7 +32,7 @@ export const useNotificationRecipients = ({ isModalOpen, historyId }) => {
     return () => {
       mounted = false;
     };
-  }, [historyId, isModalOpen, messageApi]);
+  }, [historyId, isModalOpen]);
 
   return { loading, recipients };
 };

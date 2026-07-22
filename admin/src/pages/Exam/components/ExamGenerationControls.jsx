@@ -6,7 +6,6 @@ import {
   InputNumber,
   Row,
   Space,
-  Table,
   Typography,
 } from "antd";
 import {
@@ -14,6 +13,7 @@ import {
   AdminFilterSelect,
   AdminSearchInput,
 } from "../../../components/common/filters/AdminFilterControls";
+import { ExamQuestionPickerTable } from "./ExamQuestionPickerTable";
 
 const { Text } = Typography;
 
@@ -38,14 +38,6 @@ export const ExamGenerationControls = ({
   setManualQuestionIds,
   setManualQuestionPage,
 }) => {
-  const toggleManualQuestion = (questionId) => {
-    setManualQuestionIds(
-      manualQuestionIds.includes(questionId)
-        ? manualQuestionIds.filter((id) => id !== questionId)
-        : [...manualQuestionIds, questionId]
-    );
-  };
-
   if (!selectedSubject) {
     return (
       <Alert
@@ -58,16 +50,16 @@ export const ExamGenerationControls = ({
 
   return (
     <>
-      <div>
+      <div className="exam-generation-controls">
         {generationMode === "total" && (
           <Row gutter={16} align="middle">
             <Col span={10}>
               <Text>Số câu hỏi ngẫu nhiên</Text>
             </Col>
             <Col span={14}>
-              <Space.Compact style={{ width: "100%" }}>
+              <Space.Compact className="exam-generation-controls__compact">
                 <InputNumber
-                  style={{ flex: 1 }}
+                  className="exam-generation-controls__number"
                   min={0}
                   max={maxQuestions.totalQuestion}
                   value={inputTotal}
@@ -76,7 +68,7 @@ export const ExamGenerationControls = ({
                 <Input
                   readOnly
                   value={`/ ${maxQuestions.totalQuestion || 0} có sẵn`}
-                  style={{ width: 110, textAlign: "center" }}
+                  className="exam-generation-controls__total-label"
                 />
               </Space.Compact>
             </Col>
@@ -84,12 +76,14 @@ export const ExamGenerationControls = ({
         )}
 
         {generationMode === "difficulty" && (
-          <Space direction="vertical" style={{ width: "100%" }}>
+          <Space className="exam-generation-controls__stack" direction="vertical">
             <Row gutter={16}>
               <Col span={8}>
-                <div style={{ marginBottom: 5 }}>Dễ (Max: {maxQuestions.totalEasy})</div>
+                <div className="exam-generation-controls__field-label">
+                  Dễ (Max: {maxQuestions.totalEasy})
+                </div>
                 <InputNumber
-                  style={{ width: "100%" }}
+                  className="exam-generation-controls__full-control"
                   min={0}
                   max={maxQuestions.totalEasy}
                   value={inputDiff.easy}
@@ -97,9 +91,11 @@ export const ExamGenerationControls = ({
                 />
               </Col>
               <Col span={8}>
-                <div style={{ marginBottom: 5 }}>Trung bình (Max: {maxQuestions.totalMedium})</div>
+                <div className="exam-generation-controls__field-label">
+                  Trung bình (Max: {maxQuestions.totalMedium})
+                </div>
                 <InputNumber
-                  style={{ width: "100%" }}
+                  className="exam-generation-controls__full-control"
                   min={0}
                   max={maxQuestions.totalMedium}
                   value={inputDiff.medium}
@@ -107,9 +103,11 @@ export const ExamGenerationControls = ({
                 />
               </Col>
               <Col span={8}>
-                <div style={{ marginBottom: 5 }}>Khó (Max: {maxQuestions.totalHard})</div>
+                <div className="exam-generation-controls__field-label">
+                  Khó (Max: {maxQuestions.totalHard})
+                </div>
                 <InputNumber
-                  style={{ width: "100%" }}
+                  className="exam-generation-controls__full-control"
                   min={0}
                   max={maxQuestions.totalHard}
                   value={inputDiff.hard}
@@ -125,7 +123,7 @@ export const ExamGenerationControls = ({
             {inputChapters.map((chapter, index) => (
               <Row
                 key={chapter.chapterId}
-                style={{ marginBottom: 12 }}
+                className="exam-generation-controls__chapter-row"
                 gutter={16}
                 align="middle"
               >
@@ -133,9 +131,9 @@ export const ExamGenerationControls = ({
                   <Text>{chapter.chapterName}</Text>
                 </Col>
                 <Col span={10}>
-                  <Space.Compact style={{ width: "100%" }}>
+                  <Space.Compact className="exam-generation-controls__compact">
                     <InputNumber
-                      style={{ flex: 1 }}
+                      className="exam-generation-controls__number"
                       min={0}
                       max={chapter.maxTotal}
                       value={chapter.selected}
@@ -148,7 +146,7 @@ export const ExamGenerationControls = ({
                     <Input
                       readOnly
                       value={`/ ${chapter.maxTotal}`}
-                      style={{ width: 72, textAlign: "center" }}
+                      className="exam-generation-controls__chapter-label"
                     />
                   </Space.Compact>
                 </Col>
@@ -161,7 +159,7 @@ export const ExamGenerationControls = ({
         )}
 
         {generationMode === "manual" && (
-          <Space direction="vertical" style={{ width: "100%" }} size={12}>
+          <Space className="exam-generation-controls__stack" direction="vertical" size={12}>
             <AdminFilterBar
               filters={
                 <>
@@ -215,36 +213,14 @@ export const ExamGenerationControls = ({
               }
             />
 
-            <Table
-              size="small"
-              rowKey="questionId"
+            <ExamQuestionPickerTable
               loading={manualPickerLoading}
               dataSource={manualQuestions}
-              onRow={(record) => ({
-                onClick: () => toggleManualQuestion(record.questionId),
-                style: { cursor: "pointer" },
-              })}
-              pagination={{
-                current: manualQuestionPage,
-                pageSize: 20,
-                total: manualQuestionTotal,
-                showSizeChanger: false,
-                onChange: setManualQuestionPage,
-              }}
-              rowSelection={{
-                selectedRowKeys: manualQuestionIds,
-                preserveSelectedRowKeys: true,
-                onChange: (keys) => setManualQuestionIds(keys),
-                onCell: () => ({
-                  onClick: (event) => event.stopPropagation(),
-                }),
-              }}
-              columns={[
-                { title: "Câu hỏi", dataIndex: "content", ellipsis: true },
-                { title: "Chương", dataIndex: "chapterName", width: 160 },
-                { title: "Độ khó", dataIndex: "difficulty", width: 110 },
-                { title: "Loại", dataIndex: "questionType", width: 150 },
-              ]}
+              onPageChange={setManualQuestionPage}
+              onSelectionChange={setManualQuestionIds}
+              page={manualQuestionPage}
+              selectedQuestionIds={manualQuestionIds}
+              total={manualQuestionTotal}
             />
             <Text type="secondary">
               Đang hiển thị {manualQuestions.length}/{manualQuestionTotal} câu trong môn đã chọn.

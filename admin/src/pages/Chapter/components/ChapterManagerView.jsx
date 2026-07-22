@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Button,
   Segmented,
   Space,
 } from "antd";
@@ -138,33 +137,33 @@ export const ChapterManagerView = ({
     <AdminFilterBar
       filters={
         <>
-      <AdminSearchInput
-        placeholder="Tìm tên chương..."
-        value={searchText}
-        onChange={(event) => setSearchText(event.target.value)}
-      />
-      <AdminFilterSelect
-        placeholder="Khoa"
-        value={categoryFilter}
-        onChange={changeCategoryFilter}
-        showSearch
-        optionFilterProp="label"
-        options={categories.map((category) => ({
-          value: category.categoryId,
-          label: category.categoryName,
-        }))}
-      />
-      <AdminFilterSelect
-        placeholder="Môn học"
-        value={subjectFilter}
-        onChange={setSubjectFilter}
-        showSearch
-        optionFilterProp="label"
-        options={subjects.map((subject) => ({
-          value: subject.subjectId,
-          label: subject.name,
-        }))}
-      />
+          <AdminSearchInput
+            placeholder="Tìm tên chương..."
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+          />
+          <AdminFilterSelect
+            placeholder="Khoa"
+            value={categoryFilter}
+            onChange={changeCategoryFilter}
+            showSearch
+            optionFilterProp="label"
+            options={categories.map((category) => ({
+              value: category.categoryId,
+              label: category.categoryName,
+            }))}
+          />
+          <AdminFilterSelect
+            placeholder="Môn học"
+            value={subjectFilter}
+            onChange={setSubjectFilter}
+            showSearch
+            optionFilterProp="label"
+            options={subjects.map((subject) => ({
+              value: subject.subjectId,
+              label: subject.name,
+            }))}
+          />
         </>
       }
       statusSwitch={

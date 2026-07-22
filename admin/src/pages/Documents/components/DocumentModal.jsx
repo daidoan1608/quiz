@@ -1,6 +1,7 @@
 import React from "react";
 import { Form, Input, Modal, Upload } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
+import { buildAdminModalFooter } from "../../../components/common/forms/AdminFormActions";
 import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch";
 
 const { Dragger } = Upload;
@@ -18,10 +19,12 @@ export const DocumentModal = ({
     title={editing ? "Cập nhật tài liệu" : "Thêm tài liệu"}
     open={modalOpen}
     onCancel={closeModal}
-    onOk={saveDocument}
-    confirmLoading={saving}
-    okText={editing ? "Cập nhật" : "Tải lên"}
-    cancelText="Hủy"
+    footer={buildAdminModalFooter({
+      loading: saving,
+      onCancel: closeModal,
+      onSubmit: saveDocument,
+      saveText: editing ? "Cập nhật" : "Tải lên",
+    })}
     destroyOnHidden
   >
     <Form form={form} layout="vertical" initialValues={{ active: true }}>

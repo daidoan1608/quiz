@@ -1,13 +1,12 @@
 import React from "react";
-import { Divider, Form, Input, Modal, Skeleton, Typography } from "antd";
+import { Divider, Form, Input, Modal, Skeleton } from "antd";
 import { AppstoreAddOutlined, EditOutlined } from "@ant-design/icons";
 import {
-  AdminCancelButton,
-  AdminSaveButton,
-} from "../../../components/common/buttons/AdminButtons";
+  buildAdminModalFooter,
+} from "../../../components/common/forms/AdminFormActions";
+import AdminModalTitle from "../../../components/common/modal/AdminModalTitle";
 import { useCategoryForm } from "../hooks/useCategoryForm";
 
-const { Title } = Typography;
 const { TextArea } = Input;
 
 export const CategoryFormModal = ({
@@ -29,35 +28,24 @@ export const CategoryFormModal = ({
   return (
     <Modal
       title={
-        <Title level={4} style={{ margin: 0 }}>
-          {isEditMode ? (
-            <>
-              <EditOutlined style={{ marginRight: 8 }} /> Cập Nhật Khoa: {categoryId}
-            </>
-          ) : (
-            <>
-              <AppstoreAddOutlined style={{ marginRight: 8 }} /> Thêm Khoa Mới
-            </>
-          )}
-        </Title>
+        <AdminModalTitle
+          icon={isEditMode ? <EditOutlined /> : <AppstoreAddOutlined />}
+        >
+          {isEditMode ? `Cập Nhật Khoa: ${categoryId}` : "Thêm Khoa Mới"}
+        </AdminModalTitle>
       }
       open={open}
       onCancel={cancel}
-      footer={[
-        <AdminCancelButton key="back" onClick={cancel} />,
-        <AdminSaveButton
-          key="submit"
-          loading={submitting}
-          onClick={() => form.submit()}
-        >
-          Lưu
-        </AdminSaveButton>,
-      ]}
+      footer={buildAdminModalFooter({
+        loading: submitting,
+        onCancel: cancel,
+        onSubmit: () => form.submit(),
+      })}
       width={500}
       centered
       maskClosable={!loading}
     >
-      <Divider style={{ margin: "16px 0" }} />
+      <Divider className="admin-modal-divider" />
       {loading ? (
         <Skeleton active paragraph={{ rows: 4 }} />
       ) : (

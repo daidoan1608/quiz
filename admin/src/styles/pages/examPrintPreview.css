@@ -12,6 +12,11 @@
   margin: 0 auto 16px;
 }
 
+.exam-print-toolbar-inner {
+  width: 100%;
+  justify-content: space-between;
+}
+
 .exam-print-paper {
   width: 210mm;
   min-height: 297mm;

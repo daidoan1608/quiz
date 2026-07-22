@@ -40,19 +40,13 @@ const renderAnswerContent = (answers, index) => {
   if (!answer) return <Text type="secondary">-</Text>;
   return (
     <Tooltip
-      title={<MarkdownLatex content={answer.content} style={{ maxWidth: 300 }} />}
+      title={<MarkdownLatex className="question-answer-tooltip-content" content={answer.content} />}
       styles={{ root: { maxWidth: 320 } }}
     >
       <span>
         <MarkdownLatex
+          className={answer.isCorrect ? "question-answer-cell is-correct" : "question-answer-cell"}
           content={answer.content}
-          style={{
-            maxWidth: 150,
-            overflow: "hidden",
-            maxHeight: 60,
-            color: answer.isCorrect ? "var(--admin-success)" : undefined,
-            fontWeight: answer.isCorrect ? "bold" : undefined,
-          }}
         />
       </span>
     </Tooltip>
@@ -102,21 +96,16 @@ export const QuestionManagerView = ({
         <Tooltip
           title={
             <MarkdownLatex
+              className="question-content-tooltip"
               content={text}
-              style={{ maxWidth: 450, maxHeight: 300, overflowY: "auto" }}
             />
           }
           styles={{ root: { maxWidth: 480 } }}
         >
           <span>
             <MarkdownLatex
+              className="question-content-cell"
               content={text}
-              style={{
-                maxWidth: 250,
-                maxHeight: 80,
-                overflow: "hidden",
-                fontWeight: "bold",
-              }}
             />
           </span>
         </Tooltip>

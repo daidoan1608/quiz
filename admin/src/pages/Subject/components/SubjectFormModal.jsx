@@ -6,20 +6,18 @@ import {
   Modal,
   Select,
   Skeleton,
-  Typography,
 } from "antd";
 import {
   EditOutlined,
   ReadOutlined,
 } from "@ant-design/icons";
 import {
-  AdminCancelButton,
   AdminResetButton,
-  AdminSaveButton,
 } from "../../../components/common/buttons/AdminButtons";
+import { buildAdminModalFooter } from "../../../components/common/forms/AdminFormActions";
+import AdminModalTitle from "../../../components/common/modal/AdminModalTitle";
 import { useSubjectForm } from "../hooks/useSubjectForm";
 
-const { Title } = Typography;
 const { TextArea } = Input;
 
 export const SubjectFormModal = ({
@@ -46,41 +44,23 @@ export const SubjectFormModal = ({
     onSuccess,
   });
 
-  const footer = [
-    isEditMode && (
-      <AdminResetButton
-        key="restore"
-        onClick={reload}
-        disabled={loading}
-      >
+  const footer = buildAdminModalFooter({
+    extra: isEditMode && (
+      <AdminResetButton key="restore" onClick={reload} disabled={loading}>
         Khôi phục
       </AdminResetButton>
     ),
-    <AdminCancelButton key="back" onClick={cancel} />,
-    <AdminSaveButton
-      key="submit"
-      loading={submitting}
-      onClick={() => form.submit()}
-    >
-      Lưu
-    </AdminSaveButton>,
-  ].filter(Boolean);
+    loading: submitting,
+    onCancel: cancel,
+    onSubmit: () => form.submit(),
+  });
 
   return (
     <Modal
       title={
-        <Title level={4} style={{ margin: 0 }}>
-          {isEditMode ? (
-            <>
-              <EditOutlined style={{ marginRight: 8 }} /> Cập nhật môn học ID:{" "}
-              {subjectId}
-            </>
-          ) : (
-            <>
-              <ReadOutlined style={{ marginRight: 8 }} /> Thêm Môn Học
-            </>
-          )}
-        </Title>
+        <AdminModalTitle icon={isEditMode ? <EditOutlined /> : <ReadOutlined />}>
+          {isEditMode ? `Cập nhật môn học ID: ${subjectId}` : "Thêm Môn Học"}
+        </AdminModalTitle>
       }
       open={open}
       onCancel={cancel}
@@ -89,7 +69,7 @@ export const SubjectFormModal = ({
       centered
       maskClosable={!loading}
     >
-      <Divider style={{ margin: "16px 0" }} />
+      <Divider className="admin-modal-divider" />
       {loading ? (
         <Skeleton active paragraph={{ rows: 4 }} />
       ) : (

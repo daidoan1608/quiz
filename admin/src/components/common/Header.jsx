@@ -10,7 +10,6 @@ import {
   Space,
   Switch,
   Typography,
-  theme as antTheme,
 } from 'antd';
 import {
   BellOutlined,
@@ -35,7 +34,6 @@ export const ContentHeader = () => {
   const isDarkMode = mode === 'dark';
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [adminAlertCount, setAdminAlertCount] = useState(0);
-  const { token } = antTheme.useToken();
   const username = localStorage.getItem('username') || 'Admin';
   const displayName = localStorage.getItem('fullName') || username;
   const avatarUrl = resolveAvatarUrl(localStorage.getItem('avatarUrl') || '');
@@ -45,21 +43,21 @@ export const ContentHeader = () => {
   };
 
   const colorThemes = [
-    { name: 'blue', color: '#137fec', label: 'Blue' },
-    { name: 'emerald', color: '#10b981', label: 'Emerald' },
-    { name: 'cyberpunk', color: '#ec4899', label: 'Pink' },
-    { name: 'sunset', color: '#f97316', label: 'Orange' },
-    { name: 'slate', color: '#6366f1', label: 'Indigo' },
+    { name: 'blue', label: 'Blue' },
+    { name: 'emerald', label: 'Emerald' },
+    { name: 'cyberpunk', label: 'Pink' },
+    { name: 'sunset', label: 'Orange' },
+    { name: 'slate', label: 'Indigo' },
   ];
 
   const userMenuItems = [
     {
       key: 'user-info',
       label: (
-        <div style={{ cursor: 'default', padding: '6px 4px' }}>
+        <div className="admin-user-menu-info">
           <Text strong>{displayName}</Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text className="admin-user-menu-subtitle" type="secondary">
             Quản trị hệ thống
           </Text>
         </div>
@@ -71,17 +69,10 @@ export const ContentHeader = () => {
       key: 'theme-controls',
       label: (
         <div
-          style={{ padding: '8px 4px', width: 230 }}
+          className="admin-theme-menu"
           onClick={(event) => event.stopPropagation()}
         >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 12,
-            }}
-          >
+          <div className="admin-theme-menu__row">
             <Text strong>Giao diện</Text>
             <Switch
               checked={isDarkMode}
@@ -92,32 +83,20 @@ export const ContentHeader = () => {
           </div>
 
           <Text
+            className="admin-theme-menu__label"
             type="secondary"
-            style={{
-              fontSize: 12,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-            }}
           >
             Màu chủ đạo
           </Text>
-          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+          <div className="admin-theme-swatches">
             {colorThemes.map((themeOpt) => (
               <button
                 key={themeOpt.name}
+                className={`admin-theme-swatch admin-theme-swatch--${themeOpt.name}${
+                  colorTheme === themeOpt.name ? ' is-selected' : ''
+                }`}
                 onClick={() => setColorTheme(themeOpt.name)}
                 title={themeOpt.label}
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 12,
-                  border:
-                    colorTheme === themeOpt.name
-                      ? `2px solid ${token.colorText}`
-                      : `1px solid ${token.colorBorder}`,
-                  background: themeOpt.color,
-                  cursor: 'pointer',
-                }}
               />
             ))}
           </div>
@@ -158,14 +137,14 @@ export const ContentHeader = () => {
             placement="bottomRight"
             arrow
           >
-            <Button type="text" style={{ height: 44, padding: '0 8px 0 6px' }}>
+            <Button className="admin-user-trigger" type="text">
               <Space size={10}>
                 <Avatar
+                  className="admin-user-avatar"
                   src={avatarUrl || undefined}
                   icon={<UserOutlined />}
-                  style={{ background: token.colorPrimary }}
                 />
-                <span style={{ fontWeight: 700 }}>{displayName}</span>
+                <span className="admin-user-trigger__name">{displayName}</span>
               </Space>
             </Button>
           </Dropdown>

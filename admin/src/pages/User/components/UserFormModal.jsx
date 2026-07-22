@@ -8,7 +8,6 @@ import {
   Modal,
   Row,
   Select,
-  Space,
   Typography,
 } from "antd";
 import {
@@ -19,13 +18,14 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import {
-  AdminCancelButton,
-  AdminSaveButton,
-} from "../../../components/common/buttons/AdminButtons";
+  AdminFormActions,
+  buildAdminModalFooter,
+} from "../../../components/common/forms/AdminFormActions";
+import AdminModalTitle from "../../../components/common/modal/AdminModalTitle";
 import { USER_FORM_INITIAL_VALUES, USER_ROLE_OPTIONS } from "../constants";
 import { useUserForm } from "../hooks/useUserForm";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export const UserFormModal = ({
   mode,
@@ -54,47 +54,38 @@ export const UserFormModal = ({
   return (
     <Modal
       title={
-        <Title level={4} style={{ margin: 0 }}>
-          {isEditMode ? (
-            <>
-              <EditOutlined style={{ marginRight: 8 }} /> Cập nhật người dùng
-            </>
-          ) : (
-            <>
-              <UserAddOutlined style={{ marginRight: 8 }} /> Thêm người dùng mới
-            </>
-          )}
-        </Title>
+        <AdminModalTitle icon={isEditMode ? <EditOutlined /> : <UserAddOutlined />}>
+          {isEditMode ? "Cập nhật người dùng" : "Thêm người dùng mới"}
+        </AdminModalTitle>
       }
       open={open}
       onCancel={cancel}
-      footer={isEditMode ? null : [
-        <AdminCancelButton key="back" onClick={cancel} />,
-        <AdminSaveButton
-          key="submit"
-          loading={submitting}
-          onClick={() => form.submit()}
-        >
-          Lưu
-        </AdminSaveButton>,
-      ]}
+      footer={
+        isEditMode
+          ? null
+          : buildAdminModalFooter({
+              loading: submitting,
+              onCancel: cancel,
+              onSubmit: () => form.submit(),
+            })
+      }
       width={isEditMode ? 720 : 700}
       centered
       maskClosable={!loading}
       confirmLoading={loading}
     >
-      <Divider style={{ margin: "16px 0" }} />
+      <Divider className="admin-modal-divider" />
       {loading ? (
-        <div style={{ textAlign: "center", padding: "48px 0" }}>
+        <div className="admin-modal-loading">
           <Text type="secondary">Đang tải dữ liệu...</Text>
         </div>
       ) : (
         <>
           {isEditMode && isEditingSelf && (
             <Alert
+              className="admin-modal-alert"
               type="info"
               showIcon
-              style={{ marginBottom: 16 }}
               message="Tài khoản hiện tại"
               description="Bạn không thể tự thay đổi vai trò của chính mình để tránh mất quyền quản trị."
             />
@@ -102,9 +93,9 @@ export const UserFormModal = ({
 
           {isEditMode && originalRole === "ADMIN" && !isEditingSelf && (
             <Alert
+              className="admin-modal-alert"
               type="warning"
               showIcon
-              style={{ marginBottom: 16 }}
               message="Tài khoản ADMIN"
               description="Backend sẽ không cho hạ quyền nếu đây là ADMIN cuối cùng của hệ thống."
             />
@@ -112,9 +103,9 @@ export const UserFormModal = ({
 
           {isEditMode && originalRole === "MOD" && (
             <Alert
+              className="admin-modal-alert"
               type="warning"
               showIcon
-              style={{ marginBottom: 16 }}
               message="Tài khoản MOD"
               description="Nếu đổi sang USER hoặc ADMIN, các quyền theo môn sẽ bị backend thu hồi."
             />
@@ -206,17 +197,11 @@ export const UserFormModal = ({
                       </Select>
                     </Form.Item>
                     <Form.Item label="Hành động">
-                      <Space style={{ width: "100%", justifyContent: "flex-end" }}>
-                        <AdminCancelButton onClick={cancel}>
-                          Hủy
-                        </AdminCancelButton>
-                        <AdminSaveButton
-                          htmlType="submit"
-                          loading={submitting}
-                        >
-                          Lưu
-                        </AdminSaveButton>
-                      </Space>
+                      <AdminFormActions
+                        loading={submitting}
+                        onCancel={cancel}
+                        onSubmit={() => form.submit()}
+                      />
                     </Form.Item>
                   </>
                 ) : (

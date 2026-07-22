@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { message } from "antd";
+import { appMessage as message } from "../../../utils/ui/messageService";
 import { getApiErrorMessage } from "../../../api/axiosConfig";
 import { exportApi, userApi } from "../../../api/services";
 import { useDebouncedEffect } from "../../../hooks/useDebouncedEffect";

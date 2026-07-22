@@ -61,13 +61,6 @@ export default function Sidebar() {
       theme={mode === 'dark' ? 'dark' : 'light'}
       width={270}
       className="admin-sidebar"
-      style={{
-        height: '100vh',
-        position: 'sticky',
-        top: 0,
-        left: 0,
-        overflow: 'auto',
-      }}
     >
       <div className="admin-sidebar-logo">
         {!collapsed && (
@@ -84,7 +77,7 @@ export default function Sidebar() {
           type="text"
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={() => setCollapsed(!collapsed)}
-          style={{ width: 38, height: 38 }}
+          className="admin-sidebar-toggle"
         />
       </div>
 

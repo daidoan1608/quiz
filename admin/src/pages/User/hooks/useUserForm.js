@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Form, Modal, message } from "antd";
+import { appMessage as message } from "../../../utils/ui/messageService";
+import { Form, Modal } from "antd";
 import { authAxios, getApiErrorMessage } from "../../../api/axiosConfig";
 import { userApi } from "../../../api/services";
 import { unwrapApiData } from "../../../api/services/apiResponse";

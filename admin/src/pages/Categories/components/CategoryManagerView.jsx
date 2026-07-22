@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Button,
   Segmented,
   Space,
 } from "antd";
@@ -122,11 +121,11 @@ export const CategoryManagerView = ({
   const filters = (
     <AdminFilterBar
       filters={
-      <AdminSearchInput
-        placeholder="Tìm tên khoa..."
-        value={searchText}
-        onChange={(event) => setSearchText(event.target.value)}
-      />
+        <AdminSearchInput
+          placeholder="Tìm tên khoa..."
+          value={searchText}
+          onChange={(event) => setSearchText(event.target.value)}
+        />
       }
       statusSwitch={
         <Segmented

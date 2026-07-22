@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Button,
   Segmented,
   Space,
 } from "antd";
@@ -132,22 +131,22 @@ export const SubjectManagerView = ({
     <AdminFilterBar
       filters={
         <>
-      <AdminSearchInput
-        placeholder="Tìm tên môn..."
-        value={searchText}
-        onChange={(event) => setSearchText(event.target.value)}
-      />
-      <AdminFilterSelect
-        placeholder="Khoa"
-        value={categoryFilter}
-        onChange={setCategoryFilter}
-        showSearch
-        optionFilterProp="label"
-        options={categories.map((category) => ({
-          value: category.categoryId,
-          label: category.categoryName,
-        }))}
-      />
+          <AdminSearchInput
+            placeholder="Tìm tên môn..."
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+          />
+          <AdminFilterSelect
+            placeholder="Khoa"
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            showSearch
+            optionFilterProp="label"
+            options={categories.map((category) => ({
+              value: category.categoryId,
+              label: category.categoryName,
+            }))}
+          />
         </>
       }
       statusSwitch={

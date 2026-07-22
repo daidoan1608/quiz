@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Form, message, notification } from "antd";
+import { appMessage as message } from "../../../utils/ui/messageService";
+import { Form } from "antd";
 import {
   authAxios,
   getApiErrorMessage,
@@ -108,7 +109,7 @@ export const useQuestionImport = ({ isModalOpen, onCancel, onSuccess }) => {
         message.success("File hợp lệ, có thể import.");
       }
     } catch (error) {
-      notification.error({
+      message.error({
         message: "Kiểm tra file thất bại",
         description: getApiErrorMessage(
           error,
@@ -149,7 +150,7 @@ export const useQuestionImport = ({ isModalOpen, onCancel, onSuccess }) => {
         setChapters([]);
         onSuccess();
       } else {
-        notification.error({
+        message.error({
           message: "Không thể import file",
           description:
             response.data?.message ||
@@ -157,7 +158,7 @@ export const useQuestionImport = ({ isModalOpen, onCancel, onSuccess }) => {
         });
       }
     } catch (error) {
-      notification.error({
+      message.error({
         message: "Upload thất bại",
         description: getApiErrorMessage(
           error,

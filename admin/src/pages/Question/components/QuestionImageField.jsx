@@ -22,13 +22,13 @@ export const QuestionImageField = ({
 
   return (
     <>
-      <div style={{ marginBottom: 10 }}>
+      <div className="question-image-field__mode">
         <Text strong>Hình thức đính kèm ảnh: </Text>
         <Radio.Group
+          className="question-image-field__mode-control"
           value={imageType}
           onChange={handleImageTypeChange}
           buttonStyle="solid"
-          style={{ marginLeft: 10 }}
         >
           <Radio.Button value="upload">Upload tệp</Radio.Button>
           <Radio.Button value="url">Nhập Link ảnh</Radio.Button>
@@ -48,7 +48,7 @@ export const QuestionImageField = ({
           >
             <AdminUploadButton
               loading={uploadingImage}
-              style={{ width: "100%" }}
+              className="question-image-field__upload-button"
             >
               {uploadingImage ? "Đang tải lên..." : "Chọn ảnh để upload"}
             </AdminUploadButton>
@@ -67,16 +67,11 @@ export const QuestionImageField = ({
       )}
 
       {previewImgUrl && (
-        <div style={{ marginTop: 10, textAlign: "center" }}>
+        <div className="question-image-field__preview">
           <img
+            className="question-image-field__preview-image"
             src={resolveMediaUrl(previewImgUrl)}
             alt="Preview"
-            style={{
-              maxHeight: 100,
-              maxWidth: "100%",
-              borderRadius: 6,
-              border: "1px solid var(--admin-border)",
-            }}
           />
         </div>
       )}

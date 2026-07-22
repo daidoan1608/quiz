@@ -9,22 +9,21 @@ import {
   Row,
   Skeleton,
   Space,
-  Statistic,
-  Table,
   Typography,
 } from "antd";
-import { ControlOutlined, EditOutlined } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
-import { AdminSaveButton } from "../../components/common/buttons/AdminButtons";
-import MainBackButton from "../../components/common/MainBackButton";
+import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import {
   AdminFilterBar,
   AdminFilterSelect,
   AdminSearchInput,
 } from "../../components/common/filters/AdminFilterControls";
+import { ExamQuestionConfigHeader } from "./components/ExamQuestionConfigHeader";
+import { ExamQuestionPickerTable } from "./components/ExamQuestionPickerTable";
 import { useExamUpdateForm } from "./hooks/useExamUpdateForm";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 const { TextArea } = Input;
 
 const ExamUpdatePage = () => {
@@ -58,25 +57,20 @@ const ExamUpdatePage = () => {
   });
 
   return (
-    <div style={{ padding: 24 }}>
-      <MainBackButton onClick={handleCancel} />
-
-      <Space style={{ marginBottom: 16 }}>
-        <Title level={3} style={{ margin: 0 }}>
-          <EditOutlined /> Sửa đề thi #{examId}
-        </Title>
-      </Space>
-
+    <AdminFormPageLayout
+      onBack={handleCancel}
+      title={<><EditOutlined /> Sửa đề thi #{examId}</>}
+    >
       <Card variant="borderless">
         {detailLoading ? (
           <Skeleton active paragraph={{ rows: 10 }} />
         ) : (
           <>
             <Alert
+              className="exam-update-info-alert"
               showIcon
               type="info"
               message="Thay đổi danh sách câu hỏi chỉ áp dụng cho lượt làm mới. Lượt đang làm và kết quả đã nộp giữ snapshot cũ."
-              style={{ marginBottom: 16 }}
             />
 
             <Form form={form} layout="vertical" onFinish={submitExam} size="large">
@@ -106,7 +100,7 @@ const ExamUpdatePage = () => {
                     name="duration"
                     rules={[{ required: true, message: "Nhập thời gian!" }]}
                   >
-                    <InputNumber min={1} style={{ width: "100%" }} />
+                    <InputNumber className="admin-full-control" min={1} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -131,44 +125,15 @@ const ExamUpdatePage = () => {
                 </Col>
               </Row>
 
-              <Row align="middle" justify="space-between" gutter={16} style={{ margin: "24px 0 16px" }}>
-                <Col>
-                  <Text strong style={{ fontSize: 16 }}>
-                    <ControlOutlined /> Cấu hình câu hỏi
-                  </Text>
-                </Col>
-                <Col flex="auto">
-                  <Text type="secondary">Chọn thủ công</Text>
-                </Col>
-                <Col>
-                  <Space align="center">
-                    <div
-                      style={{
-                        minWidth: 96,
-                        height: 40,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 8,
-                        padding: "0 12px",
-                        borderRadius: 6,
-                        background: "var(--admin-bg)",
-                      }}
-                    >
-                      <Text>Tổng:</Text>
-                      <Statistic value={selectedQuestionIds.length} valueStyle={{ fontSize: 18 }} />
-                    </div>
-                    <AdminSaveButton
-                      loading={loading}
-                      onClick={() => form.submit()}
-                    >
-                      Lưu
-                    </AdminSaveButton>
-                  </Space>
-                </Col>
-              </Row>
+              <ExamQuestionConfigHeader
+                loading={loading}
+                modeControl={<Text type="secondary">Chọn thủ công</Text>}
+                onCancel={handleCancel}
+                onSubmit={() => form.submit()}
+                total={selectedQuestionIds.length}
+              />
 
-              <Space direction="vertical" size={12} style={{ width: "100%" }}>
+              <Space className="exam-update-question-stack" direction="vertical" size={12}>
                 <AdminFilterBar
                   filters={
                     <>
@@ -222,39 +187,15 @@ const ExamUpdatePage = () => {
                   }
                 />
 
-                <Table
-                  size="small"
-                  rowKey="questionId"
+                <ExamQuestionPickerTable
                   loading={pickerLoading}
                   dataSource={questions}
-                  pagination={{
-                    current: questionPage,
-                    pageSize: 30,
-                    total: questionTotal,
-                    showSizeChanger: false,
-                    onChange: setQuestionPage,
-                  }}
-                  rowSelection={{
-                    selectedRowKeys: selectedQuestionIds,
-                    preserveSelectedRowKeys: true,
-                    onChange: (keys) => setSelectedQuestionIds(keys),
-                  }}
-                  onRow={(record) => ({
-                    onClick: () => {
-                      setSelectedQuestionIds((currentIds) =>
-                        currentIds.includes(record.questionId)
-                          ? currentIds.filter((questionId) => questionId !== record.questionId)
-                          : [...currentIds, record.questionId]
-                      );
-                    },
-                    style: { cursor: "pointer" },
-                  })}
-                  columns={[
-                    { title: "Câu hỏi", dataIndex: "content", ellipsis: true },
-                    { title: "Chương", dataIndex: "chapterName", width: 170 },
-                    { title: "Độ khó", dataIndex: "difficulty", width: 110 },
-                    { title: "Loại", dataIndex: "questionType", width: 150 },
-                  ]}
+                  onPageChange={setQuestionPage}
+                  onSelectionChange={setSelectedQuestionIds}
+                  page={questionPage}
+                  pageSize={30}
+                  selectedQuestionIds={selectedQuestionIds}
+                  total={questionTotal}
                 />
 
                 <Text type="secondary">
@@ -267,7 +208,7 @@ const ExamUpdatePage = () => {
           </>
         )}
       </Card>
-    </div>
+    </AdminFormPageLayout>
   );
 };
 

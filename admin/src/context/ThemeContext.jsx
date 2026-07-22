@@ -1,7 +1,7 @@
 // context/ThemeContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { App as AntApp, ConfigProvider, theme } from 'antd';
-import { setMessageApi } from '../utils/ui/messageService';
+import { setMessageApi, setNotificationApi } from '../utils/ui/messageService';
 
 const ThemeContext = createContext();
 
@@ -109,12 +109,16 @@ const allowedModes = ['light', 'dark'];
 const allowedColorThemes = ['blue', 'emerald', 'cyberpunk', 'sunset', 'slate'];
 
 const AntAppMessageBridge = ({ children }) => {
-  const { message } = AntApp.useApp();
+  const { message, notification } = AntApp.useApp();
 
   useEffect(() => {
     setMessageApi(message);
-    return () => setMessageApi(null);
-  }, [message]);
+    setNotificationApi(notification);
+    return () => {
+      setMessageApi(null);
+      setNotificationApi(null);
+    };
+  }, [message, notification]);
 
   return children;
 };

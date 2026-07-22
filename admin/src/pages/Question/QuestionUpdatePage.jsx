@@ -9,15 +9,13 @@ import {
   Select,
   Skeleton,
   Space,
-  Typography,
 } from "antd";
 import { CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  AdminCancelButton,
-  AdminSaveButton,
-} from "../../components/common/buttons/AdminButtons";
-import MainBackButton from "../../components/common/MainBackButton";
+  AdminFormActions,
+} from "../../components/common/forms/AdminFormActions";
+import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import AdminTableSwitch from "../../components/common/table/AdminTableSwitch";
 import MarkdownLatexEditor from "../../components/common/MarkdownLatexEditor";
 import { QuestionAnswerFields } from "./components/QuestionAnswerFields";
@@ -25,18 +23,7 @@ import { QuestionImageField } from "./components/QuestionImageField";
 import { useQuestionImageUpload } from "./hooks/useQuestionImageUpload";
 import { useQuestionUpdateForm } from "./hooks/useQuestionUpdateForm";
 
-const { Title } = Typography;
 const { Option } = Select;
-
-const actionBarStyle = {
-  position: "sticky",
-  bottom: 0,
-  zIndex: 8,
-  display: "flex",
-  justifyContent: "flex-end",
-  padding: "12px 0 0",
-  background: "var(--admin-bg)",
-};
 
 const QuestionUpdatePage = () => {
   const [form] = Form.useForm();
@@ -68,22 +55,17 @@ const QuestionUpdatePage = () => {
   });
 
   return (
-    <div style={{ padding: 24 }}>
-      <MainBackButton onClick={goBack} />
-
-      <Space style={{ marginBottom: 16 }}>
-        <Title level={3} style={{ margin: 0 }}>
-          <EditOutlined /> Cập nhật câu hỏi #{questionId}
-        </Title>
-      </Space>
-
+    <AdminFormPageLayout
+      onBack={goBack}
+      title={<><EditOutlined /> Cập nhật câu hỏi #{questionId}</>}
+    >
       {loadingData ? (
         <Card variant="borderless">
           <Skeleton active paragraph={{ rows: 8 }} />
         </Card>
       ) : (
           <Form form={form} layout="vertical" onFinish={submitQuestion} size="middle">
-            <Space direction="vertical" size={16} style={{ width: "100%" }}>
+            <Space className="question-form-stack" direction="vertical" size={16}>
               <Card variant="borderless" size="small">
                 <Row gutter={16}>
                   <Col xs={24} md={12} xl={6}>
@@ -119,7 +101,7 @@ const QuestionUpdatePage = () => {
               <Row gutter={16}>
                 <Col xs={24} xl={16}>
                   <Card variant="borderless" size="small" title="Nội dung câu hỏi">
-                    <Form.Item name="content" rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]} style={{ marginBottom: 0 }}>
+                    <Form.Item className="question-form-content-item" name="content" rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}>
                       <MarkdownLatexEditor placeholder="Nhập câu hỏi, công thức LaTeX hoặc Markdown..." minRows={7} maxRows={16} />
                     </Form.Item>
                   </Card>
@@ -140,12 +122,12 @@ const QuestionUpdatePage = () => {
               </Row>
 
               <Card variant="borderless" size="small">
-                <Divider orientation="left" style={{ marginTop: 0 }}><CheckCircleOutlined /> Chỉnh sửa đáp án</Divider>
+                <Divider className="question-form-answer-divider" orientation="left"><CheckCircleOutlined /> Chỉnh sửa đáp án</Divider>
                 <Alert
+                  className="question-form-answer-alert"
                   message={questionType === "SINGLE_CHOICE" ? "Chọn một đáp án đúng." : "Có thể chọn nhiều đáp án đúng."}
                   type="info"
                   showIcon
-                  style={{ marginBottom: 16 }}
                 />
                 <QuestionAnswerFields
                   questionType={questionType}
@@ -154,22 +136,17 @@ const QuestionUpdatePage = () => {
                 />
               </Card>
 
-              <div style={actionBarStyle}>
-                <Space>
-                  <AdminCancelButton onClick={goBack} />
-                  <AdminSaveButton
-                    loading={submitting}
-                    disabled={submitting || uploadingImage}
-                    onClick={() => form.submit()}
-                  >
-                    Lưu
-                  </AdminSaveButton>
-                </Space>
-              </div>
+              <AdminFormActions
+                sticky
+                loading={submitting}
+                disabled={submitting || uploadingImage}
+                onCancel={goBack}
+                onSubmit={() => form.submit()}
+              />
             </Space>
           </Form>
       )}
-    </div>
+    </AdminFormPageLayout>
   );
 };
 

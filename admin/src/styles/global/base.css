@@ -36,3 +36,25 @@ body {
 .notranslate {
   unicode-bidi: isolate;
 }
+
+.admin-toast-notice {
+  border-radius: var(--admin-radius);
+  border: 1px solid var(--admin-border);
+  box-shadow: var(--admin-shadow-lg);
+}
+
+.ant-notification-bottomRight .admin-toast-notice {
+  animation: admin-toast-slide-in 0.22s ease-out;
+}
+
+@keyframes admin-toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

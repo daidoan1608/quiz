@@ -23,10 +23,10 @@ export const NotificationFilters = ({
     <AdminFilterBar
       filters={
         <>
-          <Form.Item name="keyword" style={{ marginBottom: 0 }}>
+          <Form.Item className="admin-filter-form-item" name="keyword">
             <AdminSearchInput placeholder="Tìm tiêu đề/nội dung" />
           </Form.Item>
-          <Form.Item name="sendType" style={{ marginBottom: 0 }}>
+          <Form.Item className="admin-filter-form-item" name="sendType">
             <AdminFilterSelect placeholder="Loại gửi">
               {canSendGlobal && (
                 <Select.Option value="GLOBAL">Toàn hệ thống</Select.Option>
@@ -43,15 +43,15 @@ export const NotificationFilters = ({
             </AdminFilterSelect>
           </Form.Item>
           {!isMod && (
-            <Form.Item name="createdBy" style={{ marginBottom: 0 }}>
-              <Input allowClear placeholder="User ID người tạo" style={{ width: 220 }} />
+            <Form.Item className="admin-filter-form-item" name="createdBy">
+              <Input className="management-filter-control" allowClear placeholder="User ID người tạo" />
             </Form.Item>
           )}
-          <Form.Item name="dateRange" style={{ marginBottom: 0 }}>
+          <Form.Item className="admin-filter-form-item" name="dateRange">
             <RangePicker
+              className="management-filter-control"
               format="DD/MM/YYYY"
               allowClear
-              style={{ width: 220 }}
               placeholder={["Từ ngày", "Đến ngày"]}
             />
           </Form.Item>

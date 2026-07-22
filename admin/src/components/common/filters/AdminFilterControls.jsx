@@ -51,23 +51,14 @@ export const AdminFilterSelect = ({
 );
 
 export const AdminFilterBar = ({ filters, statusSwitch }) => (
-  <div style={{ width: "100%" }}>
+  <div className="admin-filter-bar">
     {filters && (
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 8,
-          alignItems: "flex-start",
-          justifyContent: "flex-start",
-          width: "100%",
-        }}
-      >
+      <div className="admin-filter-bar__controls">
         {filters}
       </div>
     )}
     {statusSwitch && (
-      <div style={{ display: "flex", justifyContent: "flex-start", marginTop: 12 }}>
+      <div className="admin-filter-bar__status">
         {statusSwitch}
       </div>
     )}

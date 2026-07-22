@@ -1,20 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Card,
-  Checkbox,
-  Col,
-  Collapse,
-  Form,
-  Input,
-  Row,
-  Select,
-  Skeleton,
-  Space,
-  Table,
-  Tag,
-  Typography,
-  message,
-} from "antd";
+import { appMessage as message } from "../../utils/ui/messageService";
+import { Card, Checkbox, Col, Collapse, Form, Input, Row, Select, Skeleton, Space, Table, Tag, Typography } from "antd";
 import {
   EyeOutlined,
   SafetyCertificateOutlined,
@@ -24,11 +10,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getApiErrorMessage } from "../../api/axiosConfig";
 import { adminGroupApi, subjectApi } from "../../api/services";
 import {
-  AdminCancelButton,
-  AdminSaveButton,
   AdminToolbarButton,
 } from "../../components/common/buttons/AdminButtons";
-import MainBackButton from "../../components/common/MainBackButton";
+import { AdminFormActions } from "../../components/common/forms/AdminFormActions";
+import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import AdminTableSwitch from "../../components/common/table/AdminTableSwitch";
 import {
   GLOBAL_ACTIONS,
@@ -38,6 +23,8 @@ import {
   SUBJECT_MATRIX,
 } from "./constants";
 import { PermissionMatrix } from "./components/PermissionMatrix";
+import { PermissionPresetGrid } from "./components/PermissionPresetGrid";
+import { PermissionSummaryCards } from "./components/PermissionSummaryCards";
 import {
   buildPermissionSummary,
   keyOf,
@@ -46,7 +33,7 @@ import {
   subjectLabel,
 } from "./utils/permissionUtils";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 const AdminGroupFormPage = () => {
   const [form] = Form.useForm();
@@ -226,22 +213,21 @@ const AdminGroupFormPage = () => {
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <MainBackButton onClick={goBack} />
-
-      <Space style={{ marginBottom: 16 }}>
-        <Title level={3} style={{ margin: 0 }}>
+    <AdminFormPageLayout
+      onBack={goBack}
+      title={
+        <>
           <SafetyCertificateOutlined /> {isEdit ? "Sửa nhóm quyền" : "Thêm nhóm quyền"}
-        </Title>
-      </Space>
-
+        </>
+      }
+    >
       {loading ? (
         <Card variant="borderless">
           <Skeleton active paragraph={{ rows: 12 }} />
         </Card>
       ) : (
         <Form form={form} layout="vertical" onFinish={saveGroup} size="middle">
-          <Space direction="vertical" size={16} style={{ width: "100%" }}>
+          <Space className="admin-group-form-stack" direction="vertical" size={16}>
             <Card variant="borderless" size="small">
               <Row gutter={16}>
                 <Col xs={24} md={8}>
@@ -276,7 +262,7 @@ const AdminGroupFormPage = () => {
             </Card>
 
             <Card variant="borderless" size="small" title="Phạm vi và mẫu quyền">
-              <Space direction="vertical" size={12} style={{ width: "100%" }}>
+              <Space className="admin-group-form-stack" direction="vertical" size={12}>
                 <Select
                   mode="multiple"
                   allowClear
@@ -285,7 +271,7 @@ const AdminGroupFormPage = () => {
                   value={selectedSubjectIds}
                   placeholder="Chọn một hoặc nhiều môn"
                   optionFilterProp="label"
-                  style={{ width: "100%" }}
+                  className="admin-group-form-full-control"
                   dropdownStyle={{ minWidth: 420 }}
                   onChange={handleSubjectSelection}
                   options={subjects.map((subject) => ({
@@ -297,17 +283,9 @@ const AdminGroupFormPage = () => {
                 <Checkbox.Group
                   value={selectedPresetKeys}
                   onChange={setSelectedPresetKeys}
-                  style={{ width: "100%" }}
+                  className="admin-group-form-full-control"
                 >
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 10 }}>
-                    {PRESETS.map((preset) => (
-                      <Card key={preset.key} size="small">
-                        <Checkbox value={preset.key}>
-                          <Text strong>{preset.label}</Text>
-                        </Checkbox>
-                      </Card>
-                    ))}
-                  </div>
+                  <PermissionPresetGrid presets={PRESETS} />
                 </Checkbox.Group>
                 <AdminToolbarButton type="primary" onClick={applySelectedPresets}>
                   Áp dụng mẫu quyền
@@ -316,47 +294,18 @@ const AdminGroupFormPage = () => {
             </Card>
 
             <Card variant="borderless" size="small">
-              <Space style={{ marginBottom: 10 }} wrap>
-                <EyeOutlined />
-                <Text strong>Tóm tắt quyền sẽ lưu</Text>
-                <Tag>{previewRows.length} quyền</Tag>
-                <Tag>{summary.menus.length} menu</Tag>
-                <Tag>{summary.subjectResources.length} môn</Tag>
-              </Space>
-              <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                <Card size="small" title="Menu được thấy">
-                  {summary.menus.length ? (
-                    summary.menus.map((item) => <Tag key={item}>{item}</Tag>)
-                  ) : (
-                    <Text type="secondary">Chưa có menu nào</Text>
-                  )}
-                </Card>
-                <Card size="small" title="Quyền toàn hệ thống">
-                  {summary.globalResources.length ? (
-                    summary.globalResources.map((item) => <Tag key={item}>{item}</Tag>)
-                  ) : (
-                    <Text type="secondary">Chưa có quyền toàn hệ thống</Text>
-                  )}
-                </Card>
-                <Card size="small" title="Quyền theo môn">
-                  {summary.subjectResources.length ? (
-                    <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                      {summary.subjectResources.map((item) => (
-                        <div key={item.subject}>
-                          <Text strong>{item.subject}</Text>
-                          <div style={{ marginTop: 4 }}>
-                            {item.values.map((value) => (
-                              <Tag key={value}>{value}</Tag>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </Space>
-                  ) : (
-                    <Text type="secondary">Chưa có quyền theo môn</Text>
-                  )}
-                </Card>
-              </Space>
+              <PermissionSummaryCards
+                badges={
+                  <>
+                    <Tag>{previewRows.length} quyền</Tag>
+                    <Tag>{summary.menus.length} menu</Tag>
+                    <Tag>{summary.subjectResources.length} môn</Tag>
+                  </>
+                }
+                summary={summary}
+                title="Tóm tắt quyền sẽ lưu"
+                titleIcon={<EyeOutlined />}
+              />
             </Card>
 
             <Collapse
@@ -365,9 +314,9 @@ const AdminGroupFormPage = () => {
                   key: "advanced",
                   label: "Tùy chỉnh nâng cao",
                   children: (
-                    <Space direction="vertical" size={18} style={{ width: "100%" }}>
+                    <Space className="admin-group-form-stack" direction="vertical" size={18}>
                       <section>
-                        <Space style={{ marginBottom: 10 }}>
+                        <Space className="admin-group-form-section-title">
                           <SettingOutlined />
                           <Text strong>Quyền toàn hệ thống</Text>
                         </Space>
@@ -381,10 +330,10 @@ const AdminGroupFormPage = () => {
                       </section>
                       <section>
                         <Text strong>Quyền chi tiết theo môn</Text>
-                        <Space direction="vertical" size={12} style={{ width: "100%", marginTop: 10 }}>
+                        <Space className="admin-group-form-subject-stack" direction="vertical" size={12}>
                           {selectedSubjectIds.map((subjectId) => (
                             <div key={subjectId}>
-                              <Space style={{ marginBottom: 8 }}>
+                              <Space className="admin-group-form-subject-actions">
                                 <Tag color="blue">
                                   {subjectMap.has(subjectId)
                                     ? subjectLabel(subjectMap.get(subjectId))
@@ -430,16 +379,15 @@ const AdminGroupFormPage = () => {
               ]}
             />
 
-            <Space style={{ display: "flex", justifyContent: "flex-end" }}>
-              <AdminCancelButton onClick={goBack} />
-              <AdminSaveButton htmlType="submit" loading={saving}>
-                Lưu
-              </AdminSaveButton>
-            </Space>
+            <AdminFormActions
+              loading={saving}
+              onCancel={goBack}
+              onSubmit={() => form.submit()}
+            />
           </Space>
         </Form>
       )}
-    </div>
+    </AdminFormPageLayout>
   );
 };
 

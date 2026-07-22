@@ -7,19 +7,15 @@ import {
   InputNumber,
   Radio,
   Row,
-  Space,
-  Statistic,
-  Typography,
 } from "antd";
-import { ControlOutlined, FileAddOutlined } from "@ant-design/icons";
+import { FileAddOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { AdminSaveButton } from "../../components/common/buttons/AdminButtons";
-import MainBackButton from "../../components/common/MainBackButton";
+import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import { AdminFilterSelect } from "../../components/common/filters/AdminFilterControls";
 import { useExamCreateForm } from "./hooks/useExamCreateForm";
 import { ExamGenerationControls } from "./components/ExamGenerationControls";
+import { ExamQuestionConfigHeader } from "./components/ExamQuestionConfigHeader";
 
-const { Text, Title } = Typography;
 const { TextArea } = Input;
 
 const ExamCreatePage = () => {
@@ -62,15 +58,10 @@ const ExamCreatePage = () => {
   });
 
   return (
-    <div style={{ padding: 24 }}>
-      <MainBackButton onClick={handleCancel} />
-
-      <Space style={{ marginBottom: 16 }}>
-        <Title level={3} style={{ margin: 0 }}>
-          <FileAddOutlined /> Tạo đề thi mới
-        </Title>
-      </Space>
-
+    <AdminFormPageLayout
+      onBack={handleCancel}
+      title={<><FileAddOutlined /> Tạo đề thi mới</>}
+    >
       <Card variant="borderless">
         <Form form={form} layout="vertical" onFinish={submitExam} size="large">
           <Row gutter={24}>
@@ -136,7 +127,7 @@ const ExamCreatePage = () => {
                 name="duration"
                 rules={[{ required: true, message: "Nhập thời gian!" }]}
               >
-                <InputNumber min={1} style={{ width: "100%" }} placeholder="Ví dụ: 60" />
+                <InputNumber className="admin-full-control" min={1} placeholder="Ví dụ: 60" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -146,13 +137,9 @@ const ExamCreatePage = () => {
             </Col>
           </Row>
 
-          <Row align="middle" justify="space-between" gutter={16} style={{ margin: "24px 0 16px" }}>
-            <Col>
-              <Text strong style={{ fontSize: 16 }}>
-                <ControlOutlined /> Cấu hình câu hỏi
-              </Text>
-            </Col>
-            <Col flex="auto">
+          <ExamQuestionConfigHeader
+            loading={loading}
+            modeControl={
               <Radio.Group
                 value={generationMode}
                 onChange={(event) => setGenerationMode(event.target.value)}
@@ -163,34 +150,12 @@ const ExamCreatePage = () => {
                 <Radio.Button value="chapter">Theo chương</Radio.Button>
                 <Radio.Button value="manual">Chọn thủ công</Radio.Button>
               </Radio.Group>
-            </Col>
-            <Col>
-              <Space align="center">
-                <div
-                  style={{
-                    minWidth: 96,
-                    height: 40,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                    padding: "0 12px",
-                    borderRadius: 6,
-                    background: "var(--admin-bg)",
-                  }}
-                >
-                  <Text>Tổng:</Text>
-                  <Statistic value={calculateTotalSelected()} valueStyle={{ fontSize: 18 }} />
-                </div>
-                <AdminSaveButton
-                  loading={loading}
-                  onClick={() => form.submit()}
-                >
-                  Tạo đề thi
-                </AdminSaveButton>
-              </Space>
-            </Col>
-          </Row>
+            }
+            onCancel={handleCancel}
+            onSubmit={() => form.submit()}
+            saveText="Tạo đề thi"
+            total={calculateTotalSelected()}
+          />
 
           <ExamGenerationControls
             selectedSubject={selectedSubject}
@@ -216,7 +181,7 @@ const ExamCreatePage = () => {
 
         </Form>
       </Card>
-    </div>
+    </AdminFormPageLayout>
   );
 };
 

@@ -43,7 +43,7 @@ export const DocumentsManagerView = ({
       ellipsis: true,
       sorter: (a, b) => String(a.title || "").localeCompare(String(b.title || "")),
       render: (title, record) => (
-        <div style={{ minWidth: 0 }}>
+        <div className="admin-table-cell-stack">
           <AdminTableText strong>{title}</AdminTableText>
           <div>
             <AdminTableText type="secondary">

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { Result, Row, Select, Space, Statistic, Table, theme, Typography } from "antd";
+import { Result, Row, Select, Space, Statistic, Typography } from "antd";
 import {
   DndContext,
   PointerSensor,
@@ -21,11 +21,13 @@ import {
   OverviewBarChart,
 } from "./StatisticsChart";
 import { DEFAULT_WIDGET_ORDER, LIMIT_OPTIONS } from "../constants";
+import { AdminWidgetTable } from "./AdminWidgetTable";
 import { DashboardCard } from "./DashboardCard";
 import { SortableWidget } from "./SortableWidget";
 import { AdminResetButton } from "../../../components/common/buttons/AdminButtons";
+import AdminPageHeader from "../../../components/common/layout/AdminPageHeader";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export function DashboardView({
   canViewStatistics,
@@ -36,7 +38,6 @@ export function DashboardView({
   widgetOrder,
   setWidgetOrder,
 }) {
-  const { token } = theme.useToken();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -50,11 +51,11 @@ export function DashboardView({
       <Space size={8}>
         <Text type="secondary">Hiển thị</Text>
         <Select
+          className="dashboard-limit-select"
           size="small"
           value={tableLimits[key]}
           options={LIMIT_OPTIONS}
           onChange={updateLimit(key)}
-          style={{ width: 96 }}
         />
       </Space>
     ),
@@ -76,55 +77,35 @@ export function DashboardView({
     setWidgetOrder(DEFAULT_WIDGET_ORDER);
   };
 
-  const tableProps = useMemo(
-    () => ({
-      size: "small",
-      pagination: false,
-      scroll: { x: true },
-    }),
-    []
-  );
-
   const widgets = useMemo(() => {
-    const statIconStyle = (color) => ({
-      width: 38,
-      height: 38,
-      borderRadius: 8,
-      display: "inline-grid",
-      placeItems: "center",
-      marginRight: 6,
-      color,
-      background: `${color}18`,
-    });
-
     const statWidgets = [
       {
         id: "totalSubjects",
         title: "Môn học",
         value: statistics.totalSubjects,
         icon: <ReadOutlined />,
-        color: token.colorPrimary,
+        tone: "primary",
       },
       {
         id: "totalQuestions",
         title: "Câu hỏi",
         value: statistics.totalQuestions,
         icon: <QuestionCircleOutlined />,
-        color: token.colorWarning,
+        tone: "warning",
       },
       {
         id: "totalExams",
         title: "Đề thi",
         value: statistics.totalExams,
         icon: <FileTextOutlined />,
-        color: token.colorSuccess,
+        tone: "success",
       },
       {
         id: "totalUsers",
         title: "Người dùng",
         value: statistics.totalUsers,
         icon: <UserOutlined />,
-        color: token.colorError,
+        tone: "error",
       },
     ].map((item) => ({
       id: item.id,
@@ -139,7 +120,11 @@ export function DashboardView({
           <Statistic
             title={item.title}
             value={item.value}
-            prefix={<span style={statIconStyle(item.color)}>{item.icon}</span>}
+            prefix={
+              <span className={`dashboard-stat-icon dashboard-stat-icon--${item.tone}`}>
+                {item.icon}
+              </span>
+            }
           />
         </DashboardCard>
       ),
@@ -195,8 +180,7 @@ export function DashboardView({
             dragHandleProps={dragHandleProps}
             isDragging={isDragging}
           >
-            <Table
-              {...tableProps}
+            <AdminWidgetTable
               columns={[
                 { title: "Ngày", dataIndex: "date" },
                 { title: "Lượt thi", dataIndex: "attempts", width: 120 },
@@ -218,8 +202,7 @@ export function DashboardView({
             dragHandleProps={dragHandleProps}
             isDragging={isDragging}
           >
-            <Table
-              {...tableProps}
+            <AdminWidgetTable
               columns={[
                 { title: "Môn học", dataIndex: "subjectName", ellipsis: true },
                 { title: "Lượt thi", dataIndex: "attempts", width: 120 },
@@ -241,8 +224,7 @@ export function DashboardView({
             dragHandleProps={dragHandleProps}
             isDragging={isDragging}
           >
-            <Table
-              {...tableProps}
+            <AdminWidgetTable
               columns={[
                 { title: "ID", dataIndex: "questionId", width: 80 },
                 { title: "Câu hỏi", dataIndex: "content", ellipsis: true },
@@ -265,8 +247,7 @@ export function DashboardView({
             dragHandleProps={dragHandleProps}
             isDragging={isDragging}
           >
-            <Table
-              {...tableProps}
+            <AdminWidgetTable
               columns={[
                 { title: "User", dataIndex: "username", ellipsis: true },
                 { title: "Họ tên", dataIndex: "fullName", ellipsis: true },
@@ -279,7 +260,7 @@ export function DashboardView({
         ),
       },
     ];
-  }, [loading, renderLimitSelect, statistics, tableProps, token]);
+  }, [loading, renderLimitSelect, statistics]);
 
   const widgetMap = useMemo(
     () => new Map(widgets.map((widget) => [widget.id, widget])),
@@ -298,17 +279,15 @@ export function DashboardView({
 
   return (
     <>
-      <div className="dashboard-header">
-        <div>
-          <Title level={2} style={{ margin: 0 }}>
-            Dashboard
-          </Title>
-          <Text type="secondary">Tổng quan vận hành hệ thống quiz.</Text>
-        </div>
-        <AdminResetButton onClick={resetLayout}>
-          Khôi phục bố cục
-        </AdminResetButton>
-      </div>
+      <AdminPageHeader
+        title="Dashboard"
+        subtitle="Tổng quan vận hành hệ thống quiz."
+        actions={
+          <AdminResetButton onClick={resetLayout}>
+            Khôi phục bố cục
+          </AdminResetButton>
+        }
+      />
 
       <DndContext
         sensors={sensors}

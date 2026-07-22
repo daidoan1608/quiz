@@ -4,6 +4,7 @@ import {
   AdminAddButton,
   AdminReloadButton,
 } from '../components/common/buttons/AdminButtons';
+import AdminPageHeader from '../components/common/layout/AdminPageHeader';
 import styles from '../styles/layouts/ManagementPageLayout.module.css';
 
 const ManagementPageLayout = ({
@@ -35,10 +36,7 @@ const ManagementPageLayout = ({
 
   return (
     <div className={styles.managementPageContainer}>
-      <div className={styles.managementHeader}>
-        <h2 className={styles.pageTitle}>{title}</h2>
-        {renderActionButtons()}
-      </div>
+      <AdminPageHeader title={title} actions={renderActionButtons()} />
       {filters && (
         <Card className={styles.managementFilters} variant="borderless">
           {filters}

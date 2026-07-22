@@ -9,20 +9,15 @@ import {
   Row,
   Select,
   Skeleton,
-  Typography,
 } from "antd";
 import {
   BookOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import {
-  AdminCancelButton,
-  AdminResetButton,
-  AdminSaveButton,
-} from "../../../components/common/buttons/AdminButtons";
+import { AdminResetButton } from "../../../components/common/buttons/AdminButtons";
+import { buildAdminModalFooter } from "../../../components/common/forms/AdminFormActions";
+import AdminModalTitle from "../../../components/common/modal/AdminModalTitle";
 import { useChapterForm } from "../hooks/useChapterForm";
-
-const { Title } = Typography;
 
 export const ChapterFormModal = ({
   mode,
@@ -51,35 +46,23 @@ export const ChapterFormModal = ({
     onSuccess,
   });
 
-  const footer = [
-    <AdminResetButton key="reset" onClick={reload} disabled={loading}>
-      Khôi phục
-    </AdminResetButton>,
-    <AdminCancelButton key="back" onClick={cancel} />,
-    <AdminSaveButton
-      key="submit"
-      loading={submitting}
-      onClick={() => form.submit()}
-    >
-      Lưu
-    </AdminSaveButton>,
-  ];
+  const footer = buildAdminModalFooter({
+    extra: (
+      <AdminResetButton key="reset" onClick={reload} disabled={loading}>
+        Khôi phục
+      </AdminResetButton>
+    ),
+    loading: submitting,
+    onCancel: cancel,
+    onSubmit: () => form.submit(),
+  });
 
   return (
     <Modal
       title={
-        <Title level={4} style={{ margin: 0 }}>
-          {isEditMode ? (
-            <>
-              <EditOutlined style={{ marginRight: 8 }} /> Cập nhật chương ID:{" "}
-              {chapterId}
-            </>
-          ) : (
-            <>
-              <BookOutlined style={{ marginRight: 8 }} /> Thêm Chương Mới
-            </>
-          )}
-        </Title>
+        <AdminModalTitle icon={isEditMode ? <EditOutlined /> : <BookOutlined />}>
+          {isEditMode ? `Cập nhật chương ID: ${chapterId}` : "Thêm Chương Mới"}
+        </AdminModalTitle>
       }
       open={open}
       onCancel={cancel}
@@ -88,7 +71,7 @@ export const ChapterFormModal = ({
       centered
       maskClosable={!loading}
     >
-      <Divider style={{ margin: "16px 0" }} />
+      <Divider className="admin-modal-divider" />
       {loading ? (
         <Skeleton active paragraph={{ rows: 4 }} />
       ) : (
@@ -109,7 +92,7 @@ export const ChapterFormModal = ({
                 tooltip="Mã môn học không nên thay đổi sau khi chương được tạo."
               >
                 <InputNumber
-                  style={{ width: "100%" }}
+                  className="admin-full-control"
                   placeholder="ID môn học"
                   min={1}
                   disabled
@@ -122,7 +105,7 @@ export const ChapterFormModal = ({
                 rules={[{ required: true, message: "Vui lòng nhập số chương!" }]}
               >
                 <InputNumber
-                  style={{ width: "100%" }}
+                  className="admin-full-control"
                   placeholder="Ví dụ: 1"
                   min={1}
                 />
@@ -189,7 +172,7 @@ export const ChapterFormModal = ({
                   ]}
                 >
                   <InputNumber
-                    style={{ width: "100%" }}
+                    className="admin-full-control"
                     min={1}
                     placeholder="Ví dụ: 1"
                   />

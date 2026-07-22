@@ -12,7 +12,6 @@ import {
   Statistic,
   Tag,
   Typography,
-  theme,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -30,7 +29,6 @@ import { useUserExamDetailPage } from "../hooks/useUserExamDetailPage";
 const { Title, Text } = Typography;
 
 export default function UserExamDetailPageView() {
-  const { token } = theme.useToken();
   const { userExamId } = useParams();
   const navigate = useNavigate();
   const {
@@ -44,7 +42,7 @@ export default function UserExamDetailPageView() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", marginTop: 50 }}>
+      <div className="detail-page-loading">
         <Spin size="large">
           <span>Đang tải kết quả...</span>
         </Spin>
@@ -55,7 +53,7 @@ export default function UserExamDetailPageView() {
   if (!examDetail) {
     return (
       <Card>
-        <div style={{ textAlign: "center", padding: 20 }}>
+        <div className="detail-page-empty">
           <Title level={4}>Không tìm thấy dữ liệu bài thi</Title>
           <Button onClick={onBack}>Quay lại</Button>
         </div>
@@ -66,43 +64,27 @@ export default function UserExamDetailPageView() {
   const { subjectName, title, userExamDto } = examDetail;
   const isPassed = userExamDto.score >= 50;
 
-  const getAnswerStyle = (isUserAnswer, isCorrect) => {
+  const getAnswerState = (isUserAnswer, isCorrect) => {
     if (isUserAnswer && isCorrect) {
-      return {
-        background: token.colorSuccessBg,
-        border: `1px solid ${token.colorSuccess}`,
-        color: token.colorSuccessText,
-      };
+      return "correct";
     }
     if (isUserAnswer && !isCorrect) {
-      return {
-        background: token.colorErrorBg,
-        border: `1px solid ${token.colorError}`,
-        color: token.colorErrorText,
-      };
+      return "wrong";
     }
     if (!isUserAnswer && isCorrect) {
-      return {
-        background: "transparent",
-        border: `1px dashed ${token.colorSuccess}`,
-        color: token.colorSuccess,
-      };
+      return "missed-correct";
     }
-    return {
-      background: token.colorBgContainer,
-      border: `1px solid ${token.colorBorder}`,
-      color: token.colorText,
-    };
+    return "neutral";
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", paddingBottom: 40 }}>
-      <div style={{ marginBottom: 16 }}>
+    <div className="detail-page">
+      <div className="detail-page-back">
         <Button
+          className="detail-page-back-button"
           type="link"
           icon={<ArrowLeftOutlined />}
           onClick={onBack}
-          style={{ paddingLeft: 0, fontSize: 16 }}
         >
           Quay lại danh sách
         </Button>
@@ -112,22 +94,18 @@ export default function UserExamDetailPageView() {
         <Col xs={24} md={8}>
           <Card
             variant="borderless"
-            className="c-shadow"
-            style={{ height: "100%", textAlign: "center" }}
+            className="c-shadow detail-page-score-card"
           >
             <Statistic
+              className={`detail-page-score ${isPassed ? "detail-score-value--passed" : "detail-score-value--failed"}`}
               title="Điểm số đạt được"
               value={userExamDto.score}
-              valueStyle={{
-                color: isPassed ? token.colorSuccess : token.colorError,
-                fontSize: 40,
-              }}
               prefix={<TrophyOutlined />}
               suffix="/ 100"
             />
             <Tag
+              className="detail-page-score-tag"
               color={isPassed ? "success" : "error"}
-              style={{ marginTop: 10, fontSize: 16, padding: "5px 20px" }}
             >
               {isPassed ? "ĐẠT (PASSED)" : "CHƯA ĐẠT (FAILED)"}
             </Tag>
@@ -142,10 +120,9 @@ export default function UserExamDetailPageView() {
               </>
             }
             variant="borderless"
-            className="c-shadow"
-            style={{ height: "100%" }}
+            className="c-shadow detail-summary-card"
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="detail-page-info-list">
               <div>
                 <Text type="secondary">Môn học:</Text>{" "}
                 <div>
@@ -183,22 +160,21 @@ export default function UserExamDetailPageView() {
               </>
             }
             variant="borderless"
-            className="c-shadow"
-            style={{ height: "100%" }}
+            className="c-shadow detail-summary-card"
           >
-            <div style={{ textAlign: "center", marginBottom: 10 }}>
+            <div className="detail-page-avatar-wrap">
               <Avatar
                 size={64}
                 icon={<UserOutlined />}
-                style={{ backgroundColor: token.colorPrimary }}
+                className="detail-user-avatar"
               />
             </div>
-            <div style={{ textAlign: "center" }}>
-              <Title level={5} style={{ margin: 0 }}>
+            <div className="detail-page-user-info">
+              <Title className="detail-section-title" level={5}>
                 {userInfo?.fullName || "Unknown"}
               </Title>
               <Text type="secondary">@{userInfo?.username}</Text>
-              <div style={{ marginTop: 10 }}>
+              <div className="detail-page-submit-time">
                 <Tag icon={<CalendarOutlined />}>
                   Nộp bài: {new Date(userExamDto.endTime).toLocaleString()}
                 </Tag>
@@ -209,12 +185,12 @@ export default function UserExamDetailPageView() {
       </Row>
 
       <Divider orientation="left">
-        <Title level={4} style={{ margin: 0 }}>
+        <Title className="detail-section-title" level={4}>
           Chi tiết bài làm
         </Title>
       </Divider>
 
-      <Space direction="vertical" size="large" style={{ width: "100%" }}>
+      <Space className="detail-question-stack" direction="vertical" size="large">
         {examQuestions.length === 0 && (
           <Card variant="borderless" className="c-shadow">
             <Text type="secondary">Chưa có dữ liệu câu hỏi cho bài làm này.</Text>
@@ -229,34 +205,25 @@ export default function UserExamDetailPageView() {
               key={question.questionId}
               title={<Text strong>Câu {index + 1}</Text>}
               variant="borderless"
-              className="c-shadow"
+              className="c-shadow detail-question-card"
             >
               <MarkdownLatex
+                className="detail-question-content detail-page-question-content"
                 content={question.content}
-                style={{ fontSize: 16, marginBottom: 20 }}
               />
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="detail-answer-stack detail-page-answer-stack">
                 {(question.answers || []).map((answer) => {
                   const isUserAnswer = userAnswerIds.has(answer.optionId);
                   const isCorrect = answer.isCorrect;
-                  const style = getAnswerStyle(isUserAnswer, isCorrect);
 
                   return (
                     <div
                       key={answer.optionId}
-                      style={{
-                        padding: "12px 16px",
-                        borderRadius: 8,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        transition: "all 0.3s",
-                        ...style,
-                      }}
+                      className={`detail-answer-row detail-answer-row--${getAnswerState(isUserAnswer, isCorrect)}`}
                     >
-                      <span>
-                        <strong style={{ marginRight: 8 }}>
+                      <span className="detail-answer-content">
+                        <strong>
                           {String.fromCharCode(
                             65 + question.answers.indexOf(answer)
                           )}
@@ -267,17 +234,13 @@ export default function UserExamDetailPageView() {
 
                       <span>
                         {isUserAnswer && isCorrect && (
-                          <CheckCircleFilled
-                            style={{ fontSize: 20, color: token.colorSuccess }}
-                          />
+                          <CheckCircleFilled className="detail-answer-icon--success detail-page-answer-icon" />
                         )}
                         {isUserAnswer && !isCorrect && (
-                          <CloseCircleFilled
-                            style={{ fontSize: 20, color: token.colorError }}
-                          />
+                          <CloseCircleFilled className="detail-answer-icon--error detail-page-answer-icon" />
                         )}
                         {!isUserAnswer && isCorrect && (
-                          <Text type="success" style={{ fontSize: 12 }}>
+                          <Text className="detail-answer-note" type="success">
                             (Đáp án đúng)
                           </Text>
                         )}

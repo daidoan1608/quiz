@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Badge, Button, Drawer, Empty, List, Space, Spin, Tag, Typography, theme } from "antd";
+import { Alert, Badge, Button, Drawer, Empty, List, Space, Spin, Tag, Typography } from "antd";
 import {
   AuditOutlined,
   CheckOutlined,
@@ -27,7 +27,6 @@ const alertIcons = {
 };
 
 export const NotificationSidebar = ({ isOpen, onClose, onCountChange }) => {
-  const { token } = theme.useToken();
   const {
     dismissAlert,
     dismissAllVisibleAlerts,
@@ -48,7 +47,8 @@ export const NotificationSidebar = ({ isOpen, onClose, onCountChange }) => {
       onClose={onClose}
       open={isOpen}
       width={430}
-      styles={{ body: { padding: 0, background: token.colorBgLayout } }}
+      className="admin-notification-drawer"
+      styles={{ body: { padding: 0 } }}
       extra={
         visibleAlerts.length > 0 ? (
           <Space>
@@ -63,22 +63,22 @@ export const NotificationSidebar = ({ isOpen, onClose, onCountChange }) => {
       }
     >
       <Spin spinning={loading}>
-        <div style={{ padding: 18 }}>
+        <div className="admin-notification-drawer__body">
           <Alert
+            className="admin-notification-drawer__intro"
             type="info"
             showIcon
             icon={<AuditOutlined />}
             message="Tổng hợp từ dữ liệu quản trị hiện có"
             description="Bao gồm audit log, câu hỏi, đề thi và trạng thái người dùng. Không hiển thị thông báo giả."
-            style={{ marginBottom: 16 }}
           />
 
           {!loading && visibleAlerts.length === 0 ? (
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có cảnh báo cần xử lý" />
           ) : (
             Object.entries(groupedAlerts).map(([group, items]) => (
-              <div key={group} style={{ marginBottom: 18 }}>
-                <Title level={5} style={{ margin: "0 0 10px" }}>
+              <div className="admin-notification-group" key={group}>
+                <Title className="admin-notification-group__title" level={5}>
                   {group}
                 </Title>
                 <List
@@ -86,40 +86,14 @@ export const NotificationSidebar = ({ isOpen, onClose, onCountChange }) => {
                   dataSource={items}
                   renderItem={(item) => (
                     <List.Item
+                      className="admin-notification-item"
                       onClick={() => dismissAlert(item.id)}
-                      style={{
-                        padding: "12px 14px",
-                        marginBottom: 10,
-                        borderRadius: 12,
-                        border: `1px solid ${token.colorBorderSecondary}`,
-                        background: token.colorBgContainer,
-                        cursor: "pointer",
-                      }}
                     >
                       <List.Item.Meta
                         avatar={
                           <Badge status={getBadgeStatus(item.level)}>
                             <span
-                              style={{
-                                width: 34,
-                                height: 34,
-                                borderRadius: 12,
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color:
-                                  item.level === "error"
-                                    ? token.colorError
-                                    : item.level === "warning"
-                                      ? token.colorWarning
-                                      : token.colorPrimary,
-                                background:
-                                  item.level === "error"
-                                    ? token.colorErrorBg
-                                    : item.level === "warning"
-                                      ? token.colorWarningBg
-                                      : token.colorPrimaryBg,
-                              }}
+                              className={`admin-notification-item__icon admin-notification-item__icon--${item.level}`}
                             >
                               {alertIcons[item.iconType] || <WarningOutlined />}
                             </span>
@@ -129,10 +103,10 @@ export const NotificationSidebar = ({ isOpen, onClose, onCountChange }) => {
                         description={
                           <Space direction="vertical" size={4}>
                             <Text type="secondary">{item.description}</Text>
-                            <Text type="secondary" style={{ fontSize: 12 }}>
+                            <Text className="admin-notification-item__meta" type="secondary">
                               <ClockCircleOutlined /> {formatAlertTime(item.time)}
                             </Text>
-                            <Text type="secondary" style={{ fontSize: 12 }}>
+                            <Text className="admin-notification-item__meta" type="secondary">
                               Bấm để đánh dấu đã xử lý
                             </Text>
                           </Space>

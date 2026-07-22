@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { message } from "antd";
+import { appMessage as message } from "../../../utils/ui/messageService";
 import { adminGroupApi } from "../../../api/services";
 import { getApiErrorMessage } from "../../../api/axiosConfig";
 
