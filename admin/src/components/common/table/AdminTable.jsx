@@ -22,6 +22,7 @@ const normalizePagination = (pagination) => {
 };
 
 const normalizeScroll = (scroll) => {
+  if (!scroll) return { x: "max-content" };
   if (!scroll?.x || typeof scroll.x !== "number") return scroll;
   return {
     ...scroll,
@@ -32,7 +33,7 @@ const normalizeScroll = (scroll) => {
 const normalizeColumns = (columns) =>
   columns?.map((column) => ({
     ...column,
-    align: "center",
+    align: column.align,
     children: normalizeColumns(column.children),
   }));
 

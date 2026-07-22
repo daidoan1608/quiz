@@ -20,13 +20,16 @@ export const AdminActionButton = forwardRef(({
   variant = "default",
   className,
   disabled,
+  "aria-label": ariaLabel,
   ...buttonProps
 }, ref) => {
   const button = (
     <Button
+      aria-label={ariaLabel || title}
       ref={ref}
       className={getActionButtonClassName(variant, className)}
       disabled={disabled}
+      title={title}
       {...buttonProps}
     />
   );

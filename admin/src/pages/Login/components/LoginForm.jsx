@@ -14,11 +14,19 @@ export default function LoginForm({ loading, onSubmit }) {
       requiredMark={false}
     >
       <Form.Item name="username" label="Tên đăng nhập" rules={LOGIN_FORM_RULES.username}>
-        <Input prefix={<UserOutlined />} placeholder="Nhập tên đăng nhập" />
+        <Input
+          autoComplete="username"
+          prefix={<UserOutlined />}
+          placeholder="Nhập tên đăng nhập"
+        />
       </Form.Item>
 
       <Form.Item name="password" label="Mật khẩu" rules={LOGIN_FORM_RULES.password}>
-        <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
+        <Input.Password
+          autoComplete="current-password"
+          prefix={<LockOutlined />}
+          placeholder="Nhập mật khẩu"
+        />
       </Form.Item>
 
       <Form.Item className={styles.submitItem}>

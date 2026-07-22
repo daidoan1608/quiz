@@ -5,6 +5,7 @@ import {
   publicAxios,
   setExplicitLogoutInProgress,
 } from "../api/axiosConfig";
+import PageLoading from "../components/common/PageLoading";
 import {
   canGlobal as policyCanGlobal,
   canMenu as policyCanMenu,
@@ -188,7 +189,7 @@ export const AuthProvider = ({ children }) => {
         getAllowedSubjectIds,
       }}
     >
-      {loading ? <div>Loading...</div> : children}
+      {loading ? <PageLoading /> : children}
     </AuthContext.Provider>
   );
 };
