@@ -668,6 +668,11 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     private List<QuestionDto> getAttemptQuestionDtos(UserExam userExam) {
+        if (userExamQuestionRepository == null) {
+            return getAttemptQuestions(userExam).stream()
+                    .map(this::mapQuestionToDto)
+                    .toList();
+        }
         List<UserExamQuestion> snapshots = userExamQuestionRepository.findByUserExamUserExamIdOrderByPositionAsc(userExam.getUserExamId());
         if (!snapshots.isEmpty() && snapshots.stream().allMatch(snapshot -> snapshot.getQuestionContentSnapshot() != null)) {
             return snapshots.stream()

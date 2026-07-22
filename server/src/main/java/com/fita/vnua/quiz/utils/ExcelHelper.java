@@ -268,9 +268,12 @@ public class ExcelHelper {
     }
 
     private static Set<String> parseCorrectOptions(String correctOption) {
-        return correctOption.chars()
+        String normalized = correctOption == null ? "" : correctOption.trim().toUpperCase();
+        if (!normalized.matches("[A-H]*")) {
+            throw new CustomApiException("Đáp án đúng chỉ được chứa các ký tự từ A đến H.", HttpStatus.BAD_REQUEST);
+        }
+        return normalized.chars()
                 .mapToObj(value -> String.valueOf((char) value))
-                .filter(value -> value.matches("[A-H]"))
                 .collect(Collectors.toSet());
     }
 

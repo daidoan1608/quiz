@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.Cache;
@@ -24,7 +24,9 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Configuration
+@Slf4j
 public class RedisCacheConfig {
+    private static final String TYPE_HINT_PROPERTY = "@type";
 
     @Bean
     public RedisCacheConfiguration cacheConfiguration(
@@ -67,22 +69,25 @@ public class RedisCacheConfig {
         return new CacheErrorHandler() {
             @Override
             public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
-                // Keep APIs available even when Redis is temporarily unavailable.
+                log.warn("Redis cache GET failed for cache='{}', key='{}'. Falling back to source.",
+                        cache.getName(), key, exception);
             }
 
             @Override
             public void handleCachePutError(RuntimeException exception, Cache cache, Object key, Object value) {
-                // Keep APIs available even when Redis is temporarily unavailable.
+                log.warn("Redis cache PUT failed for cache='{}', key='{}'. Response will still be served.",
+                        cache.getName(), key, exception);
             }
 
             @Override
             public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
-                // Keep APIs available even when Redis is temporarily unavailable.
+                log.warn("Redis cache EVICT failed for cache='{}', key='{}'.",
+                        cache.getName(), key, exception);
             }
 
             @Override
             public void handleCacheClearError(RuntimeException exception, Cache cache) {
-                // Keep APIs available even when Redis is temporarily unavailable.
+                log.warn("Redis cache CLEAR failed for cache='{}'.", cache.getName(), exception);
             }
         };
     }
@@ -105,10 +110,10 @@ public class RedisCacheConfig {
                 .allowIfSubType("java.util")
                 .allowIfSubType("java.lang")
                 .build();
-        objectMapper.activateDefaultTyping(
+        objectMapper.activateDefaultTypingAsProperty(
                 typeValidator,
                 ObjectMapper.DefaultTyping.EVERYTHING,
-                JsonTypeInfo.As.WRAPPER_ARRAY
+                TYPE_HINT_PROPERTY
         );
         return new GenericJackson2JsonRedisSerializer(objectMapper);
     }

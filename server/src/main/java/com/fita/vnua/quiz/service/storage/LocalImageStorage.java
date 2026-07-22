@@ -1,6 +1,6 @@
 package com.fita.vnua.quiz.service.storage;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
-@ConditionalOnProperty(name = "cloudinary.enabled", havingValue = "false", matchIfMissing = true)
+@ConditionalOnExpression("!'${cloudinary.enabled:false}'.equalsIgnoreCase('true') && !'${imgbb.enabled:false}'.equalsIgnoreCase('true')")
 public class LocalImageStorage implements ImageStorage {
 
     @Override
