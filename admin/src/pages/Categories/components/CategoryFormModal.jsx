@@ -4,6 +4,7 @@ import { AppstoreAddOutlined, EditOutlined } from "@ant-design/icons";
 import {
   buildAdminModalFooter,
 } from "../../../components/common/forms/AdminFormActions";
+import AdminReadonlyField from "../../../components/common/forms/AdminReadonlyField";
 import AdminModalFormShell from "../../../components/common/modal/AdminModalFormShell";
 import { useCategoryForm } from "../hooks/useCategoryForm";
 
@@ -27,7 +28,7 @@ export const CategoryFormModal = ({
 
   return (
     <AdminModalFormShell
-      title={isEditMode ? `Cập Nhật Khoa: ${categoryId}` : "Thêm Khoa Mới"}
+      title={isEditMode ? "Cập Nhật Khoa" : "Thêm Khoa Mới"}
       icon={isEditMode ? <EditOutlined /> : <AppstoreAddOutlined />}
       open={open}
       onCancel={cancel}
@@ -42,6 +43,10 @@ export const CategoryFormModal = ({
       maskClosable={!loading}
     >
       <Form form={form} layout="vertical" onFinish={submit} size="large">
+        {isEditMode && (
+          <AdminReadonlyField name="categoryId" />
+        )}
+
         <Form.Item
           label="Tên khoa"
           name="categoryName"

@@ -12,6 +12,7 @@ import {
   AdminResetButton,
 } from "../../../components/common/buttons/AdminButtons";
 import { buildAdminModalFooter } from "../../../components/common/forms/AdminFormActions";
+import AdminReadonlyField from "../../../components/common/forms/AdminReadonlyField";
 import AdminModalFormShell from "../../../components/common/modal/AdminModalFormShell";
 import { useSubjectForm } from "../hooks/useSubjectForm";
 
@@ -54,7 +55,7 @@ export const SubjectFormModal = ({
 
   return (
     <AdminModalFormShell
-      title={isEditMode ? `Cập nhật môn học ID: ${subjectId}` : "Thêm Môn Học"}
+      title={isEditMode ? "Cập nhật môn học" : "Thêm Môn Học"}
       icon={isEditMode ? <EditOutlined /> : <ReadOutlined />}
       open={open}
       onCancel={cancel}
@@ -65,6 +66,10 @@ export const SubjectFormModal = ({
       maskClosable={!loading}
     >
       <Form form={form} layout="vertical" onFinish={submit} size="large">
+        {isEditMode && (
+          <AdminReadonlyField name="subjectId" />
+        )}
+
         {!isEditMode && (
           <Form.Item
             label="Chọn Khoa"
@@ -104,11 +109,6 @@ export const SubjectFormModal = ({
         <Form.Item
           label="Mô tả"
           name="description"
-          rules={
-            isEditMode
-              ? [{ required: true, message: "Vui lòng nhập mô tả!" }]
-              : undefined
-          }
         >
           <TextArea
             rows={4}

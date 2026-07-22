@@ -25,11 +25,20 @@ export const useChapterManager = () => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [chapterIdToUpdate, setChapterIdToUpdate] = useState(null);
   const { tableSort, handleTableChange, getSortOrder } = useTableSort();
-  const { user, capabilities, canOnSubject } = useAuth();
+  const { user, canOnSubject, getAllowedSubjectIds } = useAuth();
   const isMod = user?.role === "MOD";
   const allowedSubjectIds = useMemo(
-    () => Object.keys(capabilities.subjects || {}),
-    [capabilities.subjects]
+    () => getAllowedSubjectIds("CHAPTER", "VIEW")?.map(String) || [],
+    [getAllowedSubjectIds]
+  );
+  const visibleCategories = useMemo(
+    () =>
+      isMod
+        ? categories.filter((category) =>
+            subjects.some((subject) => subject.categoryId === category.categoryId)
+          )
+        : categories,
+    [categories, isMod, subjects]
   );
 
   const fetchChapters = useCallback(
@@ -169,7 +178,7 @@ export const useChapterManager = () => {
 
   return {
     chapters,
-    categories,
+    categories: visibleCategories,
     subjects: visibleSubjects,
     loading,
     searchText,

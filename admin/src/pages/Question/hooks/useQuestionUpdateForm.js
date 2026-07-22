@@ -44,6 +44,7 @@ export const useQuestionUpdateForm = ({ form, isModalOpen, onCancel, onSuccess, 
       setPreviewImgUrl(data.imageUrl || "");
       setImageType(data.imageUrl && data.imageUrl.startsWith("http") ? "url" : "upload");
       form.setFieldsValue({
+        questionId: data.questionId || Number(questionId),
         content: data.content,
         difficulty: data.difficulty,
         imageUrl: data.imageUrl,

@@ -10,7 +10,10 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.ExamAttemptResponse;
 import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
+import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.repository.UserExamRepository;
+import com.fita.vnua.quiz.service.AdminCapabilityService;
 import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.UserExamService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +31,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +45,9 @@ import java.util.UUID;
 public class UserExamController {
     private final UserExamService userExamService;
     private final AuthorizationService authorizationService;
+    private final AdminCapabilityService adminCapabilityService;
+    private final UserExamRepository userExamRepository;
+    private final SubjectRepository subjectRepository;
 
     @GetMapping("public/user-exam-summaries")
     @Operation(summary = "Thống kê điểm thi của người dùng")
@@ -95,7 +100,6 @@ public class UserExamController {
 
     @GetMapping("admin/user-exams")
     @Operation(summary = "Lấy danh sách bài thi của tất cả người dùng")
-    @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'USER_EXAM', 'VIEW', 'GLOBAL', null) or (#subjectId != null and @adminCapabilityService.hasPermission(principal, 'USER_EXAM', 'VIEW', 'SUBJECT', #subjectId))")
     public ResponseEntity<Page<UserExamResponse>> getAllUserExams(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
@@ -106,8 +110,10 @@ public class UserExamController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime startedTo,
-            @PageableDefault(sort = "startTime", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "startTime", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal User currentUser
     ) {
+        requireAdminUserExamListAccess(currentUser, categoryId, subjectId);
         return ResponseEntity.ok(userExamService.getAllUserExamsForAdmin(
                 keyword,
                 categoryId,
@@ -116,6 +122,32 @@ public class UserExamController {
                 startedTo,
                 pageable
         ));
+    }
+
+    private void requireAdminUserExamListAccess(User currentUser, Long categoryId, Long subjectId) {
+        User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
+        if (adminCapabilityService.hasPermission(authenticatedUser, "USER_EXAM", "VIEW", "GLOBAL", null)) {
+            return;
+        }
+        if (subjectId != null) {
+            if (!adminCapabilityService.hasPermission(authenticatedUser, "USER_EXAM", "VIEW", "SUBJECT", subjectId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Không có quyền xem bài thi người dùng của môn này");
+            }
+            if (categoryId != null && !subjectRepository.existsActiveSubjectInCategory(subjectId, categoryId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Môn không thuộc khoa được chọn");
+            }
+            return;
+        }
+        if (categoryId != null) {
+            boolean hasSubjectInCategory = adminCapabilityService
+                    .getAllowedSubjectIds(authenticatedUser, "USER_EXAM", "VIEW")
+                    .stream()
+                    .anyMatch(allowedSubjectId -> subjectRepository.existsActiveSubjectInCategory(allowedSubjectId, categoryId));
+            if (hasSubjectInCategory) {
+                return;
+            }
+        }
+        throw new org.springframework.security.access.AccessDeniedException("Không có quyền xem bài thi người dùng trong phạm vi này");
     }
 
     @GetMapping("user-exams")
@@ -147,10 +179,24 @@ public class UserExamController {
             @PathVariable("userExamId") Long userExamId,
             @AuthenticationPrincipal User currentUser) {
         User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
-        UserExamResponse userExam = authorizationService.isAdminOrMod(authenticatedUser)
-                ? userExamService.getUserExamByIdForAdmin(userExamId)
-                : userExamService.getUserExamByIdForUser(userExamId, authenticatedUser.getUserId());
+        UserExamResponse userExam;
+        if (authorizationService.isAdminOrMod(authenticatedUser)) {
+            requireAdminUserExamAccess(authenticatedUser, userExamId);
+            userExam = userExamService.getUserExamByIdForAdmin(userExamId);
+        } else {
+            userExam = userExamService.getUserExamByIdForUser(userExamId, authenticatedUser.getUserId());
+        }
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin bài thi của người dùng thành công", userExam));
+    }
+
+    private void requireAdminUserExamAccess(User currentUser, Long userExamId) {
+        if (adminCapabilityService.hasPermission(currentUser, "USER_EXAM", "VIEW", "GLOBAL", null)) {
+            return;
+        }
+        Long subjectId = userExamRepository.findSubjectIdByUserExamId(userExamId).orElse(null);
+        if (subjectId == null || !adminCapabilityService.hasPermission(currentUser, "USER_EXAM", "VIEW", "SUBJECT", subjectId)) {
+            throw new org.springframework.security.access.AccessDeniedException("Không có quyền xem bài thi của người dùng thuộc môn này");
+        }
     }
 
     @GetMapping("users/{userId}/user-exams/count")

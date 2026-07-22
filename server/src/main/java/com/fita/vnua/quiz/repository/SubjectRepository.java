@@ -66,6 +66,18 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
     @Query("SELECT s.subjectId FROM Subject s WHERE s.subjectId = :subjectId AND s.deleted = false")
     Optional<Long> findActiveSubjectId(@Param("subjectId") Long subjectId);
 
+    @Query("""
+            SELECT COUNT(s) > 0 FROM Subject s
+            JOIN s.category c
+            WHERE s.subjectId = :subjectId
+              AND c.categoryId = :categoryId
+              AND s.deleted = false
+            """)
+    boolean existsActiveSubjectInCategory(
+            @Param("subjectId") Long subjectId,
+            @Param("categoryId") Long categoryId
+    );
+
     @Query(value = """
     SELECT
         s.*

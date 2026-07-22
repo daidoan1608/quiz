@@ -30,11 +30,20 @@ export const useExamManager = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState(null);
   const { current: currentPage, pageSize } = pagination;
-  const { user, capabilities, canOnSubject } = useAuth();
+  const { user, canOnSubject, getAllowedSubjectIds } = useAuth();
   const isMod = user?.role === "MOD";
   const allowedSubjectIds = useMemo(
-    () => Object.keys(capabilities.subjects || {}),
-    [capabilities.subjects]
+    () => getAllowedSubjectIds("EXAM", "VIEW")?.map(String) || [],
+    [getAllowedSubjectIds]
+  );
+  const visibleCategories = useMemo(
+    () =>
+      isMod
+        ? categories.filter((category) =>
+            subjects.some((subject) => subject.categoryId === category.categoryId)
+          )
+        : categories,
+    [categories, isMod, subjects]
   );
 
   const fetchExams = useCallback(
@@ -227,7 +236,7 @@ export const useExamManager = () => {
 
   return {
     exams,
-    categories,
+    categories: visibleCategories,
     subjects: visibleSubjects,
     creators,
     loading,

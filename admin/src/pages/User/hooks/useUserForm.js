@@ -40,6 +40,7 @@ export const useUserForm = ({
       const role = userData.role || "USER";
 
       form.setFieldsValue({
+        username: userData.username,
         fullName: userData.fullName,
         email: userData.email,
         role,

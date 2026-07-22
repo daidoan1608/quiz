@@ -67,7 +67,8 @@ export const useSubjectForm = ({
     setSubmitting(true);
     try {
       if (isEditMode) {
-        await subjectApi.update(subjectId, values);
+        const { subjectId: _subjectId, ...payload } = values;
+        await subjectApi.update(subjectId, payload);
         message.success("Môn học đã được cập nhật thành công!");
       } else {
         await subjectApi.create(values);

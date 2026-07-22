@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fita.vnua.quiz.model.dto.ExamDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
+import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.AnswerRepository;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.ExamRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
+import com.fita.vnua.quiz.repository.UserExamRepository;
 import com.fita.vnua.quiz.service.AdminCapabilityService;
 import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.ExamService;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -87,6 +90,9 @@ class ModEndpointPermissionTest {
 
     @MockBean
     private SubjectRepository subjectRepository;
+
+    @MockBean
+    private UserExamRepository userExamRepository;
 
     @MockBean
     private AdminCapabilityService adminCapabilityService;
@@ -225,6 +231,82 @@ class ModEndpointPermissionTest {
         verify(questionService, never()).getAllQuestion();
         verify(examService, never()).getAllExams();
         verify(subjectService, never()).getDeletedSubjects();
+    }
+
+    @Test
+    void modCanViewUserExamDetailWhenSubjectPermissionAllowsView() throws Exception {
+        User mod = modUser();
+        UserExamResponse response = UserExamResponse.builder().build();
+
+        when(userExamRepository.findSubjectIdByUserExamId(EXAM_ID)).thenReturn(Optional.of(SUBJECT_ID));
+        when(adminCapabilityService.hasPermission(eq(mod), eq("USER_EXAM"), eq("VIEW"), eq("GLOBAL"), eq(null)))
+                .thenReturn(false);
+        when(adminCapabilityService.hasPermission(eq(mod), eq("USER_EXAM"), eq("VIEW"), eq("SUBJECT"), eq(SUBJECT_ID)))
+                .thenReturn(true);
+        when(userExamService.getUserExamByIdForAdmin(EXAM_ID)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/user-exams/{userExamId}", EXAM_ID)
+                        .with(authentication(authenticationFor(mod))))
+                .andExpect(status().isOk());
+
+        verify(userExamService).getUserExamByIdForAdmin(EXAM_ID);
+    }
+
+    @Test
+    void modCannotViewUserExamDetailWithoutSubjectPermission() throws Exception {
+        User mod = modUser();
+
+        when(userExamRepository.findSubjectIdByUserExamId(EXAM_ID)).thenReturn(Optional.of(SUBJECT_ID));
+        when(adminCapabilityService.hasPermission(eq(mod), eq("USER_EXAM"), eq("VIEW"), eq("GLOBAL"), eq(null)))
+                .thenReturn(false);
+        when(adminCapabilityService.hasPermission(eq(mod), eq("USER_EXAM"), eq("VIEW"), eq("SUBJECT"), eq(SUBJECT_ID)))
+                .thenReturn(false);
+
+        mockMvc.perform(get("/api/v1/user-exams/{userExamId}", EXAM_ID)
+                        .with(authentication(authenticationFor(mod))))
+                .andExpect(status().isForbidden());
+
+        verify(userExamService, never()).getUserExamByIdForAdmin(any());
+    }
+
+    @Test
+    void modCannotFilterUserExamsWhenSubjectDoesNotBelongToCategory() throws Exception {
+        User mod = modUser();
+
+        when(adminCapabilityService.hasPermission(eq(mod), eq("USER_EXAM"), eq("VIEW"), eq("GLOBAL"), eq(null)))
+                .thenReturn(false);
+        when(adminCapabilityService.hasPermission(eq(mod), eq("USER_EXAM"), eq("VIEW"), eq("SUBJECT"), eq(SUBJECT_ID)))
+                .thenReturn(true);
+        when(subjectRepository.existsActiveSubjectInCategory(SUBJECT_ID, 99L)).thenReturn(false);
+
+        mockMvc.perform(get("/api/v1/admin/user-exams")
+                        .param("subjectId", String.valueOf(SUBJECT_ID))
+                        .param("categoryId", "99")
+                        .with(authentication(authenticationFor(mod))))
+                .andExpect(status().isForbidden());
+
+        verify(userExamService, never()).getAllUserExamsForAdmin(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void modCanFilterUserExamsWithinAllowedSubjectCategory() throws Exception {
+        User mod = modUser();
+
+        when(adminCapabilityService.hasPermission(eq(mod), eq("USER_EXAM"), eq("VIEW"), eq("GLOBAL"), eq(null)))
+                .thenReturn(false);
+        when(adminCapabilityService.hasPermission(eq(mod), eq("USER_EXAM"), eq("VIEW"), eq("SUBJECT"), eq(SUBJECT_ID)))
+                .thenReturn(true);
+        when(subjectRepository.existsActiveSubjectInCategory(SUBJECT_ID, 3L)).thenReturn(true);
+        when(userExamService.getAllUserExamsForAdmin(any(), eq(3L), eq(SUBJECT_ID), any(), any(), any()))
+                .thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/v1/admin/user-exams")
+                        .param("subjectId", String.valueOf(SUBJECT_ID))
+                        .param("categoryId", "3")
+                        .with(authentication(authenticationFor(mod))))
+                .andExpect(status().isOk());
+
+        verify(userExamService).getAllUserExamsForAdmin(any(), eq(3L), eq(SUBJECT_ID), any(), any(), any());
     }
 
     private User modUser() {

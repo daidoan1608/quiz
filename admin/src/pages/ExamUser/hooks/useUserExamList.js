@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { appMessage as message } from "../../../utils/ui/messageService";
 import { authAxios } from "../../../api/axiosConfig";
 import { categoryApi, exportApi, subjectApi } from "../../../api/services";
+import { useAuth } from "../../../context/AuthProvider";
 import {
   formatDayjsRangeEnd,
   formatDayjsRangeStart,
@@ -20,6 +21,8 @@ const mapUserExamRows = (items) =>
   });
 
 export const useUserExamList = () => {
+  const { user, canGlobal, getAllowedSubjectIds } = useAuth();
+  const isMod = user?.role === "MOD";
   const [data, setData] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -37,9 +40,60 @@ export const useUserExamList = () => {
     pageSize: 7,
     total: 0,
   });
+  const allowedSubjectIds = useMemo(
+    () => getAllowedSubjectIds("USER_EXAM", "VIEW") || [],
+    [getAllowedSubjectIds]
+  );
+  const visibleSubjects = useMemo(
+    () =>
+      isMod
+        ? subjects.filter((subject) =>
+            allowedSubjectIds.includes(Number(subject.subjectId))
+          )
+        : subjects,
+    [allowedSubjectIds, isMod, subjects]
+  );
+  const visibleCategories = useMemo(
+    () =>
+      isMod
+        ? categories.filter((category) =>
+            visibleSubjects.some((subject) => subject.categoryId === category.categoryId)
+          )
+        : categories,
+    [categories, isMod, visibleSubjects]
+  );
+  const effectiveSubjectId = useMemo(() => {
+    if (!isMod || canGlobal("USER_EXAM", "VIEW")) {
+      return advancedFilters.subjectId;
+    }
+    if (
+      advancedFilters.subjectId &&
+      allowedSubjectIds.includes(Number(advancedFilters.subjectId))
+    ) {
+      return advancedFilters.subjectId;
+    }
+    const firstSubjectInCategory = visibleSubjects.find(
+      (subject) =>
+        !advancedFilters.categoryId ||
+        subject.categoryId === advancedFilters.categoryId
+    );
+    return firstSubjectInCategory?.subjectId || allowedSubjectIds[0];
+  }, [
+    advancedFilters.categoryId,
+    advancedFilters.subjectId,
+    allowedSubjectIds,
+    canGlobal,
+    isMod,
+    visibleSubjects,
+  ]);
 
   const fetchData = useCallback(
     async (page = 1) => {
+      if (isMod && !canGlobal("USER_EXAM", "VIEW") && !effectiveSubjectId) {
+        setData([]);
+        setPagination((prev) => ({ ...prev, current: page, total: 0 }));
+        return;
+      }
       setLoading(true);
       try {
         const examResponse = await authAxios.get("/admin/user-exams", {
@@ -48,7 +102,7 @@ export const useUserExamList = () => {
             size: pagination.pageSize,
             keyword: searchText.trim() || undefined,
             categoryId: advancedFilters.categoryId,
-            subjectId: advancedFilters.subjectId,
+            subjectId: effectiveSubjectId,
             startedFrom: formatDayjsRangeStart(advancedFilters.startRange),
             startedTo: formatDayjsRangeEnd(advancedFilters.startRange),
           },
@@ -66,7 +120,15 @@ export const useUserExamList = () => {
         setLoading(false);
       }
     },
-    [advancedFilters, pagination.pageSize, searchText]
+    [
+      advancedFilters.categoryId,
+      advancedFilters.startRange,
+      canGlobal,
+      effectiveSubjectId,
+      isMod,
+      pagination.pageSize,
+      searchText,
+    ]
   );
 
   useEffect(() => {
@@ -78,10 +140,16 @@ export const useUserExamList = () => {
     Promise.all([categoryApi.getAll(), subjectApi.getAll()])
       .then(([categoryData, subjectData]) => {
         setCategories(categoryData);
-        setSubjects(subjectData);
+        setSubjects(
+          isMod
+            ? subjectData.filter((subject) =>
+                allowedSubjectIds.includes(Number(subject.subjectId))
+              )
+            : subjectData
+        );
       })
       .catch(() => message.warning("Không thể tải dữ liệu bộ lọc."));
-  }, []);
+  }, [allowedSubjectIds, isMod]);
 
   const updateFilter = (key, value) => {
     setAdvancedFilters((prev) => ({
@@ -108,8 +176,8 @@ export const useUserExamList = () => {
 
   return {
     data,
-    categories,
-    subjects,
+    categories: visibleCategories,
+    subjects: visibleSubjects,
     loading,
     searchText,
     setSearchText,

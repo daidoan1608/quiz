@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import {
   Alert,
   Col,
+  Divider,
   Form,
   Input,
   Row,
@@ -12,6 +13,7 @@ import {
   AdminCancelButton,
   AdminSaveButton,
 } from "../../../components/common/buttons/AdminButtons";
+import AdminReadonlyField from "../../../components/common/forms/AdminReadonlyField";
 import { useQuestionImageUpload } from "../hooks/useQuestionImageUpload";
 import { useQuestionUpdateForm } from "../hooks/useQuestionUpdateForm";
 import AdminTableSwitch from "../../../components/common/table/AdminTableSwitch";
@@ -58,7 +60,7 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
 
   return (
     <AdminModalFormShell
-      title={`Cập nhật câu hỏi ID: ${questionId}`}
+      title="Cập nhật câu hỏi"
       icon={<EditOutlined />}
       open={isModalOpen}
       onCancel={onCancel}
@@ -80,6 +82,8 @@ const QuestionFormUpdateModal = ({ isModalOpen, onCancel, onSuccess, questionId 
       maskClosable={false}
     >
       <Form form={form} layout="vertical" onFinish={submitQuestion} size="large">
+          <AdminReadonlyField name="questionId" />
+
           <Row gutter={24}>
             <Col xs={24} md={12}>
               <Form.Item

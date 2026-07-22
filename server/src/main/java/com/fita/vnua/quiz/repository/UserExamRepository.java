@@ -73,6 +73,9 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
     @Query("SELECT ue FROM UserExam ue WHERE ue.userExamId = :userExamId AND ue.user.userId = :userId")
     Optional<UserExam> findByIdAndUserId(@Param("userExamId") Long userExamId, @Param("userId") UUID userId);
 
+    @Query("SELECT ue.exam.subject.subjectId FROM UserExam ue WHERE ue.userExamId = :userExamId")
+    Optional<Long> findSubjectIdByUserExamId(@Param("userExamId") Long userExamId);
+
     @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId AND ue.exam.examId = :examId AND ue.status = 'IN_PROGRESS' ORDER BY ue.updatedAt DESC")
     List<UserExam> findInProgressByUserIdAndExamId(@Param("userId") UUID userId, @Param("examId") Long examId);
 

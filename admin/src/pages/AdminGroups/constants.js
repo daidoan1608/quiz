@@ -148,6 +148,15 @@ export const PRESETS = [
     ],
   },
   {
+    key: "subject_exam_results",
+    label: "Chỉ kết quả thi",
+    permissions: [
+      ["MENU_USER_EXAMS", "VIEW"],
+      ["USER_EXAM", "VIEW", "SUBJECT"],
+      ["USER_EXAM", "EXPORT", "SUBJECT"],
+    ],
+  },
+  {
     key: "subject_full_content",
     label: "Toàn quyền nội dung môn",
     permissions: [
@@ -155,6 +164,7 @@ export const PRESETS = [
       ["MENU_CHAPTERS", "VIEW"],
       ["MENU_QUESTIONS", "VIEW"],
       ["MENU_EXAMS", "VIEW"],
+      ["MENU_USER_EXAMS", "VIEW"],
       ["SUBJECT", "VIEW", "SUBJECT"],
       ["SUBJECT", "UPDATE", "SUBJECT"],
       ["CHAPTER", "VIEW", "SUBJECT"],
@@ -172,6 +182,8 @@ export const PRESETS = [
       ["EXAM", "UPDATE", "SUBJECT"],
       ["EXAM", "DELETE", "SUBJECT"],
       ["EXAM", "EXPORT", "SUBJECT"],
+      ["USER_EXAM", "VIEW", "SUBJECT"],
+      ["USER_EXAM", "EXPORT", "SUBJECT"],
     ],
   },
 ];
