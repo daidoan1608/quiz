@@ -1,207 +1,292 @@
 # Quiz VNUA
 
-Quiz VNUA la he thong on tap va thi trac nghiem gom 3 ung dung:
+Quiz VNUA là hệ thống ôn tập và thi trắc nghiệm trực tuyến, gồm 3 ứng dụng chính:
 
-- `client`: React app cho sinh vien/nguoi dung cuoi.
-- `admin`: React app cho ADMIN va MOD.
-- `server`: Spring Boot REST API, xu ly xac thuc, phan quyen, nghiep vu quiz va luu tru du lieu.
+- `server`: Spring Boot REST API xử lý xác thực, phân quyền, nghiệp vụ quiz, import dữ liệu và lưu trữ media.
+- `client`: ứng dụng web cho sinh viên/người dùng cuối.
+- `admin`: ứng dụng web cho `ADMIN` và `MOD` quản trị nội dung, đề thi, người dùng và thông báo.
 
-Tai lieu nay duoc cap nhat theo code hien tai trong `server`, `client` va `admin`.
+Tài liệu này được viết theo cấu trúc hiện tại của repository.
 
-## Kien truc nhanh
+## Kiến Trúc Tổng Quan
 
 ```mermaid
 flowchart LR
-    User["Nguoi dung"] --> Client["client React"]
-    AdminUser["ADMIN / MOD"] --> Admin["admin React"]
-    Client --> API["api.quizvnua.com"]
+    User["Người dùng"] --> Client["client - React/Vite"]
+    AdminUser["ADMIN / MOD"] --> Admin["admin - React/Vite"]
+    Client --> API["server - Spring Boot API"]
     Admin --> API
     API --> DB[("MySQL 8")]
+    API --> Redis[("Redis")]
     API --> Mail["SMTP Gmail"]
-    API --> Google["Google ID Token"]
-    API --> Storage["Local uploads / Cloudinary"]
+    API --> Google["Google ID Token / JWKS"]
+    API --> Storage["Local uploads / Cloudinary / ImgBB"]
     Nginx["Nginx reverse proxy"] --> Client
     Nginx --> Admin
     Nginx --> API
 ```
 
-Production dung subdomain rieng cho tung ung dung:
+Production dự kiến dùng các domain:
 
 ```text
-https://quizvnua.com          -> client
-https://admin.quizvnua.com    -> admin
-https://api.quizvnua.com      -> server API
+https://quizvnua.com        -> client
+https://admin.quizvnua.com  -> admin
+https://api.quizvnua.com    -> server API
 ```
 
-Local development van goi API mac dinh qua `http://localhost:8080/api/v1/`.
+Local Docker dùng Nginx với:
 
-## Cong nghe
+```text
+http://localhost        -> client
+http://admin.localhost  -> admin
+http://api.localhost    -> server API
+```
+
+## Công Nghệ
 
 Backend:
 
-- Java 17, Spring Boot 3.4.0
-- Spring Web, Spring Security, Method Security
-- Spring Data JPA, MySQL Connector/J
+- Java 17, Spring Boot 3.4.0, Maven Wrapper
+- Spring Web, Spring Security, Method Security, WebSocket
+- Spring Data JPA, MySQL Connector/J, Flyway
+- Redis cache
 - JWT cookie, refresh token, BCrypt
-- Spring Mail, Google OAuth client
+- Spring Mail, Google OAuth/JWKS
 - Apache POI import Excel
 - Springdoc OpenAPI/Swagger UI
-- Lombok, ModelMapper
+- Cloudinary/ImgBB/local upload cho ảnh
+- Lombok
 
 Frontend `client`:
 
-- React 18, Create React App
-- React Router DOM 6, Axios
-- Ant Design, Chakra UI, Tailwind CSS, styled-components
-- React Hook Form, React Toastify, React OAuth Google
-- i18next, Recharts
+- React 18, Vite 7
+- React Router DOM 7, Axios
+- Ant Design 5, React Icons
+- i18next/react-i18next
+- STOMP/SockJS realtime notification
+- Recharts, Tailwind CSS
 
 Frontend `admin`:
 
-- React 18, Create React App
+- React 18, Vite 7
 - React Router DOM 7, Axios
-- Ant Design, React Icons, Moment, Recharts
+- Ant Design 5, React Icons
+- dnd-kit
+- Moment, Recharts
+- html2canvas, jsPDF
 
-Ha tang:
+Hạ tầng:
 
-- MySQL 8
 - Docker Compose
+- MySQL 8
+- Redis 7 Alpine
 - Nginx Alpine
 
-## Tinh nang chinh
+## Tính Năng Chính
 
-Nguoi dung:
+Người dùng:
 
-- Dang ky, xac thuc email, dang nhap, dang xuat.
-- Dang nhap bang Google ID token.
-- Refresh access token bang refresh token cookie.
-- Quen mat khau bang OTP email.
-- Xem category, subject, chapter, question va exam public.
-- Lam bai thi, autosave dap an, cap nhat tien do, nop bai, xem ket qua.
-- Xem lich su lam bai, so lan lam bai, bang diem tong hop.
-- Quan ly subject yeu thich.
-- Cap nhat ho so, doi mat khau, upload va lay avatar.
-- Danh dau thong bao da doc hoac da doc tat ca.
+- Đăng ký, xác thực email, đăng nhập, đăng xuất.
+- Đăng nhập bằng Google ID token.
+- Refresh access token bằng cookie.
+- Quên mật khẩu bằng OTP email.
+- Xem category, subject, chapter, question, exam public.
+- Làm bài theo chapter hoặc exam, autosave đáp án, cập nhật tiến độ, nộp bài và xem kết quả.
+- Xem lịch sử làm bài, bài đang làm, số lần làm bài và bảng xếp hạng/tổng hợp.
+- Quản lý subject yêu thích.
+- Cập nhật hồ sơ, đổi mật khẩu, upload avatar.
+- Nhận và đánh dấu thông báo đã đọc.
+- Xem tài liệu/chia sẻ nội dung học tập nếu được công khai.
 
-Quan tri/MOD:
+Quản trị và MOD:
 
-- Dashboard thong ke.
-- Quan ly user, category, subject, chapter.
-- Quan ly cau hoi, dap an, anh minh hoa, soft delete/restore.
-- Import cau hoi tu Excel.
-- Quan ly de thi.
-- Xem lich su bai thi cua user.
-- Gui thong bao global, personal, subject, batch; xem campaign va recipient; thu hoi campaign.
-- Gan role va quyen MOD theo subject.
+- Dashboard thống kê.
+- Quản lý user, category, subject, chapter.
+- Quản lý câu hỏi, đáp án, ảnh minh họa, soft delete/restore.
+- Import câu hỏi từ Excel.
+- Quản lý đề thi, preview/in đề thi.
+- Xem lịch sử bài thi của user.
+- Quản lý tài liệu chia sẻ.
+- Gửi thông báo global, personal, theo subject hoặc theo danh sách user.
+- Xem campaign, recipient và thu hồi thông báo.
+- Quản lý nhóm admin, quyền menu và audit log.
+- Gán role/quyền MOD theo phạm vi được cấu hình.
 
-## Cau truc thu muc
+## Cấu Trúc Thư Mục
 
 ```text
 quiz/
-|-- admin/                         # React app quan tri
-|-- client/                        # React app nguoi dung
+|-- admin/                         # React/Vite app cho ADMIN và MOD
+|   |-- src/api/                    # Axios config, API services, HTTP helpers
+|   |-- src/components/             # Component dùng chung
+|   |-- src/config/                 # Đọc biến môi trường
+|   |-- src/context/                # Auth/theme/protected route
+|   |-- src/hooks/                  # Hook dùng chung
+|   |-- src/layouts/                # Layout quản trị
+|   |-- src/pages/                  # Feature pages: User, Question, Exam, ...
+|   |-- src/routes/                 # Route config
+|   |-- src/styles/                 # CSS global/layout/page/ui/vendor
+|   `-- src/utils/                  # Helper cho UI, quyền, markdown, media
+|-- client/                        # React/Vite app cho người dùng cuối
+|   |-- src/api/                    # Axios config, API services, auth interceptors
+|   |-- src/components/             # Component dùng chung
+|   |-- src/config/                 # Đọc biến môi trường
+|   |-- src/context/                # Auth, favorites, language, notifications, theme
+|   |-- src/i18n/                   # Tài nguyên đa ngôn ngữ
+|   |-- src/layouts/                # Layout client
+|   |-- src/pages/                  # Account, Auth, Home, Subject, Rank, ...
+|   |-- src/routes/                 # AppRouter, route definitions, guards
+|   |-- src/style/                  # CSS entry
+|   `-- src/utils/                  # Markdown, media URL, storage, math rendering
 |-- server/                        # Spring Boot backend
 |   |-- src/main/java/com/fita/vnua/quiz/
-|   |   |-- configuration/          # Security, CORS, Swagger, init admin
+|   |   |-- config/                 # Redis cache config
+|   |   |-- configuration/          # Security, Swagger, Web, WebSocket, admin init
 |   |   |-- controller/             # REST controllers
-|   |   |-- exception/              # Global exception handler
-|   |   |-- model/                  # Entity, DTO, request, response
+|   |   |-- exception/              # Custom exception và global handler
+|   |   |-- generator/              # Composite ID classes
+|   |   |-- model/                  # Entity, DTO, enum, contract
 |   |   |-- repository/             # Spring Data repositories
-|   |   |-- security/               # JWT, filters, handlers
-|   |   `-- service/                # Business services
-|   `-- src/main/resources/         # application*.properties, migration
-|-- docs/
-|   |-- SYSTEM_GRAPH.md
-|   `-- postman/Quiz.postman_collection.json
-|-- docker-compose.yml
-`-- nginx/
+|   |   |-- security/               # JWT, filters, handlers, permission evaluator
+|   |   |-- service/                # Service interfaces
+|   |   |-- service/impl/           # Business logic
+|   |   |-- service/mapper/         # DTO/entity mappers
+|   |   |-- service/storage/        # Image storage abstraction
+|   |   `-- utils/                  # Excel helper
+|   `-- src/main/resources/         # application.properties và Flyway migrations
+|-- docs/postman/                  # Postman collection
+|-- mysql.init/                    # SQL init scripts cho MySQL container
+|-- nginx/conf.d/                  # Reverse proxy config
+|-- docker-compose.yml             # Production-like Docker stack
+|-- docker-compose.local.yml       # Local override
+|-- run.ps1                        # Script chạy/build/doctor trên PowerShell
+`-- run.cmd                        # Wrapper cho Command Prompt
 ```
 
-## Yeu cau moi truong
+## Yêu Cầu Môi Trường
 
-Local:
+Chạy local không dùng Docker:
 
 - Java JDK 17+
-- Maven 3.6+ hoac Maven Wrapper trong `server/`
-- Node.js 16+/18+
+- Maven 3.6+ hoặc Maven Wrapper trong `server/`
+- Node.js tương thích Vite 7
 - npm
-- MySQL 8+
+- MySQL 8
+- Redis 7 nếu giữ `SPRING_CACHE_TYPE=redis`
 
-Container:
+Chạy bằng container:
 
 - Docker
 - Docker Compose
 
-## Cau hinh moi truong
+## Cấu Hình Môi Trường
 
-Backend:
+Các file mẫu quan trọng:
 
 ```text
-server/src/main/resources/application.properties
-server/src/main/resources/application-dev.properties
-server/src/main/resources/application-prod.properties
-server/.env.example
+server/.env.local.example
+server/.env.production.example
+client/.env.local.example
+client/.env.production.example
+admin/.env.local.example
+admin/.env.production.example
 ```
 
-Bien/cau hinh quan trong:
+Tạo file cấu hình local từ file mẫu:
 
-```properties
-server.port=8080
-spring.datasource.url=jdbc:mysql://localhost:3306/quiz
-spring.datasource.username=root
-spring.datasource.password=root
-
-jwt.secret=<secret>
-jwt.access-token-expiration=900000
-jwt.refresh-token-expiration=604800000
-
-app.cors.allowed-origins=https://quizvnua.com,https://www.quizvnua.com,https://admin.quizvnua.com
-app.security.csrf-enabled=false
-
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=<gmail-address>
-spring.mail.password=<gmail-app-password>
-
-google.client.id=<google-client-id>
-
-avatar.upload-dir=uploads/avatars
-question.upload-dir=uploads/questions
-cloudinary.enabled=false
+```powershell
+Copy-Item server\.env.local.example server\.env.local
+Copy-Item client\.env.local.example client\.env.local
+Copy-Item admin\.env.local.example admin\.env.local
 ```
 
-Client production:
+Backend đọc cấu hình qua `server/src/main/resources/application.properties` và biến môi trường. Các biến cần chú ý:
 
 ```env
-REACT_APP_API_URL=https://api.quizvnua.com/api/v1/
-REACT_APP_AVATAR_URL=https://api.quizvnua.com
-REACT_APP_GOOGLE_CLIENT_ID=<google-client-id>
+SERVER_PORT=8080
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=quiz
+DB_USER=root
+DB_PASSWORD=root
+
+SPRING_CACHE_TYPE=redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+JPA_DDL_AUTO=validate
+FLYWAY_BASELINE_ON_MIGRATE=true
+
+JWT_SECRET=replace-with-at-least-32-bytes-random-secret
+JWT_ACCESS_TOKEN_EXPIRATION=900000
+JWT_REFRESH_TOKEN_EXPIRATION=604800000
+
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=example@gmail.com
+MAIL_PASSWORD=change-me
+
+APP_FRONTEND_BASE_URL=http://localhost:3000
+APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+APP_COOKIE_SECURE=false
+APP_COOKIE_SAME_SITE=Strict
+APP_SECURITY_CSRF_ENABLED=false
+
+GOOGLE_CLIENT_ID=change-me
+
+CLOUDINARY_ENABLED=false
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+IMGBB_ENABLED=false
+IMGBB_API_KEY=
+IMAGE_STORAGE_PRIMARY=cloudinary
+
+ADMIN_INITIALIZER_ENABLED=true
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=change-me
+ADMIN_EMAIL=admin@example.com
 ```
 
-Admin production:
+Frontend dùng biến `VITE_*`:
 
 ```env
-REACT_APP_API_URL=https://api.quizvnua.com/api/v1/
-REACT_APP_ADMIN_BASENAME=/
+VITE_API_URL=http://localhost:8080/api/v1/
+VITE_AVATAR_URL=
+VITE_GOOGLE_CLIENT_ID=change-me
+VITE_ADMIN_BASENAME=/
 ```
 
-Khong commit secret that nhu JWT secret, Gmail app password, DB password production hoac Google credential.
+Không commit secret thật như `JWT_SECRET`, mật khẩu Gmail app, mật khẩu database production, Cloudinary/ImgBB key hoặc Google credential.
 
-## Chay local
+## Chạy Local
 
-Chay bang script root:
+Tạo database:
+
+```sql
+CREATE DATABASE quiz CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Chạy toàn bộ bằng script root:
 
 ```powershell
 .\run.ps1 local
 ```
 
-Neu chay tu Command Prompt hoac Windows mo `.ps1` bang Notepad, dung wrapper:
+Nếu PowerShell chặn script:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run.ps1 local
+```
+
+Hoặc dùng wrapper từ Command Prompt:
 
 ```bat
 run.cmd local
 ```
 
-Lenh nay mo 3 cua so rieng cho backend, client va admin:
+Script sẽ mở 3 cửa sổ riêng:
 
 ```text
 http://localhost:8080  -> server API
@@ -209,36 +294,23 @@ http://localhost:3000  -> client
 http://localhost:3001  -> admin
 ```
 
-Neu PowerShell chan script, chay:
+Chạy từng phần thủ công:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\run.ps1 local
-```
-
-Tao database:
-
-```sql
-CREATE DATABASE quiz CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-Chay backend tren Windows:
-
-```bat
 cd server
-mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
-Chay backend tren Linux/macOS/Git Bash:
-
-```bash
-cd server
-./mvnw spring-boot:run
+```powershell
+cd client
+npm install
+$env:PORT=3000; npm start
 ```
 
-Backend:
-
-```text
-http://localhost:8080
+```powershell
+cd admin
+npm install
+$env:PORT=3001; npm start
 ```
 
 Swagger UI:
@@ -253,245 +325,138 @@ OpenAPI JSON:
 http://localhost:8080/v3/api-docs
 ```
 
-Chay client:
+## Chạy Docker Compose
 
-```bash
-cd client
-npm install
-npm start
-```
-
-Client mac dinh:
-
-```text
-http://localhost:3000
-```
-
-Chay admin tren port 3001 neu client dang dung port 3000:
-
-```powershell
-cd admin
-npm install
-$env:PORT=3001; npm start
-```
-
-## Chay Docker Compose
-
-Docker local bang 1 lenh:
+Chạy stack local:
 
 ```powershell
 .\run.ps1 docker-local
 ```
 
-Hoac:
+Hoặc:
 
 ```bat
 run.cmd docker-local
 ```
 
-Lenh nay build va expose truc tiep:
+URL sau khi chạy:
 
 ```text
-http://localhost:8080  -> server API
-http://localhost:3000  -> client
-http://localhost:3001  -> admin
+http://localhost        -> client qua Nginx
+http://admin.localhost  -> admin qua Nginx
+http://api.localhost    -> server API qua Nginx
+http://localhost:8080   -> server API direct
+http://localhost:3000   -> client direct
+http://localhost:3001   -> admin direct
 ```
 
-Production bang 1 lenh:
+Các lệnh hỗ trợ:
+
+```powershell
+.\run.ps1 status
+.\run.ps1 logs
+.\run.ps1 doctor
+.\run.ps1 down
+```
+
+Production-like stack:
 
 ```powershell
 .\run.ps1 prod
 ```
 
-Hoac:
+Lệnh này build backend jar trước, sau đó chạy `docker compose up -d --build` với `server/.env.production`.
 
-```bat
-run.cmd prod
-```
+Các service Docker:
 
-Lenh nay build backend jar truoc, sau do `docker compose up -d --build`.
-
-Dung stack Docker:
-
-```powershell
-.\run.ps1 down
-```
-
-Xem logs:
-
-```powershell
-.\run.ps1 logs
-```
-
-Kiem tra nhanh Docker containers va URL local:
-
-```powershell
-.\run.ps1 doctor
-```
-
-Neu dung wrapper Windows:
-
-```bat
-run.cmd doctor
-```
-
-`docker-compose.yml` gom:
-
-| Service | Mo ta |
+| Service | Mô tả |
 |---|---|
-| `backend` | Build tu `./server`, API port noi bo `8080` |
-| `user` | Build tu `./client`, port noi bo `3000` |
-| `admin` | Build tu `./admin`, port noi bo `3001` |
-| `db` | MySQL 8, database `quiz`, root password mac dinh `root` |
-| `nginx` | Reverse proxy cho `quizvnua.com`, `admin.quizvnua.com`, `api.quizvnua.com`; publish `80` va `443` |
+| `backend` | Build từ `./server`, expose `8080` |
+| `user` | Build từ `./client`, expose `3000` |
+| `admin` | Build từ `./admin`, expose `3001` |
+| `db` | MySQL 8, database mặc định `quiz` |
+| `redis` | Redis 7 Alpine, dùng cho cache |
+| `nginx` | Reverse proxy cho client/admin/API |
 
-Chay:
-
-```bash
-docker compose --env-file server/.env up --build
-```
-
-Chay nen:
+Chạy Docker thủ công:
 
 ```bash
-docker compose --env-file server/.env up -d --build
+docker compose --env-file server/.env.production up -d --build
 ```
 
-Dung:
+Dừng và xóa container:
 
 ```bash
 docker compose down
 ```
 
-Xoa kem volume database:
+Xóa kèm volume database:
 
 ```bash
 docker compose down -v
 ```
 
-## API chinh
+## Build
 
-Production base URL:
+Build tất cả bằng script:
 
-```text
-https://api.quizvnua.com/api/v1
+```powershell
+.\run.ps1 build
 ```
 
-Local base URL:
+Backend:
+
+```powershell
+cd server
+.\mvnw.cmd clean package
+```
+
+Client:
+
+```powershell
+cd client
+npm install
+npm run build
+```
+
+Admin:
+
+```powershell
+cd admin
+npm install
+npm run build
+```
+
+## API Chính
+
+Base URL local:
 
 ```text
 http://localhost:8080/api/v1
 ```
 
-Auth/OTP:
+Base URL production:
 
-| Method | Endpoint | Mo ta |
+```text
+https://api.quizvnua.com/api/v1
+```
+
+Nhóm API chính:
+
+| Nhóm | Endpoint tiêu biểu | Mô tả |
 |---|---|---|
-| POST | `/auth/login` | Dang nhap, set access/refresh cookie |
-| GET | `/auth/me` | Lay user hien tai |
-| POST | `/auth/refresh` | Refresh access token bang cookie `refreshToken` |
-| POST | `/auth/logout` | Revoke refresh token va clear cookie |
-| POST | `/auth/register` | Dang ky va gui email verify |
-| GET | `/auth/verify-email?token=...` | Xac thuc email |
-| POST | `/auth/google` | Dang nhap bang Google ID token |
-| POST | `/otp/send` | Gui OTP quen mat khau |
-| POST | `/otp/verify` | Verify OTP |
-| POST | `/otp/reset` | Reset mat khau bang reset token |
-
-Public:
-
-| Method | Endpoint | Mo ta |
-|---|---|---|
-| GET | `/public/categories` | Danh sach category |
-| GET | `/public/categories/search?q=...` | Tim category |
-| GET | `/public/subjects` | Danh sach subject |
-| GET | `/public/subjects/search?q=...` | Tim subject |
-| GET | `/public/subjects/category/{categoryId}` | Subject theo category |
-| GET | `/public/subjects/{subjectId}` | Chi tiet subject |
-| GET | `/public/chapters` | Danh sach chapter |
-| GET | `/public/chapters/search?q=...` | Tim chapter |
-| GET | `/public/chapters/subject/{subjectId}` | Chapter theo subject |
-| GET | `/public/chapters/{chapterId}` | Chi tiet chapter |
-| GET | `/public/questions/chapter/{chapterId}?includeCorrectAnswers=false` | Cau hoi theo chapter |
-| GET | `/public/exams/subject/{subjectId}` | Exam theo subject |
-| GET | `/public/exams/{examId}?includeCorrectAnswers=false&userExamId=` | Chi tiet exam |
-| GET | `/public/user-exam-summaries?period=all\|week\|month` | Bang diem tong hop |
-
-User:
-
-| Method | Endpoint | Mo ta |
-|---|---|---|
-| GET | `/users/{userId}` | Lay user theo id |
-| GET | `/user/{userId}` | Alias lay user theo id |
-| PATCH | `/users/{userId}` | Cap nhat profile |
-| PATCH | `/users/{userId}/password` | Doi mat khau |
-| PUT | `/users/me/avatar` | Upload avatar multipart |
-| GET | `/users/me/avatar` | Lay avatar hien tai |
-| GET | `/user/subjects?userId={userId}` | Subject user da lam bai |
-| POST | `/favorites` | Them favorite |
-| DELETE | `/favorites` | Xoa favorite |
-| GET | `/users/{userId}/favorites` | Favorite theo user |
-| GET | `/user-exams?userId=...&subjectId=...` | Bai thi theo user va subject |
-| GET | `/users/{userId}/user-exams` | Bai thi theo user |
-| GET | `/users/{userId}/user-exams/recent` | 7 bai thi gan nhat |
-| GET | `/users/{userId}/user-exams/count` | So lan lam bai theo exam |
-| GET | `/user-exams/{userExamId}` | Chi tiet bai lam |
-| POST | `/user-exams` | Tao bai lam dang legacy |
-| POST | `/exam-attempts/start` | Tao/resume attempt |
-| GET | `/users/{userId}/exam-attempts/in-progress` | Attempt dang lam |
-| PUT | `/exam-attempts/{userExamId}/answers` | Autosave dap an |
-| PATCH | `/exam-attempts/{userExamId}/progress` | Cap nhat progress |
-| POST | `/exam-attempts/{userExamId}/submit` | Nop bai |
-| PATCH | `/notifications/{id}` | Danh dau 1 thong bao da doc |
-| PATCH | `/notifications` | Danh dau tat ca thong bao da doc |
-
-Admin/MOD:
-
-| Method | Endpoint | Mo ta |
-|---|---|---|
-| GET | `/admin/statistics` | Dashboard statistics |
-| GET | `/admin/users` | Danh sach user |
-| GET | `/admin/users/search?key=...` | Tim user |
-| POST | `/admin/users` | Tao user |
-| PATCH | `/admin/users/{userId}` | Cap nhat user |
-| DELETE | `/admin/users/{userId}` | Xoa user |
-| GET | `/admin/categories/{id}` | Chi tiet category |
-| POST | `/admin/categories` | Tao category |
-| PUT | `/admin/categories/{id}` | Cap nhat category |
-| DELETE | `/admin/categories/{id}` | Xoa category |
-| POST | `/admin/subjects` | Tao subject |
-| PATCH | `/admin/subjects/{subjectId}` | Cap nhat subject |
-| DELETE | `/admin/subjects/{subjectId}` | Xoa subject |
-| POST | `/admin/chapters` | Tao chapter |
-| PATCH | `/admin/chapters/{chapterId}` | Cap nhat chapter |
-| DELETE | `/admin/chapters/{chapterId}` | Xoa chapter |
-| GET | `/admin/questions` | Danh sach question |
-| GET | `/admin/questions/deleted` | Question da xoa mem |
-| GET | `/admin/questions/search?q=...` | Tim question |
-| GET | `/admin/questions/{questionId}` | Chi tiet question |
-| GET | `/admin/questions/subject/{subjectId}` | Question theo subject |
-| GET | `/admin/questions/total-questions/{subjectId}` | Tong question theo subject |
-| POST | `/admin/questions` | Tao question |
-| PATCH | `/admin/questions/{questionId}` | Cap nhat question |
-| DELETE | `/admin/questions/{questionId}` | Xoa mem question |
-| PATCH | `/admin/questions/{questionId}/restore` | Restore question |
-| POST | `/admin/questions/import` | Import question tu Excel |
-| POST | `/admin/questions/upload-image` | Upload anh question |
-| GET | `/admin/exams` | Danh sach exam |
-| POST | `/admin/exams` | Tao exam |
-| PUT | `/admin/exams/{examId}` | Cap nhat exam |
-| DELETE | `/admin/exams/{examId}` | Xoa exam |
-| GET | `/admin/user-exams` | Tat ca bai lam |
-| POST | `/admin/notifications/global` | Gui thong bao global |
-| POST | `/admin/notifications/personal` | Gui thong bao ca nhan |
-| POST | `/admin/notifications/subject` | Gui thong bao theo subject |
-| POST | `/admin/notifications/batch` | Gui thong bao theo danh sach user |
-| GET | `/admin/notifications/campaigns` | Lich su campaign |
-| GET | `/admin/notifications/history/{id}/recipients` | Recipient cua campaign |
-| DELETE | `/admin/notifications/history/{id}` | Thu hoi campaign |
-| POST | `/admin/permissions/subject-assignment` | Gan quyen MOD theo subject |
-| GET | `/admin/permissions/mod/{userId}` | Lay quyen cua MOD |
-| PATCH | `/admin/permissions/user/{userId}/role` | Cap nhat role |
+| Auth | `/auth/login`, `/auth/me`, `/auth/refresh`, `/auth/logout`, `/auth/register`, `/auth/google` | Đăng nhập, đăng ký, Google login, refresh token |
+| OTP | `/otp/send`, `/otp/verify`, `/otp/reset` | Quên mật khẩu bằng OTP |
+| Public content | `/public/categories`, `/public/subjects`, `/public/chapters`, `/public/questions`, `/public/exams` | Dữ liệu học tập public |
+| User profile | `/users/{userId}`, `/users/me/avatar`, `/users/{userId}/favorites` | Hồ sơ, avatar, subject yêu thích |
+| Exam attempt | `/exam-attempts/start`, `/exam-attempts/{userExamId}/answers`, `/exam-attempts/{userExamId}/progress`, `/exam-attempts/{userExamId}/submit` | Làm bài và nộp bài |
+| User exam | `/user-exams`, `/users/{userId}/user-exams`, `/user-exams/{userExamId}` | Lịch sử và chi tiết bài làm |
+| Notification | `/notifications/{id}`, `/notifications` | Đọc thông báo |
+| Admin users | `/admin/users`, `/admin/users/search` | Quản lý người dùng |
+| Admin content | `/admin/categories`, `/admin/subjects`, `/admin/chapters`, `/admin/questions`, `/admin/exams` | Quản lý nội dung và đề thi |
+| Admin import/export | `/admin/questions/import`, `/admin/questions/upload-image`, các endpoint export | Import Excel, upload ảnh, tải dữ liệu |
+| Admin notification | `/admin/notifications/global`, `/admin/notifications/personal`, `/admin/notifications/subject`, `/admin/notifications/batch`, `/admin/notifications/campaigns` | Gửi và quản lý campaign thông báo |
+| Admin groups/audit | `/admin/groups`, `/api/v1/admin/audit-logs` | Nhóm quyền admin và audit log |
 
 Postman collection:
 
@@ -499,17 +464,17 @@ Postman collection:
 docs/postman/Quiz.postman_collection.json
 ```
 
-## Xac thuc va phan quyen
+## Xác Thực Và Phân Quyền
 
-Spring Security dung stateless JWT cookie. Sau `POST /auth/login`, backend set cookie access token va refresh token. Frontend dung `withCredentials: true`; khi access token het han, Axios goi `POST /auth/refresh`.
+Backend dùng Spring Security với JWT đặt trong cookie. Sau khi đăng nhập, frontend gọi API với `withCredentials: true`; khi access token hết hạn, HTTP interceptor gọi `/auth/refresh`.
 
-Vai tro:
+Vai trò chính:
 
-- `USER`: nguoi dung cuoi.
-- `MOD`: duoc cap quyen thao tac theo subject qua `UserSubjectPermission`.
-- `ADMIN`: toan quyen.
+- `USER`: người dùng cuối.
+- `MOD`: quản trị viên giới hạn theo quyền được gán.
+- `ADMIN`: toàn quyền.
 
-Route public duoc permit:
+Một số route public:
 
 - `/api/v1/auth/login`
 - `/api/v1/auth/register`
@@ -521,61 +486,27 @@ Route public duoc permit:
 - `/swagger-ui/**`, `/v3/api-docs/**`
 - `/avatars/**`, `/questions/**`
 
-Route protected:
+Route quản trị dùng kết hợp role và kiểm tra quyền chi tiết qua service/security layer.
 
-- `/api/v1/admin/**`: `ADMIN` hoac `MOD`, them `@PreAuthorize` tren tung method.
-- `/api/v1/mod/**`: `ADMIN` hoac `MOD`.
-- `/api/v1/user/**`: `ADMIN`, `MOD` hoac `USER`.
-- Cac route con lai yeu cau dang nhap.
+## Dữ Liệu Nghiệp Vụ Chính
 
-## Du lieu nghiep vu chinh
+Các entity đáng chú ý:
 
 - `User`
-- `Category`
-- `Subject`
-- `Chapter`
+- `Category`, `Subject`, `Chapter`
 - `Question`, `Answer`
 - `Exam`, `ExamQuestion`
-- `UserExam`, `UserAnswer`
+- `UserExam`, `UserExamQuestion`, `UserAnswer`
 - `Favorite`
 - `Notification`, `NotificationHistory`, `GlobalNotificationRead`
 - `RefreshToken`, `EmailVerificationToken`, `OtpCode`
-- `UserSubjectPermission`
+- `AdminGroup`, `AdminGroupPermission`, `AdminUserGroup`
+- `AuditLog`
+- `SharedDocument`
 
-## Build production
+## Tài Liệu Liên Quan
 
-Backend:
+- `docs/postman/Quiz.postman_collection.json`: Postman collection cho API.
+- Swagger UI khi backend đang chạy: `http://localhost:8080/swagger-ui`.
+- OpenAPI JSON khi backend đang chạy: `http://localhost:8080/v3/api-docs`.
 
-```bash
-cd server
-./mvnw clean package
-```
-
-Windows:
-
-```bat
-cd server
-mvnw.cmd clean package
-```
-
-Client:
-
-```bash
-cd client
-npm install
-npm run build
-```
-
-Admin:
-
-```bash
-cd admin
-npm install
-npm run build
-```
-
-## Tai lieu lien quan
-
-- `docs/SYSTEM_GRAPH.md`: graph kien truc, security, ERD va cac sequence flow.
-- `docs/postman/Quiz.postman_collection.json`: Postman collection theo controller hien tai.
-- Swagger UI khi backend dang chay: `http://localhost:8080/swagger-ui`.
