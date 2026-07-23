@@ -18,6 +18,9 @@ export const examApi = {
     return authAxios.post(`exam-attempts/${userExamId}/submit`);
   },
 
+  /**
+   * @deprecated Legacy submit flow. Prefer startAttempt, saveAnswer, and submitAttempt.
+   */
   submitUserExam(payload) {
     return authAxios.post("user-exams", payload);
   },
