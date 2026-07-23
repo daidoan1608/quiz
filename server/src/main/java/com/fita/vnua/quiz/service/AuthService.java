@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.service;
 
+import com.fita.vnua.quiz.model.dto.request.RegisterRequest;
+import com.fita.vnua.quiz.model.dto.result.AuthRegistrationResult;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +18,10 @@ public interface AuthService {
     String refreshAccessToken(UUID refreshTokenId);
 
     void revokeRefreshToken(UUID tokenId);
+
+    AuthRegistrationResult register(RegisterRequest registerRequest);
+
+    UserDetails authenticateGoogleToken(String idToken) throws Exception;
 
     User findOrCreateGoogleUser(String email, String name, String picture);
 }

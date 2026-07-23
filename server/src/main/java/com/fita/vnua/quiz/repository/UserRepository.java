@@ -1,5 +1,9 @@
 package com.fita.vnua.quiz.repository;
 
+import com.fita.vnua.quiz.model.enums.AuthProvider;
+
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -45,8 +49,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             """)
     List<User> filterUsers(
             @Param("keyword") String keyword,
-            @Param("role") User.Role role,
-            @Param("authProvider") User.AuthProvider authProvider,
+            @Param("role") UserRole role,
+            @Param("authProvider") AuthProvider authProvider,
             @Param("emailVerified") Boolean emailVerified,
             @Param("deleted") Boolean deleted
     );
@@ -57,7 +61,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     long countByDeletedFalse();
 
-    long countByRoleAndDeletedFalse(User.Role role);
+    long countByRoleAndDeletedFalse(UserRole role);
 
     Optional<User> findByUsername(String username);
 

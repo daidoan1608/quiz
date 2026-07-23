@@ -1,6 +1,7 @@
 package com.fita.vnua.quiz.model.dto.response;
 
-import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class AuthResponse {
     private String username;
     private String email;
     private String fullName;
-    private User.Role role;
+    private UserRole role;
     private String avatarUrl;
     private AdminCapabilitiesResponse capabilities;
 }

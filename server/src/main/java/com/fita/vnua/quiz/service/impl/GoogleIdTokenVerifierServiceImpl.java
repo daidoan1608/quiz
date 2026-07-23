@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.service.GoogleIdTokenVerifierService;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWK;
@@ -14,7 +15,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
 @Service
-public class GoogleIdTokenVerifierService {
+public class GoogleIdTokenVerifierServiceImpl implements GoogleIdTokenVerifierService {
 
     @Value("${google.client.id}")
     private String clientId;
@@ -22,6 +23,7 @@ public class GoogleIdTokenVerifierService {
     @Value("${google.jwks-url}")
     private String googleJwksUrl;
 
+    @Override
     public boolean verify(String idToken) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(idToken);
@@ -51,14 +53,17 @@ public class GoogleIdTokenVerifierService {
         }
     }
 
+    @Override
     public String extractEmail(String idToken) throws Exception {
         return SignedJWT.parse(idToken).getJWTClaimsSet().getStringClaim("email");
     }
 
+    @Override
     public String extractName(String idToken) throws Exception {
         return SignedJWT.parse(idToken).getJWTClaimsSet().getStringClaim("name");
     }
 
+    @Override
     public String extractPicture(String idToken) throws Exception {
         return SignedJWT.parse(idToken).getJWTClaimsSet().getStringClaim("picture");
     }

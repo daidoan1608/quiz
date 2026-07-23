@@ -1,17 +1,21 @@
-package com.fita.vnua.quiz.service;
+package com.fita.vnua.quiz.service.impl;
+
+import com.fita.vnua.quiz.model.enums.UserRole;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.service.AuthorizationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
-public class AuthorizationService {
+public class AuthorizationServiceImpl implements AuthorizationService {
     private static final String LOGIN_REQUIRED = "Vui lòng đăng nhập để tiếp tục";
     private static final String ACCESS_DENIED = "Bạn không có quyền thực hiện thao tác này";
 
+    @Override
     public User requireAuthenticated(User currentUser) {
         if (currentUser == null) {
             throw new CustomApiException("UNAUTHORIZED", LOGIN_REQUIRED, HttpStatus.UNAUTHORIZED);
@@ -19,6 +23,7 @@ public class AuthorizationService {
         return currentUser;
     }
 
+    @Override
     public void requireSelfOrAdminMod(UUID requestedUserId, User currentUser) {
         User authenticatedUser = requireAuthenticated(currentUser);
         if (!authenticatedUser.getUserId().equals(requestedUserId) && !isAdminOrMod(authenticatedUser)) {
@@ -26,6 +31,7 @@ public class AuthorizationService {
         }
     }
 
+    @Override
     public void requireSelf(UUID requestedUserId, User currentUser) {
         User authenticatedUser = requireAuthenticated(currentUser);
         if (!authenticatedUser.getUserId().equals(requestedUserId)) {
@@ -33,7 +39,8 @@ public class AuthorizationService {
         }
     }
 
+    @Override
     public boolean isAdminOrMod(User user) {
-        return user != null && (user.getRole() == User.Role.ADMIN || user.getRole() == User.Role.MOD);
+        return user != null && (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.MOD);
     }
 }

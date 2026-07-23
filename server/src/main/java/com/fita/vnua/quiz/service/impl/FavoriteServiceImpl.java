@@ -88,10 +88,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public List<FavoriteDto> findFavoriteByUserID(UUID userID) {
-        // Tạo User dummy để tìm
-        User user = new User();
-        user.setUserId(userID);
-        List<Favorite> favorites = favoriteRepository.findFavoriteByUser(user);
+        List<Favorite> favorites = favoriteRepository.findByUserIdWithSubjectAndCategory(userID);
 
         return favorites.stream()
                 .filter(fav -> !Boolean.TRUE.equals(fav.getSubject().getDeleted()))

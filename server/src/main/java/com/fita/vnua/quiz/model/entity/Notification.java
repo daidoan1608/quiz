@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.model.entity;
 
+import com.fita.vnua.quiz.model.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -69,8 +70,4 @@ public class Notification {
         }
     }
 
-    public enum NotificationType {
-        GLOBAL,   // Thông báo chung (Bảo trì, Lễ tết...)
-        PERSONAL  // Thông báo riêng (Điểm thi, Nhắc nhở, Đề thi môn học...)
-    }
 }

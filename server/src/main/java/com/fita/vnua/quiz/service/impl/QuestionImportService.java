@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.enums.QuestionType;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
@@ -8,6 +10,7 @@ import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
+import com.fita.vnua.quiz.service.AvatarStorageService;
 import com.fita.vnua.quiz.service.mapper.QuestionMapper;
 import com.fita.vnua.quiz.utils.ExcelHelper;
 import lombok.RequiredArgsConstructor;

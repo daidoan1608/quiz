@@ -1,8 +1,13 @@
 package com.fita.vnua.quiz.service.impl;
 
-import com.fita.vnua.quiz.model.dto.UserDto;
+import com.fita.vnua.quiz.model.enums.AuthProvider;
+
+import com.fita.vnua.quiz.model.enums.UserRole;
+
+import com.fita.vnua.quiz.model.dto.command.UserCommand;
+import com.fita.vnua.quiz.model.dto.request.ChangePasswordRequest;
 import com.fita.vnua.quiz.model.dto.request.UpdateProfileRequest;
-import com.fita.vnua.quiz.model.dto.response.Response;
+import com.fita.vnua.quiz.model.dto.result.OperationResult;
 import com.fita.vnua.quiz.model.dto.response.UserResponse;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.entity.User;
@@ -13,7 +18,6 @@ import com.fita.vnua.quiz.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
-import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -33,16 +37,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final RefreshTokenRepository refreshTokenRepository;
-
-    @Override
-    public List<UserDto> getAllUsers() {
-        return userRepository.findByDeletedFalse().stream().map(user -> modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
-    }
 
     @Override
     public List<UserResponse> getAllUserResponses() {
@@ -56,14 +54,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByDeletedTrue().stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public UserDto getUserById(UUID userId) {
-        return userRepository.findById(userId)
-                .filter(user -> !Boolean.TRUE.equals(user.getDeleted()))
-                .map(user -> modelMapper.map(user, UserDto.class))
-                .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -91,30 +81,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getUserBySearchKey(String keyword) {
-        log.info("Searching for users with keyword: {}", keyword);
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-        return userRepository.findByUsernameContainingOrFullNameContaining(keyword)
-                .stream()
-                .map(user -> modelMapper.map(user, UserDto.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<UserResponse> getUserResponsesBySearchKey(String keyword) {
-        log.info("Searching for users with keyword: {}", keyword);
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-        return userRepository.findByUsernameContainingOrFullNameContaining(keyword)
-                .stream()
-                .map(userMapper::toUserResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public List<UserResponse> searchNotificationRecipients(String keyword, int limit) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return new ArrayList<>();
@@ -129,10 +95,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponse> filterUsers(String keyword, String role, String authProvider, Boolean emailVerified, Boolean deleted, String sortBy, String sortDir) {
         String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
-        User.Role normalizedRole = role == null || role.isBlank() ? null : User.Role.valueOf(role.trim().toUpperCase());
-        User.AuthProvider normalizedProvider = authProvider == null || authProvider.isBlank()
+        UserRole normalizedRole = role == null || role.isBlank() ? null : UserRole.valueOf(role.trim().toUpperCase());
+        AuthProvider normalizedProvider = authProvider == null || authProvider.isBlank()
                 ? null
-                : User.AuthProvider.valueOf(authProvider.trim().toUpperCase());
+                : AuthProvider.valueOf(authProvider.trim().toUpperCase());
         List<UserResponse> users = userRepository.filterUsers(normalizedKeyword, normalizedRole, normalizedProvider, emailVerified, deleted).stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
@@ -148,12 +114,12 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserDto create(UserDto userDto) {
+    public UserCommand create(UserCommand command) {
         try {
-            User user = modelMapper.map(userDto, User.class);
-            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            User user = userMapper.toEntity(command);
+            user.setPassword(passwordEncoder.encode(command.getPassword()));
             User savedUser = userRepository.save(user);
-            return modelMapper.map(savedUser, UserDto.class);
+            return userMapper.toUserCommand(savedUser);
         } catch (DataIntegrityViolationException ex) {
             // Kiểm tra lỗi có phải do trùng username
             if (ex.getCause() instanceof ConstraintViolationException constraintEx) {
@@ -167,58 +133,34 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserDto update(UUID userId, UserDto userDto) {
+    public UserCommand update(UUID userId, UserCommand command) {
         var existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
         ensureActiveUser(existingUser);
-        if (userDto.getFullName() != null) {
-            existingUser.setFullName(userDto.getFullName());
+        if (command.getFullName() != null) {
+            existingUser.setFullName(command.getFullName());
         }
-        if (userDto.getEmail() != null) {
-            existingUser.setEmail(userDto.getEmail());
+        if (command.getEmail() != null) {
+            existingUser.setEmail(command.getEmail());
         }
-        if (userDto.getRole() != null) {
-            validateRoleChange(existingUser, userDto.getRole());
-            existingUser.setRole(userDto.getRole());
+        if (command.getRole() != null) {
+            validateRoleChange(existingUser, command.getRole());
+            existingUser.setRole(command.getRole());
         }
-        if (userDto.getAvatarUrl() != null) {
-            existingUser.setAvatarUrl(userDto.getAvatarUrl());
+        if (command.getAvatarUrl() != null) {
+            existingUser.setAvatarUrl(command.getAvatarUrl());
         }
-        if (userDto.getPhone() != null) {
-            existingUser.setPhone(userDto.getPhone());
+        if (command.getPhone() != null) {
+            existingUser.setPhone(command.getPhone());
         }
-        if (userDto.getAddress() != null) {
-            existingUser.setAddress(userDto.getAddress());
+        if (command.getAddress() != null) {
+            existingUser.setAddress(command.getAddress());
         }
-        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
-            existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        }
-        var updatedUser = userRepository.save(existingUser);
-        return modelMapper.map(updatedUser, UserDto.class);
-    }
-
-    @Override
-    public UserDto updateProfile(UUID userId, UpdateProfileRequest request) {
-        var existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
-        ensureActiveUser(existingUser);
-        if (request.getFullName() != null) {
-            existingUser.setFullName(request.getFullName());
-        }
-        if (request.getEmail() != null) {
-            existingUser.setEmail(request.getEmail());
-        }
-        if (request.getAvatarUrl() != null) {
-            existingUser.setAvatarUrl(request.getAvatarUrl());
-        }
-        if (request.getPhone() != null) {
-            existingUser.setPhone(request.getPhone());
-        }
-        if (request.getAddress() != null) {
-            existingUser.setAddress(request.getAddress());
+        if (command.getPassword() != null && !command.getPassword().isBlank()) {
+            existingUser.setPassword(passwordEncoder.encode(command.getPassword()));
         }
         var updatedUser = userRepository.save(existingUser);
-        return modelMapper.map(updatedUser, UserDto.class);
+        return userMapper.toUserCommand(updatedUser);
     }
 
     @Override
@@ -246,7 +188,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Response delete(UUID userId) {
+    public void changePassword(UUID userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
+        ensureActiveUser(user);
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new CustomApiException("Mật khẩu hiện tại không đúng", HttpStatus.FORBIDDEN);
+        }
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new CustomApiException("Mật khẩu mới không được trùng mật khẩu hiện tại", HttpStatus.BAD_REQUEST);
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public OperationResult delete(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
         validateUserDeletion(user);
@@ -260,7 +218,7 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         }
         refreshTokenRepository.revokeAllByUserId(userId);
-        return Response.builder()
+        return OperationResult.builder()
                 .responseMessage("Vô hiệu hóa người dùng thành công")
                 .responseCode("200 OK").build();
     }
@@ -287,11 +245,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isEmailExisted(String email) {
         return userRepository.existsUserByEmail(email);
-    }
-
-    @Override
-    public UserDto getUserByUsername(String username) {
-        return userRepository.findByUsername(username).map(user -> modelMapper.map(user, UserDto.class)).orElse(null);
     }
 
     @Override
@@ -326,9 +279,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void validateRoleChange(User targetUser, User.Role newRole) {
+    private void validateRoleChange(User targetUser, UserRole newRole) {
         User currentUser = currentUser();
-        if (currentUser == null || currentUser.getRole() != User.Role.ADMIN) {
+        if (currentUser == null || currentUser.getRole() != UserRole.ADMIN) {
             throw new CustomApiException("Chỉ ADMIN mới được thay đổi vai trò người dùng", HttpStatus.FORBIDDEN);
         }
 
@@ -336,9 +289,9 @@ public class UserServiceImpl implements UserService {
             throw new CustomApiException("Không thể tự thay đổi vai trò của chính mình", HttpStatus.BAD_REQUEST);
         }
 
-        if (targetUser.getRole() == User.Role.ADMIN
-                && newRole != User.Role.ADMIN
-                && userRepository.countByRoleAndDeletedFalse(User.Role.ADMIN) <= 1) {
+        if (targetUser.getRole() == UserRole.ADMIN
+                && newRole != UserRole.ADMIN
+                && userRepository.countByRoleAndDeletedFalse(UserRole.ADMIN) <= 1) {
             throw new CustomApiException("Không thể hạ quyền ADMIN cuối cùng của hệ thống", HttpStatus.BAD_REQUEST);
         }
     }
@@ -349,8 +302,8 @@ public class UserServiceImpl implements UserService {
             throw new CustomApiException("Không thể tự vô hiệu hóa tài khoản của chính mình", HttpStatus.BAD_REQUEST);
         }
 
-        if (targetUser.getRole() == User.Role.ADMIN
-                && userRepository.countByRoleAndDeletedFalse(User.Role.ADMIN) <= 1) {
+        if (targetUser.getRole() == UserRole.ADMIN
+                && userRepository.countByRoleAndDeletedFalse(UserRole.ADMIN) <= 1) {
             throw new CustomApiException("Không thể vô hiệu hóa ADMIN cuối cùng của hệ thống", HttpStatus.BAD_REQUEST);
         }
     }

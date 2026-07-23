@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.utils;
 
+import com.fita.vnua.quiz.model.enums.QuestionType;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;

@@ -1,5 +1,9 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.enums.NotificationType;
+
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.response.CampaignResponse;
 import com.fita.vnua.quiz.model.dto.response.NotificationResponse;
@@ -57,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = Notification.builder()
                 .title(title)
                 .message(message)
-                .type(Notification.NotificationType.GLOBAL)
+                .type(NotificationType.GLOBAL)
                 .relatedType("SYSTEM")
                 .history(history)
                 .isRead(false)
@@ -90,7 +94,7 @@ public class NotificationServiceImpl implements NotificationService {
             notifications.add(Notification.builder()
                     .title(history.getTitle())
                     .message(history.getMessage())
-                    .type(Notification.NotificationType.PERSONAL)
+                    .type(NotificationType.PERSONAL)
                     .userId(userId)
                     .relatedId(examId)
                     .relatedType("EXAM")
@@ -117,7 +121,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = Notification.builder()
                 .title(title)
                 .message(message)
-                .type(Notification.NotificationType.PERSONAL)
+                .type(NotificationType.PERSONAL)
                 .userId(userId)
                 .relatedType("PERSONAL_MSG")
                 .history(history)
@@ -146,7 +150,7 @@ public class NotificationServiceImpl implements NotificationService {
             notifications.add(Notification.builder()
                     .title(title)
                     .message(message)
-                    .type(Notification.NotificationType.PERSONAL)
+                    .type(NotificationType.PERSONAL)
                     .userId(userId)
                     .relatedType("BATCH_MSG")
                     .history(history)
@@ -191,7 +195,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (currentUser == null || Boolean.TRUE.equals(currentUser.getDeleted())) {
             throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
         }
-        if (currentUser.getRole() == User.Role.MOD) {
+        if (currentUser.getRole() == UserRole.MOD) {
             List<String> sendTypes = adminCapabilityService
                     .getAllowedSubjectIds(currentUser, "NOTIFICATION", "VIEW")
                     .stream()
@@ -223,7 +227,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (currentUser == null || Boolean.TRUE.equals(currentUser.getDeleted())) {
             throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
         }
-        if (currentUser.getRole() == User.Role.MOD) {
+        if (currentUser.getRole() == UserRole.MOD) {
             NotificationHistory history = historyRepository.findById(historyId)
                     .orElseThrow(() -> new CustomApiException("Chiến dịch không tồn tại", HttpStatus.NOT_FOUND));
             Long subjectId = subjectIdFromSendType(history.getSendType());
@@ -264,7 +268,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy thông báo", HttpStatus.NOT_FOUND));
 
-        if (notification.getType() == Notification.NotificationType.PERSONAL) {
+        if (notification.getType() == NotificationType.PERSONAL) {
             if (!notification.getUserId().equals(currentUserId)) {
                 throw new CustomApiException("Bạn không có quyền đọc thông báo này", HttpStatus.FORBIDDEN);
             }
@@ -273,7 +277,7 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        if (notification.getType() == Notification.NotificationType.GLOBAL) {
+        if (notification.getType() == NotificationType.GLOBAL) {
             boolean isAlreadyRead = globalReadRepository
                     .existsByUserIdAndNotificationId(currentUserId, notificationId);
 

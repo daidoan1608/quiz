@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.security;
 
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.AnswerRepository;
 import com.fita.vnua.quiz.repository.ChapterRepository;
@@ -48,7 +50,7 @@ class CustomPermissionEvaluatorTest {
         when(adminCapabilityService.hasPermission(org.mockito.ArgumentMatchers.any(User.class), org.mockito.ArgumentMatchers.eq("SUBJECT"), org.mockito.ArgumentMatchers.eq("UPDATE"), org.mockito.ArgumentMatchers.eq("SUBJECT"), org.mockito.ArgumentMatchers.eq(subjectId)))
                 .thenReturn(true);
 
-        boolean allowed = evaluator.hasPermission(authentication(userId, User.Role.MOD, false), subjectId, "Subject", "update");
+        boolean allowed = evaluator.hasPermission(authentication(userId, UserRole.MOD, false), subjectId, "Subject", "update");
 
         assertThat(allowed).isTrue();
     }
@@ -61,7 +63,7 @@ class CustomPermissionEvaluatorTest {
 
         when(subjectRepository.findActiveSubjectId(subjectId)).thenReturn(Optional.empty());
 
-        boolean allowed = evaluator.hasPermission(authentication(userId, User.Role.MOD, false), subjectId, "Subject", "UPDATE");
+        boolean allowed = evaluator.hasPermission(authentication(userId, UserRole.MOD, false), subjectId, "Subject", "UPDATE");
 
         assertThat(allowed).isFalse();
         verify(adminCapabilityService, never()).hasPermission(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
@@ -72,7 +74,7 @@ class CustomPermissionEvaluatorTest {
         UUID userId = UUID.randomUUID();
         CustomPermissionEvaluator evaluator = evaluator();
 
-        boolean allowed = evaluator.hasPermission(authentication(userId, User.Role.MOD, true), 10L, "Subject", "UPDATE");
+        boolean allowed = evaluator.hasPermission(authentication(userId, UserRole.MOD, true), 10L, "Subject", "UPDATE");
 
         assertThat(allowed).isFalse();
         verify(subjectRepository, never()).findActiveSubjectId(10L);
@@ -89,7 +91,7 @@ class CustomPermissionEvaluatorTest {
         );
     }
 
-    private UsernamePasswordAuthenticationToken authentication(UUID userId, User.Role role, boolean deleted) {
+    private UsernamePasswordAuthenticationToken authentication(UUID userId, UserRole role, boolean deleted) {
         User user = new User();
         user.setUserId(userId);
         user.setRole(role);

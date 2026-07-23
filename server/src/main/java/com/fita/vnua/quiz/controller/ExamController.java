@@ -1,24 +1,17 @@
 package com.fita.vnua.quiz.controller;
 
-import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.ExamDto;
 import com.fita.vnua.quiz.model.dto.ExamSummaryDto;
 import com.fita.vnua.quiz.model.dto.request.ExamRequest;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
-import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.ExamService;
-import com.fita.vnua.quiz.service.UserExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,7 +25,6 @@ import java.util.List;
 @Tag(name = "Exam API", description = "API cho các chức năng liên quan đến bài thi")
 public class ExamController {
     private final ExamService examService;
-    private final UserExamService userExamService;
     private final AuthorizationService authorizationService;
     private final AuditLogService auditLogService;
 
@@ -80,14 +72,9 @@ public class ExamController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDir
     ) {
-        Pageable pageable = PageRequest.of(
-                Math.max(page, 0),
-                Math.min(Math.max(size, 1), 100),
-                resolveExamSort(sortBy, sortDir)
-        );
         return ResponseEntity.ok(ApiResponse.success(
                 "Lọc bài thi thành công",
-                examService.filterExamsPage(keyword, categoryId, subjectId, createdBy, deleted, pageable)
+                examService.filterExamsPage(keyword, categoryId, subjectId, createdBy, deleted, page, size, sortBy, sortDir)
         ));
     }
 
@@ -121,19 +108,14 @@ public class ExamController {
             @RequestParam(required = false) Long userExamId,
             @AuthenticationPrincipal User currentUser
     ) {
-        ExamDto exam;
-        if (includeCorrectAnswers) {
-            requireCorrectAnswerAccess(examId, userExamId, currentUser);
-            if (userExamId != null) {
-                User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
-                exam = examService.getExamByIdForSubmittedAttempt(examId, userExamId, authenticatedUser.getUserId());
-            } else {
-                exam = examService.getExamById(examId);
-            }
-        } else {
-            exam = examService.getExamById(examId);
-            stripCorrectAnswers(exam);
-        }
+        User authenticatedUser = includeCorrectAnswers ? authorizationService.requireAuthenticated(currentUser) : currentUser;
+        ExamDto exam = examService.getPublicExamById(
+                examId,
+                includeCorrectAnswers,
+                userExamId,
+                authenticatedUser == null ? null : authenticatedUser.getUserId(),
+                authenticatedUser != null && authorizationService.isAdminOrMod(authenticatedUser)
+        );
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin bài thi thành công", exam));
     }
 
@@ -160,51 +142,5 @@ public class ExamController {
     @Operation(summary = "Khôi phục bài thi đã xóa mềm")
     public ResponseEntity<ApiResponse<ExamDto>> restoreExam(@PathVariable("examId") Long examId) {
         return ResponseEntity.ok(ApiResponse.success("Khôi phục bài thi thành công", examService.restoreExam(examId)));
-    }
-    private ExamDto stripCorrectAnswers(ExamDto exam) {
-        if (exam.getQuestions() == null) {
-            return exam;
-        }
-        exam.getQuestions().forEach(question -> {
-            if (question.getAnswers() != null) {
-                question.getAnswers().forEach(answer -> answer.setIsCorrect(null));
-            }
-        });
-        return exam;
-    }
-
-    private void requireCorrectAnswerAccess(Long examId, Long userExamId, User currentUser) {
-        User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
-        if (authorizationService.isAdminOrMod(authenticatedUser)) {
-            return;
-        }
-        if (userExamId == null) {
-            throw new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN);
-        }
-
-        UserExamResponse userExam = userExamService.getUserExamByIdForUser(userExamId, authenticatedUser.getUserId());
-        if (userExam.getUserExamDto() == null
-                || !examId.equals(userExam.getUserExamDto().getExamId())
-                || !"SUBMITTED".equals(userExam.getUserExamDto().getStatus())) {
-            throw new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN);
-        }
-    }
-
-    private Sort resolveExamSort(String sortBy, String sortDir) {
-        String property = switch (sortBy == null ? "" : sortBy) {
-            case "subjectId" -> "subject.subjectId";
-            case "subjectName" -> "subject.name";
-            case "examCode" -> "examCode";
-            case "title" -> "title";
-            case "description" -> "description";
-            case "duration" -> "duration";
-            case "createdDate" -> "createdTime";
-            case "deletedAt" -> "deletedAt";
-            default -> "examId";
-        };
-        Sort.Direction direction = "ascend".equalsIgnoreCase(sortDir) || "asc".equalsIgnoreCase(sortDir)
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-        return Sort.by(direction, property);
     }
 }

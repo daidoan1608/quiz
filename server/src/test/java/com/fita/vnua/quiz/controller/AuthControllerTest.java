@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.controller;
 
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
@@ -9,7 +11,7 @@ import com.fita.vnua.quiz.security.JwtTokenUtil;
 import com.fita.vnua.quiz.service.AuthService;
 import com.fita.vnua.quiz.service.EmailVerificationService;
 import com.fita.vnua.quiz.service.UserService;
-import com.fita.vnua.quiz.service.impl.GoogleIdTokenVerifierService;
+import com.fita.vnua.quiz.service.GoogleIdTokenVerifierService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,7 +60,7 @@ class AuthControllerTest {
         AuthResponse authResponse = AuthResponse.builder()
                 .userId(userId)
                 .username("student")
-                .role(User.Role.USER)
+                .role(UserRole.USER)
                 .build();
 
         when(customUserDetailsService.loadUserByUsername("student")).thenReturn(userDetails);

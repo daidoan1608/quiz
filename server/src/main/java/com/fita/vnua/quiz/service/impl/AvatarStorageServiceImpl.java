@@ -3,8 +3,7 @@ package com.fita.vnua.quiz.service.impl;
 import com.fita.vnua.quiz.service.storage.ImageStorage;
 import com.fita.vnua.quiz.service.storage.ImageValidator;
 import com.fita.vnua.quiz.service.storage.StoredImage;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.fita.vnua.quiz.service.AvatarStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +15,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AvatarStorageService {
+public class AvatarStorageServiceImpl implements AvatarStorageService {
 
     private static final String AVATAR_PUBLIC_PATH = "/avatars/";
     private static final String QUESTION_PUBLIC_PATH = "/questions/";
@@ -33,6 +32,7 @@ public class AvatarStorageService {
     @Value("${question.upload-dir:uploads/questions}")
     private String questionUploadDir;
 
+    @Override
     public Uploaded saveAvatar(UUID userId, MultipartFile file, String oldUrl) throws Exception {
         byte[] bytes = readAndValidate(file);
         deleteOldAvatar(oldUrl);
@@ -43,6 +43,7 @@ public class AvatarStorageService {
         return toUploaded(imageStorage.save(avatarUploadDir, AVATAR_PUBLIC_PATH, filename, bytes));
     }
 
+    @Override
     public void deleteAvatar(String url) {
         try {
             imageStorage.delete(avatarUploadDir, AVATAR_PUBLIC_PATH, url);
@@ -51,15 +52,18 @@ public class AvatarStorageService {
         }
     }
 
+    @Override
     public String getDefaultUrl() {
         return defaultAvatarUrl;
     }
 
+    @Override
     public Uploaded saveQuestionImage(MultipartFile file) throws Exception {
         byte[] bytes = readAndValidate(file);
         return saveQuestionImage(file.getOriginalFilename(), bytes);
     }
 
+    @Override
     public Uploaded saveQuestionImage(String originalName, byte[] bytes) throws Exception {
         imageValidator.validate(originalName, null, bytes == null ? 0 : bytes.length, bytes);
 
@@ -87,12 +91,5 @@ public class AvatarStorageService {
 
     private Uploaded toUploaded(StoredImage storedImage) {
         return new Uploaded(storedImage.filename(), storedImage.url());
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class Uploaded {
-        private String filename;
-        private String url;
     }
 }

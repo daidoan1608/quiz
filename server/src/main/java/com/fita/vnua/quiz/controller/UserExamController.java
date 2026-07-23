@@ -10,11 +10,9 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.ExamAttemptResponse;
 import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
-import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.model.entity.User;
-import com.fita.vnua.quiz.repository.UserExamRepository;
-import com.fita.vnua.quiz.service.AdminCapabilityService;
 import com.fita.vnua.quiz.service.AuthorizationService;
+import com.fita.vnua.quiz.service.UserExamAccessService;
 import com.fita.vnua.quiz.service.UserExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,8 +20,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,26 +41,13 @@ import java.util.UUID;
 public class UserExamController {
     private final UserExamService userExamService;
     private final AuthorizationService authorizationService;
-    private final AdminCapabilityService adminCapabilityService;
-    private final UserExamRepository userExamRepository;
-    private final SubjectRepository subjectRepository;
+    private final UserExamAccessService userExamAccessService;
 
     @GetMapping("public/user-exam-summaries")
     @Operation(summary = "Thống kê điểm thi của người dùng")
     public ResponseEntity<ApiResponse<List<UserExamSummaryDto>>> getUserExamSummaries(
             @RequestParam(defaultValue = "all") String period) {
-        LocalDate today = LocalDate.now();
-        LocalDateTime fromDate = switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> today.with(DayOfWeek.MONDAY).atStartOfDay();
-            case "month" -> today.withDayOfMonth(1).atStartOfDay();
-            default -> null;
-        };
-        LocalDateTime toDate = switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> today.with(DayOfWeek.MONDAY).plusWeeks(1).atStartOfDay();
-            case "month" -> today.withDayOfMonth(1).plusMonths(1).atStartOfDay();
-            default -> null;
-        };
-        List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries(fromDate, toDate);
+        List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries(period);
         return ResponseEntity.ok(ApiResponse.success("Lấy thống kê điểm thi thành công", summaries));
     }
 
@@ -76,20 +59,8 @@ public class UserExamController {
             @RequestParam(defaultValue = "total") String criteria,
             @RequestParam(defaultValue = "10") int limit,
             @AuthenticationPrincipal User currentUser) {
-        LocalDate today = LocalDate.now();
-        LocalDateTime fromDate = switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> today.with(DayOfWeek.MONDAY).atStartOfDay();
-            case "month" -> today.withDayOfMonth(1).atStartOfDay();
-            default -> null;
-        };
-        LocalDateTime toDate = switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> today.with(DayOfWeek.MONDAY).plusWeeks(1).atStartOfDay();
-            case "month" -> today.withDayOfMonth(1).plusMonths(1).atStartOfDay();
-            default -> null;
-        };
         RankingResponse rankings = userExamService.getRankings(
-                fromDate,
-                toDate,
+                period,
                 subjectName,
                 criteria,
                 limit,
@@ -113,7 +84,7 @@ public class UserExamController {
             @PageableDefault(sort = "startTime", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User currentUser
     ) {
-        requireAdminUserExamListAccess(currentUser, categoryId, subjectId);
+        userExamAccessService.requireAdminUserExamListAccess(currentUser, categoryId, subjectId);
         return ResponseEntity.ok(userExamService.getAllUserExamsForAdmin(
                 keyword,
                 categoryId,
@@ -122,32 +93,6 @@ public class UserExamController {
                 startedTo,
                 pageable
         ));
-    }
-
-    private void requireAdminUserExamListAccess(User currentUser, Long categoryId, Long subjectId) {
-        User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
-        if (adminCapabilityService.hasPermission(authenticatedUser, "USER_EXAM", "VIEW", "GLOBAL", null)) {
-            return;
-        }
-        if (subjectId != null) {
-            if (!adminCapabilityService.hasPermission(authenticatedUser, "USER_EXAM", "VIEW", "SUBJECT", subjectId)) {
-                throw new org.springframework.security.access.AccessDeniedException("Không có quyền xem bài thi người dùng của môn này");
-            }
-            if (categoryId != null && !subjectRepository.existsActiveSubjectInCategory(subjectId, categoryId)) {
-                throw new org.springframework.security.access.AccessDeniedException("Môn không thuộc khoa được chọn");
-            }
-            return;
-        }
-        if (categoryId != null) {
-            boolean hasSubjectInCategory = adminCapabilityService
-                    .getAllowedSubjectIds(authenticatedUser, "USER_EXAM", "VIEW")
-                    .stream()
-                    .anyMatch(allowedSubjectId -> subjectRepository.existsActiveSubjectInCategory(allowedSubjectId, categoryId));
-            if (hasSubjectInCategory) {
-                return;
-            }
-        }
-        throw new org.springframework.security.access.AccessDeniedException("Không có quyền xem bài thi người dùng trong phạm vi này");
     }
 
     @GetMapping("user-exams")
@@ -181,22 +126,12 @@ public class UserExamController {
         User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
         UserExamResponse userExam;
         if (authorizationService.isAdminOrMod(authenticatedUser)) {
-            requireAdminUserExamAccess(authenticatedUser, userExamId);
+            userExamAccessService.requireAdminUserExamAccess(authenticatedUser, userExamId);
             userExam = userExamService.getUserExamByIdForAdmin(userExamId);
         } else {
             userExam = userExamService.getUserExamByIdForUser(userExamId, authenticatedUser.getUserId());
         }
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin bài thi của người dùng thành công", userExam));
-    }
-
-    private void requireAdminUserExamAccess(User currentUser, Long userExamId) {
-        if (adminCapabilityService.hasPermission(currentUser, "USER_EXAM", "VIEW", "GLOBAL", null)) {
-            return;
-        }
-        Long subjectId = userExamRepository.findSubjectIdByUserExamId(userExamId).orElse(null);
-        if (subjectId == null || !adminCapabilityService.hasPermission(currentUser, "USER_EXAM", "VIEW", "SUBJECT", subjectId)) {
-            throw new org.springframework.security.access.AccessDeniedException("Không có quyền xem bài thi của người dùng thuộc môn này");
-        }
     }
 
     @GetMapping("users/{userId}/user-exams/count")
@@ -211,7 +146,12 @@ public class UserExamController {
     }
 
     @PostMapping("user-exams")
-    @Operation(summary = "Tạo bài thi cho người dùng")
+    @Deprecated(since = "2026-07-23", forRemoval = false)
+    @Operation(
+            summary = "Tạo bài thi cho người dùng",
+            description = "Deprecated: dùng luồng exam-attempts/start, exam-attempts/{id}/answers và exam-attempts/{id}/submit cho bài thi mới.",
+            deprecated = true
+    )
     public ResponseEntity<ApiResponse<UserExamDto>> createUserExam(
             @RequestBody UserExamRequest userExamRequest,
             @AuthenticationPrincipal User currentUser

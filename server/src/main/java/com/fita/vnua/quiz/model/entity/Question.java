@@ -1,5 +1,8 @@
 package com.fita.vnua.quiz.model.entity;
 
+import com.fita.vnua.quiz.model.contract.SoftDeletable;
+import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
+import com.fita.vnua.quiz.model.enums.QuestionType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,7 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-public class Question {
+public class Question implements SoftDeletable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long questionId;
@@ -19,7 +22,7 @@ public class Question {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private Difficulty difficulty; // Enum: EASY, MEDIUM, HARD
+    private QuestionDifficulty difficulty;
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -54,14 +57,6 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Answer> answers = new ArrayList<>();
 
-    public enum Difficulty {
-        EASY, MEDIUM, HARD
-    }
-
-    public enum QuestionType {
-        SINGLE_CHOICE, MULTIPLE_CHOICE, FILL_IN_THE_BLANK
-    }
-
     @PrePersist
     private void prePersist() {
         ensureDefaults();
@@ -87,4 +82,3 @@ public class Question {
         }
     }
 }
-

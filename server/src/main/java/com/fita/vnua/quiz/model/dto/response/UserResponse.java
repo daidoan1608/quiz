@@ -1,31 +1,28 @@
 package com.fita.vnua.quiz.model.dto.response;
 
-import com.fita.vnua.quiz.model.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fita.vnua.quiz.model.dto.SoftDeleteMetadataDto;
+import com.fita.vnua.quiz.model.enums.UserRole;
 
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
 import java.util.UUID;
 
 @Data
-@Builder
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
+public class UserResponse extends SoftDeleteMetadataDto {
     private UUID userId;
     private String username;
     private String fullName;
     private String email;
-    private User.Role role;
+    private UserRole role;
     private String avatarUrl;
     private String phone;
     private String address;
-    private Boolean deleted;
-    private LocalDateTime deletedAt;
-    private UUID deletedBy;
-    private UUID deletedCascadeId;
-    private String deleteOriginType;
-    private Long deleteOriginId;
 }

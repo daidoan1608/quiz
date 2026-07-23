@@ -35,4 +35,13 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             )
             """)
     List<Category> searchActive(@Param("keyword") String keyword);
+
+    @Query("""
+            SELECT s.category.categoryId, COUNT(s)
+            FROM Subject s
+            WHERE s.category.categoryId IN :categoryIds
+            AND s.deleted = false
+            GROUP BY s.category.categoryId
+            """)
+    List<Object[]> countActiveSubjectsByCategoryIds(@Param("categoryIds") List<Long> categoryIds);
 }

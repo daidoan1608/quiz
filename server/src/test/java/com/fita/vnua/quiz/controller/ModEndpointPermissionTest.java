@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.controller;
 
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fita.vnua.quiz.model.dto.ExamDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
@@ -313,7 +315,7 @@ class ModEndpointPermissionTest {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setUsername("mod");
-        user.setRole(User.Role.MOD);
+        user.setRole(UserRole.MOD);
         user.setDeleted(false);
         return user;
     }

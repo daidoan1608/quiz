@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.model.entity;
 
+import com.fita.vnua.quiz.model.contract.SoftDeletable;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-public class Subject {
+public class Subject implements SoftDeletable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long subjectId;

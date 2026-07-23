@@ -1,8 +1,10 @@
-package com.fita.vnua.quiz.service;
+package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
+import com.fita.vnua.quiz.model.contract.SoftDeletable;
 import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;
+import com.fita.vnua.quiz.service.SoftDeleteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,7 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class SoftDeleteService {
+public class SoftDeleteServiceImpl implements SoftDeleteService {
     private final CategoryRepository categoryRepository;
     private final SubjectRepository subjectRepository;
     private final ChapterRepository chapterRepository;
@@ -22,6 +24,7 @@ public class SoftDeleteService {
     private final QuestionRepository questionRepository;
 
     @Transactional
+    @Override
     public void deleteCategory(Long categoryId, UUID actorId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
@@ -33,6 +36,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void deleteSubject(Long subjectId, UUID actorId) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
@@ -41,6 +45,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void deleteChapter(Long chapterId, UUID actorId) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
@@ -49,6 +54,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void deleteExam(Long examId, UUID actorId) {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi", HttpStatus.NOT_FOUND));
@@ -58,6 +64,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void deleteQuestion(Long questionId, UUID actorId) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
@@ -67,6 +74,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void restoreCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
@@ -82,6 +90,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void restoreSubject(Long subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
@@ -92,6 +101,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void restoreChapter(Long chapterId) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND));
@@ -102,6 +112,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void restoreExam(Long examId) {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi", HttpStatus.NOT_FOUND));
@@ -113,6 +124,7 @@ public class SoftDeleteService {
     }
 
     @Transactional
+    @Override
     public void restoreQuestion(Long questionId) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
@@ -153,29 +165,21 @@ public class SoftDeleteService {
                 restoreChapterTree(chapter, cascadeId);
             }
         });
-        examRepository.findByDeletedTrue().forEach(exam -> {
-            if (exam.getSubject().getSubjectId().equals(subject.getSubjectId())
-                    && cascadeId.equals(exam.getDeletedCascadeId())) {
-                clearDeleted(exam);
-                examRepository.save(exam);
-            }
-        });
+        var exams = examRepository.findDeletedBySubjectIdAndCascadeId(subject.getSubjectId(), cascadeId);
+        exams.forEach(this::clearDeleted);
+        examRepository.saveAll(exams);
     }
 
     private void restoreChapterTree(Chapter chapter, UUID cascadeId) {
         clearDeleted(chapter);
         chapterRepository.save(chapter);
         if (cascadeId == null) return;
-        questionRepository.findByDeletedTrue().forEach(question -> {
-            if (question.getChapter().getChapterId().equals(chapter.getChapterId())
-                    && cascadeId.equals(question.getDeletedCascadeId())) {
-                clearDeleted(question);
-                questionRepository.save(question);
-            }
-        });
+        var questions = questionRepository.findDeletedByChapterIdAndCascadeId(chapter.getChapterId(), cascadeId);
+        questions.forEach(this::clearDeleted);
+        questionRepository.saveAll(questions);
     }
 
-    private void markDeleted(Category entity, UUID actorId, UUID cascadeId, String originType, Long originId) {
+    private void markDeleted(SoftDeletable entity, UUID actorId, UUID cascadeId, String originType, Long originId) {
         if (Boolean.TRUE.equals(entity.getDeleted())) return;
         actorId = actorId != null ? actorId : currentActorId();
         entity.setDeleted(true);
@@ -186,87 +190,7 @@ public class SoftDeleteService {
         entity.setDeleteOriginId(originId);
     }
 
-    private void markDeleted(Subject entity, UUID actorId, UUID cascadeId, String originType, Long originId) {
-        if (Boolean.TRUE.equals(entity.getDeleted())) return;
-        actorId = actorId != null ? actorId : currentActorId();
-        entity.setDeleted(true);
-        entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy(actorId);
-        entity.setDeletedCascadeId(cascadeId);
-        entity.setDeleteOriginType(originType);
-        entity.setDeleteOriginId(originId);
-    }
-
-    private void markDeleted(Chapter entity, UUID actorId, UUID cascadeId, String originType, Long originId) {
-        if (Boolean.TRUE.equals(entity.getDeleted())) return;
-        actorId = actorId != null ? actorId : currentActorId();
-        entity.setDeleted(true);
-        entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy(actorId);
-        entity.setDeletedCascadeId(cascadeId);
-        entity.setDeleteOriginType(originType);
-        entity.setDeleteOriginId(originId);
-    }
-
-    private void markDeleted(Exam entity, UUID actorId, UUID cascadeId, String originType, Long originId) {
-        if (Boolean.TRUE.equals(entity.getDeleted())) return;
-        actorId = actorId != null ? actorId : currentActorId();
-        entity.setDeleted(true);
-        entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy(actorId);
-        entity.setDeletedCascadeId(cascadeId);
-        entity.setDeleteOriginType(originType);
-        entity.setDeleteOriginId(originId);
-    }
-
-    private void markDeleted(Question entity, UUID actorId, UUID cascadeId, String originType, Long originId) {
-        if (Boolean.TRUE.equals(entity.getDeleted())) return;
-        actorId = actorId != null ? actorId : currentActorId();
-        entity.setDeleted(true);
-        entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy(actorId);
-        entity.setDeletedCascadeId(cascadeId);
-        entity.setDeleteOriginType(originType);
-        entity.setDeleteOriginId(originId);
-    }
-
-    private void clearDeleted(Category entity) {
-        entity.setDeleted(false);
-        entity.setDeletedAt(null);
-        entity.setDeletedBy(null);
-        entity.setDeletedCascadeId(null);
-        entity.setDeleteOriginType(null);
-        entity.setDeleteOriginId(null);
-    }
-
-    private void clearDeleted(Subject entity) {
-        entity.setDeleted(false);
-        entity.setDeletedAt(null);
-        entity.setDeletedBy(null);
-        entity.setDeletedCascadeId(null);
-        entity.setDeleteOriginType(null);
-        entity.setDeleteOriginId(null);
-    }
-
-    private void clearDeleted(Chapter entity) {
-        entity.setDeleted(false);
-        entity.setDeletedAt(null);
-        entity.setDeletedBy(null);
-        entity.setDeletedCascadeId(null);
-        entity.setDeleteOriginType(null);
-        entity.setDeleteOriginId(null);
-    }
-
-    private void clearDeleted(Exam entity) {
-        entity.setDeleted(false);
-        entity.setDeletedAt(null);
-        entity.setDeletedBy(null);
-        entity.setDeletedCascadeId(null);
-        entity.setDeleteOriginType(null);
-        entity.setDeleteOriginId(null);
-    }
-
-    private void clearDeleted(Question entity) {
+    private void clearDeleted(SoftDeletable entity) {
         entity.setDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);

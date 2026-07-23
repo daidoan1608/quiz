@@ -1,17 +1,15 @@
 package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
-import com.fita.vnua.quiz.model.dto.UserDto;
 import com.fita.vnua.quiz.model.dto.request.*;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
+import com.fita.vnua.quiz.model.dto.result.AuthRegistrationResult;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
 import com.fita.vnua.quiz.service.AuthService;
 import jakarta.validation.Valid;
-import com.fita.vnua.quiz.service.UserService;
-import com.fita.vnua.quiz.service.impl.GoogleIdTokenVerifierService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +24,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,9 +38,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final AuthService authService;
-    private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil;
-    private final GoogleIdTokenVerifierService googleVerifier;
     private final CustomUserDetailsService customUserDetailsService;
     private final com.fita.vnua.quiz.service.EmailVerificationService emailVerificationService;
 
@@ -119,52 +114,11 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    @Transactional
     @Operation(summary = "API đăng ký tài khoản (Gửi email xác thực)")
     public ResponseEntity<ApiResponse<Object>> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        User existingByEmail = userService.findEntityByEmail(registerRequest.getEmail());
-        User existingByUsername = userService.findEntityByUsername(registerRequest.getUsername());
-
-        if (existingByEmail != null && existingByEmail.isEmailVerified()) {
-            throw new CustomApiException("EMAIL_ALREADY_EXISTS", "Email đã được sử dụng", HttpStatus.BAD_REQUEST);
-        }
-        if (existingByUsername != null && existingByUsername.isEmailVerified()) {
-            throw new CustomApiException("USERNAME_ALREADY_EXISTS", "Tên đăng nhập đã được sử dụng", HttpStatus.BAD_REQUEST);
-        }
-        if (existingByEmail != null && existingByUsername != null
-                && !existingByEmail.getUserId().equals(existingByUsername.getUserId())) {
-            throw new CustomApiException(
-                    "ACCOUNT_PENDING_VERIFICATION",
-                    "Email hoặc tên đăng nhập đang chờ xác thực",
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-
-        User pendingUser = existingByEmail != null ? existingByEmail : existingByUsername;
-        if (pendingUser != null) {
-            UserDto pendingUserDto = new UserDto();
-            pendingUserDto.setUsername(registerRequest.getUsername());
-            pendingUserDto.setEmail(registerRequest.getEmail());
-            pendingUserDto.setFullName(registerRequest.getFullName());
-            pendingUserDto.setPassword(registerRequest.getPassword());
-            UserDto updatedPendingUser = userService.update(pendingUser.getUserId(), pendingUserDto);
-            User updatedPendingEntity = userService.findEntityById(updatedPendingUser.getUserId());
-            emailVerificationService.createAndSendVerification(updatedPendingEntity);
-            return ResponseEntity.ok(ApiResponse.success("Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư.", null));
-        }
-
-        UserDto user = new UserDto();
-        user.setUsername(registerRequest.getUsername());
-        user.setPassword(registerRequest.getPassword());
-        user.setEmail(registerRequest.getEmail());
-        user.setFullName(registerRequest.getFullName());
-        user.setRole(User.Role.USER);
-        UserDto createdUser = userService.create(user);
-        User createdEntity = userService.findEntityById(createdUser.getUserId());
-        emailVerificationService.createAndSendVerification(createdEntity);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", null));
+        AuthRegistrationResult result = authService.register(registerRequest);
+        return ResponseEntity.status(result.created() ? HttpStatus.CREATED : HttpStatus.OK)
+                .body(ApiResponse.success(result.message(), null));
     }
 
     @GetMapping("verify-email")
@@ -177,20 +131,7 @@ public class AuthController {
     @PostMapping("google")
     @Operation(summary = "API đăng nhập bằng Google (Nhận Google ID Token, Trả về HttpOnly Cookie)")
     public ResponseEntity<ApiResponse<AuthResponse>> loginWithGoogle(@RequestBody Map<String, String> body) throws Exception {
-        String idToken = body.get("idToken");
-        if (!googleVerifier.verify(idToken)) {
-            throw new CustomApiException("INVALID_GOOGLE_TOKEN", "Google ID Token không hợp lệ", HttpStatus.UNAUTHORIZED);
-        }
-
-        String email = googleVerifier.extractEmail(idToken);
-        String name = googleVerifier.extractName(idToken);
-        String picture = googleVerifier.extractPicture(idToken);
-        User user = authService.findOrCreateGoogleUser(email, name, picture);
-        if (Boolean.TRUE.equals(user.getDeleted())) {
-            throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
-        }
-
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getUsername());
+        UserDetails userDetails = authService.authenticateGoogleToken(body.get("idToken"));
         return buildAuthenticatedResponse("Đăng nhập bằng Google thành công", userDetails);
     }
 

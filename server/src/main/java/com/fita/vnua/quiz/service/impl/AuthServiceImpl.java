@@ -1,25 +1,34 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.enums.AuthProvider;
+
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
+import com.fita.vnua.quiz.model.dto.command.UserCommand;
+import com.fita.vnua.quiz.model.dto.request.RegisterRequest;
+import com.fita.vnua.quiz.model.dto.result.AuthRegistrationResult;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.entity.RefreshToken;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.RefreshTokenRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
+import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
 import com.fita.vnua.quiz.service.AdminCapabilityService;
 import com.fita.vnua.quiz.service.AuthService;
+import com.fita.vnua.quiz.service.EmailVerificationService;
+import com.fita.vnua.quiz.service.GoogleIdTokenVerifierService;
+import com.fita.vnua.quiz.service.UserService;
 import com.fita.vnua.quiz.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,13 +43,17 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserMapper userMapper;
     private final AdminCapabilityService adminCapabilityService;
+    private final UserService userService;
+    private final EmailVerificationService emailVerificationService;
+    private final GoogleIdTokenVerifierService googleVerifier;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
 
     @Override
     public AuthResponse createAuthResponse(UserDetails userDetails) {
-        User user = getUserByUsername(userDetails.getUsername());
+        User user = resolveUser(userDetails);
         AuthResponse response = userMapper.toAuthResponse(user);
         response.setCapabilities(adminCapabilityService.getCapabilities(user));
         return response;
@@ -48,19 +61,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String generateAccessToken(UserDetails userDetails) {
-        User user = getUserByUsername(userDetails.getUsername());
-
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", user.getUserId().toString());
-        claims.put("role", user.getRole().name());
-
-        return jwtTokenUtil.generateToken(claims, userDetails.getUsername());
+        return generateAccessTokenForUser(resolveUser(userDetails));
     }
 
     @Override
     @Transactional
     public String generateRefreshToken(UserDetails userDetails) {
-        User user = getUserByUsername(userDetails.getUsername());
+        User user = resolveUser(userDetails);
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(UUID.randomUUID())
@@ -89,13 +96,7 @@ public class AuthServiceImpl implements AuthService {
             refreshTokenRepository.save(refreshToken);
             throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
         }
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword() != null ? user.getPassword() : "",
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-        );
-
-        return generateAccessToken(userDetails);
+        return generateAccessTokenForUser(user);
     }
 
     @Override
@@ -105,6 +106,63 @@ public class AuthServiceImpl implements AuthService {
                     refreshToken.setRevoked(true);
                     refreshTokenRepository.save(refreshToken);
                 });
+    }
+
+    @Override
+    @Transactional
+    public AuthRegistrationResult register(RegisterRequest registerRequest) {
+        User existingByEmail = userService.findEntityByEmail(registerRequest.getEmail());
+        User existingByUsername = userService.findEntityByUsername(registerRequest.getUsername());
+
+        if (existingByEmail != null && existingByEmail.isEmailVerified()) {
+            throw new CustomApiException("EMAIL_ALREADY_EXISTS", "Email đã được sử dụng", HttpStatus.BAD_REQUEST);
+        }
+        if (existingByUsername != null && existingByUsername.isEmailVerified()) {
+            throw new CustomApiException("USERNAME_ALREADY_EXISTS", "Tên đăng nhập đã được sử dụng", HttpStatus.BAD_REQUEST);
+        }
+        if (existingByEmail != null && existingByUsername != null
+                && !existingByEmail.getUserId().equals(existingByUsername.getUserId())) {
+            throw new CustomApiException(
+                    "ACCOUNT_PENDING_VERIFICATION",
+                    "Email hoặc tên đăng nhập đang chờ xác thực",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        User pendingUser = existingByEmail != null ? existingByEmail : existingByUsername;
+        if (pendingUser != null) {
+            UserCommand pendingUserCommand = new UserCommand();
+            pendingUserCommand.setUsername(registerRequest.getUsername());
+            pendingUserCommand.setEmail(registerRequest.getEmail());
+            pendingUserCommand.setFullName(registerRequest.getFullName());
+            pendingUserCommand.setPassword(registerRequest.getPassword());
+            UserCommand updatedPendingUser = userService.update(pendingUser.getUserId(), pendingUserCommand);
+            emailVerificationService.createAndSendVerification(userService.findEntityById(updatedPendingUser.getUserId()));
+            return new AuthRegistrationResult("Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư.", false);
+        }
+
+        UserCommand user = new UserCommand();
+        user.setUsername(registerRequest.getUsername());
+        user.setPassword(registerRequest.getPassword());
+        user.setEmail(registerRequest.getEmail());
+        user.setFullName(registerRequest.getFullName());
+        user.setRole(UserRole.USER);
+        UserCommand createdUser = userService.create(user);
+        emailVerificationService.createAndSendVerification(userService.findEntityById(createdUser.getUserId()));
+        return new AuthRegistrationResult("Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", true);
+    }
+
+    @Override
+    public UserDetails authenticateGoogleToken(String idToken) throws Exception {
+        if (!googleVerifier.verify(idToken)) {
+            throw new CustomApiException("INVALID_GOOGLE_TOKEN", "Google ID Token không hợp lệ", HttpStatus.UNAUTHORIZED);
+        }
+
+        String email = googleVerifier.extractEmail(idToken);
+        String name = googleVerifier.extractName(idToken);
+        String picture = googleVerifier.extractPicture(idToken);
+        User user = findOrCreateGoogleUser(email, name, picture);
+        return customUserDetailsService.loadUserByUsername(user.getUsername());
     }
 
     @Override
@@ -129,13 +187,31 @@ public class AuthServiceImpl implements AuthService {
         return user;
     }
 
+    private User resolveUser(UserDetails userDetails) {
+        if (userDetails instanceof User user) {
+            if (Boolean.TRUE.equals(user.getDeleted())) {
+                throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
+            }
+            return user;
+        }
+        return getUserByUsername(userDetails.getUsername());
+    }
+
+    private String generateAccessTokenForUser(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getUserId().toString());
+        claims.put("role", user.getRole().name());
+
+        return jwtTokenUtil.generateToken(claims, user.getUsername());
+    }
+
     private User createGoogleUser(String email, String name, String picture) {
         User user = new User();
         user.setEmail(email);
         user.setUsername(generateUniqueGoogleUsername(email));
         user.setFullName(name);
-        user.setRole(User.Role.USER);
-        user.setAuthProvider(User.AuthProvider.GOOGLE);
+        user.setRole(UserRole.USER);
+        user.setAuthProvider(AuthProvider.GOOGLE);
         user.setEmailVerified(true);
         user.setPassword(null);
         user.setAvatarUrl(picture);
@@ -144,8 +220,8 @@ public class AuthServiceImpl implements AuthService {
 
     private User syncGoogleProfile(User user, String name, String picture) {
         boolean changed = false;
-        if (user.getAuthProvider() != User.AuthProvider.GOOGLE) {
-            user.setAuthProvider(User.AuthProvider.GOOGLE);
+        if (user.getAuthProvider() != AuthProvider.GOOGLE) {
+            user.setAuthProvider(AuthProvider.GOOGLE);
             changed = true;
         }
         if (!user.isEmailVerified()) {

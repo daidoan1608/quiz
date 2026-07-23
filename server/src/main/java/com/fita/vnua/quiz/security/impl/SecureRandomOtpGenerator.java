@@ -1,5 +1,6 @@
-package com.fita.vnua.quiz.security;
+package com.fita.vnua.quiz.security.impl;
 
+import com.fita.vnua.quiz.security.OtpGenerator;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;

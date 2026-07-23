@@ -1,13 +1,14 @@
 package com.fita.vnua.quiz.service.impl;
 
-import com.fita.vnua.quiz.model.dto.UserDto;
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.model.dto.request.UpdateProfileRequest;
+import com.fita.vnua.quiz.model.dto.response.UserResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.modelmapper.ModelMapper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -24,9 +25,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
-
-    @Spy
-    private ModelMapper modelMapper = new ModelMapper();
 
     @Mock
     private UserRepository userRepository;
@@ -47,7 +45,7 @@ class UserServiceImplTest {
         existingUser.setUserId(userId);
         existingUser.setUsername("student");
         existingUser.setPassword("encoded-old-password");
-        existingUser.setRole(User.Role.USER);
+        existingUser.setRole(UserRole.USER);
         existingUser.setFullName("Old Name");
 
         UpdateProfileRequest request = new UpdateProfileRequest();
@@ -57,14 +55,14 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(userRepository.save(existingUser)).thenReturn(existingUser);
 
-        UserDto updated = userService.updateProfile(userId, request);
+        UserResponse updated = userService.updateProfileResponse(userId, request);
 
         ArgumentCaptor<User> savedUser = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(savedUser.capture());
         assertThat(savedUser.getValue().getFullName()).isEqualTo("New Name");
         assertThat(savedUser.getValue().getEmail()).isEqualTo("new@example.com");
-        assertThat(savedUser.getValue().getRole()).isEqualTo(User.Role.USER);
+        assertThat(savedUser.getValue().getRole()).isEqualTo(UserRole.USER);
         assertThat(savedUser.getValue().getPassword()).isEqualTo("encoded-old-password");
-        assertThat(updated.getRole()).isEqualTo(User.Role.USER);
+        assertThat(updated.getRole()).isEqualTo(UserRole.USER);
     }
 }

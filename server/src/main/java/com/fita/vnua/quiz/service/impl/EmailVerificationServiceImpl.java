@@ -1,9 +1,10 @@
-package com.fita.vnua.quiz.service;
+package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.model.entity.EmailVerificationToken;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.EmailVerificationTokenRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
+import com.fita.vnua.quiz.service.EmailVerificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmailVerificationService {
+public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final EmailVerificationTokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
@@ -36,6 +37,7 @@ public class EmailVerificationService {
     private String mailFrom;
 
     @Transactional
+    @Override
     public void createAndSendVerification(User user) {
         EmailVerificationToken verificationToken = tokenRepository.findByUser(user)
                 .orElseGet(EmailVerificationToken::new);
@@ -49,6 +51,7 @@ public class EmailVerificationService {
     }
 
     @Transactional
+    @Override
     public void verifyEmail(String token) {
         EmailVerificationToken verificationToken = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token xác thực không hợp lệ"));

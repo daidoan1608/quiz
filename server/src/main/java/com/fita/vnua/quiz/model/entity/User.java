@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.model.entity;
 
+import com.fita.vnua.quiz.model.enums.AuthProvider;
+import com.fita.vnua.quiz.model.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,7 +30,7 @@ public class User implements UserDetails {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    private Role role; // Enum: ADMIN, MOD, USER
+    private UserRole role;
 
     @Column(nullable = false)
     private String fullName;
@@ -60,10 +62,6 @@ public class User implements UserDetails {
     private String deleteOriginType;
 
     private Long deleteOriginId;
-
-    public enum AuthProvider {
-        LOCAL, GOOGLE, FACEBOOK, GITHUB
-    }
 
     @PrePersist
     private void prePersist() {
@@ -97,10 +95,6 @@ public class User implements UserDetails {
         // Tài khoản quản trị được tạo nội bộ không cần luồng xác thực email như USER đăng ký.
         // Nếu không cho ADMIN/MOD enabled ở đây, Spring Security sẽ chặn đăng nhập dù đúng mật khẩu.
         return !Boolean.TRUE.equals(deleted)
-                && (role == Role.ADMIN || role == Role.MOD || emailVerified || authProvider != AuthProvider.LOCAL);
-    }
-
-    public enum Role {
-        ADMIN, MOD, USER
+                && (role == UserRole.ADMIN || role == UserRole.MOD || emailVerified || authProvider != AuthProvider.LOCAL);
     }
 }

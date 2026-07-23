@@ -1,4 +1,4 @@
-package com.fita.vnua.quiz.model.dto.response;
+package com.fita.vnua.quiz.model.dto.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Response {
+public class OperationResult {
     private String responseCode;
     private String responseMessage;
 }

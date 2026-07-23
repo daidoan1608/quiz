@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.enums.AdminMenu;
+import com.fita.vnua.quiz.model.enums.UserRole;
 import com.fita.vnua.quiz.model.dto.response.AdminCapabilitiesResponse;
 import com.fita.vnua.quiz.model.entity.AdminGroupPermission;
 import com.fita.vnua.quiz.model.entity.AdminUserGroup;
@@ -16,34 +18,18 @@ import java.util.*;
 @Service("adminCapabilityService")
 @RequiredArgsConstructor
 public class AdminCapabilityServiceImpl implements AdminCapabilityService {
-    private static final List<String> ADMIN_MENUS = List.of(
-            "MENU_DASHBOARD",
-            "MENU_NOTIFICATIONS",
-            "MENU_DOCUMENTS",
-            "MENU_USER_EXAMS",
-            "MENU_USERS",
-            "MENU_GROUPS",
-            "MENU_EXAMS",
-            "MENU_CATEGORIES",
-            "MENU_SUBJECTS",
-            "MENU_CHAPTERS",
-            "MENU_QUESTIONS",
-            "MENU_AUDIT_LOGS",
-            "MENU_ADMIN_GROUPS"
-    );
-
     private final AdminUserGroupRepository userGroupRepository;
     private final AdminGroupPermissionRepository permissionRepository;
 
     @Override
     @Transactional(readOnly = true)
     public AdminCapabilitiesResponse getCapabilities(User user) {
-        if (user == null || user.getRole() == User.Role.USER) {
+        if (user == null || user.getRole() == UserRole.USER) {
             return emptyCapabilities();
         }
-        if (user.getRole() == User.Role.ADMIN) {
+        if (user.getRole() == UserRole.ADMIN) {
             return AdminCapabilitiesResponse.builder()
-                    .menus(ADMIN_MENUS)
+                    .menus(AdminMenu.codes())
                     .subjects(Map.of())
                     .global(Map.of("*", List.of("*")))
                     .build();
@@ -61,7 +47,7 @@ public class AdminCapabilityServiceImpl implements AdminCapabilityService {
 
             if ("GLOBAL".equals(scopeType)) {
                 globalSets.computeIfAbsent(resource, ignored -> new TreeSet<>()).add(action);
-                if (resource.startsWith("MENU_") && "VIEW".equals(action)) {
+                if (AdminMenu.isMenuResource(resource) && "VIEW".equals(action)) {
                     menus.add(resource);
                 }
                 continue;
@@ -88,7 +74,7 @@ public class AdminCapabilityServiceImpl implements AdminCapabilityService {
         if (user == null || Boolean.TRUE.equals(user.getDeleted())) {
             return false;
         }
-        if (user.getRole() == User.Role.ADMIN) {
+        if (user.getRole() == UserRole.ADMIN) {
             return true;
         }
         String normalizedResource = normalize(resource);
@@ -109,7 +95,7 @@ public class AdminCapabilityServiceImpl implements AdminCapabilityService {
         if (user == null || Boolean.TRUE.equals(user.getDeleted())) {
             return false;
         }
-        if (user.getRole() == User.Role.ADMIN) {
+        if (user.getRole() == UserRole.ADMIN) {
             return true;
         }
         String normalizedResource = normalize(resource);
@@ -127,7 +113,7 @@ public class AdminCapabilityServiceImpl implements AdminCapabilityService {
         if (user == null || Boolean.TRUE.equals(user.getDeleted())) {
             return List.of();
         }
-        if (user.getRole() == User.Role.ADMIN) {
+        if (user.getRole() == UserRole.ADMIN) {
             return List.of();
         }
         String normalizedResource = normalize(resource);

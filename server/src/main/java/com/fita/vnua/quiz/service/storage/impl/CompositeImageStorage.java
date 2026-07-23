@@ -1,5 +1,7 @@
-package com.fita.vnua.quiz.service.storage;
+package com.fita.vnua.quiz.service.storage.impl;
 
+import com.fita.vnua.quiz.service.storage.ImageStorage;
+import com.fita.vnua.quiz.service.storage.StoredImage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

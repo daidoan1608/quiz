@@ -1,5 +1,7 @@
-package com.fita.vnua.quiz.service.storage;
+package com.fita.vnua.quiz.service.storage.impl;
 
+import com.fita.vnua.quiz.service.storage.ImageStorage;
+import com.fita.vnua.quiz.service.storage.StoredImage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 
