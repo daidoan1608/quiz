@@ -2,6 +2,7 @@ import React from "react";
 import { Alert, Col, Form, Row, Select, Upload } from "antd";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import { AdminExportButton } from "../../../components/common/buttons/AdminButtons";
+import sampleQuestionZipUrl from "../../../assets/templates/mau_zip.zip?url";
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -30,7 +31,7 @@ export function QuestionImportInfoAlert({ compact = false }) {
       action={
         <AdminExportButton
           type="link"
-          href="/templates/mau_zip.zip"
+          href={sampleQuestionZipUrl}
           download="mau_nhap_cau_hoi.zip"
         >
           Tải folder mẫu

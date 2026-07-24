@@ -1,4 +1,5 @@
 import React from 'react';
+import logoSchoolUrl from '../../../assets/images/logoschool.png';
 
 export const AuthCard = ({
   children,
@@ -10,7 +11,7 @@ export const AuthCard = ({
     <div className="auth-card w-full max-w-md space-y-8 p-10 rounded-2xl shadow-xl">
       <div className="text-center">
         <img
-          src="/logoschool.png"
+          src={logoSchoolUrl}
           alt="Logo"
           className="mx-auto h-16 w-auto mb-4 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => navigate('/')}
