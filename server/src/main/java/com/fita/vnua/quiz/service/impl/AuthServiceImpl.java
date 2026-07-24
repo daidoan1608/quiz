@@ -23,9 +23,12 @@ import com.fita.vnua.quiz.service.UserService;
 import com.fita.vnua.quiz.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +50,8 @@ public class AuthServiceImpl implements AuthService {
     private final EmailVerificationService emailVerificationService;
     private final GoogleIdTokenVerifierService googleVerifier;
     private final CustomUserDetailsService customUserDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final CacheManager cacheManager;
 
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
@@ -110,10 +115,30 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    public void setPassword(UUID userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(user.getDeleted())) {
+            throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        evictUserDetailsCache(user);
+    }
+
+    @Override
+    @Transactional
     public AuthRegistrationResult register(RegisterRequest registerRequest) {
         User existingByEmail = userService.findEntityByEmail(registerRequest.getEmail());
         User existingByUsername = userService.findEntityByUsername(registerRequest.getUsername());
 
+        if (existingByEmail != null && existingByEmail.getAuthProvider() == AuthProvider.GOOGLE) {
+            throw new CustomApiException(
+                    "EMAIL_GOOGLE_ACCOUNT",
+                    "Email này đã được dùng với tài khoản Google. Vui lòng đăng nhập bằng Google và thiết lập mật khẩu trong phần Cài đặt.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
         if (existingByEmail != null && existingByEmail.isEmailVerified()) {
             throw new CustomApiException("EMAIL_ALREADY_EXISTS", "Email đã được sử dụng", HttpStatus.BAD_REQUEST);
         }
@@ -203,6 +228,17 @@ public class AuthServiceImpl implements AuthService {
         claims.put("role", user.getRole().name());
 
         return jwtTokenUtil.generateToken(claims, user.getUsername());
+    }
+
+    private void evictUserDetailsCache(User user) {
+        Cache cache = cacheManager.getCache("userDetails");
+        if (cache == null) {
+            return;
+        }
+        cache.evictIfPresent(user.getUsername());
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+            cache.evictIfPresent(user.getEmail());
+        }
     }
 
     private User createGoogleUser(String email, String name, String picture) {

@@ -13,12 +13,21 @@ export const SubjectSummaryCard = ({
   subjectName,
   subtitle,
 }) => {
-  const CardTag = onClick ? 'button' : 'article';
+  const CardTag = onClick ? 'div' : 'article';
+  const handleKeyDown = (event) => {
+    if (!onClick) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick(event);
+    }
+  };
 
   return (
     <CardTag
       onClick={onClick}
-      type={onClick ? 'button' : undefined}
+      onKeyDown={handleKeyDown}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       className={`subject-card aura-surface-panel aura-surface-panel-hover group flex ${minHeightClassName} w-full cursor-pointer flex-col gap-5 p-6 text-left ${className}`}
     >
       <div className="flex items-start justify-between gap-4">

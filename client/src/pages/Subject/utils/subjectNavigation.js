@@ -8,6 +8,7 @@ export const buildChapterPracticeLocation = ({ chapter, subjectData, subjectId }
   state: {
     chapterId: chapter.chapterId,
     chapterName: chapter.name,
+    chapterNumber: chapter.chapterNumber ?? chapter.ChapterNumber,
     chapterQuestionCount: chapter.countQuestion || 0,
     subjectId,
     subjectName: subjectData?.name,

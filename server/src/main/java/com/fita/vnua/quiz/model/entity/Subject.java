@@ -19,7 +19,7 @@ public class Subject implements SoftDeletable {
     @Column(nullable = false)
     private String name;
 
-    @Column
+    @Column(length = 500)
     private String description;
 
     @Column(nullable = false)

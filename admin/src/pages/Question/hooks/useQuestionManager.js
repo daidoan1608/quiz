@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { appMessage as message } from "../../../utils/ui/messageService";
 import { getApiErrorMessage } from "../../../api/axiosConfig";
+import { unwrapPageData } from "../../../api/services/apiResponse";
 import {
   chapterApi,
   exportApi,
@@ -113,12 +114,13 @@ export const useQuestionManager = () => {
           sortBy: tableSort.sortBy,
           sortDir: tableSort.sortDir,
         });
-        setQuestions(data.content || []);
+        const pageData = unwrapPageData(data);
+        setQuestions(pageData.content);
         setPagination((prev) => ({
           ...prev,
-          current: page,
-          pageSize: nextPageSize,
-          total: data.totalElements || 0,
+          current: pageData.current || page,
+          pageSize: pageData.pageSize || nextPageSize,
+          total: pageData.total,
         }));
       } catch (error) {
         message.error(

@@ -46,6 +46,7 @@ public class AuthController {
     @Operation(summary = "API đăng nhập (Trả về HttpOnly Cookie)")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest loginRequest) {
         try {
+            customUserDetailsService.ensurePasswordConfigured(loginRequest.getUsername());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
@@ -58,6 +59,9 @@ public class AuthController {
                             "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.",
                             List.of("Tài khoản đã bị vô hiệu hóa")
                     ));
+        } catch (CustomApiException e) {
+            return ResponseEntity.status(e.getStatus())
+                    .body(ApiResponse.error(e.getCode(), e.getMessage(), List.of(e.getMessage())));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(
@@ -66,6 +70,19 @@ public class AuthController {
                             List.of("Thông tin đăng nhập không hợp lệ")
                     ));
         }
+    }
+
+    @PatchMapping("password")
+    @Operation(summary = "API thiết lập mật khẩu cho tài khoản đang đăng nhập")
+    public ResponseEntity<ApiResponse<Object>> setPassword(
+            @AuthenticationPrincipal User currentUser,
+            @Valid @RequestBody SetPasswordRequest request
+    ) {
+        if (currentUser == null) {
+            throw new CustomApiException("Vui lòng đăng nhập để tiếp tục", HttpStatus.UNAUTHORIZED);
+        }
+        authService.setPassword(currentUser.getUserId(), request.getNewPassword());
+        return ResponseEntity.ok(ApiResponse.success("Đã thiết lập mật khẩu thành công. Bạn có thể đăng nhập bằng tài khoản + mật khẩu.", null));
     }
 
     @GetMapping("me")

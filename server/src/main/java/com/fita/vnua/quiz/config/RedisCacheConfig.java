@@ -54,6 +54,7 @@ public class RedisCacheConfig {
                 .withCacheConfiguration("publicExamDetail", cacheWithTtl(Duration.ofMinutes(10), keyPrefix))
                 .withCacheConfiguration("practiceQuestions", cacheWithTtl(Duration.ofMinutes(5), keyPrefix))
                 .withCacheConfiguration("ranking", cacheWithTtl(Duration.ofSeconds(60), keyPrefix))
+                .withCacheConfiguration("userDetails", cacheWithTtl(Duration.ofMinutes(5), keyPrefix))
                 .withCacheConfiguration("notificationUnreadCount", cacheWithTtl(Duration.ofSeconds(60), keyPrefix));
     }
 

@@ -24,6 +24,8 @@ public interface UserExamQuestionRepository extends JpaRepository<UserExamQuesti
 
     boolean existsByUserExamUserExamId(Long userExamId);
 
+    boolean existsByUserExamUserExamIdAndQuestionQuestionId(Long userExamId, Long questionId);
+
     @Query("""
             SELECT CASE WHEN COUNT(ueq) > 0 THEN true ELSE false END
             FROM UserExamQuestion ueq

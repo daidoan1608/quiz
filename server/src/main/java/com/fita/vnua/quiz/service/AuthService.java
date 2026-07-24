@@ -19,6 +19,8 @@ public interface AuthService {
 
     void revokeRefreshToken(UUID tokenId);
 
+    void setPassword(UUID userId, String newPassword);
+
     AuthRegistrationResult register(RegisterRequest registerRequest);
 
     UserDetails authenticateGoogleToken(String idToken) throws Exception;

@@ -3,6 +3,7 @@ import { PageContainer } from 'components/common/PageContainer';
 import ChangePasswordModal from './ChangePasswordModal';
 import PersonalInfo from './PersonalInfo';
 import Roadmap from './Roadmap';
+import SetPasswordPanel from './SetPasswordPanel';
 import UserProfileCard from './UserProfileCard';
 import { ACCOUNT_SECTIONS } from '../constants/accountSections';
 
@@ -11,6 +12,7 @@ export const AccountView = ({
   groupedExams,
   handleChangePassword,
   handleContinueAttempt,
+  handleSetPassword,
   handleUpdateProfile,
   handleUploadAvatar,
   inProgressAttempts,
@@ -42,7 +44,13 @@ export const AccountView = ({
           onUploadAvatar={handleUploadAvatar}
           onPersonalInfoClick={() => setActiveSection(ACCOUNT_SECTIONS.PERSONAL)}
           onRoadmapClick={() => setActiveSection(ACCOUNT_SECTIONS.ROADMAP)}
-          onChangePasswordClick={() => setShowChangePassword(true)}
+          onChangePasswordClick={() => {
+            if (user?.authProvider === 'GOOGLE' && !user?.hasPassword) {
+              setActiveSection(ACCOUNT_SECTIONS.PERSONAL);
+              return;
+            }
+            setShowChangePassword(true);
+          }}
           texts={texts}
         />
       </aside>
@@ -57,12 +65,17 @@ export const AccountView = ({
             </h2>
           </div>
           {isPersonalSection ? (
-            <PersonalInfo
-              user={user}
-              onSave={handleUpdateProfile}
-              saving={savingProfile}
-              texts={texts}
-            />
+            <>
+              <PersonalInfo
+                user={user}
+                onSave={handleUpdateProfile}
+                saving={savingProfile}
+                texts={texts}
+              />
+              {user?.authProvider === 'GOOGLE' && !user?.hasPassword && (
+                <SetPasswordPanel onSubmit={handleSetPassword} texts={texts} />
+              )}
+            </>
           ) : (
             <Roadmap
               groupedExams={groupedExams}

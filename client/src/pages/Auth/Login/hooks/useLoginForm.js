@@ -2,7 +2,7 @@
 import { appMessage } from 'utils/appMessage';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from 'api/services/authApi';
-import { getApiErrorMessage } from 'api/http/apiError';
+import { getApiErrorCode, getApiErrorMessage } from 'api/http/apiError';
 import { useAuth } from 'context/auth/AuthProvider';
 import {
   getStorageItem,
@@ -34,7 +34,7 @@ export const useLoginForm = (form) => {
         password: values.password,
       });
 
-      const { userId, role, fullName, avatarUrl } = userData || {};
+      const { userId, role, fullName, avatarUrl, authProvider, hasPassword } = userData || {};
       if (!userId) {
         throw new Error('Login response is missing userId');
       }
@@ -60,13 +60,26 @@ export const useLoginForm = (form) => {
         removeStorageItem(storageKeys.avatarUrl);
       }
 
-      const loggedIn = login({ userId, role, fullName, avatarUrl: avatar });
+      const loggedIn = login({
+        userId,
+        role,
+        fullName,
+        authProvider,
+        hasPassword,
+        avatarUrl: avatar,
+      });
       if (!loggedIn) {
         await authApi.logout().catch(() => {});
         return;
       }
       navigate('/');
     } catch (error) {
+      if (getApiErrorCode(error) === 'ACCOUNT_NEEDS_PASSWORD') {
+        appMessage.warning(
+          'Tài khoản này đang đăng nhập bằng Google. Bạn có muốn thiết lập mật khẩu để đăng nhập bằng tài khoản/mật khẩu?'
+        );
+        return;
+      }
       const errorMessage = getApiErrorMessage(
         error,
         'Đăng nhập thất bại. Vui lòng thử lại!'
@@ -81,7 +94,7 @@ export const useLoginForm = (form) => {
     setLoading(true);
     try {
       const userData = await authApi.loginWithGoogle(idToken);
-      const { userId, role, fullName, avatarUrl } = userData || {};
+      const { userId, role, fullName, avatarUrl, authProvider, hasPassword } = userData || {};
       if (!userId) {
         console.error('Google login response is missing userId', userData);
         throw new Error('Google login response is missing userId');
@@ -91,6 +104,8 @@ export const useLoginForm = (form) => {
         userId,
         role,
         fullName,
+        authProvider,
+        hasPassword,
         avatarUrl: avatarUrl || '',
       });
       if (!loggedIn) {

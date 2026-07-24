@@ -8,6 +8,7 @@ import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.SubjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -99,7 +100,7 @@ public class SubjectController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("admin/subjects")
     @Operation(summary = "Tạo môn học (admin)")
-    public ResponseEntity<ApiResponse<SubjectDto>> createSubject(@RequestBody SubjectDto subjectDto) {
+    public ResponseEntity<ApiResponse<SubjectDto>> createSubject(@Valid @RequestBody SubjectDto subjectDto) {
         SubjectDto createdSubject = subjectService.create(subjectDto);
         return ResponseEntity.ok(ApiResponse.success("Tạo môn học thành công", createdSubject));
     }
@@ -109,7 +110,7 @@ public class SubjectController {
     @Operation(summary = "Cập nhật môn học (admin)")
     public ResponseEntity<ApiResponse<SubjectDto>> updateSubject(
             @PathVariable("subjectId") Long subjectId,
-            @RequestBody SubjectDto subjectDto
+            @Valid @RequestBody SubjectDto subjectDto
     ) {
         SubjectDto updatedSubject = subjectService.update(subjectId, subjectDto);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật môn học thành công", updatedSubject));

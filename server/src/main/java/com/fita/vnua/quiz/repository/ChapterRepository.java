@@ -47,7 +47,7 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
             @Param("deleted") Boolean deleted
     );
 
-    @Query("SELECT c FROM Chapter c JOIN FETCH c.subject WHERE c.subject.subjectId = :subjectId AND c.deleted = false")
+    @Query("SELECT c FROM Chapter c JOIN FETCH c.subject WHERE c.subject.subjectId = :subjectId AND c.deleted = false ORDER BY c.chapterNumber ASC")
     List<Chapter> findBySubject(Long subjectId);
 
     @Query("SELECT c FROM Chapter c JOIN FETCH c.subject WHERE c.subject.subjectId = :subjectId")

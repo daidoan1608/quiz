@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { appMessage as message } from "../../../utils/ui/messageService";
 import { getApiErrorMessage } from "../../../api/axiosConfig";
+import { unwrapPageData } from "../../../api/services/apiResponse";
 import { examApi, questionApi } from "../../../api/services/contentApi";
 import { subjectApi } from "../../../api/services/subjectApi";
 
@@ -100,8 +101,9 @@ export const useExamUpdateForm = ({ form, examId, open, onCancel, onSuccess }) =
         page: questionPage - 1,
         size: 30,
       });
-      setQuestions(pageData.content || []);
-      setQuestionTotal(pageData.totalElements || 0);
+      const questionPageData = unwrapPageData(pageData);
+      setQuestions(questionPageData.content);
+      setQuestionTotal(questionPageData.total);
     } catch (error) {
       message.error(getApiErrorMessage(error, "Không thể tải danh sách câu hỏi."));
     } finally {

@@ -42,3 +42,5 @@ export const getApiErrorMessage = (
   }
   return serverMessage || fallback;
 };
+
+export const getApiErrorCode = (error) => error?.response?.data?.code || '';

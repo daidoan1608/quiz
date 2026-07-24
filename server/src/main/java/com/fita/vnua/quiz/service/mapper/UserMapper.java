@@ -43,6 +43,8 @@ public class UserMapper {
                 .email(response.getEmail())
                 .fullName(response.getFullName())
                 .role(response.getRole())
+                .authProvider(user.getAuthProvider())
+                .hasPassword(user.getPassword() != null && !user.getPassword().isBlank())
                 .avatarUrl(response.getAvatarUrl())
                 .build();
     }

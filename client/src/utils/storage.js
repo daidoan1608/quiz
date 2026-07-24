@@ -6,6 +6,8 @@ export const storageKeys = {
   role: "role",
   fullName: "fullName",
   avatarUrl: "avatarUrl",
+  authProvider: "authProvider",
+  hasPassword: "hasPassword",
   appLanguage: "appLanguage",
   themeMode: "theme-mode",
   themeColor: "theme-color",

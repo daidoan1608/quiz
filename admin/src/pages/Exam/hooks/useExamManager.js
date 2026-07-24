@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { appMessage as message } from "../../../utils/ui/messageService";
 import { getApiErrorMessage } from "../../../api/axiosConfig";
+import { unwrapPageData } from "../../../api/services/apiResponse";
 import { categoryApi, examApi, subjectApi, userApi } from "../../../api/services";
 import { useAuth } from "../../../context/AuthProvider";
 import { useDebouncedEffect } from "../../../hooks/useDebouncedEffect";
@@ -95,12 +96,13 @@ export const useExamManager = () => {
           sortBy: tableSort.sortBy,
           sortDir: tableSort.sortDir,
         });
-        setExams(data.content || []);
+        const pageData = unwrapPageData(data);
+        setExams(pageData.content);
         setPagination((prev) => ({
           ...prev,
-          current: page,
-          pageSize: nextPageSize,
-          total: data.totalElements || 0,
+          current: pageData.current || page,
+          pageSize: pageData.pageSize || nextPageSize,
+          total: pageData.total,
         }));
       } catch (error) {
         message.error(getApiErrorMessage(error, "Không thể tải danh sách đề thi."));

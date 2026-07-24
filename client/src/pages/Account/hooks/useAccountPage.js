@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { appMessage } from 'utils/appMessage';
 import { accountApi } from 'api/services/accountApi';
+import { authApi } from 'api/services/authApi';
 import { useAuth } from 'context/auth/AuthProvider';
 import { useLanguage } from 'context/language/LanguageProvider';
 import { buildContinueExamAttemptLocation } from 'pages/Subject/utils/subjectNavigation';
@@ -26,7 +27,7 @@ export const useAccountPage = () => {
   const [inProgressAttempts, setInProgressAttempts] = useState([]);
   const [savingProfile, setSavingProfile] = useState(false);
 
-  const { updateAvatar, avatarUrl } = useAuth();
+  const { updateAvatar, avatarUrl, authProvider, hasPassword } = useAuth();
   const navigate = useNavigate();
   const { texts } = useLanguage();
   const requireUserId = useRequireAccountUser({
@@ -50,6 +51,11 @@ export const useAccountPage = () => {
 
       setUser({
         ...accountData.user,
+        authProvider: accountData.user.authProvider || authProvider,
+        hasPassword:
+          typeof accountData.user.hasPassword === 'boolean'
+            ? accountData.user.hasPassword
+            : hasPassword,
         avatarUrl: syncedAvatarUrl,
       });
       setExams(normalizeExams(accountData.exams));
@@ -60,7 +66,7 @@ export const useAccountPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [avatarUrl, requireUserId]);
+  }, [authProvider, avatarUrl, hasPassword, requireUserId]);
 
   useEffect(() => {
     fetchAccountData();
@@ -83,6 +89,21 @@ export const useAccountPage = () => {
       setShowChangePassword(false);
     } catch (error) {
       appMessage.error('Lỗi đổi mật khẩu.');
+    }
+  };
+
+  const handleSetPassword = async (values) => {
+    try {
+      await authApi.setPassword(values);
+      setUser((prevUser) => ({
+        ...prevUser,
+        hasPassword: true,
+      }));
+      appMessage.success(
+        'Đã thiết lập mật khẩu thành công. Bạn có thể đăng nhập bằng tài khoản + mật khẩu.'
+      );
+    } catch (error) {
+      appMessage.error('Không thể thiết lập mật khẩu.');
     }
   };
 
@@ -146,6 +167,7 @@ export const useAccountPage = () => {
     groupedExams,
     handleChangePassword,
     handleContinueAttempt,
+    handleSetPassword,
     handleUpdateProfile,
     handleUploadAvatar,
     inProgressAttempts,

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { appMessage as message } from "../../../utils/ui/messageService";
+import { unwrapPageData } from "../../../api/services/apiResponse";
 import { categoryApi } from "../../../api/services/categoryApi";
 import { examApi, questionApi } from "../../../api/services/contentApi";
 import { subjectApi } from "../../../api/services/subjectApi";
@@ -114,8 +115,9 @@ export const useExamCreateForm = ({ form, isModalOpen, onCancel, onSuccess }) =>
         page: manualQuestionPage - 1,
         size: 20,
       });
-      setManualQuestions(pageData.content || []);
-      setManualQuestionTotal(pageData.totalElements || 0);
+      const manualPage = unwrapPageData(pageData);
+      setManualQuestions(manualPage.content);
+      setManualQuestionTotal(manualPage.total);
     } catch (error) {
       console.error("Lỗi tải câu hỏi thủ công:", error);
       message.error("Không thể tải danh sách câu hỏi để chọn.");

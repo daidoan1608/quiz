@@ -40,6 +40,7 @@ export const useExamAttempt = () => {
   const endTimeRef = useRef(null);
   const handleSubmitRef = useRef(null);
   const isSubmittingRef = useRef(false);
+  const saveAnswerQueueRef = useRef(Promise.resolve());
   const userExamIdRef = useRef(null);
 
   const navigate = useNavigate();
@@ -170,24 +171,24 @@ export const useExamAttempt = () => {
   }, [currentQuestionIndex, questions]);
 
   const saveAnswerToServer = useCallback(
-    async (questionIndex, answerValue) => {
+    (questionIndex, answerValue) => {
       const attemptId = userExamIdRef.current;
       const question = questions[questionIndex];
       if (!attemptId || !question) return;
 
-      try {
-        await examApi.saveAnswer(
-          attemptId,
-          buildSaveAnswerPayload({
-            answerValue,
-            question,
-            questionIndex,
-            remainingTime: timeLeft ?? 0,
-          })
-        );
-      } catch (error) {
-        console.error('Lỗi lưu đáp án:', error);
-      }
+      const payload = buildSaveAnswerPayload({
+        answerValue,
+        question,
+        questionIndex,
+        remainingTime: timeLeft ?? 0,
+      });
+
+      saveAnswerQueueRef.current = saveAnswerQueueRef.current
+        .catch(() => {})
+        .then(() => examApi.saveAnswer(attemptId, payload))
+        .catch((error) => {
+          console.error('Lỗi lưu đáp án:', error);
+        });
     },
     [questions, timeLeft]
   );

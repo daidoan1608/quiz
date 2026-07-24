@@ -11,7 +11,9 @@ import com.fita.vnua.quiz.model.dto.UserExamDto;
 import com.fita.vnua.quiz.model.dto.response.ExamAttemptResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.Answer;
+import com.fita.vnua.quiz.model.entity.Exam;
 import com.fita.vnua.quiz.model.entity.Question;
+import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.model.entity.UserAnswer;
 import com.fita.vnua.quiz.model.entity.UserExam;
 import com.fita.vnua.quiz.model.entity.UserExamQuestion;
@@ -85,12 +87,14 @@ public class UserExamMapper {
             List<QuestionDto> questions
     ) {
         List<UserAnswerDto> answerDtos = toUserAnswerDtos(answers);
+        Exam exam = userExam.getExam();
+        Subject subject = exam == null ? null : exam.getSubject();
         return ExamAttemptResponse.builder()
                 .userExamId(userExam.getUserExamId())
-                .examId(userExam.getExam().getExamId())
-                .subjectId(userExam.getExam().getSubject().getSubjectId())
-                .title(userExam.getExam().getTitle())
-                .subjectName(userExam.getExam().getSubject().getName())
+                .examId(exam == null ? null : exam.getExamId())
+                .subjectId(subject == null ? null : subject.getSubjectId())
+                .title(exam == null ? null : exam.getTitle())
+                .subjectName(subject == null ? null : subject.getName())
                 .status(userExam.getStatus())
                 .startTime(userExam.getStartTime())
                 .endTime(userExam.getEndTime())
@@ -180,10 +184,12 @@ public class UserExamMapper {
     }
 
     private UserExamResponse.UserExamResponseBuilder baseResponse(UserExam userExam) {
+        Exam exam = userExam.getExam();
+        Subject subject = exam == null ? null : exam.getSubject();
         return UserExamResponse.builder()
-                .subjectName(userExam.getExam().getSubject().getName())
-                .title(userExam.getExam().getTitle())
-                .username(userExam.getUser().getUsername())
-                .fullName(userExam.getUser().getFullName());
+                .subjectName(subject == null ? null : subject.getName())
+                .title(exam == null ? null : exam.getTitle())
+                .username(userExam.getUser() == null ? null : userExam.getUser().getUsername())
+                .fullName(userExam.getUser() == null ? null : userExam.getUser().getFullName());
     }
 }

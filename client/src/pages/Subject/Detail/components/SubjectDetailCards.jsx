@@ -12,17 +12,22 @@ export const StatsCard = ({ title, value }) => (
   />
 );
 
+const getChapterDisplayNumber = (chapter, index) =>
+  chapter.chapterNumber ?? chapter.ChapterNumber ?? index + 1;
+
 export const ChapterCard = ({ chapter, index, onStart, texts }) => {
   const hasQuestions = (chapter.countQuestion || 0) > 0;
+  const chapterDisplayNumber = getChapterDisplayNumber(chapter, index);
+
   return (
     <div className="aura-surface-panel aura-surface-panel-hover flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
       <div className="flex items-start gap-4">
         <div
-          className={`aura-index-badge h-12 w-12 ${
+          className={`aura-index-badge h-12 min-w-12 px-3 ${
             hasQuestions ? '' : 'aura-index-badge--muted'
           }`}
         >
-          {index + 1}
+          {chapterDisplayNumber}
         </div>
         <div>
           <h4 className="text-lg font-black text-gray-950 dark:text-white">

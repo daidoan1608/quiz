@@ -211,6 +211,7 @@ public class SubjectServiceImpl implements SubjectService {
 
         // --- 2. Xử lý Chapters & Questions ---
         List<Chapter> chapters = chapterRepository.findBySubject(subject.getSubjectId());
+        chapters.sort(java.util.Comparator.comparingInt(Chapter::getChapterNumber));
         Map<Long, Long> chapterQuestionCounts = countChapterQuestions(chapters);
         List<ChapterDto> chapterDtos = new ArrayList<>();
         long totalQuestionsOfSubject = 0;

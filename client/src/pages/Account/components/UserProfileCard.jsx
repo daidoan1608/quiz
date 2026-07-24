@@ -94,7 +94,9 @@ export default function UserProfileCard({
             lock_reset
           </span>
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary">
-            {texts?.changePass || 'Đổi mật khẩu'}
+            {user?.authProvider === 'GOOGLE' && !user?.hasPassword
+              ? 'Thiết lập mật khẩu'
+              : texts?.changePass || 'Đổi mật khẩu'}
           </span>
         </button>
       </div>

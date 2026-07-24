@@ -4,6 +4,8 @@ export const AUTH_EMPTY_STATE = {
   fullName: '',
   avatarUrl: '',
   role: '',
+  authProvider: '',
+  hasPassword: false,
 };
 
 export const isClientUser = (userData) => ['USER', 'MOD'].includes(userData?.role);
@@ -14,4 +16,6 @@ export const mapUserToAuthState = (userData) => ({
   fullName: userData.fullName || '',
   avatarUrl: userData.avatarUrl || '',
   role: userData.role || '',
+  authProvider: userData.authProvider || '',
+  hasPassword: Boolean(userData.hasPassword),
 });

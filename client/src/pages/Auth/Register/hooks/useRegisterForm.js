@@ -2,7 +2,7 @@
 import { appMessage } from 'utils/appMessage';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from 'api/services/authApi';
-import { getApiErrorMessage } from 'api/http/apiError';
+import { getApiErrorCode, getApiErrorMessage } from 'api/http/apiError';
 
 export const useRegisterForm = (form) => {
   const [loading, setLoading] = useState(false);
@@ -24,6 +24,12 @@ export const useRegisterForm = (form) => {
       );
       form.resetFields();
     } catch (error) {
+      if (getApiErrorCode(error) === 'EMAIL_GOOGLE_ACCOUNT') {
+        appMessage.warning(
+          'Email này đã được dùng với tài khoản Google. Vui lòng đăng nhập bằng Google trước.'
+        );
+        return;
+      }
       const serverMessage = error.response?.data?.message;
       const validationErrors = error.response?.data?.errors;
       const errorMessage =

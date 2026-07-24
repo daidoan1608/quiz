@@ -26,15 +26,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.ByteBuffer;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,12 +47,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserExamServiceImpl implements UserExamService {
+    private static final Duration ATTEMPT_WRITE_LOCK_TTL = Duration.ofSeconds(5);
+    private static final int ATTEMPT_WRITE_QUEUE_MAX_ATTEMPTS = 50;
+    private static final long ATTEMPT_WRITE_QUEUE_WAIT_MS = 100L;
+
     private final UserExamRepository userExamRepository;
     private final UserAnswerRepository userAnswerRepository;
     private final UserRepository userRepository;
@@ -59,6 +67,7 @@ public class UserExamServiceImpl implements UserExamService {
     private final UserExamQuestionRepository userExamQuestionRepository;
     private final UserExamAttemptStatsService attemptStatsService;
     private final UserExamMapper userExamMapper;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     public List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate) {
@@ -389,14 +398,20 @@ public class UserExamServiceImpl implements UserExamService {
     @Override
     @Transactional
     public ExamAttemptResponse saveAttemptAnswer(Long userExamId, SaveExamAttemptAnswerRequest request, UUID currentUserId) {
-        UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
-        return saveAttemptAnswerInternal(userExam, userExamId, request);
+        return withAttemptWriteQueue(userExamId, () -> {
+            try {
+                UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
+                return saveAttemptAnswerInternal(userExam, userExamId, request);
+            } catch (CannotAcquireLockException exception) {
+                throw new CustomApiException("Đang lưu đáp án, vui lòng thử lại", HttpStatus.CONFLICT);
+            }
+        });
     }
 
     private ExamAttemptResponse saveAttemptAnswerInternal(UserExam userExam, Long userExamId, SaveExamAttemptAnswerRequest request) {
         Question question = questionRepository.findById(request.getQuestionId())
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy câu hỏi"));
-        if (getAttemptQuestions(userExam).stream().noneMatch(q -> q.getQuestionId().equals(question.getQuestionId()))) {
+        if (!isQuestionInAttempt(userExam, question.getQuestionId())) {
             throw new CustomApiException("Câu hỏi không thuộc lượt làm bài này", HttpStatus.BAD_REQUEST);
         }
 
@@ -406,6 +421,7 @@ public class UserExamServiceImpl implements UserExamService {
         }
 
         userAnswerRepository.deleteByUserExamIdAndQuestionId(userExamId, request.getQuestionId());
+        userAnswerRepository.flush();
         Set<Long> uniqueAnswerIds = new HashSet<>(answerIds);
         Map<Long, Answer> answersById = uniqueAnswerIds.isEmpty()
                 ? Map.of()
@@ -424,15 +440,48 @@ public class UserExamServiceImpl implements UserExamService {
         }
 
         updateAttemptProgressFields(userExam, request.getCurrentQuestionIndex(), request.getRemainingTime());
-        return buildAttemptResponse(userExamRepository.save(userExam));
+        return buildLightAttemptResponse(userExamRepository.save(userExam));
     }
 
     @Override
     @Transactional
     public ExamAttemptResponse updateAttemptProgress(Long userExamId, UpdateExamAttemptProgressRequest request, UUID currentUserId) {
-        UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
-        updateAttemptProgressFields(userExam, request.getCurrentQuestionIndex(), request.getRemainingTime());
-        return buildAttemptResponse(userExamRepository.save(userExam));
+        return withAttemptWriteQueue(userExamId, () -> {
+            UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
+            updateAttemptProgressFields(userExam, request.getCurrentQuestionIndex(), request.getRemainingTime());
+            return buildLightAttemptResponse(userExamRepository.save(userExam));
+        });
+    }
+
+    private ExamAttemptResponse withAttemptWriteQueue(Long userExamId, Supplier<ExamAttemptResponse> action) {
+        String lockKey = "quiz:exam-attempt:" + userExamId + ":write-lock";
+        String lockToken = UUID.randomUUID().toString();
+
+        for (int attempt = 0; attempt < ATTEMPT_WRITE_QUEUE_MAX_ATTEMPTS; attempt++) {
+            Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, lockToken, ATTEMPT_WRITE_LOCK_TTL);
+            if (Boolean.TRUE.equals(acquired)) {
+                try {
+                    return action.get();
+                } finally {
+                    String currentToken = stringRedisTemplate.opsForValue().get(lockKey);
+                    if (lockToken.equals(currentToken)) {
+                        stringRedisTemplate.delete(lockKey);
+                    }
+                }
+            }
+            sleepBeforeRetryingAttemptWrite();
+        }
+
+        throw new CustomApiException("Hệ thống đang lưu tiến độ, vui lòng thử lại", HttpStatus.CONFLICT);
+    }
+
+    private void sleepBeforeRetryingAttemptWrite() {
+        try {
+            Thread.sleep(ATTEMPT_WRITE_QUEUE_WAIT_MS);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new CustomApiException("Hệ thống đang lưu tiến độ, vui lòng thử lại", HttpStatus.CONFLICT);
+        }
     }
 
     @Override
@@ -535,6 +584,18 @@ public class UserExamServiceImpl implements UserExamService {
         return userExam;
     }
 
+    private UserExam getInProgressUserExamForUpdate(Long userExamId, UUID currentUserId) {
+        if (currentUserId == null) {
+            throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.UNAUTHORIZED);
+        }
+        UserExam userExam = userExamRepository.findByIdAndUserIdForUpdate(userExamId, currentUserId)
+                .orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN));
+        if (!"IN_PROGRESS".equals(userExam.getStatus())) {
+            throw new IllegalStateException("Lượt làm bài không ở trạng thái đang thực hiện");
+        }
+        return userExam;
+    }
+
     private UserExam getUserExamForCurrentUser(Long userExamId, UUID currentUserId) {
         if (currentUserId == null) {
             throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.UNAUTHORIZED);
@@ -553,6 +614,10 @@ public class UserExamServiceImpl implements UserExamService {
         List<UserAnswer> answers = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId());
         List<QuestionDto> questions = getAttemptQuestionDtos(userExam);
         return userExamMapper.toAttemptResponse(userExam, answers, questions);
+    }
+
+    private ExamAttemptResponse buildLightAttemptResponse(UserExam userExam) {
+        return userExamMapper.toAttemptResponse(userExam, List.of(), List.of());
     }
 
     private void saveAttemptQuestionSnapshot(UserExam userExam, List<Question> questions) {
@@ -581,7 +646,7 @@ public class UserExamServiceImpl implements UserExamService {
         if (userExamQuestionRepository == null) {
             return getExamQuestionsIncludingDeleted(userExam.getExam().getExamId());
         }
-        List<UserExamQuestion> snapshots = userExamQuestionRepository.findByUserExamUserExamIdOrderByPositionAsc(userExam.getUserExamId());
+        List<UserExamQuestion> snapshots = findAttemptQuestionSnapshots(userExam.getUserExamId());
         if (!snapshots.isEmpty()) {
             return snapshots.stream().map(UserExamQuestion::getQuestion).toList();
         }
@@ -592,13 +657,32 @@ public class UserExamServiceImpl implements UserExamService {
         if (userExamQuestionRepository == null) {
             return userExamMapper.toQuestionDtos(getAttemptQuestions(userExam));
         }
-        List<UserExamQuestion> snapshots = userExamQuestionRepository.findByUserExamUserExamIdOrderByPositionAsc(userExam.getUserExamId());
+        List<UserExamQuestion> snapshots = findAttemptQuestionSnapshots(userExam.getUserExamId());
         if (!snapshots.isEmpty() && snapshots.stream().allMatch(snapshot -> snapshot.getQuestionContentSnapshot() != null)) {
             return snapshots.stream()
                     .map(userExamMapper::toQuestionDto)
                     .toList();
         }
         return userExamMapper.toQuestionDtos(getAttemptQuestions(userExam));
+    }
+
+    private List<UserExamQuestion> findAttemptQuestionSnapshots(Long userExamId) {
+        return userExamQuestionRepository.findWithQuestionDetailsByUserExamIds(List.of(userExamId));
+    }
+
+    private boolean isQuestionInAttempt(UserExam userExam, Long questionId) {
+        if (userExamQuestionRepository == null) {
+            return getAttemptQuestions(userExam).stream()
+                    .anyMatch(question -> question.getQuestionId().equals(questionId));
+        }
+        if (userExamQuestionRepository.existsByUserExamUserExamId(userExam.getUserExamId())) {
+            return userExamQuestionRepository.existsByUserExamUserExamIdAndQuestionQuestionId(
+                    userExam.getUserExamId(),
+                    questionId
+            );
+        }
+        return getExamQuestionsIncludingDeleted(userExam.getExam().getExamId()).stream()
+                .anyMatch(question -> question.getQuestionId().equals(questionId));
     }
 
     private List<Question> getExamQuestionsIncludingDeleted(Long examId) {

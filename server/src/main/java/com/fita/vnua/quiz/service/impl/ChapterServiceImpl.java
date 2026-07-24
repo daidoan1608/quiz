@@ -36,6 +36,7 @@ public class ChapterServiceImpl implements ChapterService {
         List<Chapter> chapters = chapterRepository.findBySubject(subjectId);
         Map<Long, Long> questionCounts = countQuestionsByChapter(chapters);
         return chapters.stream()
+                .sorted(java.util.Comparator.comparingInt(Chapter::getChapterNumber))
                 .map(chapter -> mapChapterToDto(chapter, questionCounts))
                 .toList();
     }

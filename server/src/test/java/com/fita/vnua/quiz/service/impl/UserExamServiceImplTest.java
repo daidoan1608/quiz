@@ -27,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,6 +58,8 @@ class UserExamServiceImplTest {
     private UserExamQuestionRepository userExamQuestionRepository;
     @Mock
     private UserExamAttemptStatsService attemptStatsService;
+    @Mock
+    private StringRedisTemplate stringRedisTemplate;
     @Spy
     private UserExamMapper userExamMapper = new UserExamMapper(new ObjectMapper(), new QuestionMapper());
 
@@ -94,9 +97,14 @@ class UserExamServiceImplTest {
 
         when(userExamRepository.findInProgressByUserIdAndExamId(authenticatedUserId, examId)).thenReturn(List.of());
         when(userRepository.findById(authenticatedUserId)).thenReturn(Optional.of(authenticatedUser));
-        when(examRepository.findById(examId)).thenReturn(Optional.of(exam));
-        when(userExamRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(examRepository.findByExamIdAndDeletedFalse(examId)).thenReturn(Optional.of(exam));
+        when(userExamRepository.save(any())).thenAnswer(invocation -> {
+            UserExam saved = invocation.getArgument(0);
+            saved.setUserExamId(1L);
+            return saved;
+        });
         when(userAnswerRepository.findUserAnswersByUserExamId(any())).thenReturn(List.of());
+        when(userExamQuestionRepository.findWithQuestionDetailsByUserExamIds(any())).thenReturn(List.of());
         when(questionRepository.findQuestionsByExamId(examId)).thenReturn(List.of());
 
         userExamService.startOrResumeAttempt(request, authenticatedUserId);
@@ -126,9 +134,9 @@ class UserExamServiceImplTest {
         exam.setExamId(examId);
 
         when(userRepository.findById(authenticatedUserId)).thenReturn(Optional.of(authenticatedUser));
-        when(examRepository.findById(examId)).thenReturn(Optional.of(exam));
+        when(examRepository.findByExamIdAndDeletedFalse(examId)).thenReturn(Optional.of(exam));
         when(questionRepository.findQuestionsByExamId(examId)).thenReturn(List.of());
-        when(userExamRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userExamRepository.save(any())).thenAnswer(invocation -> { UserExam saved = invocation.getArgument(0); saved.setUserExamId(1L); return saved; });
 
         userExamService.createUserExam(request, authenticatedUserId);
 
@@ -195,3 +203,4 @@ class UserExamServiceImplTest {
         return userAnswer;
     }
 }
+

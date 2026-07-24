@@ -16,6 +16,15 @@ import {
   getSubjectProgress,
 } from 'pages/Subject/utils/subjectPresentation';
 
+const getChapterNumberValue = (chapter) => {
+  const rawNumber = chapter?.chapterNumber ?? chapter?.ChapterNumber;
+  const numericValue = Number(rawNumber);
+
+  return Number.isFinite(numericValue)
+    ? numericValue
+    : Number.MAX_SAFE_INTEGER;
+};
+
 export const useSubjectDetail = () => {
   const [subjectData, setSubjectData] = useState(null);
   const [error, setError] = useState(null);
@@ -88,7 +97,21 @@ export const useSubjectDetail = () => {
     fetchInProgressExams();
   }, [isLoggedIn, userId]);
 
-  const chapters = subjectData?.chapters || [];
+  const chapters = useMemo(() => {
+    const rawChapters = subjectData?.chapters || [];
+
+    return [...rawChapters].sort((a, b) => {
+      const firstNumber = getChapterNumberValue(a);
+      const secondNumber = getChapterNumberValue(b);
+
+      if (firstNumber !== secondNumber) {
+        return firstNumber - secondNumber;
+      }
+
+      return Number(a?.chapterId || 0) - Number(b?.chapterId || 0);
+    });
+  }, [subjectData?.chapters]);
+
   const exams = subjectData?.exams || [];
   const estimatedHours = getEstimatedStudyHours(subjectData);
   const isFavorited = subjectData

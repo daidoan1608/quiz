@@ -2,10 +2,12 @@ package com.fita.vnua.quiz.repository;
 
 import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
 import com.fita.vnua.quiz.model.entity.UserExam;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -103,6 +105,17 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
             AND ue.user.userId = :userId
             """)
     Optional<UserExam> findByIdAndUserId(@Param("userExamId") Long userExamId, @Param("userId") UUID userId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT ue FROM UserExam ue
+            JOIN FETCH ue.exam e
+            JOIN FETCH e.subject
+            JOIN FETCH ue.user
+            WHERE ue.userExamId = :userExamId
+            AND ue.user.userId = :userId
+            """)
+    Optional<UserExam> findByIdAndUserIdForUpdate(@Param("userExamId") Long userExamId, @Param("userId") UUID userId);
 
     @Query("SELECT ue.exam.subject.subjectId FROM UserExam ue WHERE ue.userExamId = :userExamId")
     Optional<Long> findSubjectIdByUserExamId(@Param("userExamId") Long userExamId);

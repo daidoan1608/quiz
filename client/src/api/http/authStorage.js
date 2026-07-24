@@ -5,6 +5,8 @@ export const clearAuthStorage = () => {
   removeStorageItem(storageKeys.role);
   removeStorageItem(storageKeys.fullName);
   removeStorageItem(storageKeys.avatarUrl);
+  removeStorageItem(storageKeys.authProvider);
+  removeStorageItem(storageKeys.hasPassword);
 };
 
 export const cacheUser = (userData) => {
@@ -13,4 +15,6 @@ export const cacheUser = (userData) => {
   setStorageItem(storageKeys.role, userData.role || "");
   setStorageItem(storageKeys.fullName, userData.fullName || "");
   setStorageItem(storageKeys.avatarUrl, userData.avatarUrl || "");
+  setStorageItem(storageKeys.authProvider, userData.authProvider || "");
+  setStorageItem(storageKeys.hasPassword, userData.hasPassword ? "true" : "false");
 };

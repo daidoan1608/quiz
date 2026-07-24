@@ -1,0 +1,2 @@
+ALTER TABLE subject
+    MODIFY COLUMN description VARCHAR(500) NULL;

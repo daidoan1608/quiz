@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "f1b5a18b-9aeb-4eb8-8ee7-f73d4482811e",
     "name": "Quiz VNUA API",
-    "description": "Collection cap nhat theo Spring controllers hien tai. Base URL mac dinh: http://localhost:8080/api/v1. Auth dung cookie HttpOnly; bat Save cookies/with credentials trong Postman.",
+    "description": "Collection chuan hoa theo Spring controllers hien tai. Base URL mac dinh: http://localhost:8080/api/v1. Auth dung HttpOnly cookie; bat cookie jar/with credentials trong Postman.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16,33 +16,71 @@
           "name": "Login",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/auth/login"
           },
           "response": []
         },
         {
           "name": "Current user",
-          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/auth/me" },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me"
+          },
           "response": []
         },
         {
           "name": "Refresh access token",
-          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/refresh" },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/refresh"
+          },
           "response": []
         },
         {
           "name": "Logout",
-          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/logout" },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/logout"
+          },
           "response": []
         },
         {
           "name": "Register",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{$randomUserName}}\",\n  \"password\": \"Password@123\",\n  \"fullName\": \"{{$randomFullName}}\",\n  \"email\": \"{{$randomEmail}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"username\": \"{{$randomUserName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/auth/register"
           },
           "response": []
@@ -60,8 +98,21 @@
           "name": "Google login",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"idToken\": \"{{googleIdToken}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"{{googleIdToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/auth/google"
           },
           "response": []
@@ -75,8 +126,21 @@
           "name": "Send OTP",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/otp/send"
           },
           "response": []
@@ -85,8 +149,21 @@
           "name": "Verify OTP",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/otp/verify"
           },
           "response": []
@@ -95,8 +172,21 @@
           "name": "Reset password",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword@123\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/otp/reset"
           },
           "response": []
@@ -106,33 +196,228 @@
     {
       "name": "Public Catalog",
       "item": [
-        { "name": "Get categories", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/categories" }, "response": [] },
-        { "name": "Search categories", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/categories/search?q={{keyword}}" }, "response": [] },
-        { "name": "Get subjects", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/subjects" }, "response": [] },
-        { "name": "Search subjects", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/subjects/search?q={{keyword}}" }, "response": [] },
-        { "name": "Get subjects by category", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/subjects/category/{{categoryId}}" }, "response": [] },
-        { "name": "Get subject by id", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/subjects/{{subjectId}}" }, "response": [] },
-        { "name": "Get chapters", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/chapters" }, "response": [] },
-        { "name": "Search chapters", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/chapters/search?q={{keyword}}" }, "response": [] },
-        { "name": "Get chapters by subject", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/chapters/subject/{{subjectId}}" }, "response": [] },
-        { "name": "Get chapter by id", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/chapters/{{chapterId}}" }, "response": [] },
-        { "name": "Get questions by chapter", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/questions/chapter/{{chapterId}}?includeCorrectAnswers=false" }, "response": [] },
-        { "name": "Get exams by subject", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/exams/subject/{{subjectId}}" }, "response": [] },
-        { "name": "Get exam by id", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/exams/{{examId}}?includeCorrectAnswers=false" }, "response": [] },
-        { "name": "Get exam by id with correct answers after submit", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/exams/{{examId}}?includeCorrectAnswers=true&userExamId={{userExamId}}" }, "response": [] },
-        { "name": "Get leaderboard summaries", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/public/user-exam-summaries?period=all" }, "response": [] }
+        {
+          "name": "Get categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Search categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/categories/search?q={{keyword}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get subjects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/subjects"
+          },
+          "response": []
+        },
+        {
+          "name": "Get random subjects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/subjects/random?limit=6"
+          },
+          "response": []
+        },
+        {
+          "name": "Search subjects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/subjects/search?q={{keyword}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get subjects by category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/subjects/category/{{categoryId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get subject by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/subjects/{{subjectId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get chapters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/chapters"
+          },
+          "response": []
+        },
+        {
+          "name": "Search chapters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/chapters/search?q={{keyword}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get chapters by subject",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/chapters/subject/{{subjectId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get chapter by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/chapters/{{chapterId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get questions by chapter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/questions/chapter/{{chapterId}}?includeCorrectAnswers=false&limit=20&difficulty=EASY&mode=all"
+          },
+          "response": []
+        },
+        {
+          "name": "Get wrong-practice questions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/questions/practice/wrong?subjectId={{subjectId}}&chapterId={{chapterId}}&limit=10&difficulty=EASY&strategy=recent&includeCorrectAnswers=true"
+          },
+          "response": []
+        },
+        {
+          "name": "Get exams by subject",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/exams/subject/{{subjectId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get exam by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/exams/{{examId}}?includeCorrectAnswers=false"
+          },
+          "response": []
+        },
+        {
+          "name": "Get exam by id with correct answers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/exams/{{examId}}?includeCorrectAnswers=true&userExamId={{userExamId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get leaderboard summaries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/user-exam-summaries?period=all"
+          },
+          "response": []
+        },
+        {
+          "name": "Get rankings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/rankings?period=all&subjectName=&criteria=total&limit=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Get public documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/documents"
+          },
+          "response": []
+        },
+        {
+          "name": "Download public document",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/documents/{{documentId}}/download"
+          },
+          "response": []
+        }
       ]
     },
     {
       "name": "User Profile",
       "item": [
-        { "name": "Get user by id", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/{{userId}}" }, "response": [] },
+        {
+          "name": "Get user by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get user by id legacy alias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/user/{{userId}}"
+          },
+          "response": []
+        },
         {
           "name": "Update profile",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"email\": \"user@example.com\",\n  \"phoneNumber\": \"0123456789\",\n  \"address\": \"Ha Noi\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"email\": \"user@example.com\",\n  \"avatarUrl\": \"https://example.com/avatar.png\",\n  \"phone\": \"0123456789\",\n  \"address\": \"Ha Noi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/users/{{userId}}"
           },
           "response": []
@@ -141,8 +426,21 @@
           "name": "Change password",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"oldPassword\": \"Password@123\",\n  \"newPassword\": \"NewPassword@123\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"Password123\",\n  \"newPassword\": \"NewPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/users/{{userId}}/password"
           },
           "response": []
@@ -152,13 +450,38 @@
           "request": {
             "method": "PUT",
             "header": [],
-            "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": [] }] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
             "url": "{{baseUrl}}/users/me/avatar"
           },
           "response": []
         },
-        { "name": "Get avatar", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/me/avatar" }, "response": [] },
-        { "name": "Get subjects taken by user", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/user/subjects?userId={{userId}}" }, "response": [] }
+        {
+          "name": "Get avatar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/me/avatar"
+          },
+          "response": []
+        },
+        {
+          "name": "Get subjects taken by user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/user/subjects?userId={{userId}}"
+          },
+          "response": []
+        }
       ]
     },
     {
@@ -168,8 +491,21 @@
           "name": "Create favorite",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"subjectId\": {{subjectId}}\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"subjectId\": \"{{subjectId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"subjectName\": \"Lap trinh Java\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/favorites"
           },
           "response": []
@@ -178,29 +514,103 @@
           "name": "Delete favorite",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"subjectId\": {{subjectId}}\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"subjectId\": \"{{subjectId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/favorites"
           },
           "response": []
         },
-        { "name": "Get favorites by user", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/{{userId}}/favorites" }, "response": [] }
+        {
+          "name": "Get favorites by user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/favorites"
+          },
+          "response": []
+        }
       ]
     },
     {
       "name": "Exam Attempts",
       "item": [
-        { "name": "Get user exams by user and subject", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/user-exams?userId={{userId}}&subjectId={{subjectId}}" }, "response": [] },
-        { "name": "Get all user exams by user", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/{{userId}}/user-exams" }, "response": [] },
-        { "name": "Get recent user exams", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/{{userId}}/user-exams/recent" }, "response": [] },
-        { "name": "Get user exam count", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/{{userId}}/user-exams/count" }, "response": [] },
-        { "name": "Get user exam detail", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/user-exams/{{userExamId}}" }, "response": [] },
+        {
+          "name": "Get user exams by user and subject",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/user-exams?userId={{userId}}&subjectId={{subjectId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get all user exams by user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/user-exams"
+          },
+          "response": []
+        },
+        {
+          "name": "Get recent user exams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/user-exams/recent"
+          },
+          "response": []
+        },
+        {
+          "name": "Get user exam count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/user-exams/count"
+          },
+          "response": []
+        },
+        {
+          "name": "Get user exam detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/user-exams/{{userExamId}}"
+          },
+          "response": []
+        },
         {
           "name": "Create user exam legacy",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"userExamDto\": {\n    \"examId\": {{examId}}\n  },\n  \"userAnswerDtos\": [\n    { \"questionId\": 1, \"answerId\": 1 }\n  ]\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userExamDto\": {\n    \"examId\": \"{{examId}}\"\n  },\n  \"userAnswerDtos\": [\n    {\n      \"questionId\": 1,\n      \"answerId\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/user-exams"
           },
           "response": []
@@ -209,19 +619,53 @@
           "name": "Start or resume attempt",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"examId\": {{examId}}\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examId\": \"{{examId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/exam-attempts/start"
           },
           "response": []
         },
-        { "name": "Get in-progress attempts", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/users/{{userId}}/exam-attempts/in-progress" }, "response": [] },
+        {
+          "name": "Get in-progress attempts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/exam-attempts/in-progress"
+          },
+          "response": []
+        },
         {
           "name": "Save attempt answer",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"questionId\": 1,\n  \"answerId\": 1\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": 1,\n  \"answerId\": 1,\n  \"answerIds\": [\n    1,\n    2\n  ],\n  \"currentQuestionIndex\": 0,\n  \"remainingTime\": 1800\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/exam-attempts/{{userExamId}}/answers"
           },
           "response": []
@@ -230,33 +674,135 @@
           "name": "Update attempt progress",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"currentQuestionIndex\": 0,\n  \"remainingSeconds\": 1800\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentQuestionIndex\": 0,\n  \"remainingTime\": 1800\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/exam-attempts/{{userExamId}}/progress"
           },
           "response": []
         },
-        { "name": "Submit attempt", "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/exam-attempts/{{userExamId}}/submit" }, "response": [] }
+        {
+          "name": "Submit attempt",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/exam-attempts/{{userExamId}}/submit"
+          },
+          "response": []
+        }
       ]
     },
     {
       "name": "Notifications",
       "item": [
-        { "name": "Mark notification as read", "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/notifications/{{notificationId}}" }, "response": [] },
-        { "name": "Mark all notifications as read", "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/notifications" }, "response": [] }
+        {
+          "name": "Get notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/notifications?page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Get unread count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/notifications/unread-count"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark notification as read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/notifications/{{notificationId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark all notifications as read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/notifications"
+          },
+          "response": []
+        }
       ]
     },
     {
       "name": "Admin Users",
       "item": [
-        { "name": "Get users", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/users" }, "response": [] },
-        { "name": "Search users", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/users/search?key={{keyword}}" }, "response": [] },
+        {
+          "name": "Get users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/users"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/users/filter?keyword={{keyword}}&role=USER&authProvider=&emailVerified=true&deleted=false&sortBy=username&sortDir=asc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/users/deleted"
+          },
+          "response": []
+        },
+        {
+          "name": "Search users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/users/search?key={{keyword}}&limit=20"
+          },
+          "response": []
+        },
         {
           "name": "Create user",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{$randomUserName}}\",\n  \"password\": \"Password@123\",\n  \"fullName\": \"{{$randomFullName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"role\": \"USER\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{$randomUserName}}\",\n  \"password\": \"Password123\",\n  \"fullName\": \"Nguoi dung moi\",\n  \"email\": \"{{$randomEmail}}\",\n  \"avatarUrl\": \"\",\n  \"phone\": \"0123456789\",\n  \"address\": \"Ha Noi\",\n  \"role\": \"USER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/admin/users"
           },
           "response": []
@@ -265,69 +811,399 @@
           "name": "Update user",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Updated User\",\n  \"email\": \"updated@example.com\",\n  \"role\": \"USER\"\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated User\",\n  \"email\": \"updated@example.com\",\n  \"avatarUrl\": \"\",\n  \"phone\": \"0123456789\",\n  \"address\": \"Ha Noi\",\n  \"role\": \"USER\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/admin/users/{{userId}}"
           },
           "response": []
         },
-        { "name": "Delete user", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/admin/users/{{userId}}" }, "response": [] }
+        {
+          "name": "Delete user",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/users/{{userId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Restore user",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/admin/users/{{userId}}/restore"
+          },
+          "response": []
+        }
       ]
     },
     {
       "name": "Admin Catalog",
       "item": [
-        { "name": "Get category by id", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/categories/{{categoryId}}" }, "response": [] },
+        {
+          "name": "Filter categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/categories/filter?keyword={{keyword}}&deleted=false&sortBy=categoryName&sortDir=asc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/categories/deleted"
+          },
+          "response": []
+        },
+        {
+          "name": "Get category by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/categories/{{categoryId}}"
+          },
+          "response": []
+        },
         {
           "name": "Create category",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cong nghe thong tin\",\n  \"description\": \"Khoa CNTT\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/categories" },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryName\": \"Cong nghe thong tin\",\n  \"categoryDescription\": \"Khoa CNTT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/categories"
+          },
           "response": []
         },
         {
           "name": "Update category",
-          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"CNTT\",\n  \"description\": \"Updated\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/categories/{{categoryId}}" },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryName\": \"CNTT\",\n  \"categoryDescription\": \"Da cap nhat\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/categories/{{categoryId}}"
+          },
           "response": []
         },
-        { "name": "Delete category", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/admin/categories/{{categoryId}}" }, "response": [] },
+        {
+          "name": "Delete category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/categories/{{categoryId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Restore category",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/admin/categories/{{categoryId}}/restore"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter subjects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/subjects/filter?keyword={{keyword}}&categoryId={{categoryId}}&deleted=false&sortBy=name&sortDir=asc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted subjects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/subjects/deleted"
+          },
+          "response": []
+        },
         {
           "name": "Create subject",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Lap trinh Java\",\n  \"description\": \"Java co ban\",\n  \"categoryId\": {{categoryId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/subjects" },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"name\": \"Lap trinh Java\",\n  \"description\": \"Java c? b?n\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/subjects"
+          },
           "response": []
         },
         {
           "name": "Update subject",
-          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Java nang cao\",\n  \"description\": \"Updated\",\n  \"categoryId\": {{categoryId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/subjects/{{subjectId}}" },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"name\": \"Java nang cao\",\n  \"description\": \"Da cap nhat\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/subjects/{{subjectId}}"
+          },
           "response": []
         },
-        { "name": "Delete subject", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/admin/subjects/{{subjectId}}" }, "response": [] },
+        {
+          "name": "Delete subject",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/subjects/{{subjectId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Restore subject",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/admin/subjects/{{subjectId}}/restore"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter chapters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/chapters/filter?keyword={{keyword}}&categoryId={{categoryId}}&subjectId={{subjectId}}&deleted=false&sortBy=name&sortDir=asc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted chapters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/chapters/deleted"
+          },
+          "response": []
+        },
         {
           "name": "Create chapter",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Introduction\",\n  \"chapterNumber\": 1,\n  \"subjectId\": {{subjectId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/chapters" },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Introduction\",\n  \"chapterNumber\": 1,\n  \"subjectId\": \"{{subjectId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/chapters"
+          },
           "response": []
         },
         {
           "name": "Update chapter",
-          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Introduction updated\",\n  \"chapterNumber\": 1,\n  \"subjectId\": {{subjectId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/chapters/{{chapterId}}" },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Introduction updated\",\n  \"chapterNumber\": 1,\n  \"subjectId\": \"{{subjectId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/chapters/{{chapterId}}"
+          },
           "response": []
         },
-        { "name": "Delete chapter", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/admin/chapters/{{chapterId}}" }, "response": [] }
+        {
+          "name": "Delete chapter",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/chapters/{{chapterId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Restore chapter",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/admin/chapters/{{chapterId}}/restore"
+          },
+          "response": []
+        }
       ]
     },
     {
       "name": "Admin Questions",
       "item": [
-        { "name": "Get questions", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/questions" }, "response": [] },
-        { "name": "Get deleted questions", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/questions/deleted" }, "response": [] },
-        { "name": "Search questions", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/questions/search?q={{keyword}}" }, "response": [] },
-        { "name": "Get question by id", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/questions/{{questionId}}" }, "response": [] },
-        { "name": "Get questions by subject", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/questions/subject/{{subjectId}}" }, "response": [] },
-        { "name": "Get total questions by subject", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/questions/total-questions/{{subjectId}}" }, "response": [] },
+        {
+          "name": "Get questions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions"
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted questions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/deleted"
+          },
+          "response": []
+        },
+        {
+          "name": "Search questions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/search?q={{keyword}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter questions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/filter?keyword={{keyword}}&subjectId={{subjectId}}&chapterId={{chapterId}}&difficulty=EASY&deleted=false&examEnabled=true&practiceEnabled=true&creatorId="
+          },
+          "response": []
+        },
+        {
+          "name": "Get questions page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/page?keyword={{keyword}}&subjectId={{subjectId}}&chapterId={{chapterId}}&difficulty=EASY&deleted=false&examEnabled=true&practiceEnabled=true&creatorId=&usageFilter=all&excludeExamId=&excludeUsedInSubject=false&page=0&size=10&sortBy=questionId&sortDir=desc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get question by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/{{questionId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get questions by subject",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/subject/{{subjectId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get total questions by subject",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/total-questions/{{subjectId}}"
+          },
+          "response": []
+        },
         {
           "name": "Create question",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"content\": \"What is Java?\",\n  \"difficulty\": \"EASY\",\n  \"chapterId\": {{chapterId}},\n  \"answers\": [\n    { \"content\": \"A programming language\", \"isCorrect\": true },\n    { \"content\": \"A database\", \"isCorrect\": false },\n    { \"content\": \"An operating system\", \"isCorrect\": false }\n  ]\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Java la gi?\",\n  \"difficulty\": \"EASY\",\n  \"chapterId\": \"{{chapterId}}\",\n  \"imageUrl\": \"\",\n  \"questionType\": \"SINGLE_CHOICE\",\n  \"examEnabled\": true,\n  \"practiceEnabled\": true,\n  \"answers\": [\n    {\n      \"content\": \"Mot ngon ngu lap trinh\",\n      \"isCorrect\": true\n    },\n    {\n      \"content\": \"Mot co so du lieu\",\n      \"isCorrect\": false\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/admin/questions"
           },
           "response": []
@@ -336,14 +1212,77 @@
           "name": "Update question",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"content\": \"What is Java updated?\",\n  \"difficulty\": \"MEDIUM\",\n  \"chapterId\": {{chapterId}},\n  \"answers\": [\n    { \"content\": \"A programming language\", \"isCorrect\": true },\n    { \"content\": \"A database\", \"isCorrect\": false }\n  ]\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Java la gi? (updated)\",\n  \"difficulty\": \"MEDIUM\",\n  \"chapterId\": \"{{chapterId}}\",\n  \"imageUrl\": \"\",\n  \"questionType\": \"SINGLE_CHOICE\",\n  \"examEnabled\": true,\n  \"practiceEnabled\": true,\n  \"answers\": [\n    {\n      \"optionId\": 1,\n      \"content\": \"Mot ngon ngu lap trinh\",\n      \"isCorrect\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/admin/questions/{{questionId}}"
           },
           "response": []
         },
-        { "name": "Delete question", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/admin/questions/{{questionId}}" }, "response": [] },
-        { "name": "Restore question", "request": { "method": "PATCH", "header": [], "url": "{{baseUrl}}/admin/questions/{{questionId}}/restore" }, "response": [] },
+        {
+          "name": "Delete question",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/{{questionId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Restore question",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/admin/questions/{{questionId}}/restore"
+          },
+          "response": []
+        },
+        {
+          "name": "Preview question import",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "subjectId",
+                  "value": "{{subjectId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "chapterId",
+                  "value": "{{chapterId}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/questions/import/preview"
+          },
+          "response": []
+        },
         {
           "name": "Import questions from Excel",
           "request": {
@@ -352,10 +1291,26 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "file", "type": "file", "src": [] },
-                { "key": "categoryId", "value": "{{categoryId}}", "type": "text" },
-                { "key": "subjectId", "value": "{{subjectId}}", "type": "text" },
-                { "key": "chapterId", "value": "{{chapterId}}", "type": "text" }
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "subjectId",
+                  "value": "{{subjectId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "chapterId",
+                  "value": "{{chapterId}}",
+                  "type": "text"
+                }
               ]
             },
             "url": "{{baseUrl}}/admin/questions/import"
@@ -367,7 +1322,16 @@
           "request": {
             "method": "POST",
             "header": [],
-            "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": [] }] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
             "url": "{{baseUrl}}/admin/questions/upload-image"
           },
           "response": []
@@ -377,13 +1341,61 @@
     {
       "name": "Admin Exams",
       "item": [
-        { "name": "Get exams", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/exams" }, "response": [] },
+        {
+          "name": "Get exams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/exams"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter exams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/exams/filter?keyword={{keyword}}&subjectId={{subjectId}}&categoryId={{categoryId}}&deleted=false&sortBy=createdDate&sortDir=desc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get exams page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/exams/page?keyword={{keyword}}&subjectId={{subjectId}}&categoryId={{categoryId}}&deleted=false&page=0&size=10&sortBy=createdDate&sortDir=desc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted exams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/exams/deleted"
+          },
+          "response": []
+        },
         {
           "name": "Create exam",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"examDto\": {\n    \"subjectId\": {{subjectId}},\n    \"title\": \"De so 1\",\n    \"description\": \"De thi thu\",\n    \"duration\": 60\n  },\n  \"numberOfQuestion\": 10\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examDto\": {\n    \"subjectId\": \"{{subjectId}}\",\n    \"title\": \"De so 1\",\n    \"description\": \"De thi thu\",\n    \"duration\": 60\n  },\n  \"totalQuestions\": 10,\n  \"easyQuestions\": 4,\n  \"mediumQuestions\": 4,\n  \"hardQuestions\": 2,\n  \"totalQuestionByChapter\": {\n    \"{{chapterId}}\": 10\n  },\n  \"generationMode\": \"AUTO\",\n  \"questionIds\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/admin/exams"
           },
           "response": []
@@ -392,15 +1404,61 @@
           "name": "Update exam",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"subjectId\": {{subjectId}},\n  \"title\": \"De so 1 updated\",\n  \"description\": \"Updated\",\n  \"duration\": 45\n}", "options": { "raw": { "language": "json" } } },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"title\": \"De so 1 updated\",\n  \"description\": \"Da cap nhat\",\n  \"duration\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": "{{baseUrl}}/admin/exams/{{examId}}"
           },
           "response": []
         },
-        { "name": "Delete exam", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/admin/exams/{{examId}}" }, "response": [] },
-        { "name": "Get all user exams for admin", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/user-exams" }, "response": [] },
-        { "name": "Get admin statistics", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/statistics" }, "response": [] }
+        {
+          "name": "Delete exam",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/exams/{{examId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Restore exam",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/admin/exams/{{examId}}/restore"
+          },
+          "response": []
+        },
+        {
+          "name": "Get all user exams for admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/user-exams?keyword={{keyword}}&categoryId={{categoryId}}&subjectId={{subjectId}}&startedFrom=2026-01-01T00:00:00&startedTo=2026-12-31T23:59:59&page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Get admin statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/statistics?hotSubjectsLimit=5&wrongQuestionsLimit=5&activeUsersLimit=5&attemptsDays=14"
+          },
+          "response": []
+        }
       ]
     },
     {
@@ -408,50 +1466,357 @@
       "item": [
         {
           "name": "Create global notification",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Bao tri\",\n  \"message\": \"He thong se bao tri luc 22:00\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/notifications/global" },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bao tri\",\n  \"message\": \"H? th?ng s? Bao tri l?c 22:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/notifications/global"
+          },
           "response": []
         },
         {
           "name": "Create personal notification",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"title\": \"Thong bao\",\n  \"message\": \"Noi dung thong bao\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/notifications/personal" },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"title\": \"Thong bao\",\n  \"message\": \"N?i dung Thong bao\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/notifications/personal"
+          },
           "response": []
         },
         {
           "name": "Create subject notification",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"subjectId\": {{subjectId}},\n  \"subjectName\": \"Lap trinh Java\",\n  \"examId\": {{examId}}\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/notifications/subject" },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"subjectName\": \"Lap trinh Java\",\n  \"examId\": \"{{examId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/notifications/subject"
+          },
           "response": []
         },
         {
           "name": "Create batch notification",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userIds\": [\"{{userId}}\"],\n  \"title\": \"Thong bao\",\n  \"message\": \"Noi dung thong bao\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/admin/notifications/batch" },
-          "response": []
-        },
-        { "name": "Get campaigns", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/notifications/campaigns?keyword=&page=0&size=10" }, "response": [] },
-        { "name": "Get campaign recipients", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/notifications/history/{{notificationHistoryId}}/recipients?page=0&size=10" }, "response": [] },
-        { "name": "Recall campaign", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/admin/notifications/history/{{notificationHistoryId}}" }, "response": [] }
-      ]
-    },
-    {
-      "name": "Admin Permissions",
-      "item": [
-        {
-          "name": "Assign subject permissions",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"subjectPermissions\": {\n    \"{{subjectId}}\": [\"READ\", \"CREATE\", \"UPDATE\", \"DELETE\"]\n  }\n}", "options": { "raw": { "language": "json" } } },
-            "url": "{{baseUrl}}/admin/permissions/subject-assignment"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIds\": [\n    \"{{userId}}\"\n  ],\n  \"title\": \"Thong bao\",\n  \"message\": \"N?i dung Thong bao\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/notifications/batch"
           },
           "response": []
         },
-        { "name": "Get permissions by mod", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/admin/permissions/mod/{{userId}}" }, "response": [] },
         {
-          "name": "Update user role",
+          "name": "Get campaigns",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/notifications/campaigns?keyword=&sendType=&createdBy=&fromDate=2026-01-01T00:00:00&toDate=2026-12-31T23:59:59&page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Get campaign recipients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/notifications/history/{{notificationHistoryId}}/recipients?page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Recall campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/notifications/history/{{notificationHistoryId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Groups & Permissions",
+      "item": [
+        {
+          "name": "Get groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/groups"
+          },
+          "response": []
+        },
+        {
+          "name": "Save group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CONTENT_MOD\",\n  \"name\": \"Content Moderator\",\n  \"description\": \"Nhom quan tri noi dung\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/groups"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete group",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/groups/{{groupId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get group permissions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/groups/{{groupId}}/permissions"
+          },
+          "response": []
+        },
+        {
+          "name": "Save group permissions",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"scopeType\": \"GLOBAL\",\n    \"scopeId\": null,\n    \"resource\": \"QUESTION\",\n    \"action\": \"VIEW\"\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/groups/{{groupId}}/permissions"
+          },
+          "response": []
+        },
+        {
+          "name": "Get user groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/groups/users/{{userId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Assign user groups",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"groupIds\": [\n    \"{{groupId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/admin/groups/users/{{userId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Documents",
+      "item": [
+        {
+          "name": "Get documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/documents"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload document",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Tai lieu on tap",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Mo ta tai lieu",
+                  "type": "text"
+                },
+                {
+                  "key": "active",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/documents"
+          },
+          "response": []
+        },
+        {
+          "name": "Update document",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"role\": \"MOD\"\n}", "options": { "raw": { "language": "json" } } },
-            "url": "{{baseUrl}}/admin/permissions/user/{{userId}}/role"
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "T?i li?u Da cap nhat",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Mo ta moi",
+                  "type": "text"
+                },
+                {
+                  "key": "active",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/documents/{{documentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete document",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/admin/documents/{{documentId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Export & Audit",
+      "item": [
+        {
+          "name": "Export users CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/export/users"
+          },
+          "response": []
+        },
+        {
+          "name": "Export exam results CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/export/exam-results"
+          },
+          "response": []
+        },
+        {
+          "name": "Export questions CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/export/questions"
+          },
+          "response": []
+        },
+        {
+          "name": "Get audit logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/audit-logs"
           },
           "response": []
         }
@@ -459,19 +1824,70 @@
     }
   ],
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
-    { "key": "keyword", "value": "java" },
-    { "key": "userId", "value": "00000000-0000-0000-0000-000000000000" },
-    { "key": "categoryId", "value": "1" },
-    { "key": "subjectId", "value": "1" },
-    { "key": "chapterId", "value": "1" },
-    { "key": "questionId", "value": "1" },
-    { "key": "examId", "value": "1" },
-    { "key": "userExamId", "value": "1" },
-    { "key": "notificationId", "value": "1" },
-    { "key": "notificationHistoryId", "value": "1" },
-    { "key": "emailVerifyToken", "value": "" },
-    { "key": "resetToken", "value": "" },
-    { "key": "googleIdToken", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "keyword",
+      "value": "java"
+    },
+    {
+      "key": "userId",
+      "value": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "key": "groupId",
+      "value": "1"
+    },
+    {
+      "key": "categoryId",
+      "value": "1"
+    },
+    {
+      "key": "subjectId",
+      "value": "1"
+    },
+    {
+      "key": "chapterId",
+      "value": "1"
+    },
+    {
+      "key": "questionId",
+      "value": "1"
+    },
+    {
+      "key": "examId",
+      "value": "1"
+    },
+    {
+      "key": "userExamId",
+      "value": "1"
+    },
+    {
+      "key": "notificationId",
+      "value": "1"
+    },
+    {
+      "key": "notificationHistoryId",
+      "value": "1"
+    },
+    {
+      "key": "documentId",
+      "value": "1"
+    },
+    {
+      "key": "emailVerifyToken",
+      "value": ""
+    },
+    {
+      "key": "resetToken",
+      "value": ""
+    },
+    {
+      "key": "googleIdToken",
+      "value": ""
+    }
   ]
 }
+

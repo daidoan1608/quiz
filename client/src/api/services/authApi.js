@@ -42,6 +42,10 @@ export const authApi = {
     return publicAxios.post("/auth/google", { idToken }).then((response) => getResponseData(response, null));
   },
 
+  setPassword(payload) {
+    return authAxios.patch("/auth/password", payload).then((response) => getResponseData(response, response?.data));
+  },
+
   getMyAvatar() {
     return authAxios.get("users/me/avatar");
   },

@@ -23,7 +23,13 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
 
     long countByDeletedFalse();
 
-    Optional<Exam> findByExamIdAndDeletedFalse(Long examId);
+    @Query("""
+            SELECT e FROM Exam e
+            JOIN FETCH e.subject
+            WHERE e.examId = :examId
+            AND e.deleted = false
+            """)
+    Optional<Exam> findByExamIdAndDeletedFalse(@Param("examId") Long examId);
 
     boolean existsByExamCodeIgnoreCase(String examCode);
 

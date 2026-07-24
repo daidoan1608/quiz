@@ -30,3 +30,27 @@ export const getPasswordChangeValidationMessage = ({
 
   return '';
 };
+
+export const getPasswordSetupValidationMessage = ({
+  confirmPassword,
+  newPassword,
+  texts,
+}) => {
+  if (!newPassword || !confirmPassword) {
+    return 'Vui lòng nhập đầy đủ thông tin thiết lập mật khẩu!';
+  }
+
+  if (newPassword.length < PASSWORD_MIN_LENGTH) {
+    return `Mật khẩu mới phải có ít nhất ${PASSWORD_MIN_LENGTH} ký tự!`;
+  }
+
+  if (!PASSWORD_PATTERN.test(newPassword)) {
+    return 'Mật khẩu mới phải có cả chữ và số!';
+  }
+
+  if (newPassword !== confirmPassword) {
+    return texts.passwordMismatch || 'Mật khẩu xác nhận không khớp!';
+  }
+
+  return '';
+};
