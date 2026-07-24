@@ -10,8 +10,23 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
-    @Query("SELECT ua FROM UserAnswer ua WHERE ua.userExam.userExamId = :userExamId")
+    @Query("""
+            SELECT ua FROM UserAnswer ua
+            JOIN FETCH ua.userExam
+            JOIN FETCH ua.question
+            JOIN FETCH ua.answer
+            WHERE ua.userExam.userExamId = :userExamId
+            """)
     List<UserAnswer> findUserAnswersByUserExamId(Long userExamId);
+
+    @Query("""
+            SELECT ua FROM UserAnswer ua
+            JOIN FETCH ua.userExam ue
+            JOIN FETCH ua.question
+            JOIN FETCH ua.answer
+            WHERE ue.userExamId IN :userExamIds
+            """)
+    List<UserAnswer> findUserAnswersByUserExamIds(@Param("userExamIds") List<Long> userExamIds);
 
     @Query("SELECT ua FROM UserAnswer ua WHERE ua.userExam.userExamId = :userExamId AND ua.question.questionId = :questionId")
     java.util.Optional<UserAnswer> findByUserExamIdAndQuestionId(@Param("userExamId") Long userExamId, @Param("questionId") Long questionId);
@@ -37,6 +52,8 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
 
     @Query("""
             SELECT ua FROM UserAnswer ua
+            JOIN FETCH ua.question
+            JOIN FETCH ua.answer
             WHERE ua.userExam.user.userId = :userId
               AND ua.userExam.status = 'SUBMITTED'
               AND ua.question.chapter.chapterId = :chapterId

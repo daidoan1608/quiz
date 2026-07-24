@@ -43,7 +43,7 @@ export default function ExamAttemptCard({ exam, onShowDetail, texts }) {
           event.stopPropagation();
           onShowDetail(exam);
         }}
-        className="mt-auto w-full py-2 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all shadow-sm"
+        className="aura-button aura-button-subtle mt-auto min-h-0 w-full py-2 text-sm font-medium group-hover:border-primary group-hover:bg-primary group-hover:text-white"
         type="button"
       >
         {texts?.showDetail || 'Xem chi tiết'}

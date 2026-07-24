@@ -1,11 +1,9 @@
 import React from 'react';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import {
-  ForgotPasswordHeader,
-  ResetPasswordStep,
-  SendOtpStep,
-  VerifyOtpStep,
-} from './ForgotPasswordSteps';
+import { ForgotPasswordHeader } from './ForgotPasswordHeader';
+import { ResetPasswordStep } from './ResetPasswordStep';
+import { SendOtpStep } from './SendOtpStep';
+import { VerifyOtpStep } from './VerifyOtpStep';
 
 export const ForgotPasswordView = ({
   email,
@@ -54,7 +52,8 @@ export const ForgotPasswordView = ({
         <div className="text-center mt-8 pt-4 border-t border-gray-100">
           <button
             onClick={() => navigate('/login')}
-            className="text-gray-600 hover:text-blue-600 transition-colors flex items-center justify-center gap-2 font-medium text-sm"
+            className="auth-link flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+            type="button"
           >
             <ArrowLeftOutlined /> Quay lại đăng nhập
           </button>

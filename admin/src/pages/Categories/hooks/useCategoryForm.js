@@ -44,7 +44,8 @@ export const useCategoryForm = ({
     setSubmitting(true);
     try {
       if (isEditMode) {
-        await categoryApi.update(categoryId, values);
+        const { categoryId: _categoryId, ...payload } = values;
+        await categoryApi.update(categoryId, payload);
         message.success("Cập nhật khoa thành công!");
       } else {
         await categoryApi.create(values);

@@ -16,22 +16,28 @@ export default function MobileMenu({
   toggleLanguage,
 }) {
   return (
-    <div className="md:hidden max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain py-4 pb-8 border-t border-gray-100 dark:border-gray-700 space-y-2 animate-in slide-in-from-top-2">
-      {navItems.map((item) => (
-        <div
-          key={item.link}
-          onClick={() => handleMobileNavClick(item.link)}
-          className={`cursor-pointer block px-4 py-2 rounded-lg text-base font-medium ${
-            isActive(item.link)
-              ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-white dark:ring-1 dark:ring-blue-300/25'
-              : 'text-gray-700 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-white/10 dark:hover:text-white'
-          }`}
-        >
-          {item.name}
-        </div>
-      ))}
+    <div
+      className={`max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain py-4 pb-8 border-t border-gray-100 dark:border-gray-700 space-y-2 animate-in slide-in-from-top-2 ${
+        isLoggedIn ? 'lg:hidden' : 'xl:hidden'
+      }`}
+    >
+      <div className="lg:hidden">
+        {navItems.map((item) => (
+          <div
+            key={item.link}
+            onClick={() => handleMobileNavClick(item.link)}
+            className={`cursor-pointer block px-4 py-2 rounded-lg text-base font-medium ${
+              isActive(item.link)
+                ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-white dark:ring-1 dark:ring-blue-300/25'
+                : 'text-gray-700 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-white/10 dark:hover:text-white'
+            }`}
+          >
+            {item.name}
+          </div>
+        ))}
 
-      <div className="my-2 h-px bg-gray-100 dark:bg-gray-700" />
+        <div className="my-2 h-px bg-gray-100 dark:bg-gray-700" />
+      </div>
 
       {!isLoggedIn && (
         <>
@@ -54,20 +60,24 @@ export default function MobileMenu({
         </>
       )}
 
-      <LanguageMenuItem
-        language={language}
-        t={t}
-        toggleLanguage={toggleLanguage}
-      />
+      {!isLoggedIn && (
+        <>
+          <LanguageMenuItem
+            language={language}
+            t={t}
+            toggleLanguage={toggleLanguage}
+          />
 
-      <AppearancePanel
-        colorTheme={colorTheme}
-        isDarkMode={isDarkMode}
-        mobile
-        setColorTheme={setColorTheme}
-        setMode={setMode}
-        t={t}
-      />
+          <AppearancePanel
+            colorTheme={colorTheme}
+            isDarkMode={isDarkMode}
+            mobile
+            setColorTheme={setColorTheme}
+            setMode={setMode}
+            t={t}
+          />
+        </>
+      )}
     </div>
   );
 }

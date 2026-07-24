@@ -103,6 +103,18 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     List<Exam> findExamsBySubjectId(Long subjectId);
 
     @Query("""
+            SELECT e FROM Exam e
+            JOIN FETCH e.subject
+            WHERE e.subject.subjectId = :subjectId
+            AND e.deleted = true
+            AND e.deletedCascadeId = :cascadeId
+            """)
+    List<Exam> findDeletedBySubjectIdAndCascadeId(
+            @Param("subjectId") Long subjectId,
+            @Param("cascadeId") java.util.UUID cascadeId
+    );
+
+    @Query("""
             SELECT e.subject.subjectId, COUNT(e)
             FROM Exam e
             WHERE e.subject.subjectId IN :subjectIds

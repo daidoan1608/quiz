@@ -12,6 +12,7 @@ import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.AuthorizationService;
+import com.fita.vnua.quiz.service.UserExamAccessService;
 import com.fita.vnua.quiz.service.UserExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,8 +20,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +27,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,23 +41,13 @@ import java.util.UUID;
 public class UserExamController {
     private final UserExamService userExamService;
     private final AuthorizationService authorizationService;
+    private final UserExamAccessService userExamAccessService;
 
     @GetMapping("public/user-exam-summaries")
     @Operation(summary = "Thống kê điểm thi của người dùng")
     public ResponseEntity<ApiResponse<List<UserExamSummaryDto>>> getUserExamSummaries(
             @RequestParam(defaultValue = "all") String period) {
-        LocalDate today = LocalDate.now();
-        LocalDateTime fromDate = switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> today.with(DayOfWeek.MONDAY).atStartOfDay();
-            case "month" -> today.withDayOfMonth(1).atStartOfDay();
-            default -> null;
-        };
-        LocalDateTime toDate = switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> today.with(DayOfWeek.MONDAY).plusWeeks(1).atStartOfDay();
-            case "month" -> today.withDayOfMonth(1).plusMonths(1).atStartOfDay();
-            default -> null;
-        };
-        List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries(fromDate, toDate);
+        List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries(period);
         return ResponseEntity.ok(ApiResponse.success("Lấy thống kê điểm thi thành công", summaries));
     }
 
@@ -71,20 +59,8 @@ public class UserExamController {
             @RequestParam(defaultValue = "total") String criteria,
             @RequestParam(defaultValue = "10") int limit,
             @AuthenticationPrincipal User currentUser) {
-        LocalDate today = LocalDate.now();
-        LocalDateTime fromDate = switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> today.with(DayOfWeek.MONDAY).atStartOfDay();
-            case "month" -> today.withDayOfMonth(1).atStartOfDay();
-            default -> null;
-        };
-        LocalDateTime toDate = switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> today.with(DayOfWeek.MONDAY).plusWeeks(1).atStartOfDay();
-            case "month" -> today.withDayOfMonth(1).plusMonths(1).atStartOfDay();
-            default -> null;
-        };
         RankingResponse rankings = userExamService.getRankings(
-                fromDate,
-                toDate,
+                period,
                 subjectName,
                 criteria,
                 limit,
@@ -95,7 +71,6 @@ public class UserExamController {
 
     @GetMapping("admin/user-exams")
     @Operation(summary = "Lấy danh sách bài thi của tất cả người dùng")
-    @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'USER_EXAM', 'VIEW', 'GLOBAL', null) or (#subjectId != null and @adminCapabilityService.hasPermission(principal, 'USER_EXAM', 'VIEW', 'SUBJECT', #subjectId))")
     public ResponseEntity<Page<UserExamResponse>> getAllUserExams(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
@@ -106,8 +81,10 @@ public class UserExamController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime startedTo,
-            @PageableDefault(sort = "startTime", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "startTime", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal User currentUser
     ) {
+        userExamAccessService.requireAdminUserExamListAccess(currentUser, categoryId, subjectId);
         return ResponseEntity.ok(userExamService.getAllUserExamsForAdmin(
                 keyword,
                 categoryId,
@@ -147,9 +124,13 @@ public class UserExamController {
             @PathVariable("userExamId") Long userExamId,
             @AuthenticationPrincipal User currentUser) {
         User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
-        UserExamResponse userExam = authorizationService.isAdminOrMod(authenticatedUser)
-                ? userExamService.getUserExamByIdForAdmin(userExamId)
-                : userExamService.getUserExamByIdForUser(userExamId, authenticatedUser.getUserId());
+        UserExamResponse userExam;
+        if (authorizationService.isAdminOrMod(authenticatedUser)) {
+            userExamAccessService.requireAdminUserExamAccess(authenticatedUser, userExamId);
+            userExam = userExamService.getUserExamByIdForAdmin(userExamId);
+        } else {
+            userExam = userExamService.getUserExamByIdForUser(userExamId, authenticatedUser.getUserId());
+        }
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin bài thi của người dùng thành công", userExam));
     }
 
@@ -165,7 +146,12 @@ public class UserExamController {
     }
 
     @PostMapping("user-exams")
-    @Operation(summary = "Tạo bài thi cho người dùng")
+    @Deprecated(since = "2026-07-23", forRemoval = false)
+    @Operation(
+            summary = "Tạo bài thi cho người dùng",
+            description = "Deprecated: dùng luồng exam-attempts/start, exam-attempts/{id}/answers và exam-attempts/{id}/submit cho bài thi mới.",
+            deprecated = true
+    )
     public ResponseEntity<ApiResponse<UserExamDto>> createUserExam(
             @RequestBody UserExamRequest userExamRequest,
             @AuthenticationPrincipal User currentUser

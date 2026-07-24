@@ -103,7 +103,8 @@ export const useChapterForm = ({
     setSubmitting(true);
     try {
       if (isEditMode) {
-        await authAxios.patch(`/admin/chapters/${chapterId}`, values);
+        const { chapterId: _chapterId, subjectId: _subjectId, ...payload } = values;
+        await authAxios.patch(`/admin/chapters/${chapterId}`, payload);
         message.success("Cập nhật chương thành công!");
       } else {
         await authAxios.post("/admin/chapters", {

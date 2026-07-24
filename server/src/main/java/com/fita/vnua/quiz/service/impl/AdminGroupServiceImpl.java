@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.AdminGroupDto;
 import com.fita.vnua.quiz.model.dto.AdminGroupPermissionDto;
@@ -18,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -92,13 +96,20 @@ public class AdminGroupServiceImpl implements AdminGroupService {
     public List<AdminGroupDto> assignUserGroups(UUID userId, List<Long> groupIds) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
-        if (user.getRole() != User.Role.MOD) {
+        if (user.getRole() != UserRole.MOD) {
             throw new CustomApiException("Chỉ gán nhóm quyền cho tài khoản MOD", HttpStatus.BAD_REQUEST);
         }
         userGroupRepository.deleteByUserId(userId);
-        List<AdminUserGroup> assignments = (groupIds == null ? List.<Long>of() : groupIds).stream()
+        List<Long> uniqueGroupIds = (groupIds == null ? List.<Long>of() : groupIds).stream()
                 .distinct()
-                .map(this::getGroup)
+                .toList();
+        Map<Long, AdminGroup> groupsById = groupRepository.findAllById(uniqueGroupIds).stream()
+                .collect(Collectors.toMap(AdminGroup::getId, group -> group));
+        if (groupsById.size() != uniqueGroupIds.size()) {
+            throw new CustomApiException("Không tìm thấy nhóm quyền", HttpStatus.NOT_FOUND);
+        }
+        List<AdminUserGroup> assignments = uniqueGroupIds.stream()
+                .map(groupsById::get)
                 .map(group -> {
                     AdminUserGroup userGroup = new AdminUserGroup();
                     userGroup.setUserId(userId);

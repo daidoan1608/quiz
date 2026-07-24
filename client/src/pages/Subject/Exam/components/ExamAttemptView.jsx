@@ -19,14 +19,15 @@ export const ExamAttemptView = ({
   handleAnswerSelect,
   hours,
   isSubmitConfirmOpen,
+  isSubmitting,
   minutes,
   navigate,
-  openSubmitConfirm,
   progressPercent,
   questions,
   seconds,
   selectedAnswers,
   setCurrentQuestionIndex,
+  requestSubmitExam,
   subjectId,
   subjectName,
   texts,
@@ -83,7 +84,8 @@ export const ExamAttemptView = ({
             selectedAnswers={selectedAnswers}
             currentQuestionIndex={currentQuestionIndex}
             setCurrentQuestionIndex={setCurrentQuestionIndex}
-            onSubmit={openSubmitConfirm}
+            isSubmitting={isSubmitting}
+            onSubmit={requestSubmitExam}
           />
         </div>
     </PageContainer>
@@ -95,6 +97,7 @@ export const ExamAttemptView = ({
         hours={hours}
         minutes={minutes}
         seconds={seconds}
+        isSubmitting={isSubmitting}
         onCancel={closeSubmitConfirm}
         onSubmit={confirmSubmitExam}
       />

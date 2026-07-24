@@ -10,38 +10,36 @@ import com.fita.vnua.quiz.repository.CategoryRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.CategoryService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
+import com.fita.vnua.quiz.service.mapper.CategoryMapper;
+import com.fita.vnua.quiz.service.mapper.SubjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final SubjectRepository subjectRepository;
-    private final ModelMapper modelMapper;
     private final SoftDeleteService softDeleteService;
+    private final CategoryMapper categoryMapper;
+    private final SubjectMapper subjectMapper;
 
     @Override
     @Cacheable(value = "publicCategories", key = "'all'")
     public List<CategorySummaryDto> getAllCategories() {
-        return categoryRepository.findByDeletedFalse().stream()
-                .map(this::mapCategoryToSummaryDto)
-                .toList();
+        return mapCategoriesToSummaryDtos(categoryRepository.findByDeletedFalse());
     }
 
     @Override
     public List<CategorySummaryDto> getDeletedCategories() {
-        return categoryRepository.findByDeletedTrue().stream()
-                .map(this::mapCategoryToSummaryDto)
-                .toList();
+        return mapCategoriesToSummaryDtos(categoryRepository.findByDeletedTrue());
     }
 
     @Override
@@ -49,18 +47,15 @@ public class CategoryServiceImpl implements CategoryService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllCategories();
         }
-        return categoryRepository.searchActive(keyword.trim())
-                .stream()
-                .map(this::mapCategoryToSummaryDto)
-                .toList();
+        return mapCategoriesToSummaryDtos(categoryRepository.searchActive(keyword.trim()));
     }
 
     @Override
     public List<CategorySummaryDto> filterCategories(String keyword, Boolean deleted, String sortBy, String sortDir) {
         String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
-        List<CategorySummaryDto> categories = categoryRepository.filterCategories(normalizedKeyword, deleted).stream()
-                .map(this::mapCategoryToSummaryDto)
-                .toList();
+        List<CategorySummaryDto> categories = mapCategoriesToSummaryDtos(
+                categoryRepository.filterCategories(normalizedKeyword, deleted)
+        );
         return AdminSortHelper.sort(categories, sortBy, sortDir, Map.of(
                 "categoryId", CategorySummaryDto::getCategoryId,
                 "categoryName", CategorySummaryDto::getCategoryName,
@@ -77,12 +72,10 @@ public class CategoryServiceImpl implements CategoryService {
         if (Boolean.TRUE.equals(category.getDeleted())) {
             throw new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND);
         }
-        CategoryDto categoryDto = modelMapper.map(category, CategoryDto.class);
         List<SubjectDto> subjectDtos = subjectRepository.findSubjectsByCategoryAndDeletedFalse(category).stream()
-                .map(subject -> modelMapper.map(subject, SubjectDto.class))
+                .map(subjectMapper::toDto)
                 .toList();
-        categoryDto.setSubjects(subjectDtos);
-        return categoryDto;
+        return categoryMapper.toDto(category, subjectDtos);
     }
 
     @Override
@@ -93,7 +86,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setCategoryDescription(categoryDto.getCategoryDescription());
         category.setDeleted(false);
         Category savedCategory = categoryRepository.save(category);
-        return modelMapper.map(savedCategory, CategoryDto.class);
+        return categoryMapper.toDto(savedCategory);
     }
 
     @Override
@@ -107,7 +100,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setCategoryName((categoryDto.getCategoryName()));
         category.setCategoryDescription(categoryDto.getCategoryDescription());
         Category savedCategory = categoryRepository.save(category);
-        return modelMapper.map(savedCategory, CategoryDto.class);
+        return categoryMapper.toDto(savedCategory);
     }
 
     @Override
@@ -122,12 +115,27 @@ public class CategoryServiceImpl implements CategoryService {
         softDeleteService.restoreCategory(id);
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
-        return modelMapper.map(category, CategoryDto.class);
+        return categoryMapper.toDto(category);
     }
 
-    private CategorySummaryDto mapCategoryToSummaryDto(Category category) {
-        CategorySummaryDto categoryDto = modelMapper.map(category, CategorySummaryDto.class);
-        categoryDto.setTotalSubjects(subjectRepository.findSubjectsByCategoryAndDeletedFalse(category).size());
-        return categoryDto;
+    private List<CategorySummaryDto> mapCategoriesToSummaryDtos(List<Category> categories) {
+        List<Long> categoryIds = categories.stream()
+                .map(Category::getCategoryId)
+                .toList();
+        if (categoryIds.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, Long> subjectCounts = categoryRepository.countActiveSubjectsByCategoryIds(categoryIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+        return categories.stream()
+                .map(category -> mapCategoryToSummaryDto(category, subjectCounts))
+                .toList();
+    }
+
+    private CategorySummaryDto mapCategoryToSummaryDto(Category category, Map<Long, Long> subjectCounts) {
+        return categoryMapper.toSummaryDto(category, subjectCounts.getOrDefault(category.getCategoryId(), 0L));
     }
 }

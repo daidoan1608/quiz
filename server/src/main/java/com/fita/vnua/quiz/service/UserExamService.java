@@ -9,6 +9,7 @@ import com.fita.vnua.quiz.model.dto.request.StartExamAttemptRequest;
 import com.fita.vnua.quiz.model.dto.request.UpdateExamAttemptProgressRequest;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.ExamAttemptResponse;
+import com.fita.vnua.quiz.model.dto.result.PeriodRange;
 import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import org.springframework.data.domain.Page;
@@ -22,12 +23,19 @@ import java.util.UUID;
 public interface UserExamService {
     List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate);
 
+    List<UserExamSummaryDto> getUserExamSummaries(String period);
+
     RankingResponse getRankings(LocalDateTime fromDate, LocalDateTime toDate, String subjectName, String criteria, int limit, UUID currentUserId);
+
+    RankingResponse getRankings(String period, String subjectName, String criteria, int limit, UUID currentUserId);
+
+    PeriodRange resolvePeriodRange(String period);
 
     UserExamResponse getUserExamByIdForUser(Long id, UUID currentUserId);
 
     UserExamResponse getUserExamByIdForAdmin(Long id);
 
+    @Deprecated(since = "2026-07-23", forRemoval = false)
     UserExamDto createUserExam(UserExamRequest userExamRequest, UUID currentUserId);
 
     List<UserExamResponse> getUserExamByUserId(UUID userId);

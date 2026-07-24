@@ -7,6 +7,7 @@ export const QuestionNavigator = ({
   questions,
   selectedAnswers,
   currentQuestionIndex,
+  isSubmitting,
   setCurrentQuestionIndex,
   onSubmit,
 }) => (
@@ -20,12 +21,15 @@ export const QuestionNavigator = ({
       title: texts.table || "Bảng trả lời",
       current: texts.currentQuestion || "Câu hiện tại",
       answered: texts.answered || "Đã trả lời",
+      marked: texts.marked || "Đã đánh dấu",
       notAnswered: texts.notAnswered || "Chưa trả lời",
-      submit: texts.submit || "Nộp bài",
+      submit: isSubmitting ? "Đang nộp..." : texts.submit || "Nộp bài",
     }}
     onSubmit={onSubmit}
     questions={questions}
     setCurrentQuestionIndex={setCurrentQuestionIndex}
     showLegend
+    submitDisabled={isSubmitting}
+    submitIcon={isSubmitting ? "hourglass_top" : "check_circle"}
   />
 );

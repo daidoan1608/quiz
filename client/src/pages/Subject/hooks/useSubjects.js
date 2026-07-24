@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { subjectApi } from 'api/services/subjectApi';
+import { useAuth } from 'context/auth/AuthProvider';
 import { useFavorites } from 'context/favorites/FavoritesContext';
 import { useLanguage } from 'context/language/LanguageProvider';
 import { buildSubjectDetailLocation } from '../utils/subjectNavigation';
@@ -14,6 +15,7 @@ const PAGE_SIZE = 6;
 
 export const useSubjects = () => {
   const { favorites, toggleFavorite } = useFavorites();
+  const { isLoggedIn } = useAuth();
   const { texts } = useLanguage();
   const navigate = useNavigate();
 
@@ -100,6 +102,7 @@ export const useSubjects = () => {
   const getStatus = (subject) => getSubjectStatus({ subject, texts });
 
   return {
+    canToggleFavorite: isLoggedIn,
     categories,
     clearFilters,
     currentPage,

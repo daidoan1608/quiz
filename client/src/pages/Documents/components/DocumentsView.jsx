@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageEmptyState, PageLoadingState } from 'components/common/PageState';
 import { PageContainer } from 'components/common/PageContainer';
 import { DocumentCard } from './DocumentCard';
 import { DocumentsHero } from './DocumentsHero';
@@ -9,27 +10,23 @@ export const DocumentsView = ({ documents, error, loading, stats }) => (
 
     <PageContainer as="section" className="pt-0">
       {loading && (
-        <div className="flex min-h-72 items-center justify-center text-gray-500 dark:text-gray-300">
-          Đang tải tài liệu...
-        </div>
+        <PageLoadingState
+          label="Đang tải tài liệu..."
+          minHeightClassName="min-h-72"
+        />
       )}
 
       {!loading && error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-200">
-          {error}
-        </div>
+        <div className="aura-alert-error p-5">{error}</div>
       )}
 
       {!loading && !error && documents.length === 0 && (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <span className="material-symbols-outlined text-5xl text-gray-400">
-            folder_open
-          </span>
-          <h2 className="mt-3 text-xl font-semibold">Chưa có tài liệu</h2>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
-            Khi admin đăng tài liệu mới, danh sách sẽ hiển thị tại đây.
-          </p>
-        </div>
+        <PageEmptyState
+          className="p-10"
+          description="Khi admin đăng tài liệu mới, danh sách sẽ hiển thị tại đây."
+          icon="folder_open"
+          title="Chưa có tài liệu"
+        />
       )}
 
       {!loading && !error && documents.length > 0 && (

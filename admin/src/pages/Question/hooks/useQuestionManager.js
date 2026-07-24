@@ -38,11 +38,11 @@ export const useQuestionManager = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [questionIdToUpdate, setQuestionIdToUpdate] = useState(null);
   const { current: currentPage, pageSize } = pagination;
-  const { user, capabilities, canOnSubject } = useAuth();
+  const { user, canOnSubject, getAllowedSubjectIds } = useAuth();
   const isMod = user?.role === "MOD";
   const allowedSubjectIds = useMemo(
-    () => Object.keys(capabilities.subjects || {}),
-    [capabilities.subjects]
+    () => getAllowedSubjectIds("QUESTION", "VIEW")?.map(String) || [],
+    [getAllowedSubjectIds]
   );
 
   const fetchQuestions = useCallback(

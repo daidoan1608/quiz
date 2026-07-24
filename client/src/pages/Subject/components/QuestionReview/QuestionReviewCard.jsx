@@ -36,6 +36,8 @@ export default function QuestionReviewCard({
                   src={resolveMediaUrl(question.imageUrl)}
                   alt="Minh họa câu hỏi"
                   className="max-h-48 max-w-full rounded-lg shadow-xs border border-gray-200 dark:border-gray-700"
+                  decoding="async"
+                  loading="lazy"
                 />
               </div>
             )}

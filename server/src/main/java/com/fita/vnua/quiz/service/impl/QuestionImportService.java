@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.enums.QuestionType;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
@@ -8,6 +10,7 @@ import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
+import com.fita.vnua.quiz.service.AvatarStorageService;
 import com.fita.vnua.quiz.service.mapper.QuestionMapper;
 import com.fita.vnua.quiz.utils.ExcelHelper;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +38,12 @@ import java.util.zip.ZipInputStream;
 public class QuestionImportService {
     private static final int MIN_ANSWERS = 2;
     private static final int MAX_ANSWERS = 8;
+    private static final long MAX_IMPORT_FILE_SIZE_BYTES = 20L * 1024 * 1024;
+    private static final long MAX_UNZIPPED_BYTES = 50L * 1024 * 1024;
+    private static final long MAX_SPREADSHEET_BYTES = 10L * 1024 * 1024;
+    private static final long MAX_IMAGE_BYTES = 5L * 1024 * 1024;
+    private static final int MAX_ZIP_ENTRIES = 100;
+    private static final int MAX_IMAGE_FILES = 40;
 
     private final QuestionRepository questionRepository;
     private final ChapterRepository chapterRepository;
@@ -83,6 +94,12 @@ public class QuestionImportService {
     }
 
     private ImportedQuestionFile readImportFile(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new CustomApiException("File import đang trống.", HttpStatus.BAD_REQUEST);
+        }
+        if (file.getSize() > MAX_IMPORT_FILE_SIZE_BYTES) {
+            throw new CustomApiException("File import vượt quá dung lượng cho phép.", HttpStatus.BAD_REQUEST);
+        }
         String contentType = file.getContentType();
         String originalFilename = file.getOriginalFilename();
         boolean isZip = (contentType != null
@@ -103,24 +120,51 @@ public class QuestionImportService {
         Map<String, byte[]> images = new HashMap<>();
         byte[] excelBytes = null;
         String excelFilename = null;
+        long totalUnzippedBytes = 0;
+        int entryCount = 0;
+        int imageCount = 0;
 
         try (ZipInputStream zipInputStream = new ZipInputStream(file.getInputStream())) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
+                entryCount++;
+                if (entryCount > MAX_ZIP_ENTRIES) {
+                    throw new CustomApiException("File ZIP có quá nhiều file.", HttpStatus.BAD_REQUEST);
+                }
                 if (entry.isDirectory()) {
                     continue;
                 }
 
                 String simpleName = Paths.get(entry.getName()).getFileName().toString();
                 if (isSpreadsheetFile(simpleName)) {
-                    excelBytes = zipInputStream.readAllBytes();
+                    excelBytes = readEntryBytes(zipInputStream, MAX_SPREADSHEET_BYTES);
+                    totalUnzippedBytes += excelBytes.length;
+                    if (totalUnzippedBytes > MAX_UNZIPPED_BYTES) {
+                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.", HttpStatus.BAD_REQUEST);
+                    }
                     excelFilename = simpleName;
                 } else if (isImageFile(simpleName)) {
-                    byte[] imageBytes = zipInputStream.readAllBytes();
+                    imageCount++;
+                    if (imageCount > MAX_IMAGE_FILES) {
+                        throw new CustomApiException("File ZIP có quá nhiều ảnh.", HttpStatus.BAD_REQUEST);
+                    }
+                    byte[] imageBytes = readEntryBytes(zipInputStream, MAX_IMAGE_BYTES);
+                    totalUnzippedBytes += imageBytes.length;
+                    if (totalUnzippedBytes > MAX_UNZIPPED_BYTES) {
+                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.", HttpStatus.BAD_REQUEST);
+                    }
                     images.put(entry.getName().toLowerCase(), imageBytes);
                     images.put(simpleName.toLowerCase(), imageBytes);
+                } else {
+                    byte[] ignoredBytes = readEntryBytes(zipInputStream, MAX_IMAGE_BYTES);
+                    totalUnzippedBytes += ignoredBytes.length;
+                    if (totalUnzippedBytes > MAX_UNZIPPED_BYTES) {
+                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.", HttpStatus.BAD_REQUEST);
+                    }
                 }
             }
+        } catch (CustomApiException e) {
+            throw e;
         } catch (Exception e) {
             throw new CustomApiException("Lỗi giải nén và xử lý file ZIP: " + e.getMessage(), e);
         }
@@ -132,6 +176,21 @@ public class QuestionImportService {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(excelBytes)) {
             return new ImportedQuestionFile(ExcelHelper.importToQuestions(inputStream, excelFilename), images);
         }
+    }
+
+    private byte[] readEntryBytes(InputStream inputStream, long maxBytes) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        long totalBytes = 0;
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            totalBytes += bytesRead;
+            if (totalBytes > maxBytes) {
+                throw new CustomApiException("File trong ZIP vượt quá dung lượng cho phép.", HttpStatus.BAD_REQUEST);
+            }
+            outputStream.write(buffer, 0, bytesRead);
+        }
+        return outputStream.toByteArray();
     }
 
     private boolean isSpreadsheetFile(String filename) {

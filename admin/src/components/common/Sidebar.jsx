@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Layout, Menu, Button } from 'antd';
+import { Layout, Menu, Button, Drawer } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 import {
@@ -20,6 +20,7 @@ import {
   FolderOpenOutlined,
 } from '@ant-design/icons';
 import { ADMIN_ROUTES } from '../../utils/adminNavigationPolicy';
+import { adminDetailRoutes } from '../../routes/adminLayoutRoutes';
 
 const { Sider } = Layout;
 
@@ -40,17 +41,115 @@ const items = [
 
 const menuPermissions = Object.fromEntries(ADMIN_ROUTES.map((route) => [route.path, route.menu]));
 
-export default function Sidebar() {
+const routePatternToRegExp = (pattern) => {
+  const escapedPattern = pattern
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\\:[^/]+/g, "[^/]+");
+
+  return new RegExp(`^${escapedPattern}$`);
+};
+
+const getSelectedMenuKey = (pathname) => {
+  const detailRoute = adminDetailRoutes.find((route) =>
+    routePatternToRegExp(route.path).test(pathname)
+  );
+
+  return detailRoute?.parentPath || pathname;
+};
+
+const useIsMobileSidebar = () => {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false
+  );
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const handleChange = (event) => setIsMobile(event.matches);
+    setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  return isMobile;
+};
+
+const SidebarBrand = ({ collapsed = false, onToggle }) => (
+  <div className="admin-sidebar-logo">
+    {!collapsed && (
+      <div className="admin-brand">
+        <div className="admin-brand-mark">Q</div>
+        <div className="admin-brand-text">
+          <span className="admin-brand-title">VNUA Quiz</span>
+          <span className="admin-brand-subtitle">Admin Panel</span>
+        </div>
+      </div>
+    )}
+
+    {onToggle && (
+      <Button
+        aria-label={collapsed ? 'Mở rộng menu điều hướng' : 'Thu gọn menu điều hướng'}
+        type="text"
+        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        onClick={onToggle}
+        className="admin-sidebar-toggle"
+      />
+    )}
+  </div>
+);
+
+const SidebarMenu = ({ items: menuItems, mode, onSelect, selectedMenuKey }) => (
+  <Menu
+    theme={mode === 'dark' ? 'dark' : 'light'}
+    mode="inline"
+    selectedKeys={[selectedMenuKey]}
+    onClick={({ key }) => onSelect(key)}
+    items={menuItems}
+  />
+);
+
+export default function Sidebar({ mobileOpen = false, onMobileClose }) {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { mode } = useTheme();
   const { user, canMenu } = useAuth();
+  const selectedMenuKey = getSelectedMenuKey(location.pathname);
+  const isMobile = useIsMobileSidebar();
 
   const visibleItems = items.filter((item) => {
     if (user?.role !== 'MOD') return true;
     return canMenu(menuPermissions[item.key]);
   });
+
+  const handleSelect = (key) => {
+    navigate(key);
+    onMobileClose?.();
+  };
+
+  if (isMobile) {
+    return (
+      <Drawer
+        className="admin-mobile-sidebar-drawer"
+        closeIcon={null}
+        onClose={onMobileClose}
+        open={mobileOpen}
+        placement="left"
+        styles={{ body: { padding: 0 } }}
+        width={270}
+      >
+        <SidebarBrand />
+        <SidebarMenu
+          items={visibleItems}
+          mode={mode}
+          onSelect={handleSelect}
+          selectedMenuKey={selectedMenuKey}
+        />
+      </Drawer>
+    );
+  }
 
   return (
     <Sider
@@ -62,31 +161,15 @@ export default function Sidebar() {
       width={270}
       className="admin-sidebar"
     >
-      <div className="admin-sidebar-logo">
-        {!collapsed && (
-          <div className="admin-brand">
-            <div className="admin-brand-mark">Q</div>
-            <div className="admin-brand-text">
-              <span className="admin-brand-title">VNUA Quiz</span>
-              <span className="admin-brand-subtitle">Admin Panel</span>
-            </div>
-          </div>
-        )}
-
-        <Button
-          type="text"
-          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          onClick={() => setCollapsed(!collapsed)}
-          className="admin-sidebar-toggle"
-        />
-      </div>
-
-      <Menu
-        theme={mode === 'dark' ? 'dark' : 'light'}
-        mode="inline"
-        selectedKeys={[location.pathname]}
-        onClick={({ key }) => navigate(key)}
+      <SidebarBrand
+        collapsed={collapsed}
+        onToggle={() => setCollapsed(!collapsed)}
+      />
+      <SidebarMenu
         items={visibleItems}
+        mode={mode}
+        onSelect={handleSelect}
+        selectedMenuKey={selectedMenuKey}
       />
     </Sider>
   );

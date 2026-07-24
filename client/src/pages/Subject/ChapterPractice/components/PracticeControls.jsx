@@ -1,6 +1,9 @@
 import React from 'react';
 import { SessionHero } from 'pages/Subject/components/QuestionPanelShared/SessionHero';
-import { SUBJECT_MODE_OPTIONS } from '../constants/practiceOptions';
+import {
+  PRACTICE_DIFFICULTY_OPTIONS,
+  SUBJECT_MODE_OPTIONS,
+} from '../constants/practiceOptions';
 
 export const PracticeControls = ({
   answeredCount,
@@ -9,6 +12,7 @@ export const PracticeControls = ({
   isSubjectPractice,
   maxQuestionLimit,
   onModeChange,
+  onPracticeConfigChange,
   onStartPractice,
   panelTitle,
   practiceConfig,
@@ -18,29 +22,39 @@ export const PracticeControls = ({
 }) => {
   const description = `${isSubjectPractice
     ? 'Chọn nhóm câu cần ôn, sau đó bắt đầu khi bạn sẵn sàng.'
-    : 'Ôn tập trực tiếp toàn bộ câu hỏi thuộc chương đã chọn.'} ${
+    : 'Chọn số câu, độ khó rồi bắt đầu ôn tập theo chương.'} ${
     hasRequested
       ? 'Sau mỗi câu, đáp án đúng sẽ hiện ngay để bạn sửa lỗi tư duy.'
       : isSubjectPractice
         ? 'Câu hỏi chỉ được tải sau khi bạn bấm bắt đầu.'
-        : 'Hệ thống đang chuẩn bị câu hỏi cho chương này.'
+        : 'Câu hỏi chỉ được tải sau khi bạn bấm bắt đầu.'
   }`;
+  const safeLimit = Math.min(
+    maxQuestionLimit || 1,
+    Math.max(1, Number(practiceConfig.limit) || 1)
+  );
+
+  const updateConfig = (patch) => {
+    onPracticeConfigChange((prev) => ({
+      ...prev,
+      ...patch,
+    }));
+  };
 
   return (
     <SessionHero
       action={
-        isSubjectPractice && (
         <button
           onClick={onStartPractice}
           disabled={isLoading || maxQuestionLimit <= 0}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
+          className="aura-button aura-button-primary w-full px-5 text-sm md:w-auto"
+          type="button"
         >
           <span className="material-symbols-outlined text-base">
             {hasRequested ? 'filter_alt' : 'play_arrow'}
           </span>
           {hasRequested ? 'Lọc lại' : 'Bắt đầu ôn'}
         </button>
-        )
       }
       badgeIcon={hasRequested ? 'quiz' : 'tune'}
       badgeText={isSubjectPractice ? 'Ôn tập thông minh' : 'Ôn tập theo chương'}
@@ -53,41 +67,82 @@ export const PracticeControls = ({
       }}
       title={panelTitle}
     >
-      {isSubjectPractice && (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {SUBJECT_MODE_OPTIONS.map((option) => {
-            const isActive = practiceConfig.mode === option.value;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onModeChange(option.value)}
-                className={`flex min-h-24 items-start gap-3 rounded-xl border p-4 text-left transition-all ${
-                  isActive
-                    ? 'border-primary bg-primary/10 text-primary shadow-sm dark:bg-primary/15'
-                    : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-primary/50 hover:text-primary dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
-                }`}
-              >
-                <span
-                  className={`material-symbols-outlined mt-0.5 text-xl ${
-                    isActive ? 'text-primary' : 'text-gray-400'
+      <div className="space-y-4">
+        {isSubjectPractice && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {SUBJECT_MODE_OPTIONS.map((option) => {
+              const isActive = practiceConfig.mode === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onModeChange(option.value)}
+                  className={`aura-option-card ${
+                    isActive ? 'aura-option-card--active' : ''
                   }`}
                 >
-                  {option.icon}
-                </span>
-                <span>
-                  <span className="block text-base font-black">
+                  <span
+                    className={`material-symbols-outlined mt-0.5 text-xl ${
+                      isActive ? 'text-primary' : 'text-gray-400'
+                    }`}
+                  >
+                    {option.icon}
+                  </span>
+                  <span>
+                    <span className="block text-base font-black">
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-sm font-medium leading-5 text-gray-500 dark:text-gray-400">
+                      {option.description}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {!isSubjectPractice && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="aura-form-label">
+                Số câu
+              </span>
+              <input
+                className="aura-input h-11 w-full px-3 text-sm"
+                disabled={isLoading}
+                max={maxQuestionLimit || 1}
+                min={1}
+                onChange={(event) =>
+                  updateConfig({ limit: Number(event.target.value) || 1 })
+                }
+                type="number"
+                value={safeLimit}
+              />
+            </label>
+
+            <label className="block">
+              <span className="aura-form-label">
+                Độ khó
+              </span>
+              <select
+                className="aura-input h-11 w-full px-3 text-sm"
+                disabled={isLoading}
+                onChange={(event) =>
+                  updateConfig({ difficulty: event.target.value })
+                }
+                value={practiceConfig.difficulty}
+              >
+                {PRACTICE_DIFFICULTY_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
                     {option.label}
-                  </span>
-                  <span className="mt-1 block text-sm font-medium leading-5 text-gray-500 dark:text-gray-400">
-                    {option.description}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
+      </div>
     </SessionHero>
   );
 };

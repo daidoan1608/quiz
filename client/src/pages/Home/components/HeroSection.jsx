@@ -9,8 +9,9 @@ export default function HeroSection({ t, onStart }) {
       <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.55),transparent_42%,rgba(255,255,255,0.25))] pointer-events-none dark:bg-[linear-gradient(120deg,rgba(255,255,255,0.08),transparent_42%,rgba(255,255,255,0.03))]" />
 
       <div className="relative z-10 flex-1 flex flex-col gap-5 text-center lg:text-left">
-        <span className="inline-flex w-fit mx-auto lg:mx-0 items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-          ✨ {t('home.hero.badge')}
+        <span className="aura-kicker-pill mx-auto w-fit lg:mx-0">
+          <span className="material-symbols-outlined">auto_awesome</span>
+          {t('home.hero.badge')}
         </span>
         <h1 className="text-gray-900 dark:text-white text-4xl sm:text-5xl font-black leading-tight tracking-tight">
           {t('home.hero.title')}
@@ -23,7 +24,7 @@ export default function HeroSection({ t, onStart }) {
           <button
             type="button"
             onClick={onStart}
-            className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
+            className="aura-button aura-button-primary px-6 py-3 text-sm"
           >
             {t('home.hero.start')}
           </button>
@@ -33,8 +34,8 @@ export default function HeroSection({ t, onStart }) {
       <div className="relative z-10 w-full lg:w-96 flex justify-center">
         <div className="w-full max-w-[400px] bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md border border-white/70 dark:border-white/10 shadow-2xl shadow-blue-900/10 dark:shadow-black/30 rounded-2xl p-6 flex flex-col gap-4">
           <div className="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700/50 pb-3">
-            <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
-              🐱
+            <div className="aura-primary-icon-box size-10 rounded-full text-lg font-bold">
+              <span className="material-symbols-outlined">smart_toy</span>
             </div>
             <div className="text-left">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white">

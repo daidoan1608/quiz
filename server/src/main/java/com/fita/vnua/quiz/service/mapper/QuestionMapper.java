@@ -1,5 +1,9 @@
 package com.fita.vnua.quiz.service.mapper;
 
+import com.fita.vnua.quiz.model.enums.QuestionType;
+
+import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
@@ -80,34 +84,34 @@ public class QuestionMapper {
         return dto;
     }
 
-    public Question.Difficulty parseDifficulty(String difficulty) {
+    public QuestionDifficulty parseDifficulty(String difficulty) {
         try {
-            return Question.Difficulty.valueOf(difficulty.toUpperCase());
+            return QuestionDifficulty.valueOf(difficulty.toUpperCase());
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new CustomApiException("Độ khó không hợp lệ: " + difficulty, HttpStatus.BAD_REQUEST);
         }
     }
 
-    public Question.QuestionType parseQuestionType(String questionType) {
+    public QuestionType parseQuestionType(String questionType) {
         if (questionType == null || questionType.isBlank()) {
-            return Question.QuestionType.SINGLE_CHOICE;
+            return QuestionType.SINGLE_CHOICE;
         }
 
         try {
-            return Question.QuestionType.valueOf(questionType.toUpperCase());
+            return QuestionType.valueOf(questionType.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new CustomApiException("Loại câu hỏi không hợp lệ: " + questionType, HttpStatus.BAD_REQUEST);
         }
     }
 
-    private Question.QuestionType resolveQuestionType(Question question) {
+    private QuestionType resolveQuestionType(Question question) {
         if (question.getQuestionType() != null) {
             return question.getQuestionType();
         }
         long correctCount = question.getAnswers().stream()
                 .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
                 .count();
-        return correctCount > 1 ? Question.QuestionType.MULTIPLE_CHOICE : Question.QuestionType.SINGLE_CHOICE;
+        return correctCount > 1 ? QuestionType.MULTIPLE_CHOICE : QuestionType.SINGLE_CHOICE;
     }
 
     private Answer toAnswer(AnswerDto answerDto, Question question) {

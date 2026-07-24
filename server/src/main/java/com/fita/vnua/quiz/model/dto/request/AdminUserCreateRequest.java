@@ -1,16 +1,14 @@
 package com.fita.vnua.quiz.model.dto.request;
 
-import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class AdminUserCreateRequest {
+@EqualsAndHashCode(callSuper = true)
+public class AdminUserCreateRequest extends UpdateProfileRequest {
     private String username;
     private String password;
-    private String fullName;
-    private String email;
-    private User.Role role = User.Role.USER;
-    private String avatarUrl;
-    private String phone;
-    private String address;
+    private UserRole role = UserRole.USER;
 }

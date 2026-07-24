@@ -106,7 +106,15 @@ export const UserFormModal = ({
       >
             <Row gutter={24}>
               <Col xs={24} md={12}>
-                {!isEditMode && (
+                {isEditMode ? (
+                  <Form.Item label="Tài khoản" name="username">
+                    <Input
+                      prefix={<UserOutlined />}
+                      placeholder="Tên tài khoản"
+                      disabled
+                    />
+                  </Form.Item>
+                ) : (
                   <Form.Item
                     label="Tên tài khoản (Username)"
                     name="username"
@@ -182,7 +190,7 @@ export const UserFormModal = ({
                         <Select.Option value="ADMIN">ADMIN</Select.Option>
                       </Select>
                     </Form.Item>
-                    <Form.Item label="Hành động">
+                    <Form.Item>
                       <AdminFormActions
                         loading={submitting}
                         onCancel={cancel}

@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.configuration;
 
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.configuration.properties.AdminProperties;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.UserRepository;
@@ -36,7 +38,7 @@ public class AdminInitializer implements CommandLineRunner {
         User admin = new User();
         admin.setUsername(adminProperties.getUsername());
         admin.setPassword(passwordEncoder.encode(adminProperties.getPassword()));
-        admin.setRole(User.Role.ADMIN);
+        admin.setRole(UserRole.ADMIN);
         admin.setEmail(adminProperties.getEmail());
         admin.setFullName(adminProperties.getFullName());
 

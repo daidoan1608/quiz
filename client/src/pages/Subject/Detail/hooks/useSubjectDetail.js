@@ -4,6 +4,7 @@ import { subjectApi } from 'api/services/subjectApi';
 import { useAuth } from 'context/auth/AuthProvider';
 import { useFavorites } from 'context/favorites/FavoritesContext';
 import { useLanguage } from 'context/language/LanguageProvider';
+import { getCurrentUserId } from 'utils/storage';
 import {
   buildChapterPracticeLocation,
   buildExamAttemptLocation,
@@ -12,7 +13,7 @@ import {
 } from 'pages/Subject/utils/subjectNavigation';
 import {
   getEstimatedStudyHours,
-  getSubjectDetailProgress,
+  getSubjectProgress,
 } from 'pages/Subject/utils/subjectPresentation';
 
 export const useSubjectDetail = () => {
@@ -29,7 +30,7 @@ export const useSubjectDetail = () => {
   const { isLoggedIn } = useAuth();
   const { favorites, toggleFavorite } = useFavorites();
   const { texts } = useLanguage();
-  const userId = localStorage.getItem('userId');
+  const userId = getCurrentUserId();
 
   useEffect(() => {
     if (!subjectId) {
@@ -94,7 +95,7 @@ export const useSubjectDetail = () => {
     ? favorites.some((fav) => fav.subjectId === subjectData.subjectId)
     : false;
   const progress = useMemo(
-    () => getSubjectDetailProgress(subjectData),
+    () => getSubjectProgress(subjectData),
     [subjectData]
   );
 
@@ -122,6 +123,7 @@ export const useSubjectDetail = () => {
 
   return {
     chapters,
+    canToggleFavorite: isLoggedIn,
     closeLoginPrompt: () => setShowLoginPrompt(false),
     error,
     estimatedHours,

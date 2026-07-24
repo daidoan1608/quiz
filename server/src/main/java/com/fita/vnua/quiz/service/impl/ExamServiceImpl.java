@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.ExamDto;
 import com.fita.vnua.quiz.model.dto.ExamSummaryDto;
@@ -13,14 +15,15 @@ import com.fita.vnua.quiz.service.NotificationService;
 import com.fita.vnua.quiz.service.QuestionService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.UserExamService;
-import com.fita.vnua.quiz.service.mapper.QuestionMapper;
+import com.fita.vnua.quiz.service.mapper.ExamMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,10 +42,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ExamServiceImpl implements ExamService {
     private final ExamRepository examRepository;
-    private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;
     private final QuestionService questionService;
-    private final ModelMapper modelMapper;
     private final ExamQuestionRepository examQuestionRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
@@ -50,7 +51,9 @@ public class ExamServiceImpl implements ExamService {
     private final UserExamRepository userExamRepository;
     private final SoftDeleteService softDeleteService;
     private final UserExamService userExamService;
-    private final QuestionMapper questionMapper;
+    private final QuestionDetailLoader questionDetailLoader;
+    private final ExamQuestionSelectionService examQuestionSelectionService;
+    private final ExamMapper examMapper;
 
     protected List<ExamSummaryDto> mapExamsToSummaryDtos(List<Exam> exams) {
         Map<Long, Long> questionCounts = countQuestionsByExam(exams);
@@ -60,18 +63,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     private ExamSummaryDto mapExamToSummaryDto(Exam exam, Map<Long, Long> questionCounts) {
-        ExamSummaryDto dto = new ExamSummaryDto();
-        dto.setExamId(exam.getExamId());
-        dto.setExamCode(exam.getExamCode());
-        dto.setTitle(exam.getTitle());
-        dto.setDescription(exam.getDescription());
-        dto.setDuration(exam.getDuration());
-        dto.setSubjectId(exam.getSubject().getSubjectId());
-        dto.setSubjectName(exam.getSubject().getName());
-        dto.setCreatedBy(exam.getCreatedBy().getUserId());
-        dto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
-        dto.setQuestionCount(questionCounts.getOrDefault(exam.getExamId(), 0L).intValue());
-        return dto;
+        return examMapper.toSummaryDto(exam, questionCounts.getOrDefault(exam.getExamId(), 0L));
     }
 
     private Map<Long, Long> countQuestionsByExam(List<Exam> exams) {
@@ -135,125 +127,38 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    public Page<ExamSummaryDto> filterExamsPage(String keyword, Long categoryId, Long subjectId, UUID createdBy, Boolean deleted, int page, int size, String sortBy, String sortDir) {
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                Math.min(Math.max(size, 1), 100),
+                resolveExamSort(sortBy, sortDir)
+        );
+        return filterExamsPage(keyword, categoryId, subjectId, createdBy, deleted, pageable);
+    }
+
+    @Override
     @Cacheable(value = "publicExamDetail", key = "#id")
     public ExamDto getExamById(Long id) {
         Exam exam = examRepository.findByExamIdAndDeletedFalse(id)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi", HttpStatus.NOT_FOUND));
-        ExamDto examDto = new ExamDto();
-        examDto.setExamId(exam.getExamId());
-        examDto.setExamCode(exam.getExamCode());
-        examDto.setTitle(exam.getTitle());
-        examDto.setDescription(exam.getDescription());
-        examDto.setDuration(exam.getDuration());
-        examDto.setSubjectId(exam.getSubject().getSubjectId());
-        examDto.setSubjectName(subjectRepository.findById(exam.getSubject().getSubjectId())
-                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND))
-                .getName());
-        examDto.setCreatedBy(exam.getCreatedBy().getUserId());
-        examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
-
-        examDto.setQuestions(questionService.getQuestionsByExamId(exam.getExamId()));
-        return examDto;
+        return examMapper.toDto(exam, questionService.getQuestionsByExamId(exam.getExamId()));
     }
 
-//    @Override
-//    public ExamDto createExam(ExamRequest examRequest) {
-//        // Tạo Exam mới
-//        ExamDto examDto = examRequest.getExamDto();
-//        Exam exam = new Exam();
-//        exam.setTitle(examDto.getTitle());
-//        exam.setSubject(subjectRepository.findById(examDto.getSubjectId()).orElseThrow(() -> new RuntimeException("Không tìm thấy môn học")));
-//        exam.setDescription(examDto.getDescription());
-//        exam.setDuration(examDto.getDuration());
-//        exam.setCreatedBy(userRepository.findById(examDto.getCreatedBy()).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng")));
-//        exam.setCreatedTime(LocalDate.now());
-//        exam = examRepository.save(exam);
-//
-//        examDto.setExamId(exam.getExamId());
-//        examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
-//
-//        if (examRequest.getTotalQuestions() > 0) {
-//            List<QuestionDto> questionDtos = questionService.getQuestionsBySubjectAndNumber(examDto.getSubjectId(), examRequest.getTotalQuestions());
-//
-//            // Chuyển đổi từ DTO sang Entity cho tất cả câu hỏi
-//            List<Question> allQuestions = questionDtos.stream()
-//                    .map(questionDto -> modelMapper.map(questionDto, Question.class))
-//                    .toList();
-//
-//            // Lưu liên kết ExamQuestion cho tất cả câu hỏi
-//            for (Question question : allQuestions) {
-//                ExamQuestionId examQuestionId = new ExamQuestionId();
-//                examQuestionId.setExamId(exam.getExamId());
-//                examQuestionId.setQuestionId(question.getQuestionId());
-//                ExamQuestion examQuestion = new ExamQuestion();
-//                examQuestion.setExam(exam);
-//                examQuestion.setQuestion(question);
-//                examQuestion.setId(examQuestionId);
-//                examQuestionRepository.save(examQuestion);
-//            }
-//            examDto.setQuestions(questionDtos);
-//        }
-//        if (examRequest.getEasyQuestions() > 0 && examRequest.getMediumQuestions() > 0 && examRequest.getHardQuestions() > 0) {
-//            List<QuestionDto> questionDtos = new ArrayList<>();
-//
-//            // Lấy câu hỏi dễ
-//            if (examRequest.getEasyQuestions() > 0) {
-//                questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(examDto.getSubjectId(), examRequest.getEasyQuestions(), "EASY"));
-//            }
-//
-//            // Lấy câu hỏi trung bình
-//            if (examRequest.getMediumQuestions() > 0) {
-//                questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(examDto.getSubjectId(), examRequest.getMediumQuestions(), "MEDIUM"));
-//            }
-//
-//            // Lấy câu hỏi khó
-//            if (examRequest.getHardQuestions() > 0) {
-//                questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(examDto.getSubjectId(), examRequest.getHardQuestions(), "HARD"));
-//            }
-//
-//            List<Question> allQuestions = questionDtos.stream()
-//                    .map(questionDto -> modelMapper.map(questionDto, Question.class))
-//                    .toList();
-//
-//            // Lưu liên kết ExamQuestion cho tất cả câu hỏi
-//            for (Question question : allQuestions) {
-//                ExamQuestionId examQuestionId = new ExamQuestionId();
-//                examQuestionId.setExamId(exam.getExamId());
-//                examQuestionId.setQuestionId(question.getQuestionId());
-//                ExamQuestion examQuestion = new ExamQuestion();
-//                examQuestion.setExam(exam);
-//                examQuestion.setQuestion(question);
-//                examQuestion.setId(examQuestionId);
-//                examQuestionRepository.save(examQuestion);
-//            }
-//            examDto.setQuestions(questionDtos);
-//        }
-//        if (!examRequest.getTotalQuestionByChapter().isEmpty()) {
-//            List<QuestionDto> chapterQuestions = new ArrayList<>();
-//            for (Map.Entry<Long, Integer> entry : examRequest.getTotalQuestionByChapter().entrySet()) {
-//                Long chapterId = entry.getKey();  // Lấy chapterId
-//                Integer selectedQuestions = entry.getValue();
-//                if (selectedQuestions > 0) {
-//                    chapterQuestions.addAll(questionService.getQuestionsByChapter(chapterId, selectedQuestions));
-//                }
-//            }
-//            List<Question> allQuestions = chapterQuestions.stream()
-//                    .map(questionDto -> modelMapper.map(questionDto, Question.class))
-//                    .toList();
-//            for (Question question : allQuestions) {
-//                ExamQuestionId examQuestionId = new ExamQuestionId();
-//                examQuestionId.setExamId(exam.getExamId());
-//                examQuestionId.setQuestionId(question.getQuestionId());
-//                ExamQuestion examQuestion = new ExamQuestion();
-//                examQuestion.setExam(exam);
-//                examQuestion.setQuestion(question);
-//                examQuestion.setId(examQuestionId);
-//                examQuestionRepository.save(examQuestion);
-//            }
-//            examDto.setQuestions(chapterQuestions);
-//        }
-//        return examDto;
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public ExamDto getPublicExamById(Long examId, boolean includeCorrectAnswers, Long userExamId, UUID currentUserId, boolean currentUserAdminOrMod) {
+        ExamDto exam;
+        if (includeCorrectAnswers) {
+            requireCorrectAnswerAccess(examId, userExamId, currentUserId, currentUserAdminOrMod);
+            exam = userExamId == null
+                    ? getExamById(examId)
+                    : getExamByIdForSubmittedAttempt(examId, userExamId, currentUserId);
+        } else {
+            exam = getExamById(examId);
+            stripCorrectAnswers(exam);
+        }
+        return exam;
+    }
 
     @Override
     @Transactional // Đảm bảo tính toàn vẹn dữ liệu
@@ -287,47 +192,9 @@ public class ExamServiceImpl implements ExamService {
         examDto.setCreatedBy(exam.getCreatedBy().getUserId());
         examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
 
-        List<QuestionDto> selectedQuestions = resolveExamQuestions(examRequest, examDto.getSubjectId());
+        List<QuestionDto> selectedQuestions = examQuestionSelectionService.resolveExamQuestions(examRequest, examDto.getSubjectId());
         saveQuestionsToExam(exam, selectedQuestions);
         examDto.setQuestions(selectedQuestions);
-        examRequest.setTotalQuestions(0);
-        examRequest.setEasyQuestions(0);
-        examRequest.setMediumQuestions(0);
-        examRequest.setHardQuestions(0);
-        examRequest.setTotalQuestionByChapter(Map.of());
-        // 2. Logic thêm câu hỏi (Giữ nguyên code cũ của bạn)
-        // ... (Logic TotalQuestions) ...
-        if (examRequest.getTotalQuestions() > 0) {
-            List<QuestionDto> questionDtos = questionService.getQuestionsBySubjectAndNumber(examDto.getSubjectId(), examRequest.getTotalQuestions());
-            saveQuestionsToExam(exam, questionDtos); // Mình tách hàm save cho gọn code bên dưới
-            examDto.setQuestions(questionDtos);
-        }
-
-        // ... (Logic Difficulty) ...
-        if (examRequest.getEasyQuestions() > 0 || examRequest.getMediumQuestions() > 0 || examRequest.getHardQuestions() > 0) {
-            List<QuestionDto> questionDtos = new ArrayList<>();
-            if (examRequest.getEasyQuestions() > 0)
-                questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(examDto.getSubjectId(), examRequest.getEasyQuestions(), "EASY"));
-            if (examRequest.getMediumQuestions() > 0)
-                questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(examDto.getSubjectId(), examRequest.getMediumQuestions(), "MEDIUM"));
-            if (examRequest.getHardQuestions() > 0)
-                questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(examDto.getSubjectId(), examRequest.getHardQuestions(), "HARD"));
-
-            saveQuestionsToExam(exam, questionDtos);
-            examDto.setQuestions(questionDtos);
-        }
-
-        // ... (Logic Chapter) ...
-        if (!examRequest.getTotalQuestionByChapter().isEmpty()) {
-            List<QuestionDto> chapterQuestions = new ArrayList<>();
-            for (Map.Entry<Long, Integer> entry : examRequest.getTotalQuestionByChapter().entrySet()) {
-                if (entry.getValue() > 0) {
-                    chapterQuestions.addAll(questionService.getQuestionsByChapter(entry.getKey(), entry.getValue()));
-                }
-            }
-            saveQuestionsToExam(exam, chapterQuestions);
-            examDto.setQuestions(chapterQuestions);
-        }
 
         // 3. --- TÍCH HỢP GỬI THÔNG BÁO TỰ ĐỘNG ---
         // Đặt ở cuối cùng để chắc chắn đề thi đã tạo thành công
@@ -351,7 +218,7 @@ public class ExamServiceImpl implements ExamService {
         Set<Long> questionIds = questionDtos.stream()
                 .map(QuestionDto::getQuestionId)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        List<Question> allQuestions = questionRepository.findWithDetailsByQuestionIds(new ArrayList<>(questionIds));
+        List<Question> allQuestions = questionDetailLoader.loadByIdsInSameOrder(new ArrayList<>(questionIds));
         Map<Long, Question> questionById = allQuestions.stream()
                 .collect(Collectors.toMap(Question::getQuestionId, question -> question));
 
@@ -371,132 +238,6 @@ public class ExamServiceImpl implements ExamService {
 
             examQuestionRepository.save(examQuestion);
         }
-    }
-
-    private List<QuestionDto> resolveExamQuestions(ExamRequest examRequest, Long subjectId) {
-        ExamGenerationMode mode = resolveGenerationMode(examRequest);
-        List<QuestionDto> questions = switch (mode) {
-            case TOTAL -> questionService.getQuestionsBySubjectAndNumber(subjectId, examRequest.getTotalQuestions());
-            case DIFFICULTY -> {
-                List<QuestionDto> questionDtos = new ArrayList<>();
-                if (examRequest.getEasyQuestions() > 0) {
-                    questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(subjectId, examRequest.getEasyQuestions(), "EASY"));
-                }
-                if (examRequest.getMediumQuestions() > 0) {
-                    questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(subjectId, examRequest.getMediumQuestions(), "MEDIUM"));
-                }
-                if (examRequest.getHardQuestions() > 0) {
-                    questionDtos.addAll(questionService.getQuestionsBySubjectAndDifficulty(subjectId, examRequest.getHardQuestions(), "HARD"));
-                }
-                yield questionDtos;
-            }
-            case CHAPTER -> {
-                List<QuestionDto> chapterQuestions = new ArrayList<>();
-                Map<Long, Integer> chapterCounts = examRequest.getTotalQuestionByChapter() == null
-                        ? Map.of()
-                        : examRequest.getTotalQuestionByChapter();
-                for (Map.Entry<Long, Integer> entry : chapterCounts.entrySet()) {
-                    if (entry.getValue() != null && entry.getValue() > 0) {
-                        chapterQuestions.addAll(questionService.getQuestionsByChapter(entry.getKey(), entry.getValue()));
-                    }
-                }
-                yield chapterQuestions;
-            }
-            case MANUAL -> resolveManualQuestions(examRequest.getQuestionIds());
-        };
-        validateSelectedQuestions(questions, subjectId);
-        return questions;
-    }
-
-    private List<QuestionDto> resolveManualQuestions(List<Long> questionIds) {
-        if (questionIds == null || questionIds.isEmpty()) {
-            throw new CustomApiException("Vui lòng chọn ít nhất 1 câu hỏi", HttpStatus.BAD_REQUEST);
-        }
-        List<Long> uniqueIds = new ArrayList<>(new LinkedHashSet<>(questionIds));
-        if (uniqueIds.size() != questionIds.size()) {
-            throw new CustomApiException("Danh sách câu hỏi không được trừng", HttpStatus.BAD_REQUEST);
-        }
-        Map<Long, Question> questionById = questionRepository.findWithDetailsByQuestionIds(uniqueIds).stream()
-                .collect(Collectors.toMap(Question::getQuestionId, question -> question));
-        if (questionById.size() != uniqueIds.size()) {
-            throw new CustomApiException("Không tìm thấy một số câu hỏi đã chọn", HttpStatus.NOT_FOUND);
-        }
-        return uniqueIds.stream()
-                .map(questionById::get)
-                .map(questionMapper::toDto)
-                .toList();
-    }
-
-    private void validateSelectedQuestions(List<QuestionDto> questions, Long subjectId) {
-        if (questions == null || questions.isEmpty()) {
-            throw new CustomApiException("Vui lòng chọn ít nhất 1 câu hỏi", HttpStatus.BAD_REQUEST);
-        }
-        Set<Long> seenQuestionIds = new LinkedHashSet<>();
-        for (QuestionDto question : questions) {
-            if (question.getQuestionId() == null || !seenQuestionIds.add(question.getQuestionId())) {
-                throw new CustomApiException("Danh sách câu hỏi không được trừng", HttpStatus.BAD_REQUEST);
-            }
-            Question entity = questionRepository.findById(question.getQuestionId())
-                    .orElseThrow(() -> new CustomApiException("Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND));
-            if (Boolean.TRUE.equals(entity.getDeleted()) || !Boolean.TRUE.equals(entity.getExamEnabled())) {
-                throw new CustomApiException("Câu hỏi đã chọn không hợp lệ để tạo đề", HttpStatus.BAD_REQUEST);
-            }
-            Long questionSubjectId = entity.getChapter() == null || entity.getChapter().getSubject() == null
-                    ? null
-                    : entity.getChapter().getSubject().getSubjectId();
-            if (!subjectId.equals(questionSubjectId)) {
-                throw new CustomApiException("Câu hỏi đã chọn không thuộc môn của đề thi", HttpStatus.BAD_REQUEST);
-            }
-        }
-    }
-
-    private ExamGenerationMode resolveGenerationMode(ExamRequest examRequest) {
-        int activeModes = 0;
-        if (examRequest.getQuestionIds() != null && !examRequest.getQuestionIds().isEmpty()) {
-            activeModes++;
-        }
-        if (examRequest.getTotalQuestions() > 0) {
-            activeModes++;
-        }
-        if (examRequest.getEasyQuestions() > 0 || examRequest.getMediumQuestions() > 0 || examRequest.getHardQuestions() > 0) {
-            activeModes++;
-        }
-        Map<Long, Integer> chapterCounts = examRequest.getTotalQuestionByChapter() == null
-                ? Map.of()
-                : examRequest.getTotalQuestionByChapter();
-        if (chapterCounts.values().stream().anyMatch(count -> count != null && count > 0)) {
-            activeModes++;
-        }
-        if (activeModes > 1) {
-            throw new CustomApiException("Chỉ được chọn một phương thức tạo đề", HttpStatus.BAD_REQUEST);
-        }
-        if (examRequest.getGenerationMode() != null && !examRequest.getGenerationMode().isBlank()) {
-            try {
-                return ExamGenerationMode.valueOf(examRequest.getGenerationMode().trim().toUpperCase());
-            } catch (IllegalArgumentException exception) {
-                throw new CustomApiException("Phương thức tạo đề không hợp lệ", HttpStatus.BAD_REQUEST);
-            }
-        }
-        if (examRequest.getQuestionIds() != null && !examRequest.getQuestionIds().isEmpty()) {
-            return ExamGenerationMode.MANUAL;
-        }
-        if (examRequest.getTotalQuestions() > 0) {
-            return ExamGenerationMode.TOTAL;
-        }
-        if (examRequest.getEasyQuestions() > 0 || examRequest.getMediumQuestions() > 0 || examRequest.getHardQuestions() > 0) {
-            return ExamGenerationMode.DIFFICULTY;
-        }
-        if (chapterCounts.values().stream().anyMatch(count -> count != null && count > 0)) {
-            return ExamGenerationMode.CHAPTER;
-        }
-        throw new CustomApiException("Vui lòng chọn phương thức tạo đề", HttpStatus.BAD_REQUEST);
-    }
-
-    private enum ExamGenerationMode {
-        TOTAL,
-        DIFFICULTY,
-        CHAPTER,
-        MANUAL
     }
 
     @Override
@@ -523,22 +264,12 @@ public class ExamServiceImpl implements ExamService {
         Exam updatedExam = examRepository.save(exam);
 
         if (examDto.getQuestions() != null) {
-            validateSelectedQuestions(examDto.getQuestions(), updatedExam.getSubject().getSubjectId());
+            examQuestionSelectionService.validateSelectedQuestions(examDto.getQuestions(), updatedExam.getSubject().getSubjectId());
             examQuestionRepository.deleteByExamId(updatedExam.getExamId());
             saveQuestionsToExam(updatedExam, examDto.getQuestions());
         }
 
-        ExamDto resultDto = new ExamDto();
-        resultDto.setExamId(updatedExam.getExamId());
-        resultDto.setExamCode(updatedExam.getExamCode());
-        resultDto.setTitle(updatedExam.getTitle());
-        resultDto.setDescription(updatedExam.getDescription());
-        resultDto.setDuration(updatedExam.getDuration());
-        resultDto.setSubjectId(updatedExam.getSubject().getSubjectId());
-        resultDto.setCreatedBy(updatedExam.getCreatedBy().getUserId());
-        resultDto.setCreatedDate(String.valueOf(updatedExam.getCreatedTime()));
-        resultDto.setQuestions(questionService.getQuestionsByExamId(updatedExam.getExamId()));
-        return resultDto;
+        return examMapper.toDto(updatedExam, questionService.getQuestionsByExamId(updatedExam.getExamId()));
     }
 
     @Override
@@ -564,30 +295,62 @@ public class ExamServiceImpl implements ExamService {
     public ExamDto getExamByIdForSubmittedAttempt(Long examId, Long userExamId, UUID currentUserId) {
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN));
-        UserExam userExam = (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MOD)
-                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN))
+        UserExam userExam = (currentUser.getRole() == UserRole.ADMIN || currentUser.getRole() == UserRole.MOD)
+                ? userExamRepository.findByIdWithExamSubjectAndUser(userExamId).orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN))
                 : userExamRepository.findByIdAndUserId(userExamId, currentUserId)
                         .orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN));
         if (!examId.equals(userExam.getExam().getExamId()) || !"SUBMITTED".equals(userExam.getStatus())) {
             throw new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN);
         }
         List<QuestionDto> questions = userExamService.getAttemptQuestionDtosForSubmittedAttempt(userExamId, currentUserId);
-        return mapExamToDto(userExam.getExam(), questions);
+        return examMapper.toDto(userExam.getExam(), questions);
     }
 
-    private ExamDto mapExamToDto(Exam exam, List<QuestionDto> questions) {
-        ExamDto examDto = new ExamDto();
-        examDto.setExamId(exam.getExamId());
-        examDto.setExamCode(exam.getExamCode());
-        examDto.setTitle(exam.getTitle());
-        examDto.setDescription(exam.getDescription());
-        examDto.setDuration(exam.getDuration());
-        examDto.setSubjectId(exam.getSubject().getSubjectId());
-        examDto.setSubjectName(exam.getSubject().getName());
-        examDto.setCreatedBy(exam.getCreatedBy().getUserId());
-        examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
-        examDto.setQuestions(questions);
-        return examDto;
+    private void requireCorrectAnswerAccess(Long examId, Long userExamId, UUID currentUserId, boolean currentUserAdminOrMod) {
+        if (currentUserId == null) {
+            throw new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN);
+        }
+        if (currentUserAdminOrMod) {
+            return;
+        }
+        if (userExamId == null) {
+            throw new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN);
+        }
+        UserExam userExam = userExamRepository.findByIdAndUserId(userExamId, currentUserId)
+                .orElseThrow(() -> new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN));
+        if (!examId.equals(userExam.getExam().getExamId()) || !"SUBMITTED".equals(userExam.getStatus())) {
+            throw new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN);
+        }
+    }
+
+    private ExamDto stripCorrectAnswers(ExamDto exam) {
+        if (exam.getQuestions() == null) {
+            return exam;
+        }
+        exam.getQuestions().forEach(question -> {
+            if (question.getAnswers() != null) {
+                question.getAnswers().forEach(answer -> answer.setIsCorrect(null));
+            }
+        });
+        return exam;
+    }
+
+    private Sort resolveExamSort(String sortBy, String sortDir) {
+        String property = switch (sortBy == null ? "" : sortBy) {
+            case "subjectId" -> "subject.subjectId";
+            case "subjectName" -> "subject.name";
+            case "examCode" -> "examCode";
+            case "title" -> "title";
+            case "description" -> "description";
+            case "duration" -> "duration";
+            case "createdDate" -> "createdTime";
+            case "deletedAt" -> "deletedAt";
+            default -> "examId";
+        };
+        Sort.Direction direction = "ascend".equalsIgnoreCase(sortDir) || "asc".equalsIgnoreCase(sortDir)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+        return Sort.by(direction, property);
     }
 
     private String resolveExamCode(String rawExamCode, Long currentExamId) {

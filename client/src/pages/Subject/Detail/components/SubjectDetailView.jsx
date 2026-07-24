@@ -6,6 +6,7 @@ import SubjectDetailHero from './SubjectDetailHero';
 import { ChapterSection, ExamSidebar } from './SubjectDetailSections';
 
 export default function SubjectDetailView({
+  canToggleFavorite,
   chapters,
   closeLoginPrompt,
   estimatedHours,
@@ -46,6 +47,7 @@ export default function SubjectDetailView({
         />
 
         <SubjectDetailHero
+          canToggleFavorite={canToggleFavorite}
           chapters={chapters}
           estimatedHours={estimatedHours}
           exams={exams}

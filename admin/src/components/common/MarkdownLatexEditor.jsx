@@ -62,6 +62,8 @@ const MarkdownLatexEditor = ({
         {EDITOR_ACTIONS.map((action) => (
           <Tooltip key={action.key} title={action.title}>
             <Button
+              aria-label={action.title}
+              title={action.title}
               type="text"
               size="small"
               icon={action.icon}

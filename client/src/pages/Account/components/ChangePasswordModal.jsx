@@ -1,5 +1,5 @@
-import React from 'react';
-import { message } from 'antd';
+﻿import React from 'react';
+import { appMessage } from 'utils/appMessage';
 import PasswordInputField from './PasswordInputField';
 import {
   getPasswordChangeValidationMessage,
@@ -27,7 +27,7 @@ export default function ChangePasswordModal({
     });
 
     if (validationMessage) {
-      message.warning(validationMessage);
+      appMessage.warning(validationMessage);
       return;
     }
 
@@ -38,7 +38,7 @@ export default function ChangePasswordModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 animate-in zoom-in-95">
+      <div className="aura-surface-panel w-full max-w-md rounded-xl p-6 shadow-2xl animate-in zoom-in-95">
         <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
           {texts.changePass || 'Đổi mật khẩu'}
         </h3>
@@ -64,13 +64,13 @@ export default function ChangePasswordModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium"
+              className="aura-button aura-button-subtle flex-1 py-2 text-sm"
             >
               {texts.cancel || 'Hủy'}
             </button>
             <button
               type="submit"
-              className="flex-1 py-2 rounded-lg bg-primary text-white hover:bg-blue-600 font-bold shadow-lg shadow-blue-500/30"
+              className="aura-button aura-button-primary flex-1 py-2 text-sm"
             >
               {texts.saveChanges || 'Lưu thay đổi'}
             </button>
@@ -80,3 +80,4 @@ export default function ChangePasswordModal({
     </div>
   );
 }
+

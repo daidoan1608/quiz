@@ -1,5 +1,5 @@
 import React from 'react';
-import { progressValueStyle } from 'utils/styleVariables';
+import { ReadinessRing } from 'components/common/ProgressBar';
 import { MiniInfo } from './SubjectDetailCards';
 
 const SubjectReadinessPanel = ({ chapters, exams, progress, texts }) => (
@@ -8,10 +8,7 @@ const SubjectReadinessPanel = ({ chapters, exams, progress, texts }) => (
       {texts.readiness || 'Mức độ sẵn sàng'}
     </h3>
     <div className="flex items-center gap-5">
-      <div
-        className="aura-readiness-ring relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
-        style={progressValueStyle(progress)}
-      >
+      <ReadinessRing className="h-32 w-32" value={progress}>
         <div className="absolute h-[70%] w-[70%] rounded-full bg-white dark:bg-gray-800" />
         <div className="relative z-10 text-center">
           <span className="block text-2xl font-black text-gray-950 dark:text-white">
@@ -21,7 +18,7 @@ const SubjectReadinessPanel = ({ chapters, exams, progress, texts }) => (
             {texts.ready || 'Sẵn sàng'}
           </span>
         </div>
-      </div>
+      </ReadinessRing>
       <div className="min-w-0 flex-1 space-y-3">
         <MiniInfo label={texts.chapter || 'Chương'} value={`${chapters.length}`} />
         <MiniInfo label={texts.examLabel || 'Đề thi'} value={`${exams.length}`} />

@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.repository;
 
+import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
+
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Question;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
+    @Query("""
+            SELECT DISTINCT q FROM Question q
+            LEFT JOIN FETCH q.answers
+            JOIN FETCH q.chapter c
+            JOIN FETCH c.subject
+            """)
+    List<Question> findAllWithDetails();
+
     @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     List<Question> findByDeletedFalse();
 
@@ -118,9 +128,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             """)
     List<Question> findQuestionsByExamIdIncludingDeleted(Long examId);
 
-    long countByDifficultyAndDeletedFalse(Question.Difficulty difficulty);
+    long countByDifficultyAndDeletedFalse(QuestionDifficulty difficulty);
 
-    default long countByDifficulty(Question.Difficulty difficulty) {
+    default long countByDifficulty(QuestionDifficulty difficulty) {
         return countByDifficultyAndDeletedFalse(difficulty);
     }
 
@@ -162,9 +172,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
         return countByChapterAndDeletedFalse(chapter);
     }
 
-    long countByChapterAndDifficultyAndDeletedFalse(Chapter chapter, Question.Difficulty difficulty);
+    long countByChapterAndDifficultyAndDeletedFalse(Chapter chapter, QuestionDifficulty difficulty);
 
-    default long countByChapterAndDifficulty(Chapter chapter, Question.Difficulty difficulty) {
+    default long countByChapterAndDifficulty(Chapter chapter, QuestionDifficulty difficulty) {
         return countByChapterAndDifficultyAndDeletedFalse(chapter, difficulty);
     }
 
@@ -192,7 +202,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("keyword") String keyword,
             @Param("subjectId") Long subjectId,
             @Param("chapterId") Long chapterId,
-            @Param("difficulty") Question.Difficulty difficulty,
+            @Param("difficulty") QuestionDifficulty difficulty,
             @Param("deleted") Boolean deleted,
             @Param("examEnabled") Boolean examEnabled,
             @Param("practiceEnabled") Boolean practiceEnabled);
@@ -265,7 +275,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("keyword") String keyword,
             @Param("subjectId") Long subjectId,
             @Param("chapterId") Long chapterId,
-            @Param("difficulty") Question.Difficulty difficulty,
+            @Param("difficulty") QuestionDifficulty difficulty,
             @Param("deleted") Boolean deleted,
             @Param("examEnabled") Boolean examEnabled,
             @Param("practiceEnabled") Boolean practiceEnabled,
@@ -285,4 +295,17 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             WHERE q.questionId IN :questionIds
             """)
     List<Question> findWithDetailsByQuestionIds(@Param("questionIds") List<Long> questionIds);
+
+    @Query("""
+            SELECT DISTINCT q FROM Question q
+            LEFT JOIN FETCH q.answers
+            JOIN FETCH q.chapter c
+            WHERE c.chapterId = :chapterId
+            AND q.deleted = true
+            AND q.deletedCascadeId = :cascadeId
+            """)
+    List<Question> findDeletedByChapterIdAndCascadeId(
+            @Param("chapterId") Long chapterId,
+            @Param("cascadeId") java.util.UUID cascadeId
+    );
 }

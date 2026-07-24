@@ -1,4 +1,5 @@
 import React from 'react';
+import { SectionLoadingState } from '../../../components/common/PageState';
 import { formatTime, getIconInfo } from '../utils/notificationFormatters';
 
 export const NotificationList = ({
@@ -8,7 +9,11 @@ export const NotificationList = ({
 }) => (
   <div className="flex flex-col bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
     {loading ? (
-      <div className="p-10 text-center text-gray-500">Đang tải dữ liệu...</div>
+      <SectionLoadingState
+        className="p-10"
+        label="Đang tải dữ liệu..."
+        minHeightClassName="min-h-32"
+      />
     ) : filteredNotifications.length === 0 ? (
       <div className="flex flex-col items-center justify-center p-10 text-gray-400 gap-2">
         <span className="material-symbols-outlined text-5xl opacity-50">
@@ -24,11 +29,11 @@ export const NotificationList = ({
         return (
           <div key={notif.id}>
             <div
-              className={`relative flex gap-4 p-4 transition-all cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 ${isUnread ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+              className={`relative flex gap-4 p-4 transition-all cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 ${isUnread ? 'bg-primary/10 dark:bg-primary/15' : ''}`}
               onClick={() => onNotificationClick(notif)}
             >
               {isUnread && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
               )}
 
               <div
@@ -64,7 +69,7 @@ export const NotificationList = ({
 
               {isUnread && (
                 <div className="shrink-0 pt-2">
-                  <div className="size-2.5 bg-blue-600 rounded-full ring-2 ring-white dark:ring-gray-900"></div>
+                  <div className="size-2.5 bg-primary rounded-full ring-2 ring-white dark:ring-gray-900"></div>
                 </div>
               )}
             </div>

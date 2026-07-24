@@ -1,11 +1,10 @@
 package com.fita.vnua.quiz.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fita.vnua.quiz.model.dto.AnswerDto;
+import com.fita.vnua.quiz.model.enums.QuestionType;
+
+import com.fita.vnua.quiz.model.enums.UserRole;
+
 import com.fita.vnua.quiz.model.dto.QuestionDto;
-import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.UserAnswerDto;
 import com.fita.vnua.quiz.model.dto.UserExamDto;
 import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
@@ -14,26 +13,29 @@ import com.fita.vnua.quiz.model.dto.request.StartExamAttemptRequest;
 import com.fita.vnua.quiz.model.dto.request.UpdateExamAttemptProgressRequest;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
 import com.fita.vnua.quiz.model.dto.response.ExamAttemptResponse;
+import com.fita.vnua.quiz.model.dto.result.PeriodRange;
 import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;
-import com.fita.vnua.quiz.service.SubjectService;
 import com.fita.vnua.quiz.service.UserExamService;
 import com.fita.vnua.quiz.exception.CustomApiException;
+import com.fita.vnua.quiz.service.mapper.UserExamMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.ByteBuffer;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,15 +57,20 @@ public class UserExamServiceImpl implements UserExamService {
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final UserExamQuestionRepository userExamQuestionRepository;
-    private final ModelMapper modelMapper;
-    private final SubjectService subjectService;
-    private final ObjectMapper objectMapper;
+    private final UserExamAttemptStatsService attemptStatsService;
+    private final UserExamMapper userExamMapper;
 
     @Override
     public List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate) {
         List<UserExamRepository.UserExamSummaryProjection> projections = userExamRepository.getUserExamSummaries(fromDate, toDate);
 
         return projections.stream().map(this::mapSummaryProjection).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserExamSummaryDto> getUserExamSummaries(String period) {
+        PeriodRange range = resolvePeriodRange(period);
+        return getUserExamSummaries(range.fromDate(), range.toDate());
     }
 
     @Override
@@ -98,6 +105,22 @@ public class UserExamServiceImpl implements UserExamService {
         }
 
         return new RankingResponse(topUsers, currentUser);
+    }
+
+    @Override
+    public RankingResponse getRankings(String period, String subjectName, String criteria, int limit, UUID currentUserId) {
+        PeriodRange range = resolvePeriodRange(period);
+        return getRankings(range.fromDate(), range.toDate(), subjectName, criteria, limit, currentUserId);
+    }
+
+    @Override
+    public PeriodRange resolvePeriodRange(String period) {
+        LocalDate today = LocalDate.now();
+        return switch (period == null ? "all" : period.toLowerCase()) {
+            case "week" -> new PeriodRange(today.with(DayOfWeek.MONDAY).atStartOfDay(), today.with(DayOfWeek.MONDAY).plusWeeks(1).atStartOfDay());
+            case "month" -> new PeriodRange(today.withDayOfMonth(1).atStartOfDay(), today.withDayOfMonth(1).plusMonths(1).atStartOfDay());
+            default -> new PeriodRange(null, null);
+        };
     }
 
     private UserExamSummaryDto mapSummaryProjection(UserExamRepository.UserExamSummaryProjection proj) {
@@ -136,34 +159,23 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     public UserExamResponse getUserExamByIdForAdmin(Long id) {
-        UserExam userExam = userExamRepository.findById(id)
+        UserExam userExam = userExamRepository.findByIdWithExamSubjectAndUser(id)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi của người dùng", HttpStatus.NOT_FOUND));
         return buildUserExamResponse(userExam);
     }
 
     private UserExamResponse buildUserExamResponse(UserExam userExam) {
-        UserExamDto userExamDto = convertUserExamsToUserExamDto(userExam);
-        List<UserAnswer> userAnswer = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId());
-        List<UserAnswerDto> userAnswerDtos = new ArrayList<>();
-        for (UserAnswer userAnswer1 : userAnswer) {
-            UserAnswerDto userAnswerDto = new UserAnswerDto();
-            userAnswerDto.setAnswerId(userAnswer1.getAnswer().getOptionId());
-            userAnswerDto.setQuestionId(userAnswer1.getQuestion().getQuestionId());
-            userAnswerDto.setUserExamId(userAnswer1.getUserExam().getUserExamId());
-            userAnswerDtos.add(userAnswerDto);
-        }
-        return UserExamResponse.builder()
-                .userExamDto(userExamDto)
-                .userAnswerDtos(userAnswerDtos)
-                .subjectName(userExam.getExam().getSubject().getName())
-                .title(userExam.getExam().getTitle())
-                .username(userExam.getUser().getUsername())
-                .fullName(userExam.getUser().getFullName())
-                .questions(getAttemptQuestionDtos(userExam))
-                .build();
+        List<UserAnswer> answers = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId());
+        return userExamMapper.toDetailResponse(
+                userExam,
+                attemptStatsService.loadAttemptStats(userExam),
+                answers,
+                getAttemptQuestionDtos(userExam)
+        );
     }
 
     @Override
+    @Deprecated(since = "2026-07-23", forRemoval = false)
     @Transactional
     @CacheEvict(value = "ranking", allEntries = true)
     public UserExamDto createUserExam(UserExamRequest userExamRequest, UUID currentUserId) {
@@ -211,6 +223,24 @@ public class UserExamServiceImpl implements UserExamService {
 
         UserExam savedUserExam = userExamRepository.save(userExam);
 
+        Set<Long> answerIds = userAnswerDtos.stream()
+                .map(UserAnswerDto::getAnswerId)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, Answer> answersById = answerIds.isEmpty()
+                ? Map.of()
+                : answerRepository.findAllById(answerIds).stream()
+                        .collect(Collectors.toMap(Answer::getOptionId, answer -> answer));
+
+        Set<Long> questionIds = userAnswerDtos.stream()
+                .map(UserAnswerDto::getQuestionId)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, Question> questionsById = questionIds.isEmpty()
+                ? Map.of()
+                : questionRepository.findWithDetailsByQuestionIds(new ArrayList<>(questionIds)).stream()
+                        .collect(Collectors.toMap(Question::getQuestionId, question -> question));
+
         for (UserAnswerDto userAnswerDto : userAnswerDtos) {
             // Kiểm tra các trường quan trọng trước khi thao tác
             if (userAnswerDto.getAnswerId() == null || userAnswerDto.getQuestionId() == null) {
@@ -224,17 +254,21 @@ public class UserExamServiceImpl implements UserExamService {
             UserAnswer userAnswer = new UserAnswer();
             userAnswer.setUserExam(savedUserExam);
 
-            Answer answer = answerRepository.findById(userAnswerDto.getAnswerId())
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đáp án với id: " + userAnswerDto.getAnswerId()));
+            Answer answer = answersById.get(userAnswerDto.getAnswerId());
+            if (answer == null) {
+                throw new EntityNotFoundException("Không tìm thấy đáp án với id: " + userAnswerDto.getAnswerId());
+            }
             userAnswer.setAnswer(answer);
 
-            Question question = questionRepository.findById(userAnswerDto.getQuestionId())
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy câu hỏi"));
+            Question question = questionsById.get(userAnswerDto.getQuestionId());
+            if (question == null) {
+                throw new EntityNotFoundException("Không tìm thấy câu hỏi");
+            }
             userAnswer.setQuestion(question);
 
             userAnswerRepository.save(userAnswer);
         }
-        return modelMapper.map(savedUserExam, UserExamDto.class);
+        return userExamMapper.toListDto(savedUserExam);
     }
 
     @Override
@@ -266,32 +300,7 @@ public class UserExamServiceImpl implements UserExamService {
                         startedTo,
                         pageable
                 )
-                .map(this::buildUserExamListResponse);
-    }
-
-    private UserExamResponse buildUserExamListResponse(UserExam userExam) {
-        UserExamDto userExamDto = mapUserExamListDto(userExam);
-        return UserExamResponse.builder()
-                .userExamDto(userExamDto)
-                .subjectName(userExam.getExam().getSubject().getName())
-                .title(userExam.getExam().getTitle())
-                .username(userExam.getUser().getUsername())
-                .fullName(userExam.getUser().getFullName())
-                .build();
-    }
-
-    private UserExamDto mapUserExamListDto(UserExam userExam) {
-        UserExamDto userExamDto = new UserExamDto();
-        userExamDto.setUserExamId(userExam.getUserExamId());
-        userExamDto.setStartTime(userExam.getStartTime());
-        userExamDto.setEndTime(userExam.getEndTime());
-        userExamDto.setScore(userExam.getScore());
-        userExamDto.setStatus(userExam.getStatus());
-        userExamDto.setRemainingTime(userExam.getRemainingTime());
-        userExamDto.setCurrentQuestionIndex(userExam.getCurrentQuestionIndex());
-        userExamDto.setUserId(userExam.getUser().getUserId());
-        userExamDto.setExamId(userExam.getExam().getExamId());
-        return userExamDto;
+                .map(userExamMapper::toAdminListResponse);
     }
 
     @Override
@@ -302,24 +311,15 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     public List<UserExamResponse> getLast7ExamsByUser(UUID userId) {
-        List<UserExam> userExams = userExamRepository.findLast7ExamsByUser(userId);
+        List<UserExam> userExams = userExamRepository.findLast7ExamsByUser(userId, PageRequest.of(0, 7));
         return getUserExamResponses(userExams);
     }
 
     private List<UserExamResponse> getUserExamResponses(List<UserExam> userExams) {
-        List<UserExamResponse> userExamResponses = new ArrayList<>();
-        for (UserExam userExam : userExams) {
-            UserExamResponse userExamResponse = UserExamResponse
-                    .builder()
-                    .userExamDto(convertUserExamsToUserExamDto(userExam))
-                    .subjectName(userExam.getExam().getSubject().getName())
-                    .title(userExam.getExam().getTitle())
-                    .username(userExam.getUser().getUsername())
-                    .fullName(userExam.getUser().getFullName())
-                    .build();
-            userExamResponses.add(userExamResponse);
-        }
-        return userExamResponses;
+        Map<Long, UserExamAttemptStatsService.AttemptStats> statsByAttempt = attemptStatsService.loadAttemptStats(userExams);
+        return userExams.stream()
+                .map(userExam -> userExamMapper.toListResponse(userExam, statsByAttempt.get(userExam.getUserExamId())))
+                .toList();
     }
 
     @Override
@@ -406,9 +406,16 @@ public class UserExamServiceImpl implements UserExamService {
         }
 
         userAnswerRepository.deleteByUserExamIdAndQuestionId(userExamId, request.getQuestionId());
-        for (Long answerId : new HashSet<>(answerIds)) {
-            Answer answer = answerRepository.findById(answerId)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đáp án với id: " + answerId));
+        Set<Long> uniqueAnswerIds = new HashSet<>(answerIds);
+        Map<Long, Answer> answersById = uniqueAnswerIds.isEmpty()
+                ? Map.of()
+                : answerRepository.findAllById(uniqueAnswerIds).stream()
+                        .collect(Collectors.toMap(Answer::getOptionId, answer -> answer));
+        for (Long answerId : uniqueAnswerIds) {
+            Answer answer = answersById.get(answerId);
+            if (answer == null) {
+                throw new EntityNotFoundException("Không tìm thấy đáp án với id: " + answerId);
+            }
             UserAnswer userAnswer = new UserAnswer();
             userAnswer.setUserExam(userExam);
             userAnswer.setQuestion(question);
@@ -440,8 +447,8 @@ public class UserExamServiceImpl implements UserExamService {
     public List<Question> getAttemptQuestionsForSubmittedAttempt(Long userExamId, UUID currentUserId) {
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN));
-        UserExam userExam = (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MOD)
-                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN))
+        UserExam userExam = (currentUser.getRole() == UserRole.ADMIN || currentUser.getRole() == UserRole.MOD)
+                ? userExamRepository.findByIdWithExamSubjectAndUser(userExamId).orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN))
                 : getUserExamForCurrentUser(userExamId, currentUserId);
         if (!"SUBMITTED".equals(userExam.getStatus())) {
             throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN);
@@ -453,8 +460,8 @@ public class UserExamServiceImpl implements UserExamService {
     public List<QuestionDto> getAttemptQuestionDtosForSubmittedAttempt(Long userExamId, UUID currentUserId) {
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new CustomApiException("Ban khong co quyen thuc hien thao tac nay", HttpStatus.FORBIDDEN));
-        UserExam userExam = (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MOD)
-                ? userExamRepository.findById(userExamId).orElseThrow(() -> new CustomApiException("Ban khong co quyen thuc hien thao tac nay", HttpStatus.FORBIDDEN))
+        UserExam userExam = (currentUser.getRole() == UserRole.ADMIN || currentUser.getRole() == UserRole.MOD)
+                ? userExamRepository.findByIdWithExamSubjectAndUser(userExamId).orElseThrow(() -> new CustomApiException("Ban khong co quyen thuc hien thao tac nay", HttpStatus.FORBIDDEN))
                 : getUserExamForCurrentUser(userExamId, currentUserId);
         if (!"SUBMITTED".equals(userExam.getStatus())) {
             throw new CustomApiException("Ban khong co quyen thuc hien thao tac nay", HttpStatus.FORBIDDEN);
@@ -483,7 +490,7 @@ public class UserExamServiceImpl implements UserExamService {
         userExam.setStatus("SUBMITTED");
         userExam.setRemainingTime(0);
         userExam.setUpdatedAt(LocalDateTime.now());
-        return convertUserExamsToUserExamDto(userExamRepository.save(userExam));
+        return userExamMapper.toListDto(userExamRepository.save(userExam));
     }
 
     private boolean isQuestionCorrect(Question question, Set<Long> chosenAnswerIds) {
@@ -495,9 +502,9 @@ public class UserExamServiceImpl implements UserExamService {
                 .collect(Collectors.toSet());
         if (correctAnswerIds.isEmpty()) return false;
 
-        Question.QuestionType questionType = question.getQuestionType() != null
+        QuestionType questionType = question.getQuestionType() != null
                 ? question.getQuestionType()
-                : Question.QuestionType.SINGLE_CHOICE;
+                : QuestionType.SINGLE_CHOICE;
 
         return switch (questionType) {
             case SINGLE_CHOICE -> chosenAnswerIds.size() == 1
@@ -543,77 +550,9 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     private ExamAttemptResponse buildAttemptResponse(UserExam userExam) {
-        List<UserAnswerDto> answers = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId()).stream()
-                .map(userAnswer -> {
-                    UserAnswerDto dto = new UserAnswerDto();
-                    dto.setUserAnswerId(userAnswer.getUserAnswerId());
-                    dto.setUserExamId(userExam.getUserExamId());
-                    dto.setQuestionId(userAnswer.getQuestion().getQuestionId());
-                    dto.setAnswerId(userAnswer.getAnswer().getOptionId());
-                    return dto;
-                })
-                .collect(Collectors.toList());
+        List<UserAnswer> answers = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId());
         List<QuestionDto> questions = getAttemptQuestionDtos(userExam);
-        int totalQuestions = questions.size();
-
-        return ExamAttemptResponse.builder()
-                .userExamId(userExam.getUserExamId())
-                .examId(userExam.getExam().getExamId())
-                .subjectId(userExam.getExam().getSubject().getSubjectId())
-                .title(userExam.getExam().getTitle())
-                .subjectName(userExam.getExam().getSubject().getName())
-                .status(userExam.getStatus())
-                .startTime(userExam.getStartTime())
-                .endTime(userExam.getEndTime())
-                .updatedAt(userExam.getUpdatedAt())
-                .remainingTime(userExam.getRemainingTime())
-                .currentQuestionIndex(userExam.getCurrentQuestionIndex())
-                .answeredCount((int) answers.stream().map(UserAnswerDto::getQuestionId).distinct().count())
-                .totalQuestions(totalQuestions)
-                .score(userExam.getScore())
-                .userAnswerDtos(answers)
-                .questions(questions)
-                .build();
-    }
-
-    protected UserExamDto convertUserExamsToUserExamDto(UserExam userExam) {
-        UserExamDto userExamDto = new UserExamDto();
-            userExamDto.setUserExamId(userExam.getUserExamId());
-            userExamDto.setStartTime(userExam.getStartTime());
-            userExamDto.setEndTime(userExam.getEndTime());
-            userExamDto.setScore(userExam.getScore());
-            userExamDto.setStatus(userExam.getStatus());
-            userExamDto.setRemainingTime(userExam.getRemainingTime());
-            userExamDto.setCurrentQuestionIndex(userExam.getCurrentQuestionIndex());
-            userExamDto.setUserId(userExam.getUser().getUserId());
-            userExamDto.setExamId(userExam.getExam().getExamId());
-            populateAnswerStats(userExam, userExamDto);
-        return userExamDto;
-    }
-
-    private void populateAnswerStats(UserExam userExam, UserExamDto userExamDto) {
-        List<Question> questions = getAttemptQuestions(userExam);
-        userExamDto.setTotalQuestions(questions.size());
-
-        if (questions.isEmpty()) {
-            userExamDto.setCorrectAnswers(0);
-            return;
-        }
-
-        List<UserAnswer> userAnswers = userAnswerRepository.findUserAnswersByUserExamId(userExam.getUserExamId());
-        Map<Long, Set<Long>> userAnswersMap = userAnswers.stream()
-                .collect(Collectors.groupingBy(
-                        ua -> ua.getQuestion().getQuestionId(),
-                        Collectors.mapping(ua -> ua.getAnswer().getOptionId(), Collectors.toSet())
-                ));
-
-        int correctAnswers = 0;
-        for (Question question : questions) {
-            if (isQuestionCorrect(question, userAnswersMap.get(question.getQuestionId()))) {
-                correctAnswers++;
-            }
-        }
-        userExamDto.setCorrectAnswers(correctAnswers);
+        return userExamMapper.toAttemptResponse(userExam, answers, questions);
     }
 
     private void saveAttemptQuestionSnapshot(UserExam userExam, List<Question> questions) {
@@ -633,26 +572,8 @@ public class UserExamServiceImpl implements UserExamService {
             snapshot.setQuestionImageUrlSnapshot(question.getImageUrl());
             snapshot.setQuestionDifficultySnapshot(question.getDifficulty() == null ? null : question.getDifficulty().name());
             snapshot.setQuestionTypeSnapshot(question.getQuestionType() == null ? null : question.getQuestionType().name());
-            snapshot.setAnswersSnapshotJson(toAnswersSnapshotJson(question));
+            snapshot.setAnswersSnapshotJson(userExamMapper.toAnswersSnapshotJson(question));
             userExamQuestionRepository.save(snapshot);
-        }
-    }
-
-    private String toAnswersSnapshotJson(Question question) {
-        try {
-            List<AnswerDto> answerDtos = question.getAnswers().stream()
-                    .map(answer -> {
-                        AnswerDto answerDto = new AnswerDto();
-                        answerDto.setOptionId(answer.getOptionId());
-                        answerDto.setQuestionId(question.getQuestionId());
-                        answerDto.setContent(answer.getContent());
-                        answerDto.setIsCorrect(answer.getIsCorrect());
-                        return answerDto;
-                    })
-                    .toList();
-            return objectMapper.writeValueAsString(answerDtos);
-        } catch (JsonProcessingException exception) {
-            throw new CustomApiException("Khong the tao snapshot dap an cho luot thi", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -668,45 +589,16 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     private List<QuestionDto> getAttemptQuestionDtos(UserExam userExam) {
+        if (userExamQuestionRepository == null) {
+            return userExamMapper.toQuestionDtos(getAttemptQuestions(userExam));
+        }
         List<UserExamQuestion> snapshots = userExamQuestionRepository.findByUserExamUserExamIdOrderByPositionAsc(userExam.getUserExamId());
         if (!snapshots.isEmpty() && snapshots.stream().allMatch(snapshot -> snapshot.getQuestionContentSnapshot() != null)) {
             return snapshots.stream()
-                    .map(this::mapSnapshotToQuestionDto)
+                    .map(userExamMapper::toQuestionDto)
                     .toList();
         }
-        return getAttemptQuestions(userExam).stream()
-                .map(this::mapQuestionToDto)
-                .toList();
-    }
-
-    private QuestionDto mapSnapshotToQuestionDto(UserExamQuestion snapshot) {
-        Question question = snapshot.getQuestion();
-        QuestionDto dto = new QuestionDto();
-        dto.setQuestionId(question.getQuestionId());
-        dto.setContent(snapshot.getQuestionContentSnapshot());
-        dto.setImageUrl(snapshot.getQuestionImageUrlSnapshot());
-        dto.setDifficulty(snapshot.getQuestionDifficultySnapshot());
-        dto.setQuestionType(snapshot.getQuestionTypeSnapshot());
-        if (question.getChapter() != null) {
-            dto.setChapterId(question.getChapter().getChapterId());
-            dto.setChapterName(question.getChapter().getName());
-        }
-        dto.setExamEnabled(question.getExamEnabled());
-        dto.setPracticeEnabled(question.getPracticeEnabled());
-        dto.setAnswers(readAnswersSnapshot(snapshot));
-        return dto;
-    }
-
-    private List<AnswerDto> readAnswersSnapshot(UserExamQuestion snapshot) {
-        if (snapshot.getAnswersSnapshotJson() == null || snapshot.getAnswersSnapshotJson().isBlank()) {
-            return mapQuestionToDto(snapshot.getQuestion()).getAnswers();
-        }
-        try {
-            return objectMapper.readValue(snapshot.getAnswersSnapshotJson(), new TypeReference<List<AnswerDto>>() {
-            });
-        } catch (JsonProcessingException exception) {
-            return mapQuestionToDto(snapshot.getQuestion()).getAnswers();
-        }
+        return userExamMapper.toQuestionDtos(getAttemptQuestions(userExam));
     }
 
     private List<Question> getExamQuestionsIncludingDeleted(Long examId) {
@@ -715,25 +607,6 @@ public class UserExamServiceImpl implements UserExamService {
             return questions;
         }
         return questionRepository.findQuestionsByExamId(examId);
-    }
-
-    private QuestionDto mapQuestionToDto(Question question) {
-        QuestionDto dto = modelMapper.map(question, QuestionDto.class);
-        dto.setQuestionType(question.getQuestionType() == null ? null : question.getQuestionType().name());
-        dto.setDifficulty(question.getDifficulty() == null ? null : question.getDifficulty().name());
-        if (question.getChapter() != null) {
-            dto.setChapterId(question.getChapter().getChapterId());
-            dto.setChapterName(question.getChapter().getName());
-        }
-        dto.setAnswers(question.getAnswers().stream().map(answer -> {
-            AnswerDto answerDto = new AnswerDto();
-            answerDto.setOptionId(answer.getOptionId());
-            answerDto.setQuestionId(question.getQuestionId());
-            answerDto.setContent(answer.getContent());
-            answerDto.setIsCorrect(answer.getIsCorrect());
-            return answerDto;
-        }).toList());
-        return dto;
     }
 
     private Exam findActiveExam(Long examId) {

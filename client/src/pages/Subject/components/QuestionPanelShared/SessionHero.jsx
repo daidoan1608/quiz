@@ -1,5 +1,5 @@
 import React from 'react';
-import { progressValueStyle } from 'utils/styleVariables';
+import { ProgressBar } from 'components/common/ProgressBar';
 
 export const SessionHero = ({
   action,
@@ -10,13 +10,13 @@ export const SessionHero = ({
   progress,
   title,
 }) => (
-  <section className="mb-8 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6">
+  <section className="aura-surface-panel mb-8 p-5 md:p-6">
     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
       <div>
         {badgeText && (
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
+          <div className="aura-kicker-pill mb-3">
             {badgeIcon && (
-              <span className="material-symbols-outlined text-base">
+              <span className="material-symbols-outlined">
                 {badgeIcon}
               </span>
             )}
@@ -40,12 +40,7 @@ export const SessionHero = ({
           <span>{progress.label}</span>
           <span>{progress.value}</span>
         </div>
-        <div className="aura-progress h-2.5 w-full">
-          <div
-            className="aura-progress__bar aura-progress__bar--primary"
-            style={progressValueStyle(progress.percent)}
-          />
-        </div>
+        <ProgressBar className="h-2.5 w-full" value={progress.percent} />
       </div>
     )}
     {children && <div className="mt-5">{children}</div>}

@@ -1,7 +1,8 @@
 package com.fita.vnua.quiz.controller;
 
-import com.fita.vnua.quiz.exception.CustomApiException;
-import com.fita.vnua.quiz.model.dto.UserDto;
+import com.fita.vnua.quiz.model.enums.AuthProvider;
+
+import com.fita.vnua.quiz.model.dto.command.UserCommand;
 import com.fita.vnua.quiz.model.dto.request.AdminUserCreateRequest;
 import com.fita.vnua.quiz.model.dto.request.AdminUserUpdateRequest;
 import com.fita.vnua.quiz.model.dto.request.ChangePasswordRequest;
@@ -18,11 +19,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +33,6 @@ import java.util.UUID;
 @Tag(name = "User API", description = "API thực hiện các thao tác với người dùng")
 public class UserController {
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService;
     private final UserMapper userMapper;
     private final AuditLogService auditLogService;
@@ -44,21 +42,10 @@ public class UserController {
     public ResponseEntity<ApiResponse<Object>> changePassword(
             @PathVariable("userId") UUID userId,
             @Valid @RequestBody ChangePasswordRequest request,
-            @AuthenticationPrincipal User currentUser
+        @AuthenticationPrincipal User currentUser
     ) {
         authorizationService.requireSelf(userId, currentUser);
-        UserDto userDto = userService.getUserById(userId);
-
-        if (!passwordEncoder.matches(request.getOldPassword(), currentUser.getPassword())) {
-            throw new CustomApiException("Mật khẩu hiện tại không đúng", HttpStatus.FORBIDDEN);
-        }
-        if (passwordEncoder.matches(request.getNewPassword(), currentUser.getPassword())) {
-            throw new CustomApiException("Mật khẩu mới không được trùng mật khẩu hiện tại", HttpStatus.BAD_REQUEST);
-        }
-
-        userDto.setPassword(request.getNewPassword());
-        userService.update(userId, userDto);
-
+        userService.changePassword(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công", null));
     }
 
@@ -134,8 +121,8 @@ public class UserController {
     @PostMapping("admin/users")
     @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody AdminUserCreateRequest request, @AuthenticationPrincipal User currentUser) {
-        UserDto userDto = userMapper.toUserDto(request);
-        UserDto saveUser = userService.create(userDto);
+        UserCommand userCommand = userMapper.toUserCommand(request);
+        UserCommand saveUser = userService.create(userCommand);
         auditLogService.record("CREATE", "USER", saveUser.getUserId(), currentUser, saveUser.getUsername());
         return ResponseEntity.ok(ApiResponse.success("Tạo người dùng thành công", userService.getUserResponseById(saveUser.getUserId())));
     }
@@ -148,8 +135,8 @@ public class UserController {
             @RequestBody AdminUserUpdateRequest request,
             @AuthenticationPrincipal User currentUser
     ) {
-        UserDto userDto = userMapper.toUserDto(request);
-        UserDto updatedUser = userService.update(userId, userDto);
+        UserCommand userCommand = userMapper.toUserCommand(request);
+        UserCommand updatedUser = userService.update(userId, userCommand);
         auditLogService.record("UPDATE", "USER", userId, currentUser, updatedUser.getUsername());
         return ResponseEntity.ok(ApiResponse.success("Cập nhật người dùng thành công", userService.getUserResponseById(updatedUser.getUserId())));
     }

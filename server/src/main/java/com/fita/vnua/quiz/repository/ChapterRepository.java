@@ -18,7 +18,13 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
     long countByDeletedFalse();
 
-    List<Chapter> findByNameContainingIgnoreCaseAndDeletedFalse(String name);
+    @Query("""
+            SELECT c FROM Chapter c
+            JOIN FETCH c.subject
+            WHERE c.deleted = false
+            AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
+            """)
+    List<Chapter> findByNameContainingIgnoreCaseAndDeletedFalse(@Param("name") String name);
 
     @Query("""
             SELECT c FROM Chapter c
@@ -44,7 +50,7 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
     @Query("SELECT c FROM Chapter c JOIN FETCH c.subject WHERE c.subject.subjectId = :subjectId AND c.deleted = false")
     List<Chapter> findBySubject(Long subjectId);
 
-    @Query("SELECT c FROM Chapter c WHERE c.subject.subjectId = :subjectId")
+    @Query("SELECT c FROM Chapter c JOIN FETCH c.subject WHERE c.subject.subjectId = :subjectId")
     List<Chapter> findBySubjectIncludingDeleted(Long subjectId);
 
     @Query("SELECT c.subject.subjectId FROM Chapter c WHERE c.chapterId = :chapterId")

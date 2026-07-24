@@ -20,7 +20,11 @@ public interface ExamService {
 
     Page<ExamSummaryDto> filterExamsPage(String keyword, Long categoryId, Long subjectId, UUID createdBy, Boolean deleted, Pageable pageable);
 
+    Page<ExamSummaryDto> filterExamsPage(String keyword, Long categoryId, Long subjectId, UUID createdBy, Boolean deleted, int page, int size, String sortBy, String sortDir);
+
     ExamDto getExamById(Long id);
+
+    ExamDto getPublicExamById(Long examId, boolean includeCorrectAnswers, Long userExamId, UUID currentUserId, boolean currentUserAdminOrMod);
 
     ExamDto getExamByIdForSubmittedAttempt(Long examId, Long userExamId, UUID currentUserId);
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageContainer } from 'components/common/PageContainer';
+import { PageLoadingState } from 'components/common/PageState';
 import { ChapterPracticeView } from './components/ChapterPracticeView';
 import { PracticeBreadcrumb } from './components/PracticeBreadcrumb';
 import { PracticeControls } from './components/PracticeControls';
@@ -33,6 +34,7 @@ export default function ChapterPractice() {
           mode,
         }))
       }
+      onPracticeConfigChange={practice.setPracticeConfig}
       onStartPractice={practice.handleStartPractice}
       panelTitle={practice.panelTitle}
       practiceConfig={practice.practiceConfig}
@@ -46,10 +48,14 @@ export default function ChapterPractice() {
 
   if (practice.isLoading) {
     content = (
-      <div className="flex min-h-48 items-center justify-center rounded-xl border border-gray-200 bg-white p-8 text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-        {practice.texts.loadingPracticeQuestions ||
-          'Đang tải câu hỏi ôn tập...'}
-      </div>
+      <PageLoadingState
+        className="aura-surface-panel text-gray-600 dark:text-gray-300"
+        label={
+          practice.texts.loadingPracticeQuestions ||
+          'Đang tải câu hỏi ôn tập...'
+        }
+        minHeightClassName="min-h-48"
+      />
     );
   } else if (practice.hasRequested && !practice.questions.length) {
     content = (

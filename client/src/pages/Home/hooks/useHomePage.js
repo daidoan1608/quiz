@@ -9,6 +9,7 @@ import {
   buildLearningStats,
   normalizeExams,
 } from 'pages/Account/utils/accountUtils';
+import { buildContinueExamAttemptLocation } from 'pages/Subject/utils/subjectNavigation';
 import {
   MAX_DISPLAYED_ATTEMPTS,
   MAX_DISPLAYED_SUBJECTS,
@@ -96,14 +97,7 @@ export const useHomePage = () => {
 
   const handleContinueAttempt = useCallback(
     (attempt) => {
-      navigate(`/subjects/${attempt.subjectId}/exams/${attempt.examId}`, {
-        state: {
-          subjectId: attempt.subjectId,
-          examId: attempt.examId,
-          userExamId: attempt.userExamId,
-          title: attempt.title,
-        },
-      });
+      navigate(buildContinueExamAttemptLocation(attempt));
     },
     [navigate]
   );

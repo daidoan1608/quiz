@@ -1,8 +1,14 @@
 import React from 'react';
 import { SubjectSummaryCard } from 'components/common/SubjectSummaryCard';
 import { subjectIcons } from '../constants/subjectIcons';
+import {
+  getSubjectChapterCount,
+  getSubjectExamCount,
+  getSubjectQuestionCount,
+} from '../utils/subjectPresentation';
 
 export const SubjectCard = ({
+  canToggleFavorite,
   favorites,
   getProgress,
   getStatus,
@@ -14,6 +20,9 @@ export const SubjectCard = ({
 }) => {
   const progress = getProgress(subject);
   const status = getStatus(subject);
+  const chapterCount = getSubjectChapterCount(subject);
+  const examCount = getSubjectExamCount(subject);
+  const questionCount = getSubjectQuestionCount(subject);
   const isFavorited = favorites.some(
     (fav) => fav.subjectId === subject.subjectId
   );
@@ -26,7 +35,7 @@ export const SubjectCard = ({
             e.stopPropagation();
             toggleFavorite(subject.subjectId, subject.name);
           }}
-          disabled={!localStorage.getItem('userId')}
+          disabled={!canToggleFavorite}
           className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-700"
           title={texts.favorite || 'Yêu thích'}
           type="button"
@@ -43,6 +52,7 @@ export const SubjectCard = ({
           {subjectIcons[index % subjectIcons.length]}
         </span>
       }
+      minHeightClassName="h-[320px]"
       onClick={() => onOpen(subject)}
       progress={{ value: progress }}
       progressLabel={texts.readiness || 'Mức độ sẵn sàng'}
@@ -53,18 +63,11 @@ export const SubjectCard = ({
       }
       subjectName={subject.name}
       subtitle={
-        <>
-          {subject.description && (
-            <span className="mb-2 block line-clamp-2 leading-5">
-              {subject.description}
-            </span>
-          )}
-          <span>
-            {subject.totalChapters || 0} {texts.chapters || 'chương'} •{' '}
-            {subject.totalQuestions || 0} {texts.questions || 'câu hỏi'} •{' '}
-            {subject.totalExams || 0} {texts.examsCount || 'đề thi'}
-          </span>
-        </>
+        <span>
+          {chapterCount} {texts.chapters || 'chương'} • {questionCount}{' '}
+          {texts.questions || 'câu hỏi'} • {examCount}{' '}
+          {texts.examsCount || 'đề thi'}
+        </span>
       }
     />
   );

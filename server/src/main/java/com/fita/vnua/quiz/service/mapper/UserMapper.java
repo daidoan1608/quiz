@@ -1,6 +1,8 @@
 package com.fita.vnua.quiz.service.mapper;
 
-import com.fita.vnua.quiz.model.dto.UserDto;
+import com.fita.vnua.quiz.model.enums.UserRole;
+
+import com.fita.vnua.quiz.model.dto.command.UserCommand;
 import com.fita.vnua.quiz.model.dto.request.AdminUserCreateRequest;
 import com.fita.vnua.quiz.model.dto.request.AdminUserUpdateRequest;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
@@ -45,21 +47,21 @@ public class UserMapper {
                 .build();
     }
 
-    public UserDto toUserDto(AdminUserCreateRequest request) {
-        UserDto dto = new UserDto();
+    public UserCommand toUserCommand(AdminUserCreateRequest request) {
+        UserCommand dto = new UserCommand();
         dto.setUsername(request.getUsername());
         dto.setPassword(request.getPassword());
         dto.setFullName(request.getFullName());
         dto.setEmail(request.getEmail());
-        dto.setRole(request.getRole() != null ? request.getRole() : User.Role.USER);
+        dto.setRole(request.getRole() != null ? request.getRole() : UserRole.USER);
         dto.setAvatarUrl(request.getAvatarUrl());
         dto.setPhone(request.getPhone());
         dto.setAddress(request.getAddress());
         return dto;
     }
 
-    public UserDto toUserDto(AdminUserUpdateRequest request) {
-        UserDto dto = new UserDto();
+    public UserCommand toUserCommand(AdminUserUpdateRequest request) {
+        UserCommand dto = new UserCommand();
         dto.setPassword(request.getPassword());
         dto.setFullName(request.getFullName());
         dto.setEmail(request.getEmail());
@@ -67,6 +69,35 @@ public class UserMapper {
         dto.setAvatarUrl(request.getAvatarUrl());
         dto.setPhone(request.getPhone());
         dto.setAddress(request.getAddress());
+        return dto;
+    }
+
+    public User toEntity(UserCommand dto) {
+        User user = new User();
+        user.setUserId(dto.getUserId());
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword());
+        user.setFullName(dto.getFullName());
+        user.setEmail(dto.getEmail());
+        user.setRole(dto.getRole() != null ? dto.getRole() : UserRole.USER);
+        user.setAvatarUrl(dto.getAvatarUrl());
+        user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
+        user.setDeleted(false);
+        return user;
+    }
+
+    public UserCommand toUserCommand(User user) {
+        UserCommand dto = new UserCommand();
+        dto.setUserId(user.getUserId());
+        dto.setUsername(user.getUsername());
+        dto.setPassword(user.getPassword());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole());
+        dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
         return dto;
     }
 }

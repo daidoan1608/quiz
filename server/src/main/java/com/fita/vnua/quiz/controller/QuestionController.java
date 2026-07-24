@@ -5,17 +5,14 @@ import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
 import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.service.AvatarStorageService;
 import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.QuestionService;
-import com.fita.vnua.quiz.service.impl.AvatarStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -90,12 +87,10 @@ public class QuestionController {
             @AuthenticationPrincipal User currentUser
     ) {
         UUID currentUserId = currentUser == null ? null : currentUser.getUserId();
-        List<QuestionDto> questions = questionService.getPracticeQuestionsByChapter(chapterId, limit, difficulty, mode, currentUserId);
         if (includeCorrectAnswers) {
             authorizationService.requireAuthenticated(currentUser);
-        } else {
-            stripCorrectAnswers(questions);
         }
+        List<QuestionDto> questions = questionService.getPracticeQuestionsByChapter(chapterId, limit, difficulty, mode, currentUserId, includeCorrectAnswers);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách câu hỏi theo chương thành công", questions));
     }
 
@@ -117,10 +112,8 @@ public class QuestionController {
                 limit,
                 difficulty,
                 strategy,
-                currentUser.getUserId());
-        if (!includeCorrectAnswers) {
-            stripCorrectAnswers(questions);
-        }
+                currentUser.getUserId(),
+                includeCorrectAnswers);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách câu hỏi ôn tập theo câu sai thành công", questions));
     }
 
@@ -185,11 +178,6 @@ public class QuestionController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDir
     ) {
-        Pageable pageable = PageRequest.of(
-                Math.max(page, 0),
-                Math.min(Math.max(size, 1), 100),
-                resolveQuestionSort(sortBy, sortDir)
-        );
         Page<QuestionDto> questions = questionService.filterQuestionsPage(
                 keyword,
                 subjectId,
@@ -202,7 +190,10 @@ public class QuestionController {
                 usageFilter,
                 excludeExamId,
                 excludeUsedInSubject,
-                pageable
+                page,
+                size,
+                sortBy,
+                sortDir
         );
         return ResponseEntity.ok(ApiResponse.success("Lọc câu hỏi thành công", questions));
     }
@@ -261,33 +252,5 @@ public class QuestionController {
     public ResponseEntity<ApiResponse<Map<String, String>>> uploadQuestionImage(@RequestParam("file") MultipartFile file) throws Exception {
         var uploaded = avatarStorageService.saveQuestionImage(file);
         return ResponseEntity.ok(ApiResponse.success("Upload ảnh thành công", Map.of("imageUrl", uploaded.getUrl())));
-    }
-    private List<QuestionDto> stripCorrectAnswers(List<QuestionDto> questions) {
-        if (questions == null) {
-            return List.of();
-        }
-        questions.forEach(this::stripCorrectAnswers);
-        return questions;
-    }
-
-    private void stripCorrectAnswers(QuestionDto question) {
-        if (question.getAnswers() == null) {
-            return;
-        }
-        question.getAnswers().forEach(answer -> answer.setIsCorrect(null));
-    }
-
-    private Sort resolveQuestionSort(String sortBy, String sortDir) {
-        String property = switch (sortBy == null ? "" : sortBy) {
-            case "content" -> "content";
-            case "difficulty" -> "difficulty";
-            case "chapterName", "chapterId" -> "chapter.chapterId";
-            case "deletedAt" -> "deletedAt";
-            default -> "questionId";
-        };
-        Sort.Direction direction = "ascend".equalsIgnoreCase(sortDir) || "asc".equalsIgnoreCase(sortDir)
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-        return Sort.by(direction, property);
     }
 }

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Form, Input } from 'antd';
+import { Form } from 'antd';
 import { LockOutlined, UserOutlined, MailOutlined } from '@ant-design/icons';
 import { AuthCard } from 'pages/Auth/components/AuthCard';
 import { AuthFooterLink } from 'pages/Auth/components/AuthFooterLink';
+import { AuthFormField } from 'pages/Auth/components/AuthFormField';
 import { AuthSubmitButton } from 'pages/Auth/components/AuthSubmitButton';
 import { createConfirmPasswordRule } from 'pages/Auth/components/ConfirmPasswordRule';
 
@@ -21,8 +22,11 @@ export const RegisterView = ({ form, handleSubmit, loading, navigate }) => (
         className="auth-form mt-8 space-y-5"
         size="large"
       >
-        <Form.Item
+        <AuthFormField
+          className="mb-4"
+          icon={<UserOutlined className="auth-input-icon" />}
           name="username"
+          placeholder="Tên đăng nhập"
           rules={[
             { required: true, message: 'Vui lòng nhập tên đăng nhập!' },
             { min: 3, message: 'Tên đăng nhập phải có ít nhất 3 ký tự!' },
@@ -33,72 +37,51 @@ export const RegisterView = ({ form, handleSubmit, loading, navigate }) => (
                 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới!',
             },
           ]}
-          className="mb-4"
-        >
-          <Input
-            placeholder="Tên đăng nhập"
-            prefix={<UserOutlined className="auth-input-icon" />}
-            className="rounded-lg py-2.5"
-          />
-        </Form.Item>
+        />
 
-        <Form.Item
+        <AuthFormField
+          className="mb-4"
+          icon={<UserOutlined className="auth-input-icon" />}
           name="fullName"
+          placeholder="Họ và tên"
           rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
-          className="mb-4"
-        >
-          <Input
-            placeholder="Họ và tên"
-            prefix={<UserOutlined className="auth-input-icon" />}
-            className="rounded-lg py-2.5"
-          />
-        </Form.Item>
+        />
 
-        <Form.Item
+        <AuthFormField
+          className="mb-4"
+          icon={<MailOutlined className="auth-input-icon" />}
           name="email"
+          placeholder="Email"
           rules={[
             { required: true, message: 'Vui lòng nhập email!' },
             { type: 'email', message: 'Email không hợp lệ!' },
           ]}
-          className="mb-4"
-        >
-          <Input
-            placeholder="Email"
-            prefix={<MailOutlined className="auth-input-icon" />}
-            className="rounded-lg py-2.5"
-          />
-        </Form.Item>
+        />
 
-        <Form.Item
+        <AuthFormField
+          className="mb-4"
+          icon={<LockOutlined className="auth-input-icon" />}
           name="password"
+          placeholder="Mật khẩu"
           rules={[
             { required: true, message: 'Vui lòng nhập mật khẩu!' },
             { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
           ]}
-          className="mb-4"
-        >
-          <Input.Password
-            placeholder="Mật khẩu"
-            prefix={<LockOutlined className="auth-input-icon" />}
-            className="rounded-lg py-2.5"
-          />
-        </Form.Item>
+          type="password"
+        />
 
-        <Form.Item
-          name="confirmPassword"
+        <AuthFormField
+          className="mb-6"
           dependencies={['password']}
+          icon={<LockOutlined className="auth-input-icon" />}
+          name="confirmPassword"
+          placeholder="Xác nhận mật khẩu"
           rules={[
             { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
             createConfirmPasswordRule('Mật khẩu xác nhận không khớp!'),
           ]}
-          className="mb-6"
-        >
-          <Input.Password
-            placeholder="Xác nhận mật khẩu"
-            prefix={<LockOutlined className="auth-input-icon" />}
-            className="rounded-lg py-2.5"
-          />
-        </Form.Item>
+          type="password"
+        />
 
       <Form.Item>
         <AuthSubmitButton loading={loading}>Đăng ký ngay</AuthSubmitButton>

@@ -35,6 +35,8 @@ function TeamMemberCard({ member }) {
               src={member.avatar}
               alt={member.name}
               className="w-full h-full rounded-full object-cover"
+              decoding="async"
+              loading="lazy"
             />
           </div>
           <div className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full border-2 border-white dark:border-gray-800">

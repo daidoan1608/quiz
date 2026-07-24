@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
+
 import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.repository.ExamRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
@@ -37,9 +39,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         long questionCount = questionRepository.countByDeletedFalse();
         long userCount = userRepository.countByDeletedFalse();
         long examCount = examRepository.countByDeletedFalse();
-        long questionCountByMedium = questionRepository.countByDifficulty(Question.Difficulty.MEDIUM);
-        long questionCountByEasy = questionRepository.countByDifficulty(Question.Difficulty.EASY);
-        long questionCountByHard = questionRepository.countByDifficulty(Question.Difficulty.HARD);
+        long questionCountByMedium = questionRepository.countByDifficulty(QuestionDifficulty.MEDIUM);
+        long questionCountByEasy = questionRepository.countByDifficulty(QuestionDifficulty.EASY);
+        long questionCountByHard = questionRepository.countByDifficulty(QuestionDifficulty.HARD);
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("questionCountByMedium", questionCountByMedium);

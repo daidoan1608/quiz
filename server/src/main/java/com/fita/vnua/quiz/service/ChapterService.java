@@ -1,7 +1,7 @@
 package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.ChapterDto;
-import com.fita.vnua.quiz.model.dto.response.Response;
+import com.fita.vnua.quiz.model.dto.result.OperationResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +23,7 @@ public interface ChapterService {
 
     ChapterDto update(Long chapterId, ChapterDto chapterDto);
 
-    Response delete(Long chapterId);
+    OperationResult delete(Long chapterId);
 
     ChapterDto restore(Long chapterId);
 }
-

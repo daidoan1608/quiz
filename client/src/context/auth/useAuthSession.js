@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
-import { message } from 'antd';
+﻿import { useCallback, useEffect, useState } from 'react';
+import { appMessage } from 'utils/appMessage';
 import { authApi } from 'api/services/authApi';
 import { cacheUser, clearAuthStorage } from 'api/http/authStorage';
+import { setStorageItem, storageKeys } from 'utils/storage';
 import { AUTH_EMPTY_STATE, isClientUser, mapUserToAuthState } from './authState';
 import {
   clearExplicitLogoutMark,
@@ -60,21 +61,21 @@ export const useAuthSession = () => {
 
       if (!isClientUser(userData)) {
         clearSessionState();
-        message.error(
+        appMessage.error(
           'Tài khoản quản trị không có quyền truy cập trang người dùng!'
         );
         return false;
       }
 
       applyUserSession(userData);
-      message.success('Đăng nhập thành công!');
+      appMessage.success('Đăng nhập thành công!');
       return true;
     },
     [applyUserSession, clearSessionState]
   );
 
   const updateAvatar = useCallback((newAvatarUrl) => {
-    localStorage.setItem('avatarUrl', newAvatarUrl || '');
+    setStorageItem(storageKeys.avatarUrl, newAvatarUrl || '');
     setAuthState((prev) => ({
       ...prev,
       avatarUrl: newAvatarUrl || '',
@@ -90,7 +91,7 @@ export const useAuthSession = () => {
     }
 
     clearSessionState();
-    message.success('Đăng xuất thành công!');
+    appMessage.success('Đăng xuất thành công!');
     window.setTimeout(() => {
       clearExplicitLogoutMark();
     }, 1500);
@@ -104,3 +105,4 @@ export const useAuthSession = () => {
     updateAvatar,
   };
 };
+

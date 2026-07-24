@@ -2,7 +2,7 @@ package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.response.ImportPreviewResponse;
-import com.fita.vnua.quiz.model.dto.response.Response;
+import com.fita.vnua.quiz.model.dto.result.OperationResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +21,11 @@ public interface QuestionService {
 
     List<QuestionDto> getPracticeQuestionsByChapter(Long chapterId, Integer limit, String difficulty, String mode, UUID userId);
 
+    List<QuestionDto> getPracticeQuestionsByChapter(Long chapterId, Integer limit, String difficulty, String mode, UUID userId, boolean includeCorrectAnswers);
+
     List<QuestionDto> getSmartWrongPracticeQuestions(Long subjectId, Long chapterId, Integer limit, String difficulty, String strategy, UUID userId);
+
+    List<QuestionDto> getSmartWrongPracticeQuestions(Long subjectId, Long chapterId, Integer limit, String difficulty, String strategy, UUID userId, boolean includeCorrectAnswers);
 
     List<QuestionDto> getAllQuestion();
 
@@ -32,6 +36,8 @@ public interface QuestionService {
     List<QuestionDto> filterQuestions(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, Boolean examEnabled, Boolean practiceEnabled, UUID creatorId);
 
     Page<QuestionDto> filterQuestionsPage(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, Boolean examEnabled, Boolean practiceEnabled, UUID creatorId, String usageFilter, Long excludeExamId, Boolean excludeUsedInSubject, Pageable pageable);
+
+    Page<QuestionDto> filterQuestionsPage(String keyword, Long subjectId, Long chapterId, String difficulty, Boolean deleted, Boolean examEnabled, Boolean practiceEnabled, UUID creatorId, String usageFilter, Long excludeExamId, Boolean excludeUsedInSubject, int page, int size, String sortBy, String sortDir);
 
     List<QuestionDto> getQuestionsBySubject(Long subjectId);
 
@@ -47,7 +53,7 @@ public interface QuestionService {
 
     QuestionDto update(Long questionId, QuestionDto questionDto);
 
-    Response delete(Long questionId);
+    OperationResult delete(Long questionId);
 
     QuestionDto restore(Long questionId);
 

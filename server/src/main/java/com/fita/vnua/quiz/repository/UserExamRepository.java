@@ -4,6 +4,7 @@ import com.fita.vnua.quiz.model.dto.UserExamSummaryDto;
 import com.fita.vnua.quiz.model.entity.UserExam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +19,30 @@ import java.util.UUID;
 
 public interface UserExamRepository extends JpaRepository<UserExam, Long> {
 
-    @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId")
+    @Query("""
+            SELECT ue FROM UserExam ue
+            JOIN FETCH ue.exam e
+            JOIN FETCH e.subject
+            JOIN FETCH ue.user
+            """)
+    List<UserExam> findAllWithExamSubjectAndUser();
+
+    @Query("""
+            SELECT ue FROM UserExam ue
+            JOIN FETCH ue.exam e
+            JOIN FETCH e.subject
+            JOIN FETCH ue.user
+            WHERE ue.userExamId = :userExamId
+            """)
+    Optional<UserExam> findByIdWithExamSubjectAndUser(@Param("userExamId") Long userExamId);
+
+    @Query("""
+            SELECT ue FROM UserExam ue
+            JOIN FETCH ue.exam e
+            JOIN FETCH e.subject
+            JOIN FETCH ue.user
+            WHERE ue.user.userId = :userId
+            """)
     List<UserExam> findUserExamsByUserId(UUID userId);
 
     @Query(
@@ -70,13 +94,40 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
             Pageable pageable
     );
 
-    @Query("SELECT ue FROM UserExam ue WHERE ue.userExamId = :userExamId AND ue.user.userId = :userId")
+    @Query("""
+            SELECT ue FROM UserExam ue
+            JOIN FETCH ue.exam e
+            JOIN FETCH e.subject
+            JOIN FETCH ue.user
+            WHERE ue.userExamId = :userExamId
+            AND ue.user.userId = :userId
+            """)
     Optional<UserExam> findByIdAndUserId(@Param("userExamId") Long userExamId, @Param("userId") UUID userId);
 
-    @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId AND ue.exam.examId = :examId AND ue.status = 'IN_PROGRESS' ORDER BY ue.updatedAt DESC")
+    @Query("SELECT ue.exam.subject.subjectId FROM UserExam ue WHERE ue.userExamId = :userExamId")
+    Optional<Long> findSubjectIdByUserExamId(@Param("userExamId") Long userExamId);
+
+    @Query("""
+            SELECT ue FROM UserExam ue
+            JOIN FETCH ue.exam e
+            JOIN FETCH e.subject
+            JOIN FETCH ue.user
+            WHERE ue.user.userId = :userId
+            AND ue.exam.examId = :examId
+            AND ue.status = 'IN_PROGRESS'
+            ORDER BY ue.updatedAt DESC
+            """)
     List<UserExam> findInProgressByUserIdAndExamId(@Param("userId") UUID userId, @Param("examId") Long examId);
 
-    @Query("SELECT ue FROM UserExam ue WHERE ue.user.userId = :userId AND ue.status = 'IN_PROGRESS' ORDER BY ue.updatedAt DESC")
+    @Query("""
+            SELECT ue FROM UserExam ue
+            JOIN FETCH ue.exam e
+            JOIN FETCH e.subject
+            JOIN FETCH ue.user
+            WHERE ue.user.userId = :userId
+            AND ue.status = 'IN_PROGRESS'
+            ORDER BY ue.updatedAt DESC
+            """)
     List<UserExam> findInProgressByUserId(@Param("userId") UUID userId);
 
     @Query("SELECT ue.exam.examId AS examId, COUNT(ue) AS attempts " +
@@ -207,32 +258,27 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
         Long getRankPosition();
     }
 
-    @Query(value = """
-    SELECT
-        ue.*
-    FROM user_exam ue
-    JOIN exam e ON ue.exam_id = e.exam_id
-    JOIN subject s ON e.subject_id = s.subject_id
-    WHERE ue.user_id = :userId
-      AND e.subject_id = :subjectId
-    ORDER BY ue.start_time DESC
-    """, nativeQuery = true)
+    @Query("""
+            SELECT ue FROM UserExam ue
+            JOIN FETCH ue.exam e
+            JOIN FETCH e.subject s
+            JOIN FETCH ue.user
+            WHERE ue.user.userId = :userId
+            AND s.subjectId = :subjectId
+            ORDER BY ue.startTime DESC
+            """)
     List<UserExam> findUserExamsByUserIdAndSubjectId(
             @Param("userId") UUID userId,
             @Param("subjectId") Long subjectId
     );
 
-    @Query(value = """
-    SELECT
-        ue.*
-    FROM user_exam ue
-    JOIN exam e ON ue.exam_id = e.exam_id
-    JOIN subject s ON e.subject_id = s.subject_id
-    WHERE ue.user_id = :userId
-    ORDER BY ue.end_time DESC
-    LIMIT 7
-    """, nativeQuery = true)
-    List<UserExam> findLast7ExamsByUser(@Param("userId") UUID userId);
+    @EntityGraph(attributePaths = {"exam", "exam.subject", "user"})
+    @Query("""
+            SELECT ue FROM UserExam ue
+            WHERE ue.user.userId = :userId
+            ORDER BY ue.endTime DESC
+            """)
+    List<UserExam> findLast7ExamsByUser(@Param("userId") UUID userId, Pageable pageable);
 
     @Modifying
     @Transactional

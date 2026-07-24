@@ -1,12 +1,12 @@
 package com.fita.vnua.quiz.model.dto.request;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.UUID;
 
 @Data
-public class PersonalNotificationRequest {
+@EqualsAndHashCode(callSuper = true)
+public class PersonalNotificationRequest extends GlobalNotificationRequest {
     private UUID userId; // Quan trọng: Dùng UUID
-    private String title;
-    private String message;
 }

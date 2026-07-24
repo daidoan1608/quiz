@@ -5,7 +5,7 @@ import com.fita.vnua.quiz.model.dto.ChapterDto;
 import com.fita.vnua.quiz.model.dto.ExamInfo;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.SubjectSummaryDto;
-import com.fita.vnua.quiz.model.dto.response.Response;
+import com.fita.vnua.quiz.model.dto.result.OperationResult;
 import com.fita.vnua.quiz.model.entity.Category;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.model.entity.Exam;
@@ -13,10 +13,12 @@ import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.repository.*;
 import com.fita.vnua.quiz.service.SoftDeleteService;
 import com.fita.vnua.quiz.service.SubjectService;
+import com.fita.vnua.quiz.service.mapper.ChapterMapper;
+import com.fita.vnua.quiz.service.mapper.SubjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +35,9 @@ public class SubjectServiceImpl implements SubjectService {
     private final CategoryRepository categoryRepository;
     private final QuestionRepository questionRepository;
     private final ExamRepository examRepository;
-    private final ModelMapper modelMapper;
     private final SoftDeleteService softDeleteService;
+    private final SubjectMapper subjectMapper;
+    private final ChapterMapper chapterMapper;
 
     @Override
     public List<SubjectSummaryDto> getAllSubject() {
@@ -44,7 +47,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public List<SubjectSummaryDto> getRandomSubjects(int limit) {
         int safeLimit = Math.max(1, Math.min(limit, 20));
-        return mapSubjectsToSummaryDtos(subjectRepository.findRandomActiveSubjects(safeLimit));
+        return mapSubjectsToSummaryDtos(subjectRepository.findRandomActiveSubjects(PageRequest.of(0, safeLimit)));
     }
 
     @Override
@@ -116,7 +119,7 @@ public class SubjectServiceImpl implements SubjectService {
         subject.setCategory(category);
         subject.setDeleted(false);
         Subject savedSubject = subjectRepository.save(subject);
-        return modelMapper.map(savedSubject, SubjectDto.class);
+        return subjectMapper.toDto(savedSubject);
     }
 
     @Override
@@ -130,14 +133,14 @@ public class SubjectServiceImpl implements SubjectService {
 
         existingSubject.setName(subjectDto.getName());
         existingSubject.setDescription(subjectDto.getDescription());
-        return modelMapper.map(subjectRepository.save(existingSubject), SubjectDto.class);
+        return subjectMapper.toDto(subjectRepository.save(existingSubject));
     }
 
     @Override
     @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail"}, allEntries = true)
-    public Response delete(Long subjectId) {
+    public OperationResult delete(Long subjectId) {
         softDeleteService.deleteSubject(subjectId, null);
-        return Response.builder()
+        return OperationResult.builder()
                 .responseMessage("Xóa môn học thành công")
                 .responseCode("200 OK").build();
     }
@@ -186,15 +189,16 @@ public class SubjectServiceImpl implements SubjectService {
             Map<Long, Long> examCounts,
             Map<Long, Long> questionCounts
     ) {
-        SubjectSummaryDto subjectDto = modelMapper.map(subject, SubjectSummaryDto.class);
-        subjectDto.setTotalChapters(chapterCounts.getOrDefault(subject.getSubjectId(), 0L));
-        subjectDto.setTotalExams(examCounts.getOrDefault(subject.getSubjectId(), 0L));
-        subjectDto.setTotalQuestions(questionCounts.getOrDefault(subject.getSubjectId(), 0L));
-        return subjectDto;
+        return subjectMapper.toSummaryDto(
+                subject,
+                chapterCounts.getOrDefault(subject.getSubjectId(), 0L),
+                examCounts.getOrDefault(subject.getSubjectId(), 0L),
+                questionCounts.getOrDefault(subject.getSubjectId(), 0L)
+        );
     }
 
     private SubjectDto mapSubjectToDetailedDto(Subject subject) {
-        SubjectDto subjectDto = modelMapper.map(subject, SubjectDto.class);
+        SubjectDto subjectDto = subjectMapper.toDto(subject);
 
         // --- 1. Xử lý Exams ---
         List<Exam> exams = examRepository.findExamsBySubjectId(subject.getSubjectId());
@@ -202,9 +206,7 @@ public class SubjectServiceImpl implements SubjectService {
         List<ExamInfo> examInfos = new ArrayList<>();
 
         for (Exam exam : exams) {
-            ExamInfo examInfo = modelMapper.map(exam, ExamInfo.class);
-            examInfo.setTotalQuestions(examQuestionCounts.getOrDefault(exam.getExamId(), 0L));
-            examInfos.add(examInfo);
+            examInfos.add(subjectMapper.toExamInfo(exam, examQuestionCounts.getOrDefault(exam.getExamId(), 0L)));
         }
 
         // --- 2. Xử lý Chapters & Questions ---
@@ -214,11 +216,8 @@ public class SubjectServiceImpl implements SubjectService {
         long totalQuestionsOfSubject = 0;
 
         for (Chapter chapter : chapters) {
-            ChapterDto chapterDto = modelMapper.map(chapter, ChapterDto.class);
-
-            // Đếm số câu hỏi của chương
             long questionCount = chapterQuestionCounts.getOrDefault(chapter.getChapterId(), 0L);
-            chapterDto.setCountQuestion(questionCount);
+            ChapterDto chapterDto = chapterMapper.toDto(chapter, questionCount);
 
             // Cộng dồn tổng câu hỏi
             totalQuestionsOfSubject += questionCount;

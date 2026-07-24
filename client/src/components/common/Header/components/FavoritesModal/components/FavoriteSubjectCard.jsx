@@ -8,14 +8,14 @@ export default function FavoriteSubjectCard({
   onSmartPractice,
 }) {
   return (
-    <article className="group rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <article className="aura-surface-panel aura-surface-panel-hover group rounded-2xl p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={() => onOpenSubject(favorite.subjectId)}
           className="flex min-w-0 flex-1 items-center gap-4 text-left"
         >
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <div className="aura-primary-icon-box h-12 w-12 flex-shrink-0 rounded-2xl">
             <span className="material-symbols-outlined">
               {index % 2 === 0 ? 'menu_book' : 'school'}
             </span>
@@ -33,7 +33,7 @@ export default function FavoriteSubjectCard({
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <button
             onClick={() => onSmartPractice(favorite)}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white shadow-sm transition hover:shadow-md"
+            className="aura-button aura-button-primary min-h-10 px-4 text-sm"
             type="button"
           >
             <span className="material-symbols-outlined text-lg">
@@ -43,7 +43,7 @@ export default function FavoriteSubjectCard({
           </button>
           <button
             onClick={() => onOpenSubject(favorite.subjectId)}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+            className="aura-button aura-button-subtle min-h-10 px-4 text-sm"
             type="button"
           >
             <span className="material-symbols-outlined text-lg">

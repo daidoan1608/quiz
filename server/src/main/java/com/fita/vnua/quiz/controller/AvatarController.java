@@ -2,8 +2,8 @@ package com.fita.vnua.quiz.controller;
 
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.service.AvatarStorageService;
 import com.fita.vnua.quiz.service.UserService;
-import com.fita.vnua.quiz.service.impl.AvatarStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class AvatarController {
         UUID userId = currentUser.getUserId();
         log.debug("Uploading avatar for userId={}, file={}", userId, file.getOriginalFilename());
 
-        String oldUrl = userService.getUserById(userId).getAvatarUrl();
+        String oldUrl = userService.getUserResponseById(userId).getAvatarUrl();
 
         var up = storage.saveAvatar(userId, file, oldUrl);
 
@@ -48,12 +48,10 @@ public class AvatarController {
     @Operation(summary = "API lấy link avatar")
     @GetMapping("/avatar")
     public ResponseEntity<ApiResponse<Map<String, String>>> getAvatar(@AuthenticationPrincipal User currentUser) {
-        String url = userService.getUserById(currentUser.getUserId()).getAvatarUrl();
+        String url = userService.getUserResponseById(currentUser.getUserId()).getAvatarUrl();
         if (url == null || url.isBlank()) {
             url = storage.getDefaultUrl();
         }
         return ResponseEntity.ok(ApiResponse.success("Lấy avatar thành công", Map.of("avatarUrl", url)));
     }
 }
-
-

@@ -1,4 +1,6 @@
-import InProgressAttemptCard from './InProgressAttemptCard';
+import InProgressAttemptCard, {
+  getInProgressAttemptKey,
+} from 'pages/Subject/components/InProgressAttemptCard';
 
 export default function InProgressAttemptsSection({
   inProgressAttempts,
@@ -24,9 +26,15 @@ export default function InProgressAttemptsSection({
           {inProgressAttempts.map((attempt) => (
             <InProgressAttemptCard
               attempt={attempt}
-              key={attempt.attemptId || attempt.userExamId || attempt.examId}
+              key={getInProgressAttemptKey(attempt)}
+              labels={{
+                continue: texts.continueExam || 'Tiếp tục làm bài',
+                examFallback:
+                  texts.inProgressExamFallback || 'Bài thi đang làm',
+                subjectFallback:
+                  texts.unknownSubject || 'Chưa xác định môn học',
+              }}
               onContinue={onContinueAttempt}
-              texts={texts}
             />
           ))}
         </div>

@@ -2,7 +2,7 @@ package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.dto.SubjectSummaryDto;
-import com.fita.vnua.quiz.model.dto.response.Response;
+import com.fita.vnua.quiz.model.dto.result.OperationResult;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public interface SubjectService {
 
     SubjectDto update(Long subjectId, SubjectDto subjectDto);
 
-    Response delete(Long subjectId);
+    OperationResult delete(Long subjectId);
 
     SubjectDto restore(Long subjectId);
 

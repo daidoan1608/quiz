@@ -15,6 +15,15 @@ import java.util.UUID;
 public interface FavoriteRepository extends JpaRepository<Favorite, FavoriteId> {
     List<Favorite> findFavoriteByUser(User user);
 
+    @Query("""
+            SELECT f FROM Favorite f
+            JOIN FETCH f.user
+            JOIN FETCH f.subject s
+            JOIN FETCH s.category
+            WHERE f.user.userId = :userId
+            """)
+    List<Favorite> findByUserIdWithSubjectAndCategory(@Param("userId") UUID userId);
+
     Optional<Favorite> findByUserUserIdAndSubjectSubjectId(UUID userId, Long subjectId);
 
     /**

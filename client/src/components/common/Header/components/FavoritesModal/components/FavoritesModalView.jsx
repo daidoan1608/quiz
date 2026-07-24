@@ -14,7 +14,7 @@ export default function FavoritesModalView({
   t,
 }) {
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="flex max-h-[84vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 animate-in zoom-in-95 duration-200 dark:bg-surface-dark dark:ring-white/10">
         <FavoritesModalHeader
           favoriteCountText={favoriteCountText}

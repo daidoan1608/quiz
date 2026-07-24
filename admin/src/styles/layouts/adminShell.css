@@ -100,10 +100,23 @@ body.dark .admin-brand-mark {
   align-items: center;
 }
 
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-mobile-menu-button {
+  display: none;
+  flex: 0 0 auto;
+}
+
 .admin-header-title {
   display: flex;
   flex-direction: column;
   line-height: 1.25;
+  min-width: 0;
 }
 
 .admin-header-kicker {
@@ -268,6 +281,22 @@ body.dark .admin-brand-mark {
 }
 
 @media (max-width: 768px) {
+  .admin-shell {
+    display: block;
+  }
+
+  .admin-mobile-menu-button {
+    display: inline-flex;
+  }
+
+  .admin-topbar {
+    width: 100%;
+  }
+
+  .admin-header-inner {
+    padding: 0 12px;
+  }
+
   .admin-content {
     margin: 16px;
   }
@@ -278,5 +307,14 @@ body.dark .admin-brand-mark {
 
   .admin-header-kicker {
     font-size: 10px;
+  }
+
+  .admin-user-trigger {
+    max-width: 52px;
+    padding: 0 6px;
+  }
+
+  .admin-user-trigger__name {
+    display: none;
   }
 }

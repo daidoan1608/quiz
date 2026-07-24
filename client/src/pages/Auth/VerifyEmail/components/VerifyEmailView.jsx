@@ -1,13 +1,15 @@
 import React from 'react';
-import { Button, Result, Spin } from 'antd';
+import { Button, Result } from 'antd';
+import { PageLoadingState } from '../../../../components/common/PageState';
 
 export const VerifyEmailView = ({ message, navigate, status }) => {
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <Spin size="large" />
-        <p className="mt-4 text-gray-600">Đang xác thực email...</p>
-      </div>
+      <PageLoadingState
+        className="bg-gray-50"
+        label="Đang xác thực email..."
+        minHeightClassName="min-h-screen"
+      />
     );
   }
 

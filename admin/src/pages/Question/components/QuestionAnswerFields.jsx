@@ -110,6 +110,8 @@ export const QuestionAnswerFields = ({
             </div>
             <Tooltip title="Xóa đáp án">
               <Button
+                aria-label="Xóa đáp án"
+                title="Xóa đáp án"
                 type="text"
                 danger
                 icon={<DeleteOutlined />}

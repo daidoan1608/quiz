@@ -22,3 +22,10 @@ export const SUBJECT_MODE_OPTIONS = [
     description: 'Tập trung vào những câu bạn đã đánh dấu.',
   },
 ];
+
+export const PRACTICE_DIFFICULTY_OPTIONS = [
+  { value: 'ALL', label: 'Tất cả độ khó' },
+  { value: 'EASY', label: 'Dễ' },
+  { value: 'MEDIUM', label: 'Trung bình' },
+  { value: 'HARD', label: 'Khó' },
+];

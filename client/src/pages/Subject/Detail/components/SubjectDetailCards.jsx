@@ -1,21 +1,26 @@
 import React from 'react';
+import { MetricCard } from 'components/common/MetricCard';
 
 export const StatsCard = ({ title, value }) => (
-  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
-    <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-      {title}
-    </span>
-    <span className="text-3xl font-black text-primary">{value}</span>
-  </div>
+  <MetricCard
+    label={title}
+    labelClassName="!text-xs"
+    size="lg"
+    surface="subtle"
+    tone="primary"
+    value={value}
+  />
 );
 
 export const ChapterCard = ({ chapter, index, onStart, texts }) => {
   const hasQuestions = (chapter.countQuestion || 0) > 0;
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 md:flex-row md:items-center md:justify-between">
+    <div className="aura-surface-panel aura-surface-panel-hover flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
       <div className="flex items-start gap-4">
         <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-black ${hasQuestions ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500 dark:bg-gray-700'}`}
+          className={`aura-index-badge h-12 w-12 ${
+            hasQuestions ? '' : 'aura-index-badge--muted'
+          }`}
         >
           {index + 1}
         </div>
@@ -23,13 +28,15 @@ export const ChapterCard = ({ chapter, index, onStart, texts }) => {
           <h4 className="text-lg font-black text-gray-950 dark:text-white">
             {chapter.name}
           </h4>
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-            <span className="inline-flex items-center gap-1">
-              <span className="material-symbols-outlined text-base">quiz</span>
+          <div className="aura-meta-row mt-2">
+            <span className="aura-meta-item">
+              <span className="material-symbols-outlined">quiz</span>
               {chapter.countQuestion || 0} {texts?.questions || 'câu hỏi'}
             </span>
             <span
-              className={`rounded-full px-3 py-1 text-xs font-bold ${hasQuestions ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500 dark:bg-gray-700'}`}
+              className={`aura-status-pill ${
+                hasQuestions ? 'aura-status-pill--primary' : ''
+              }`}
             >
               {hasQuestions
                 ? texts?.canReview || 'Có thể ôn'
@@ -41,7 +48,7 @@ export const ChapterCard = ({ chapter, index, onStart, texts }) => {
       <button
         disabled={!hasQuestions}
         onClick={() => onStart(chapter)}
-        className={`h-11 rounded-lg px-6 text-sm font-bold transition-all ${hasQuestions ? 'bg-primary text-white shadow-sm hover:shadow-md hover:brightness-110 active:scale-[0.98]' : 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-700'}`}
+        className={`aura-button px-6 text-sm ${hasQuestions ? 'aura-button-primary' : 'bg-gray-100 text-gray-400 dark:bg-gray-700'}`}
       >
         {texts?.startReview || 'Bắt đầu ôn'}
       </button>
@@ -51,10 +58,10 @@ export const ChapterCard = ({ chapter, index, onStart, texts }) => {
 
 export const ExamCard = ({ exam, index, onStart, inProgress, texts }) => (
   <div
-    className={`rounded-xl border bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:bg-gray-800 ${inProgress ? 'border-primary/40 dark:border-primary/50' : 'border-gray-200 hover:border-primary/40 dark:border-gray-700'}`}
+    className={`aura-surface-panel aura-surface-panel-hover p-5 ${inProgress ? '!border-primary/40 dark:!border-primary/50' : ''}`}
   >
     <div className="mb-4 flex items-start gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 font-black text-primary">
+      <div className="aura-index-badge h-10 w-10">
         {index + 1}
       </div>
       <div className="min-w-0">
@@ -63,7 +70,7 @@ export const ExamCard = ({ exam, index, onStart, inProgress, texts }) => (
             {exam.title}
           </h4>
           {inProgress && (
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-black text-primary">
+            <span className="aura-status-pill aura-status-pill--primary">
               {texts?.inProgress || 'Đang làm'}
             </span>
           )}
@@ -75,19 +82,19 @@ export const ExamCard = ({ exam, index, onStart, inProgress, texts }) => (
         </p>
       </div>
     </div>
-    <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-      <span className="inline-flex items-center gap-1">
-        <span className="material-symbols-outlined text-base">help</span>
+    <div className="aura-meta-row mb-4">
+      <span className="aura-meta-item">
+        <span className="material-symbols-outlined">help</span>
         {exam.totalQuestions || 0} {texts?.questionUnit || 'câu'}
       </span>
-      <span className="inline-flex items-center gap-1">
-        <span className="material-symbols-outlined text-base">timer</span>
+      <span className="aura-meta-item">
+        <span className="material-symbols-outlined">timer</span>
         {exam.duration || 60} {texts?.minutes || 'phút'}
       </span>
     </div>
     <button
       onClick={() => onStart(exam)}
-      className="h-11 w-full rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98]"
+      className="aura-button aura-button-primary w-full px-5 text-sm"
     >
       {inProgress
         ? texts?.continue || 'Tiếp tục'
@@ -109,14 +116,14 @@ export const MiniInfo = ({ label, value }) => (
 
 export const EmptyState = ({ text, compact = false, texts }) => (
   <div
-    className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white px-4 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800 ${compact ? 'py-10' : 'py-14'}`}
+    className={`aura-empty-state px-4 ${compact ? 'py-10' : 'py-14'}`}
   >
-    <span className="material-symbols-outlined mb-3 text-5xl text-gray-300">
+    <span className="material-symbols-outlined aura-empty-state__icon">
       inbox
     </span>
-    <h3 className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
+    <h3 className="aura-empty-state__title text-lg">
       {texts?.noContent || 'Chưa có nội dung'}
     </h3>
-    <p className="max-w-sm text-sm text-gray-500 dark:text-gray-400">{text}</p>
+    <p className="aura-empty-state__description text-sm">{text}</p>
   </div>
 );

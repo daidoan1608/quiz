@@ -15,14 +15,17 @@ import com.fita.vnua.quiz.repository.ExamRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.UserAnswerRepository;
 import com.fita.vnua.quiz.repository.UserExamRepository;
+import com.fita.vnua.quiz.repository.UserExamQuestionRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
-import com.fita.vnua.quiz.service.SubjectService;
+import com.fita.vnua.quiz.service.mapper.QuestionMapper;
+import com.fita.vnua.quiz.service.mapper.UserExamMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.modelmapper.ModelMapper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -51,9 +54,11 @@ class UserExamServiceImplTest {
     @Mock
     private QuestionRepository questionRepository;
     @Mock
-    private ModelMapper modelMapper;
+    private UserExamQuestionRepository userExamQuestionRepository;
     @Mock
-    private SubjectService subjectService;
+    private UserExamAttemptStatsService attemptStatsService;
+    @Spy
+    private UserExamMapper userExamMapper = new UserExamMapper(new ObjectMapper(), new QuestionMapper());
 
     @InjectMocks
     private UserExamServiceImpl userExamService;
@@ -69,13 +74,11 @@ class UserExamServiceImplTest {
     }
 
     @Test
-    void startOrResumeAttemptUsesAuthenticatedUserInsteadOfRequestUserId() {
+    void startOrResumeAttemptUsesAuthenticatedUserFromSecurityContext() {
         UUID authenticatedUserId = UUID.randomUUID();
-        UUID spoofedUserId = UUID.randomUUID();
         Long examId = 99L;
 
         StartExamAttemptRequest request = new StartExamAttemptRequest();
-        request.setUserId(spoofedUserId);
         request.setExamId(examId);
 
         User authenticatedUser = new User();
@@ -105,6 +108,7 @@ class UserExamServiceImplTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void createUserExamUsesAuthenticatedUserInsteadOfRequestUserId() {
         UUID authenticatedUserId = UUID.randomUUID();
         UUID spoofedUserId = UUID.randomUUID();
@@ -125,7 +129,6 @@ class UserExamServiceImplTest {
         when(examRepository.findById(examId)).thenReturn(Optional.of(exam));
         when(questionRepository.findQuestionsByExamId(examId)).thenReturn(List.of());
         when(userExamRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(modelMapper.map(any(UserExam.class), any())).thenReturn(new UserExamDto());
 
         userExamService.createUserExam(request, authenticatedUserId);
 

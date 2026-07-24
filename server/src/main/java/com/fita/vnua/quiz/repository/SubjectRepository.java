@@ -3,6 +3,7 @@ package com.fita.vnua.quiz.repository;
 import com.fita.vnua.quiz.model.entity.Category;
 import com.fita.vnua.quiz.model.entity.Subject;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -14,14 +15,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
     @Query("SELECT s FROM Subject s JOIN FETCH s.category WHERE s.deleted = false")
     List<Subject> findByDeletedFalse();
 
-    @Query(value = """
-            SELECT s.*
-            FROM subject s
-            WHERE s.deleted = false
-            ORDER BY RAND()
-            LIMIT :limit
-            """, nativeQuery = true)
-    List<Subject> findRandomActiveSubjects(@Param("limit") int limit);
+    @EntityGraph(attributePaths = {"category"})
+    @Query("SELECT s FROM Subject s WHERE s.deleted = false ORDER BY function('RAND')")
+    List<Subject> findRandomActiveSubjects(org.springframework.data.domain.Pageable pageable);
 
     @Query("SELECT s FROM Subject s JOIN FETCH s.category WHERE s.deleted = true")
     List<Subject> findByDeletedTrue();
@@ -66,15 +62,26 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
     @Query("SELECT s.subjectId FROM Subject s WHERE s.subjectId = :subjectId AND s.deleted = false")
     Optional<Long> findActiveSubjectId(@Param("subjectId") Long subjectId);
 
-    @Query(value = """
-    SELECT
-        s.*
-    FROM user_exam ue
-    JOIN exam e ON ue.exam_id = e.exam_id
-    JOIN subject s ON e.subject_id = s.subject_id
-    WHERE ue.user_id = :userId
-    GROUP BY s.subject_id, s.name
-    ORDER BY MAX(ue.end_time) DESC
-    """, nativeQuery = true)
+    @Query("""
+            SELECT COUNT(s) > 0 FROM Subject s
+            JOIN s.category c
+            WHERE s.subjectId = :subjectId
+              AND c.categoryId = :categoryId
+              AND s.deleted = false
+            """)
+    boolean existsActiveSubjectInCategory(
+            @Param("subjectId") Long subjectId,
+            @Param("categoryId") Long categoryId
+    );
+
+    @Query("""
+            SELECT s FROM UserExam ue
+            JOIN ue.exam e
+            JOIN e.subject s
+            JOIN FETCH s.category
+            WHERE ue.user.userId = :userId
+            GROUP BY s
+            ORDER BY MAX(ue.endTime) DESC
+            """)
     List<Subject> findSubjectsWithUserExams(@Param("userId") UUID userId);
 }

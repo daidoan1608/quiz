@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { appMessage as message } from "../../../utils/ui/messageService";
 import { getApiErrorMessage } from "../../../api/axiosConfig";
 import { categoryApi, subjectApi } from "../../../api/services";
@@ -15,6 +15,7 @@ const subjectMatchesKeyword = (subject, keyword) =>
 export const useSubjectManager = () => {
   const [subjects, setSubjects] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [permittedCategoryIds, setPermittedCategoryIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [viewMode, setViewMode] = useState("active");
@@ -32,12 +33,17 @@ export const useSubjectManager = () => {
       setLoading(true);
       try {
         const trimmedKeyword = keyword.trim();
+        const allSubjects = isMod ? await subjectApi.getAll() : [];
+        const permittedSubjects = isMod
+          ? allSubjects.filter((subject) =>
+              canOnSubject(subject.subjectId, "SUBJECT", "VIEW")
+            )
+          : [];
         const data = isMod
-          ? (await subjectApi.getAll()).filter((subject) => {
+          ? permittedSubjects.filter((subject) => {
               const matchesCategory =
                 !categoryFilter || subject.categoryId === categoryFilter;
               return (
-                canOnSubject(subject.subjectId, "SUBJECT", "VIEW") &&
                 subjectMatchesKeyword(subject, trimmedKeyword) &&
                 matchesCategory
               );
@@ -50,6 +56,17 @@ export const useSubjectManager = () => {
               sortDir: tableSort.sortDir,
             });
         setSubjects(data);
+        if (isMod) {
+          setPermittedCategoryIds(
+            Array.from(
+              new Set(
+                permittedSubjects
+                  .map((subject) => subject.categoryId)
+                  .filter(Boolean)
+              )
+            )
+          );
+        }
       } catch (error) {
         message.error(
           getApiErrorMessage(error, "Không thể tải danh sách môn học.")
@@ -71,6 +88,16 @@ export const useSubjectManager = () => {
   useDebouncedEffect(() => {
     fetchSubjects(searchText);
   }, [searchText, viewMode, fetchSubjects]);
+
+  const visibleCategories = useMemo(
+    () =>
+      isMod
+        ? categories.filter((category) =>
+            permittedCategoryIds.includes(category.categoryId)
+          )
+        : categories,
+    [categories, isMod, permittedCategoryIds]
+  );
 
   const deleteSubject = async (subjectId) => {
     if (!canOnSubject(subjectId, "SUBJECT", "DELETE")) {
@@ -116,7 +143,7 @@ export const useSubjectManager = () => {
 
   return {
     subjects,
-    categories,
+    categories: visibleCategories,
     loading,
     searchText,
     setSearchText,

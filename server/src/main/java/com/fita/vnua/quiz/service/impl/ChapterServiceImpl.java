@@ -2,17 +2,17 @@ package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.ChapterDto;
-import com.fita.vnua.quiz.model.dto.response.Response;
+import com.fita.vnua.quiz.model.dto.result.OperationResult;
 import com.fita.vnua.quiz.model.entity.Chapter;
 import com.fita.vnua.quiz.repository.ChapterRepository;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.ChapterService;
 import com.fita.vnua.quiz.service.SoftDeleteService;
+import com.fita.vnua.quiz.service.mapper.ChapterMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +27,8 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterRepository chapterRepository;
     private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;
-    private final ModelMapper modelMapper;
     private final SoftDeleteService softDeleteService;
+    private final ChapterMapper chapterMapper;
 
     @Override
     @Cacheable(value = "publicChaptersBySubject", key = "#subjectId")
@@ -107,7 +107,7 @@ public class ChapterServiceImpl implements ChapterService {
 
         Chapter savedChapter = chapterRepository.save(chapter);
 
-        return modelMapper.map(savedChapter, ChapterDto.class);
+        return chapterMapper.toDto(savedChapter);
     }
 
     @Override
@@ -122,14 +122,14 @@ public class ChapterServiceImpl implements ChapterService {
         existingChapter.setName(chapterDto.getName());
         existingChapter.setChapterNumber(chapterDto.getChapterNumber());
         chapterRepository.save(existingChapter);
-        return modelMapper.map(existingChapter, ChapterDto.class);
+        return chapterMapper.toDto(existingChapter);
     }
 
     @Override
     @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
-    public Response delete(Long chapterId) {
+    public OperationResult delete(Long chapterId) {
         softDeleteService.deleteChapter(chapterId, null);
-        return Response.builder()
+        return OperationResult.builder()
                 .responseMessage("Xóa chương thành công")
                 .responseCode("200 OK").build();
     }
@@ -148,9 +148,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     private ChapterDto mapChapterToDto(Chapter chapter, Map<Long, Long> questionCounts) {
-        ChapterDto dto = modelMapper.map(chapter, ChapterDto.class);
-        dto.setCountQuestion(questionCounts.getOrDefault(chapter.getChapterId(), 0L));
-        return dto;
+        return chapterMapper.toDto(chapter, questionCounts.getOrDefault(chapter.getChapterId(), 0L));
     }
 
     private Map<Long, Long> countQuestionsByChapter(List<Chapter> chapters) {

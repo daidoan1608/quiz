@@ -14,6 +14,7 @@ import {
 import {
   BellOutlined,
   LogoutOutlined,
+  MenuUnfoldOutlined,
   MoonOutlined,
   SunOutlined,
   UserOutlined,
@@ -28,7 +29,7 @@ const resolveAvatarUrl = (url) => {
   return `${ADMIN_API_ROOT}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-export const ContentHeader = () => {
+export const ContentHeader = ({ onOpenSidebar }) => {
   const { logout } = useAuth();
   const { mode, setMode, colorTheme, setColorTheme } = useTheme();
   const isDarkMode = mode === 'dark';
@@ -92,6 +93,7 @@ export const ContentHeader = () => {
             {colorThemes.map((themeOpt) => (
               <button
                 key={themeOpt.name}
+                aria-label={`Chọn màu ${themeOpt.label}`}
                 className={`admin-theme-swatch admin-theme-swatch--${themeOpt.name}${
                   colorTheme === themeOpt.name ? ' is-selected' : ''
                 }`}
@@ -116,14 +118,26 @@ export const ContentHeader = () => {
   return (
     <>
       <div className="admin-header-inner">
-        <div className="admin-header-title">
-          <span className="admin-header-kicker">VNUA Quiz</span>
-          <span className="admin-header-name">Systems Manager</span>
+        <div className="admin-header-left">
+          <Button
+            aria-label="Mở menu điều hướng"
+            className="admin-mobile-menu-button"
+            icon={<MenuUnfoldOutlined />}
+            onClick={onOpenSidebar}
+            shape="circle"
+            type="text"
+          />
+
+          <div className="admin-header-title">
+            <span className="admin-header-kicker">VNUA Quiz</span>
+            <span className="admin-header-name">Systems Manager</span>
+          </div>
         </div>
 
         <Space size="middle">
           <Badge count={adminAlertCount} size="small">
             <Button
+              aria-label="Mở thông báo hệ thống"
               type="text"
               shape="circle"
               icon={<BellOutlined />}

@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import { AdminResetButton } from "../../../components/common/buttons/AdminButtons";
 import { buildAdminModalFooter } from "../../../components/common/forms/AdminFormActions";
+import AdminReadonlyField from "../../../components/common/forms/AdminReadonlyField";
 import AdminModalFormShell from "../../../components/common/modal/AdminModalFormShell";
 import { useChapterForm } from "../hooks/useChapterForm";
 
@@ -56,7 +57,7 @@ export const ChapterFormModal = ({
 
   return (
     <AdminModalFormShell
-      title={isEditMode ? `Cập nhật chương ID: ${chapterId}` : "Thêm Chương Mới"}
+      title={isEditMode ? "Cập nhật chương" : "Thêm Chương Mới"}
       icon={isEditMode ? <EditOutlined /> : <BookOutlined />}
       open={open}
       onCancel={cancel}
@@ -69,25 +70,14 @@ export const ChapterFormModal = ({
       <Form form={form} layout="vertical" onFinish={submit} size="large">
         {isEditMode ? (
           <>
+            <AdminReadonlyField name="chapterId" />
+
             <Form.Item
               label="Tên chương"
               name="name"
               rules={[{ required: true, message: "Vui lòng nhập tên chương!" }]}
             >
               <Input placeholder="Ví dụ: Giới thiệu về OOP" />
-            </Form.Item>
-
-            <Form.Item
-              label="Mã môn học (Subject ID)"
-              name="subjectId"
-              tooltip="Mã môn học không nên thay đổi sau khi chương được tạo."
-            >
-              <InputNumber
-                className="admin-full-control"
-                placeholder="ID môn học"
-                min={1}
-                disabled
-              />
             </Form.Item>
 
             <Form.Item

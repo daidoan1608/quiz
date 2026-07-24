@@ -1,3 +1,5 @@
+import { CLIENT_API_URL } from 'config/env';
+
 export const formatFileSize = (size = 0) => {
   if (!size) return '0 KB';
   const units = ['B', 'KB', 'MB', 'GB'];
@@ -10,3 +12,8 @@ export const formatFileSize = (size = 0) => {
 
 export const getFileType = (filename = '') =>
   filename.split('.').pop()?.toUpperCase() || 'FILE';
+
+export const getDocumentDownloadUrl = (documentId) => {
+  const baseUrl = CLIENT_API_URL.replace(/\/+$/, '');
+  return `${baseUrl}/public/documents/${documentId}/download`;
+};

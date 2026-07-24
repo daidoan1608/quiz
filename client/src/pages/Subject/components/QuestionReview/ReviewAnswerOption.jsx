@@ -42,7 +42,7 @@ export default function ReviewAnswerOption({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           {isRightAnswer && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700 dark:bg-green-900/50 dark:text-green-300">
+            <span className="aura-status-pill aura-status-pill--success">
               <span className="material-symbols-outlined !text-sm">
                 check_circle
               </span>
@@ -51,10 +51,10 @@ export default function ReviewAnswerOption({
           )}
           {isUserChoice && (
             <span
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold ${
+              className={`aura-status-pill ${
                 isRightAnswer
-                  ? 'bg-primary/10 text-primary'
-                  : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                  ? 'aura-status-pill--primary'
+                  : 'aura-status-pill--danger'
               }`}
             >
               <span className="material-symbols-outlined !text-sm">person</span>

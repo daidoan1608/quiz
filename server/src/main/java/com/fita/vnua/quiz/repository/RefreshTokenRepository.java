@@ -11,6 +11,12 @@ import java.util.UUID;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
     Optional<RefreshToken> findByToken(UUID token);
 
+    @Query("""
+            SELECT rt FROM RefreshToken rt
+            JOIN FETCH rt.user
+            WHERE rt.token = :token
+            AND rt.revoked = :revoked
+            """)
     Optional<RefreshToken> findByTokenAndRevoked(UUID token, boolean revoked);
 
     void deleteByToken(UUID token);

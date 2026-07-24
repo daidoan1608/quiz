@@ -1,5 +1,7 @@
 package com.fita.vnua.quiz.repository;
 
+import com.fita.vnua.quiz.model.enums.NotificationType;
+
 import com.fita.vnua.quiz.model.dto.response.NotificationResponse;
 import com.fita.vnua.quiz.model.dto.response.RecipientResponse;
 import com.fita.vnua.quiz.model.entity.Notification;
@@ -18,7 +20,7 @@ import java.util.UUID;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
     @Query("""
-            SELECT new com.fita.vnua.quiz.model.dto.response.NotificationResponseDto(
+            SELECT new com.fita.vnua.quiz.model.dto.response.NotificationProjectionResponse(
                 n.id,
                 n.title,
                 n.message,
@@ -26,9 +28,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
                 n.relatedId,
                 n.relatedType,
                 CASE
-                    WHEN n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.PERSONAL
+                    WHEN n.type = com.fita.vnua.quiz.model.enums.NotificationType.PERSONAL
                          AND n.isRead = true THEN 1L
-                    WHEN n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL
+                    WHEN n.type = com.fita.vnua.quiz.model.enums.NotificationType.GLOBAL
                          AND gnr.id IS NOT NULL THEN 1L
                     ELSE 0L
                 END,
@@ -38,15 +40,15 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             LEFT JOIN GlobalNotificationRead gnr
                 ON n.id = gnr.notificationId AND gnr.userId = :userId
             WHERE
-                (n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.PERSONAL AND n.userId = :userId)
+                (n.type = com.fita.vnua.quiz.model.enums.NotificationType.PERSONAL AND n.userId = :userId)
                 OR
-                (n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL)
+                (n.type = com.fita.vnua.quiz.model.enums.NotificationType.GLOBAL)
             ORDER BY n.createdAt DESC
             """)
     List<NotificationResponse> findAllNotificationsForUser(@Param("userId") UUID userId);
 
     @Modifying
-    @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = :userId AND n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.PERSONAL")
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = :userId AND n.type = com.fita.vnua.quiz.model.enums.NotificationType.PERSONAL")
     void markAllPersonalAsRead(@Param("userId") UUID userId);
 
     @Query("""
@@ -62,7 +64,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             """)
     Page<RecipientResponse> findRecipientsByHistoryId(@Param("historyId") Long historyId, Pageable pageable);
 
-    @Query("SELECT n.id FROM Notification n WHERE n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL")
+    @Query("SELECT n.id FROM Notification n WHERE n.type = com.fita.vnua.quiz.model.enums.NotificationType.GLOBAL")
     List<Long> findAllGlobalNotificationIds();
 
     @Query("""
@@ -72,13 +74,13 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
                 ON n.id = gnr.notificationId AND gnr.userId = :userId
             WHERE
                 (
-                    n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.PERSONAL
+                    n.type = com.fita.vnua.quiz.model.enums.NotificationType.PERSONAL
                     AND n.userId = :userId
                     AND n.isRead = false
                 )
                 OR
                 (
-                    n.type = com.fita.vnua.quiz.model.entity.Notification.NotificationType.GLOBAL
+                    n.type = com.fita.vnua.quiz.model.enums.NotificationType.GLOBAL
                     AND gnr.id IS NULL
                 )
             """)

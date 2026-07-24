@@ -81,6 +81,8 @@ export const LeaderboardRow = ({ currentUserId, item, texts }) => {
               src={item.avatarUrl || DEFAULT_AVATAR}
               alt={item.username || 'User avatar'}
               className="h-full w-full object-cover"
+              decoding="async"
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col min-w-0">

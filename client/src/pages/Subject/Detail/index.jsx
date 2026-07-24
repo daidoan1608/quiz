@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageLoadingState } from 'components/common/PageState';
 import SubjectDetailView from './components/SubjectDetailView';
 import { useSubjectDetail } from './hooks/useSubjectDetail';
 
@@ -7,11 +8,7 @@ export default function SubjectDetail() {
   const { error, isLoading, navigate, subjectData, texts } = detail;
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-background-light dark:bg-background-dark">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
-      </div>
-    );
+    return <PageLoadingState />;
   }
 
   if (error || !subjectData) {

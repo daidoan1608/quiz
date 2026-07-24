@@ -30,22 +30,34 @@ export const useHeaderNavigation = ({ language, location, navigate, t }) => {
   );
 
   useLayoutEffect(() => {
-    const activePath = navItems.find((item) => isActive(item.link))?.link;
-    const activeItem = activePath ? navItemRefs.current[activePath] : null;
-    const nav = navRef.current;
+    let frameId = 0;
 
-    if (!activeItem || !nav) {
-      setActivePill((prev) => ({ ...prev, opacity: 0 }));
-      return;
-    }
+    const updateActivePill = () => {
+      const activePath = navItems.find((item) => isActive(item.link))?.link;
+      const activeItem = activePath ? navItemRefs.current[activePath] : null;
+      const nav = navRef.current;
 
-    const navRect = nav.getBoundingClientRect();
-    const itemRect = activeItem.getBoundingClientRect();
-    setActivePill({
-      left: itemRect.left - navRect.left,
-      width: itemRect.width,
-      opacity: 1,
-    });
+      if (!activeItem || !nav) {
+        setActivePill((prev) => ({ ...prev, opacity: 0 }));
+        return;
+      }
+
+      const navRect = nav.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+      setActivePill({
+        left: itemRect.left - navRect.left,
+        width: itemRect.width,
+        opacity: 1,
+      });
+    };
+
+    frameId = window.requestAnimationFrame(updateActivePill);
+    window.addEventListener('resize', updateActivePill);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', updateActivePill);
+    };
   }, [location.pathname, language, navItems, isActive]);
 
   const handleMobileNavClick = useCallback(

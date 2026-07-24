@@ -1,9 +1,15 @@
 ﻿import { useEffect, useState } from 'react';
-import { message } from 'antd';
+import { appMessage } from 'utils/appMessage';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from 'api/services/authApi';
 import { getApiErrorMessage } from 'api/http/apiError';
 import { useAuth } from 'context/auth/AuthProvider';
+import {
+  getStorageItem,
+  removeStorageItem,
+  setStorageItem,
+  storageKeys,
+} from 'utils/storage';
 
 export const useLoginForm = (form) => {
   const [loading, setLoading] = useState(false);
@@ -11,7 +17,7 @@ export const useLoginForm = (form) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedUsername = localStorage.getItem('savedUsername');
+    const savedUsername = getStorageItem(storageKeys.savedUsername);
     if (savedUsername) {
       form.setFieldsValue({
         username: savedUsername,
@@ -45,13 +51,13 @@ export const useLoginForm = (form) => {
         avatar = avatarUrl || '';
       }
       if (values.remember) {
-        localStorage.setItem('savedUsername', values.username);
-        localStorage.setItem('fullName', fullName);
-        localStorage.setItem('avatarUrl', avatar);
+        setStorageItem(storageKeys.savedUsername, values.username);
+        setStorageItem(storageKeys.fullName, fullName);
+        setStorageItem(storageKeys.avatarUrl, avatar);
       } else {
-        localStorage.removeItem('savedUsername');
-        localStorage.removeItem('fullName');
-        localStorage.removeItem('avatarUrl');
+        removeStorageItem(storageKeys.savedUsername);
+        removeStorageItem(storageKeys.fullName);
+        removeStorageItem(storageKeys.avatarUrl);
       }
 
       const loggedIn = login({ userId, role, fullName, avatarUrl: avatar });
@@ -65,7 +71,7 @@ export const useLoginForm = (form) => {
         error,
         'Đăng nhập thất bại. Vui lòng thử lại!'
       );
-      message.error(errorMessage);
+      appMessage.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,7 +100,7 @@ export const useLoginForm = (form) => {
       navigate('/');
     } catch (error) {
       console.error(error);
-      message.error('Xác thực tài khoản Google thất bại!');
+      appMessage.error('Xác thực tài khoản Google thất bại!');
     } finally {
       setLoading(false);
     }
@@ -107,3 +113,4 @@ export const useLoginForm = (form) => {
     navigate,
   };
 };
+

@@ -13,6 +13,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   AdminFormActions,
 } from "../../components/common/forms/AdminFormActions";
+import AdminReadonlyField from "../../components/common/forms/AdminReadonlyField";
 import AdminFormSection from "../../components/common/forms/AdminFormSection";
 import AdminFormPageLayout from "../../components/common/layout/AdminFormPageLayout";
 import AdminLoadingState from "../../components/common/states/AdminLoadingState";
@@ -57,7 +58,7 @@ const QuestionUpdatePage = () => {
   return (
     <AdminFormPageLayout
       onBack={goBack}
-      title={<><EditOutlined /> Cập nhật câu hỏi #{questionId}</>}
+      title={<><EditOutlined /> Cập nhật câu hỏi</>}
     >
       {loadingData ? (
         <AdminLoadingState card skeleton rows={8} />
@@ -65,6 +66,8 @@ const QuestionUpdatePage = () => {
           <Form form={form} layout="vertical" onFinish={submitQuestion} size="middle">
             <Space className="question-form-stack" direction="vertical" size={16}>
               <AdminFormSection>
+                <AdminReadonlyField name="questionId" />
+
                 <Row gutter={16}>
                   <Col xs={24} md={12} xl={6}>
                     <Form.Item label="Loại câu hỏi" name="questionType" rules={[{ required: true }]}>

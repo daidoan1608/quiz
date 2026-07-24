@@ -1,6 +1,5 @@
 package com.fita.vnua.quiz.service.impl;
 
-import com.fita.vnua.quiz.model.dto.OtpCodeDto;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.entity.OtpCode;
 import com.fita.vnua.quiz.model.entity.User;
@@ -70,7 +69,7 @@ public class OtpServiceImpl implements OtpService {
             return ApiResponse.error("Xác thực OTP thất bại", "Email không tồn tại.");
         }
 
-        Optional<OtpCode> otpCodeOpt = otpCodeRepository.findByUser(user);
+        Optional<OtpCode> otpCodeOpt = otpCodeRepository.findByUser(user.get());
         if (otpCodeOpt.isEmpty()) {
             return ApiResponse.error("Xác thực OTP thất bại", "Không tìm thấy mã OTP.");
         }
@@ -109,7 +108,7 @@ public class OtpServiceImpl implements OtpService {
             return ApiResponse.error("Đặt lại mật khẩu thất bại", "Token không hợp lệ.");
         }
 
-        Optional<OtpCode> otpCodeOpt = otpCodeRepository.findAll().stream()
+        Optional<OtpCode> otpCodeOpt = otpCodeRepository.findActiveResetTokens(Instant.now()).stream()
                 .filter(code -> code.getResetToken() != null && passwordEncoder.matches(resetToken, code.getResetToken()))
                 .findFirst();
         if (otpCodeOpt.isEmpty()) {

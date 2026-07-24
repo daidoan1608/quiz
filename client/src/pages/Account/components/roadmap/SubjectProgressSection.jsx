@@ -1,9 +1,9 @@
 import { formatScore } from './roadmapFormatters';
-import { progressValueStyle } from 'utils/styleVariables';
+import { ProgressBar } from 'components/common/ProgressBar';
 
 export default function SubjectProgressSection({ subjectProgress = [] }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="aura-surface-panel p-5">
       <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
         <span className="material-symbols-outlined text-red-500">
           troubleshoot
@@ -22,14 +22,11 @@ export default function SubjectProgressSection({ subjectProgress = [] }) {
                   {formatScore(subject.averageScore)}
                 </span>
               </div>
-              <div className="aura-progress h-2">
-                <div
-                  className={`aura-progress__bar ${
-                    subject.averageScore < 70 ? 'bg-red-500' : 'bg-emerald-500'
-                  }`}
-                  style={progressValueStyle(Math.min(100, subject.averageScore))}
-                />
-              </div>
+              <ProgressBar
+                className="h-2"
+                tone={subject.averageScore < 70 ? 'danger' : 'success'}
+                value={Math.min(100, subject.averageScore)}
+              />
             </div>
           ))}
         </div>
