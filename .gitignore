@@ -61,6 +61,7 @@ output/playwright/
 
 # Local design references
 DESIGN.md
+admin/docs/
 
 # IDE / editor project files
 *.iml
