@@ -10,13 +10,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -26,6 +29,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final EmailVerificationTokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
+    private final EmailTemplateService emailTemplateService;
 
     @Value("${app.frontend.base-url:http://localhost:3000}")
     private String frontendBaseUrl;
@@ -78,21 +82,23 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     private void sendVerificationEmail(User user, String token) {
         String verifyUrl = frontendBaseUrl + "/verify-email?token=" + token;
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(user.getEmail());
-        if (mailFrom != null && !mailFrom.isBlank()) {
-            message.setFrom(mailFrom);
-        }
-        message.setSubject("Xác thực email tài khoản Quiz VNUA");
-        message.setText("Xin chào " + user.getFullName() + ",\n\n"
-                + "Vui lòng nhấn vào liên kết dưới đây để xác thực email tài khoản của bạn:\n"
-                + verifyUrl + "\n\n"
-                + "Liên kết có hiệu lực trong " + expirationMinutes + " phút.\n"
-                + "Nếu bạn không đăng ký tài khoản, vui lòng bỏ qua email này.");
+        String html = emailTemplateService.render("verify-email.html", Map.of(
+                "name", user.getFullName(),
+                "verifyUrl", verifyUrl,
+                "expirationMinutes", expirationMinutes
+        ));
 
         try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(user.getEmail());
+            if (mailFrom != null && !mailFrom.isBlank()) {
+                helper.setFrom(mailFrom);
+            }
+            helper.setSubject("Xác thực email tài khoản Quiz VNUA");
+            helper.setText(html, true);
             mailSender.send(message);
-        } catch (MailException ex) {
+        } catch (MessagingException | MailException ex) {
             log.error("Could not send verification email to {}", user.getEmail(), ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Không thể gửi email xác thực. Vui lòng thử lại sau.");
         }

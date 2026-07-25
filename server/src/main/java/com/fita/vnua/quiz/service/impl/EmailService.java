@@ -8,20 +8,24 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    private final EmailTemplateService emailTemplateService;
 
     public void sendOtpEmail(String to, String otp) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            String html = emailTemplateService.render("otp.html", Map.of("otp", otp));
 
             helper.setTo(to);
             helper.setSubject("Mã OTP đặt lại mật khẩu");
-            helper.setText("<h3>Mã OTP của bạn là: <b>" + otp + "</b></h3><p>Mã OTP này có hiệu lực trong 5 phút.</p>", true);
+            helper.setText(html, true);
 
             mailSender.send(message);
         } catch (MessagingException e) {
