@@ -5,11 +5,15 @@ export const DEFAULT_WIDGET_ORDER = [
   "totalQuestions",
   "totalExams",
   "totalUsers",
+  "resultSummary",
   "overviewChart",
   "difficultyChart",
   "attemptsByDay",
+  "scoreByExam",
+  "scoreBySubject",
   "hotSubjects",
   "wrongQuestions",
+  "ranking",
   "activeUsers",
 ];
 

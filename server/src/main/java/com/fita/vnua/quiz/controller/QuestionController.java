@@ -117,6 +117,26 @@ public class QuestionController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách câu hỏi ôn tập theo câu sai thành công", questions));
     }
 
+    @GetMapping("questions/practice/wrong/count")
+    @Operation(summary = "Đếm số câu sai có thể ôn tập")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> countSmartWrongPracticeQuestions(
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) Long chapterId,
+            @RequestParam(required = false) String difficulty,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        authorizationService.requireAuthenticated(currentUser);
+        long wrongTotal = questionService.countSmartWrongPracticeQuestions(
+                subjectId,
+                chapterId,
+                difficulty,
+                currentUser.getUserId());
+        long practiceTotal = questionService.countPracticeQuestions(subjectId, chapterId, difficulty);
+        return ResponseEntity.ok(ApiResponse.success(
+                "Đếm số câu sai có thể ôn tập thành công",
+                Map.of("total", wrongTotal, "wrongTotal", wrongTotal, "practiceTotal", practiceTotal)));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/questions")
     @Operation(summary = "Lấy tất cả câu hỏi")

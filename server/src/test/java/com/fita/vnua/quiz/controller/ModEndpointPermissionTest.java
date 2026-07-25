@@ -193,7 +193,7 @@ class ModEndpointPermissionTest {
                         .with(authentication(authenticationFor(mod)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new SubjectDto())))
+                        .content(objectMapper.writeValueAsString(validSubjectDto())))
                 .andExpect(status().isOk());
 
         verify(subjectService).update(eq(SUBJECT_ID), any(SubjectDto.class));
@@ -210,7 +210,7 @@ class ModEndpointPermissionTest {
                         .with(authentication(authenticationFor(mod)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new SubjectDto())))
+                        .content(objectMapper.writeValueAsString(validSubjectDto())))
                 .andExpect(status().isForbidden());
 
         verify(subjectService, never()).update(any(), any());
@@ -318,6 +318,13 @@ class ModEndpointPermissionTest {
         user.setRole(UserRole.MOD);
         user.setDeleted(false);
         return user;
+    }
+
+    private SubjectDto validSubjectDto() {
+        SubjectDto subject = new SubjectDto();
+        subject.setCategoryId(3L);
+        subject.setName("Updated subject");
+        return subject;
     }
 
     private UsernamePasswordAuthenticationToken authenticationFor(User user) {

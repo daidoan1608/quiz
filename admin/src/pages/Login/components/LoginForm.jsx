@@ -12,6 +12,7 @@ export default function LoginForm({ loading, onSubmit }) {
       size="large"
       layout="vertical"
       requiredMark={false}
+      className={styles.form}
     >
       <Form.Item name="username" label="Tên đăng nhập" rules={LOGIN_FORM_RULES.username}>
         <Input

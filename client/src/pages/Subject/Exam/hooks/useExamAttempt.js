@@ -1,47 +1,48 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react';
-import { appMessage } from 'utils/appMessage';
+﻿import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { examApi } from 'api/services/examApi';
 import { useLanguage } from 'context/language/LanguageProvider';
 import { typesetMath } from 'utils/typesetMath';
+import { createExamDraftKey, getCurrentUserId } from 'utils/storage';
 import {
-  createExamDraftKey,
-  getCurrentUserId,
-  removeStorageItem,
-} from 'utils/storage';
-import {
-  buildNextSelectedAnswers,
-  countAnsweredQuestions,
   getNextQuestionIndex,
   getPreviousQuestionIndex,
 } from 'pages/Subject/utils/answerSelection';
-import { buildUserAnswerDtos } from '../utils/buildUserAnswerDtos';
-import { buildSaveAnswerPayload } from '../utils/examAttemptAnswers';
+import { useExamAnswerAutosave } from './useExamAnswerAutosave';
 import { useExamCountdown } from './useExamCountdown';
 import { useExamDraftPersistence } from './useExamDraftPersistence';
 import { useExamProgressAutosave } from './useExamProgressAutosave';
+import { useExamSubmission } from './useExamSubmission';
+import { useExamAttemptSummary } from './useExamAttemptSummary';
 import { useLoadExamAttempt } from './useLoadExamAttempt';
+import {
+  createInitialExamAttemptState,
+  examAttemptActions,
+  examAttemptReducer,
+} from './examAttemptReducer';
 
 export const useExamAttempt = () => {
-  const [questions, setQuestions] = useState([]);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(null);
-  const [duration, setDuration] = useState(0);
-  const [title, setTitle] = useState('');
-  const [subjectName, setSubjectName] = useState('');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [startTime, setStartTime] = useState(new Date().toISOString());
-  const [isDraftReady, setIsDraftReady] = useState(false);
-  const [userExamId, setUserExamId] = useState(null);
-  const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [state, dispatch] = useReducer(
+    examAttemptReducer,
+    undefined,
+    createInitialExamAttemptState
+  );
+  const {
+    questions,
+    selectedAnswers,
+    timeLeft,
+    duration,
+    title,
+    subjectName,
+    currentQuestionIndex,
+    isLoading,
+    startTime,
+    isDraftReady,
+    userExamId,
+    isSubmitConfirmOpen,
+    isSubmitting,
+  } = state;
 
   const endTimeRef = useRef(null);
-  const handleSubmitRef = useRef(null);
-  const isSubmittingRef = useRef(false);
-  const saveAnswerQueueRef = useRef(Promise.resolve());
-  const userExamIdRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,72 +53,76 @@ export const useExamAttempt = () => {
   const examDraftKey = createExamDraftKey(userId, examId);
   const { texts } = useLanguage();
 
-  useEffect(() => {
-    userExamIdRef.current = userExamId;
-  }, [userExamId]);
-
-  const handleSubmit = useCallback(async () => {
-    if (isSubmittingRef.current) return;
-
-    isSubmittingRef.current = true;
-    setIsSubmitting(true);
-    setIsSubmitConfirmOpen(false);
-    const endTime = new Date().toISOString();
-    const userAnswerDtos = buildUserAnswerDtos(questions, selectedAnswers);
-
-    try {
-      const response = userExamId
-        ? await examApi.submitAttempt(userExamId)
-        : await examApi.submitUserExam({
-            userExamDto: { userId, examId, startTime, endTime },
-            userAnswerDtos,
-          });
-
-      if (response.status === 200) {
-        setUserExamId(null);
-        if (examDraftKey) removeStorageItem(examDraftKey);
-        appMessage.success('Nộp bài thành công!');
-        const submittedUserExamId = response.data.data.userExamId;
-        navigate(
-          `/subjects/${subjectId}/exams/${examId}/result?userExamId=${submittedUserExamId}`,
-          {
-          state: {
-            examId,
-            subjectId,
-            userExamId: submittedUserExamId,
-            timeTaken: duration * 60 - (timeLeft || 0),
-            totalQuestions: questions.length,
-          },
-          }
-        );
-      }
-    } catch (error) {
-      console.error('Lỗi nộp bài:', error);
-      appMessage.error(
-        error.response?.status === 403
-          ? 'Phiên đăng nhập hết hạn.'
-          : 'Lỗi khi nộp bài.'
-      );
-      isSubmittingRef.current = false;
-      setIsSubmitting(false);
-    }
-  }, [
-    duration,
-    examDraftKey,
-    examId,
-    navigate,
-    questions,
-    selectedAnswers,
-    startTime,
-    subjectId,
-    timeLeft,
-    userExamId,
-    userId,
-  ]);
-
-  useEffect(() => {
-    handleSubmitRef.current = handleSubmit;
-  }, [handleSubmit]);
+  const setQuestions = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_QUESTIONS, payload }),
+    []
+  );
+  const setSelectedAnswers = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_SELECTED_ANSWERS, payload }),
+    []
+  );
+  const setTimeLeft = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_TIME_LEFT, payload }),
+    []
+  );
+  const setDuration = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_DURATION, payload }),
+    []
+  );
+  const setTitle = useCallback(
+    (payload) => dispatch({ type: examAttemptActions.SET_TITLE, payload }),
+    []
+  );
+  const setSubjectName = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_SUBJECT_NAME, payload }),
+    []
+  );
+  const setCurrentQuestionIndex = useCallback(
+    (payload) =>
+      dispatch({
+        type: examAttemptActions.SET_CURRENT_QUESTION_INDEX,
+        payload,
+      }),
+    []
+  );
+  const setIsLoading = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_IS_LOADING, payload }),
+    []
+  );
+  const setStartTime = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_START_TIME, payload }),
+    []
+  );
+  const setIsDraftReady = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_IS_DRAFT_READY, payload }),
+    []
+  );
+  const setUserExamId = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_USER_EXAM_ID, payload }),
+    []
+  );
+  const setIsSubmitConfirmOpen = useCallback(
+    (payload) =>
+      dispatch({
+        type: examAttemptActions.SET_IS_SUBMIT_CONFIRM_OPEN,
+        payload,
+      }),
+    []
+  );
+  const setIsSubmitting = useCallback(
+    (payload) =>
+      dispatch({ type: examAttemptActions.SET_IS_SUBMITTING, payload }),
+    []
+  );
 
   useLoadExamAttempt({
     endTimeRef,
@@ -136,6 +141,44 @@ export const useExamAttempt = () => {
     setTimeLeft,
     setTitle,
     setUserExamId,
+    userId,
+  });
+
+  const {
+    answeredCount,
+    currentQuestion,
+    hasUnansweredQuestions,
+    hours,
+    minutes,
+    progressPercent,
+    seconds,
+  } = useExamAttemptSummary({
+    currentQuestionIndex,
+    questions,
+    selectedAnswers,
+    timeLeft,
+  });
+
+  const {
+    closeSubmitConfirm,
+    confirmSubmitExam,
+    handleSubmitRef,
+    requestSubmitExam,
+  } = useExamSubmission({
+    duration,
+    examDraftKey,
+    examId,
+    hasUnansweredQuestions,
+    navigate,
+    questions,
+    selectedAnswers,
+    setIsSubmitConfirmOpen,
+    setIsSubmitting,
+    setUserExamId,
+    startTime,
+    subjectId,
+    timeLeft,
+    userExamId,
     userId,
   });
 
@@ -170,66 +213,19 @@ export const useExamAttempt = () => {
     typesetMath();
   }, [currentQuestionIndex, questions]);
 
-  const saveAnswerToServer = useCallback(
-    (questionIndex, answerValue) => {
-      const attemptId = userExamIdRef.current;
-      const question = questions[questionIndex];
-      if (!attemptId || !question) return;
-
-      const payload = buildSaveAnswerPayload({
-        answerValue,
-        question,
-        questionIndex,
-        remainingTime: timeLeft ?? 0,
-      });
-
-      saveAnswerQueueRef.current = saveAnswerQueueRef.current
-        .catch(() => {})
-        .then(() => examApi.saveAnswer(attemptId, payload))
-        .catch((error) => {
-          console.error('Lỗi lưu đáp án:', error);
-        });
-    },
-    [questions, timeLeft]
-  );
-
-  const handleAnswerSelect = (answerIndex) => {
-    const question = questions[currentQuestionIndex];
-    if (!question) return;
-
-    setSelectedAnswers((prev) => {
-      const nextSelection = buildNextSelectedAnswers({
-        answerIndex,
-        currentQuestionIndex,
-        previousAnswers: prev,
-        question,
-      });
-      saveAnswerToServer(currentQuestionIndex, nextSelection.answerValue);
-      return nextSelection.selectedAnswers;
-    });
-  };
-
-  const safeTimeLeft = timeLeft ?? 0;
-  const answeredCount = countAnsweredQuestions({ questions, selectedAnswers });
-  const hasUnansweredQuestions = answeredCount < questions.length;
-
-  const requestSubmitExam = () => {
-    if (isSubmittingRef.current) return;
-    if (hasUnansweredQuestions) {
-      setIsSubmitConfirmOpen(true);
-      return;
-    }
-    handleSubmit();
-  };
+  const { handleAnswerSelect } = useExamAnswerAutosave({
+    currentQuestionIndex,
+    questions,
+    setSelectedAnswers,
+    timeLeft,
+    userExamId,
+  });
 
   return {
     answeredCount,
-    closeSubmitConfirm: () => setIsSubmitConfirmOpen(false),
-    confirmSubmitExam: () => {
-      setIsSubmitConfirmOpen(false);
-      handleSubmit();
-    },
-    currentQuestion: questions[currentQuestionIndex],
+    closeSubmitConfirm,
+    confirmSubmitExam,
+    currentQuestion,
     currentQuestionIndex,
     goToNextQuestion: () =>
       setCurrentQuestionIndex((prev) =>
@@ -238,18 +234,16 @@ export const useExamAttempt = () => {
     goToPreviousQuestion: () =>
       setCurrentQuestionIndex(getPreviousQuestionIndex),
     handleAnswerSelect,
-    hours: Math.floor(safeTimeLeft / 3600),
+    hours,
     isLoading,
     isSubmitting,
     isSubmitConfirmOpen,
-    minutes: Math.floor((safeTimeLeft % 3600) / 60),
+    minutes,
     navigate,
     requestSubmitExam,
-    progressPercent: questions.length
-      ? (answeredCount / questions.length) * 100
-      : 0,
+    progressPercent,
     questions,
-    seconds: safeTimeLeft % 60,
+    seconds,
     selectedAnswers,
     setCurrentQuestionIndex,
     subjectId,

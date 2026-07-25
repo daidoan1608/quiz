@@ -107,6 +107,18 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public long countSmartWrongPracticeQuestions(Long subjectId, Long chapterId, String difficulty, UUID userId) {
+        return questionPracticeService.countSmartWrongPracticeQuestions(subjectId, chapterId, difficulty, userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countPracticeQuestions(Long subjectId, Long chapterId, String difficulty) {
+        return questionPracticeService.countPracticeQuestions(subjectId, chapterId, difficulty);
+    }
+
+    @Override
     public List<QuestionDto> getAllQuestion() {
         return questionRepository.findByDeletedFalse().stream().map(question -> questionMapper.toDto(question)).toList();
     }

@@ -24,10 +24,25 @@ import org.springframework.web.util.UriUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 public class SharedDocumentController {
+
+    private static final Map<String, String> CONTENT_TYPES_BY_EXTENSION = Map.ofEntries(
+            Map.entry("doc", "application/msword"),
+            Map.entry("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+            Map.entry("ppt", "application/vnd.ms-powerpoint"),
+            Map.entry("pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+            Map.entry("xls", "application/vnd.ms-excel"),
+            Map.entry("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+            Map.entry("pdf", "application/pdf"),
+            Map.entry("txt", "text/plain"),
+            Map.entry("csv", "text/csv"),
+            Map.entry("zip", "application/zip"),
+            Map.entry("rar", "application/vnd.rar")
+    );
 
     private final SharedDocumentService documentService;
 
@@ -43,7 +58,7 @@ public class SharedDocumentController {
         String filename = UriUtils.encode(document.getOriginalFilename(), StandardCharsets.UTF_8);
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(document.getContentType() == null ? "application/octet-stream" : document.getContentType()))
+                .contentType(MediaType.parseMediaType(getSafeContentType(document)))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + filename)
                 .body(resource);
     }
@@ -81,5 +96,18 @@ public class SharedDocumentController {
     public ResponseEntity<ApiResponse<Object>> deleteDocument(@PathVariable Long id) throws IOException {
         documentService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa tài liệu thành công", null));
+    }
+
+    private String getSafeContentType(SharedDocument document) {
+        String filename = document.getOriginalFilename();
+        if (filename == null) {
+            return "application/octet-stream";
+        }
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex < 0 || dotIndex == filename.length() - 1) {
+            return "application/octet-stream";
+        }
+        String extension = filename.substring(dotIndex + 1).toLowerCase();
+        return CONTENT_TYPES_BY_EXTENSION.getOrDefault(extension, "application/octet-stream");
     }
 }

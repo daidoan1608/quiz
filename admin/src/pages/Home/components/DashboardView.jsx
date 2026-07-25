@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { Result, Row, Select, Space, Statistic, Typography } from "antd";
+import { Col, DatePicker, Result, Row, Select, Space, Statistic, Typography } from "antd";
 import {
   DndContext,
   PointerSensor,
@@ -11,9 +11,11 @@ import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortab
 import {
   BarChartOutlined,
   FileTextOutlined,
+  LineChartOutlined,
   PieChartOutlined,
   QuestionCircleOutlined,
   ReadOutlined,
+  TrophyOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import {
@@ -24,17 +26,37 @@ import { DEFAULT_WIDGET_ORDER, LIMIT_OPTIONS } from "../constants";
 import { AdminWidgetTable } from "./AdminWidgetTable";
 import { DashboardCard } from "./DashboardCard";
 import { SortableWidget } from "./SortableWidget";
-import { AdminResetButton } from "../../../components/common/buttons/AdminButtons";
+import {
+  AdminReloadButton,
+  AdminResetButton,
+} from "../../../components/common/buttons/AdminButtons";
 import AdminPageHeader from "../../../components/common/layout/AdminPageHeader";
 
 const { Text } = Typography;
+const { RangePicker } = DatePicker;
+
+const formatPercent = (value) => `${Number(value || 0).toFixed(2)}%`;
+const formatScore = (value) => Number(value || 0).toFixed(2);
+const renderScoreValue = (value) => (
+  <span className="dashboard-score-value">{formatScore(value)}</span>
+);
+const renderSuccessPercent = (value) => (
+  <span className="dashboard-success-value">{formatPercent(value)}</span>
+);
 
 export function DashboardView({
   canViewStatistics,
   loading,
+  filterLoading,
   statistics,
   tableLimits,
+  filters,
+  subjects,
+  exams,
   updateLimit,
+  updateFilter,
+  resetFilters,
+  refresh,
   widgetOrder,
   setWidgetOrder,
 }) {
@@ -78,6 +100,7 @@ export function DashboardView({
   };
 
   const widgets = useMemo(() => {
+    const summary = statistics.summary || {};
     const statWidgets = [
       {
         id: "totalSubjects",
@@ -132,6 +155,58 @@ export function DashboardView({
 
     return [
       ...statWidgets,
+      {
+        id: "resultSummary",
+        colProps: { xs: 24 },
+        render: ({ dragHandleProps, isDragging }) => (
+          <DashboardCard
+            title={
+              <Space>
+                <LineChartOutlined />
+                <span>Kết quả thi</span>
+              </Space>
+            }
+            loading={loading}
+            dragHandleProps={dragHandleProps}
+            isDragging={isDragging}
+          >
+            <Row gutter={[16, 16]}>
+              <Col xs={12} md={8} xl={4}>
+                <Statistic title="Lượt nộp" value={summary.submittedAttempts || 0} />
+              </Col>
+              <Col xs={12} md={8} xl={5}>
+                <Statistic title="Lượt mở bài" value={summary.totalAttempts || 0} />
+              </Col>
+              <Col xs={12} md={8} xl={5}>
+                <Statistic
+                  title="Tỷ lệ hoàn thành"
+                  value={summary.completionRate || 0}
+                  precision={2}
+                  suffix="%"
+                  valueStyle={{ color: "var(--admin-verified)" }}
+                />
+              </Col>
+              <Col xs={12} md={8} xl={5}>
+                <Statistic
+                  title="Điểm trung bình"
+                  value={summary.averageScore || 0}
+                  precision={2}
+                  valueStyle={{ color: "var(--admin-score)" }}
+                />
+              </Col>
+              <Col xs={12} md={8} xl={5}>
+                <Statistic
+                  title="Tỷ lệ đạt"
+                  value={summary.passRate || 0}
+                  precision={2}
+                  suffix="%"
+                  valueStyle={{ color: "var(--admin-verified)" }}
+                />
+              </Col>
+            </Row>
+          </DashboardCard>
+        ),
+      },
       {
         id: "overviewChart",
         colProps: { xs: 24, xl: 14 },
@@ -214,6 +289,75 @@ export function DashboardView({
         ),
       },
       {
+        id: "scoreByExam",
+        colProps: { xs: 24, xl: 12 },
+        render: ({ dragHandleProps, isDragging }) => (
+          <DashboardCard
+            title="Điểm trung bình theo đề"
+            extra={renderLimitSelect("examPerformanceLimit")}
+            loading={loading}
+            dragHandleProps={dragHandleProps}
+            isDragging={isDragging}
+          >
+            <AdminWidgetTable
+              columns={[
+                { title: "Đề thi", dataIndex: "examTitle", ellipsis: true },
+                { title: "Môn", dataIndex: "subjectName", ellipsis: true },
+                { title: "Lượt nộp", dataIndex: "submittedAttempts", width: 100 },
+                {
+                  title: "Điểm TB",
+                  dataIndex: "averageScore",
+                  width: 100,
+                  render: renderScoreValue,
+                },
+                {
+                  title: "Hoàn thành",
+                  dataIndex: "completionRate",
+                  width: 120,
+                  render: renderSuccessPercent,
+                },
+              ]}
+              dataSource={statistics.scoreByExam || []}
+              rowKey="examId"
+            />
+          </DashboardCard>
+        ),
+      },
+      {
+        id: "scoreBySubject",
+        colProps: { xs: 24, xl: 12 },
+        render: ({ dragHandleProps, isDragging }) => (
+          <DashboardCard
+            title="Điểm trung bình theo môn"
+            extra={renderLimitSelect("subjectPerformanceLimit")}
+            loading={loading}
+            dragHandleProps={dragHandleProps}
+            isDragging={isDragging}
+          >
+            <AdminWidgetTable
+              columns={[
+                { title: "Môn học", dataIndex: "subjectName", ellipsis: true },
+                { title: "Lượt nộp", dataIndex: "submittedAttempts", width: 100 },
+                {
+                  title: "Điểm TB",
+                  dataIndex: "averageScore",
+                  width: 100,
+                  render: renderScoreValue,
+                },
+                {
+                  title: "Hoàn thành",
+                  dataIndex: "completionRate",
+                  width: 120,
+                  render: renderSuccessPercent,
+                },
+              ]}
+              dataSource={statistics.scoreBySubject || []}
+              rowKey="subjectId"
+            />
+          </DashboardCard>
+        ),
+      },
+      {
         id: "wrongQuestions",
         colProps: { xs: 24, xl: 14 },
         render: ({ dragHandleProps, isDragging }) => (
@@ -228,10 +372,58 @@ export function DashboardView({
               columns={[
                 { title: "ID", dataIndex: "questionId", width: 80 },
                 { title: "Câu hỏi", dataIndex: "content", ellipsis: true },
+                { title: "Môn", dataIndex: "subjectName", ellipsis: true },
                 { title: "Sai", dataIndex: "wrongCount", width: 90 },
+                { title: "Trả lời", dataIndex: "attemptCount", width: 100 },
+                {
+                  title: "Tỷ lệ sai",
+                  dataIndex: "wrongRate",
+                  width: 110,
+                  render: formatPercent,
+                },
               ]}
               dataSource={statistics.mostWrongQuestions || []}
               rowKey="questionId"
+            />
+          </DashboardCard>
+        ),
+      },
+      {
+        id: "ranking",
+        colProps: { xs: 24, xl: 14 },
+        render: ({ dragHandleProps, isDragging }) => (
+          <DashboardCard
+            title={
+              <Space>
+                <TrophyOutlined />
+                <span>Ranking theo thời gian</span>
+              </Space>
+            }
+            extra={renderLimitSelect("rankingLimit")}
+            loading={loading}
+            dragHandleProps={dragHandleProps}
+            isDragging={isDragging}
+          >
+            <AdminWidgetTable
+              columns={[
+                { title: "User", dataIndex: "username", ellipsis: true },
+                { title: "Họ tên", dataIndex: "fullName", ellipsis: true },
+                { title: "Lượt nộp", dataIndex: "attemptCount", width: 100 },
+                {
+                  title: "Điểm TB",
+                  dataIndex: "avgScore",
+                  width: 100,
+                  render: renderScoreValue,
+                },
+                {
+                  title: "Tổng điểm",
+                  dataIndex: "totalScore",
+                  width: 110,
+                  render: renderScoreValue,
+                },
+              ]}
+              dataSource={statistics.ranking || []}
+              rowKey="userId"
             />
           </DashboardCard>
         ),
@@ -283,11 +475,55 @@ export function DashboardView({
         title="Dashboard"
         subtitle="Tổng quan vận hành hệ thống quiz."
         actions={
-          <AdminResetButton onClick={resetLayout}>
-            Khôi phục bố cục
-          </AdminResetButton>
+          <Space wrap>
+            <AdminReloadButton onClick={refresh} loading={loading}>
+              Tải lại
+            </AdminReloadButton>
+            <AdminResetButton onClick={resetLayout}>
+              Khôi phục bố cục
+            </AdminResetButton>
+          </Space>
         }
       />
+
+      <div className="dashboard-filter-bar">
+        <Select
+          allowClear
+          showSearch
+          className="dashboard-filter-control"
+          loading={filterLoading}
+          placeholder="Môn học"
+          optionFilterProp="label"
+          value={filters.subjectId}
+          options={(subjects || []).map((subject) => ({
+            value: subject.subjectId,
+            label: subject.name,
+          }))}
+          onChange={updateFilter("subjectId")}
+        />
+        <Select
+          allowClear
+          showSearch
+          className="dashboard-filter-control dashboard-filter-control--wide"
+          loading={filterLoading}
+          placeholder="Đề thi"
+          optionFilterProp="label"
+          value={filters.examId}
+          options={(exams || []).map((exam) => ({
+            value: exam.examId,
+            label: exam.title,
+          }))}
+          onChange={updateFilter("examId")}
+        />
+        <RangePicker
+          className="dashboard-date-range"
+          value={filters.dateRange}
+          onChange={updateFilter("dateRange")}
+        />
+        <AdminResetButton onClick={resetFilters}>
+          Xóa lọc
+        </AdminResetButton>
+      </div>
 
       <DndContext
         sensors={sensors}

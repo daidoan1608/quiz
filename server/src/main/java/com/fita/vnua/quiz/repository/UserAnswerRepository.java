@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
@@ -49,6 +50,29 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
             ORDER BY COUNT(ua) DESC
             """)
     List<Object[]> findMostWrongQuestions();
+
+    @Query("""
+            SELECT ua.question.questionId,
+                   ua.question.content,
+                   ua.question.chapter.subject.name,
+                   SUM(CASE WHEN ua.answer.isCorrect = false THEN 1 ELSE 0 END),
+                   COUNT(ua)
+            FROM UserAnswer ua
+            WHERE ua.userExam.status = 'SUBMITTED'
+              AND (:subjectId IS NULL OR ua.question.chapter.subject.subjectId = :subjectId)
+              AND (:examId IS NULL OR ua.userExam.exam.examId = :examId)
+              AND (:startedFrom IS NULL OR ua.userExam.startTime >= :startedFrom)
+              AND (:startedTo IS NULL OR ua.userExam.startTime <= :startedTo)
+            GROUP BY ua.question.questionId, ua.question.content, ua.question.chapter.subject.name
+            HAVING SUM(CASE WHEN ua.answer.isCorrect = false THEN 1 ELSE 0 END) > 0
+            ORDER BY SUM(CASE WHEN ua.answer.isCorrect = false THEN 1 ELSE 0 END) DESC,
+                     (SUM(CASE WHEN ua.answer.isCorrect = false THEN 1 ELSE 0 END) * 1.0 / COUNT(ua)) DESC
+            """)
+    List<Object[]> findMostWrongQuestionsForDashboard(
+            @Param("subjectId") Long subjectId,
+            @Param("examId") Long examId,
+            @Param("startedFrom") LocalDateTime startedFrom,
+            @Param("startedTo") LocalDateTime startedTo);
 
     @Query("""
             SELECT ua FROM UserAnswer ua

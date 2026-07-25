@@ -34,6 +34,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.ByteBuffer;
 import java.time.DayOfWeek;
@@ -57,6 +59,7 @@ public class UserExamServiceImpl implements UserExamService {
     private static final Duration ATTEMPT_WRITE_LOCK_TTL = Duration.ofSeconds(5);
     private static final int ATTEMPT_WRITE_QUEUE_MAX_ATTEMPTS = 50;
     private static final long ATTEMPT_WRITE_QUEUE_WAIT_MS = 100L;
+    private static final Duration ATTEMPT_START_LOCK_TTL = Duration.ofSeconds(10);
 
     private final UserExamRepository userExamRepository;
     private final UserAnswerRepository userAnswerRepository;
@@ -333,7 +336,11 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     @Transactional
-    public synchronized ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request, UUID currentUserId) {
+    public ExamAttemptResponse startOrResumeAttempt(StartExamAttemptRequest request, UUID currentUserId) {
+        return withAttemptStartLock(currentUserId, request.getExamId(), () -> startOrResumeAttemptInternal(request, currentUserId));
+    }
+
+    private ExamAttemptResponse startOrResumeAttemptInternal(StartExamAttemptRequest request, UUID currentUserId) {
         if (currentUserId == null) {
             throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.UNAUTHORIZED);
         }
@@ -371,6 +378,29 @@ public class UserExamServiceImpl implements UserExamService {
         Collections.shuffle(attemptQuestions);
         saveAttemptQuestionSnapshot(savedAttempt, attemptQuestions);
         return buildAttemptResponse(savedAttempt);
+    }
+
+    private <T> T withAttemptStartLock(UUID currentUserId, Long examId, Supplier<T> action) {
+        if (currentUserId == null || examId == null) {
+            return action.get();
+        }
+
+        String lockKey = "quiz:exam-attempt:start:" + currentUserId + ":" + examId;
+        String lockToken = UUID.randomUUID().toString();
+
+        for (int attempt = 0; attempt < ATTEMPT_WRITE_QUEUE_MAX_ATTEMPTS; attempt++) {
+            Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, lockToken, ATTEMPT_START_LOCK_TTL);
+            if (Boolean.TRUE.equals(acquired)) {
+                try {
+                    return action.get();
+                } finally {
+                    releaseLockAfterTransaction(lockKey, lockToken);
+                }
+            }
+            sleepBeforeRetryingAttemptWrite();
+        }
+
+        throw new CustomApiException("Hệ thống đang khởi tạo lượt làm bài, vui lòng thử lại", HttpStatus.CONFLICT);
     }
 
     @Override
@@ -453,7 +483,7 @@ public class UserExamServiceImpl implements UserExamService {
         });
     }
 
-    private ExamAttemptResponse withAttemptWriteQueue(Long userExamId, Supplier<ExamAttemptResponse> action) {
+    private <T> T withAttemptWriteQueue(Long userExamId, Supplier<T> action) {
         String lockKey = "quiz:exam-attempt:" + userExamId + ":write-lock";
         String lockToken = UUID.randomUUID().toString();
 
@@ -463,16 +493,34 @@ public class UserExamServiceImpl implements UserExamService {
                 try {
                     return action.get();
                 } finally {
-                    String currentToken = stringRedisTemplate.opsForValue().get(lockKey);
-                    if (lockToken.equals(currentToken)) {
-                        stringRedisTemplate.delete(lockKey);
-                    }
+                    releaseLockAfterTransaction(lockKey, lockToken);
                 }
             }
             sleepBeforeRetryingAttemptWrite();
         }
 
         throw new CustomApiException("Hệ thống đang lưu tiến độ, vui lòng thử lại", HttpStatus.CONFLICT);
+    }
+
+    private void releaseLockAfterTransaction(String lockKey, String lockToken) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            releaseLock(lockKey, lockToken);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                releaseLock(lockKey, lockToken);
+            }
+        });
+    }
+
+    private void releaseLock(String lockKey, String lockToken) {
+        String currentToken = stringRedisTemplate.opsForValue().get(lockKey);
+        if (lockToken.equals(currentToken)) {
+            stringRedisTemplate.delete(lockKey);
+        }
     }
 
     private void sleepBeforeRetryingAttemptWrite() {
@@ -488,8 +536,10 @@ public class UserExamServiceImpl implements UserExamService {
     @Transactional
     @CacheEvict(value = "ranking", allEntries = true)
     public UserExamDto submitAttempt(Long userExamId, UUID currentUserId) {
-        UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
-        return submitAttemptInternal(userExam, userExamId);
+        return withAttemptWriteQueue(userExamId, () -> {
+            UserExam userExam = getInProgressUserExam(userExamId, currentUserId);
+            return submitAttemptInternal(userExam, userExamId);
+        });
     }
 
     @Override

@@ -302,24 +302,139 @@ public interface UserExamRepository extends JpaRepository<UserExam, Long> {
             SELECT FUNCTION('DATE', ue.startTime), COUNT(ue)
             FROM UserExam ue
             WHERE ue.startTime >= :fromDate
+              AND (:subjectId IS NULL OR ue.exam.subject.subjectId = :subjectId)
+              AND (:examId IS NULL OR ue.exam.examId = :examId)
+              AND (:startedFrom IS NULL OR ue.startTime >= :startedFrom)
+              AND (:startedTo IS NULL OR ue.startTime <= :startedTo)
             GROUP BY FUNCTION('DATE', ue.startTime)
             ORDER BY FUNCTION('DATE', ue.startTime)
             """)
-    List<Object[]> countAttemptsByDay(@Param("fromDate") LocalDateTime fromDate);
+    List<Object[]> countAttemptsByDay(
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("subjectId") Long subjectId,
+            @Param("examId") Long examId,
+            @Param("startedFrom") LocalDateTime startedFrom,
+            @Param("startedTo") LocalDateTime startedTo);
 
     @Query("""
             SELECT ue.exam.subject.name, COUNT(ue)
             FROM UserExam ue
+            WHERE (:subjectId IS NULL OR ue.exam.subject.subjectId = :subjectId)
+              AND (:examId IS NULL OR ue.exam.examId = :examId)
+              AND (:startedFrom IS NULL OR ue.startTime >= :startedFrom)
+              AND (:startedTo IS NULL OR ue.startTime <= :startedTo)
             GROUP BY ue.exam.subject.subjectId, ue.exam.subject.name
             ORDER BY COUNT(ue) DESC
             """)
-    List<Object[]> countAttemptsBySubject();
+    List<Object[]> countAttemptsBySubject(
+            @Param("subjectId") Long subjectId,
+            @Param("examId") Long examId,
+            @Param("startedFrom") LocalDateTime startedFrom,
+            @Param("startedTo") LocalDateTime startedTo);
 
     @Query("""
             SELECT ue.user.userId, ue.user.username, ue.user.fullName, COUNT(ue), MAX(ue.startTime)
             FROM UserExam ue
+            WHERE (:subjectId IS NULL OR ue.exam.subject.subjectId = :subjectId)
+              AND (:examId IS NULL OR ue.exam.examId = :examId)
+              AND (:startedFrom IS NULL OR ue.startTime >= :startedFrom)
+              AND (:startedTo IS NULL OR ue.startTime <= :startedTo)
             GROUP BY ue.user.userId, ue.user.username, ue.user.fullName
             ORDER BY COUNT(ue) DESC, MAX(ue.startTime) DESC
             """)
-    List<Object[]> findActiveUsersByAttemptCount();
+    List<Object[]> findActiveUsersByAttemptCount(
+            @Param("subjectId") Long subjectId,
+            @Param("examId") Long examId,
+            @Param("startedFrom") LocalDateTime startedFrom,
+            @Param("startedTo") LocalDateTime startedTo);
+
+    @Query("""
+            SELECT COUNT(ue),
+                   SUM(CASE WHEN ue.status = 'SUBMITTED' THEN 1 ELSE 0 END),
+                   AVG(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN ue.score ELSE NULL END),
+                   SUM(CASE WHEN ue.status = 'SUBMITTED' AND ue.score >= 50 THEN 1 ELSE 0 END),
+                   SUM(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN 1 ELSE 0 END)
+            FROM UserExam ue
+            WHERE (:subjectId IS NULL OR ue.exam.subject.subjectId = :subjectId)
+              AND (:examId IS NULL OR ue.exam.examId = :examId)
+              AND (:startedFrom IS NULL OR ue.startTime >= :startedFrom)
+              AND (:startedTo IS NULL OR ue.startTime <= :startedTo)
+              AND ue.status <> 'CANCELLED'
+            """)
+    Object[] summarizeAttemptResults(
+            @Param("subjectId") Long subjectId,
+            @Param("examId") Long examId,
+            @Param("startedFrom") LocalDateTime startedFrom,
+            @Param("startedTo") LocalDateTime startedTo);
+
+    @Query("""
+            SELECT ue.exam.examId,
+                   ue.exam.title,
+                   ue.exam.subject.name,
+                   COUNT(ue),
+                   SUM(CASE WHEN ue.status = 'SUBMITTED' THEN 1 ELSE 0 END),
+                   AVG(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN ue.score ELSE NULL END)
+            FROM UserExam ue
+            WHERE (:subjectId IS NULL OR ue.exam.subject.subjectId = :subjectId)
+              AND (:examId IS NULL OR ue.exam.examId = :examId)
+              AND (:startedFrom IS NULL OR ue.startTime >= :startedFrom)
+              AND (:startedTo IS NULL OR ue.startTime <= :startedTo)
+              AND ue.status <> 'CANCELLED'
+            GROUP BY ue.exam.examId, ue.exam.title, ue.exam.subject.name
+            ORDER BY AVG(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN ue.score ELSE NULL END) DESC,
+                     COUNT(ue) DESC
+            """)
+    List<Object[]> scoreByExam(
+            @Param("subjectId") Long subjectId,
+            @Param("examId") Long examId,
+            @Param("startedFrom") LocalDateTime startedFrom,
+            @Param("startedTo") LocalDateTime startedTo);
+
+    @Query("""
+            SELECT ue.exam.subject.subjectId,
+                   ue.exam.subject.name,
+                   COUNT(ue),
+                   SUM(CASE WHEN ue.status = 'SUBMITTED' THEN 1 ELSE 0 END),
+                   AVG(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN ue.score ELSE NULL END)
+            FROM UserExam ue
+            WHERE (:subjectId IS NULL OR ue.exam.subject.subjectId = :subjectId)
+              AND (:examId IS NULL OR ue.exam.examId = :examId)
+              AND (:startedFrom IS NULL OR ue.startTime >= :startedFrom)
+              AND (:startedTo IS NULL OR ue.startTime <= :startedTo)
+              AND ue.status <> 'CANCELLED'
+            GROUP BY ue.exam.subject.subjectId, ue.exam.subject.name
+            ORDER BY AVG(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN ue.score ELSE NULL END) DESC,
+                     COUNT(ue) DESC
+            """)
+    List<Object[]> scoreBySubject(
+            @Param("subjectId") Long subjectId,
+            @Param("examId") Long examId,
+            @Param("startedFrom") LocalDateTime startedFrom,
+            @Param("startedTo") LocalDateTime startedTo);
+
+    @Query("""
+            SELECT ue.user.userId,
+                   ue.user.username,
+                   ue.user.fullName,
+                   SUM(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN 1 ELSE 0 END),
+                   AVG(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN ue.score ELSE NULL END),
+                   SUM(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN ue.score ELSE 0 END),
+                   MAX(ue.startTime)
+            FROM UserExam ue
+            WHERE (:subjectId IS NULL OR ue.exam.subject.subjectId = :subjectId)
+              AND (:examId IS NULL OR ue.exam.examId = :examId)
+              AND (:startedFrom IS NULL OR ue.startTime >= :startedFrom)
+              AND (:startedTo IS NULL OR ue.startTime <= :startedTo)
+              AND ue.status = 'SUBMITTED'
+              AND ue.score IS NOT NULL
+            GROUP BY ue.user.userId, ue.user.username, ue.user.fullName
+            ORDER BY AVG(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN ue.score ELSE NULL END) DESC,
+                     SUM(CASE WHEN ue.status = 'SUBMITTED' AND ue.score IS NOT NULL THEN 1 ELSE 0 END) DESC,
+                     MAX(ue.startTime) DESC
+            """)
+    List<Object[]> rankUsersByResults(
+            @Param("subjectId") Long subjectId,
+            @Param("examId") Long examId,
+            @Param("startedFrom") LocalDateTime startedFrom,
+            @Param("startedTo") LocalDateTime startedTo);
 }

@@ -15,6 +15,26 @@
   width: 96px;
 }
 
+.dashboard-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.dashboard-filter-control {
+  width: 220px;
+}
+
+.dashboard-filter-control--wide {
+  width: 280px;
+}
+
+.dashboard-date-range {
+  width: 280px;
+}
+
 .dashboard-stat-icon {
   width: 38px;
   height: 38px;
@@ -30,13 +50,31 @@
 }
 
 .dashboard-stat-icon--warning {
-  color: var(--admin-warning);
-  background: var(--admin-warning-soft);
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
 }
 
 .dashboard-stat-icon--success {
-  color: var(--admin-success);
-  background: var(--admin-success-soft);
+  color: var(--admin-verified);
+  background: var(--admin-verified-soft);
+}
+
+.dashboard-score-value {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--admin-score);
+  background: var(--admin-score-soft);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-success-value {
+  color: var(--admin-verified);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .dashboard-stat-icon--error {
@@ -51,4 +89,12 @@
 
 .dashboard-drag-handle:active {
   cursor: grabbing;
+}
+
+@media (max-width: 640px) {
+  .dashboard-filter-control,
+  .dashboard-filter-control--wide,
+  .dashboard-date-range {
+    width: 100%;
+  }
 }

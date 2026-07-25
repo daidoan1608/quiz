@@ -27,6 +27,10 @@ public interface QuestionService {
 
     List<QuestionDto> getSmartWrongPracticeQuestions(Long subjectId, Long chapterId, Integer limit, String difficulty, String strategy, UUID userId, boolean includeCorrectAnswers);
 
+    long countSmartWrongPracticeQuestions(Long subjectId, Long chapterId, String difficulty, UUID userId);
+
+    long countPracticeQuestions(Long subjectId, Long chapterId, String difficulty);
+
     List<QuestionDto> getAllQuestion();
 
     List<QuestionDto> getDeletedQuestions();

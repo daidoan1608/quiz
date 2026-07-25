@@ -8,7 +8,7 @@ export default function ContentHome() {
   const { canGlobal } = useAuth();
   const canViewStatistics = canGlobal("STATISTIC", "VIEW");
   const [widgetOrder, setWidgetOrder] = useState(readStoredOrder);
-  const { loading, statistics, tableLimits, updateLimit } =
+  const dashboardStats =
     useDashboardStats(canViewStatistics);
 
   useEffect(() => {
@@ -19,10 +19,7 @@ export default function ContentHome() {
     <div>
       <DashboardView
         canViewStatistics={canViewStatistics}
-        loading={loading}
-        statistics={statistics}
-        tableLimits={tableLimits}
-        updateLimit={updateLimit}
+        {...dashboardStats}
         widgetOrder={widgetOrder}
         setWidgetOrder={setWidgetOrder}
       />

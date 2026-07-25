@@ -14,6 +14,19 @@ export const createPracticeRequestParams = ({
   limit: isSubjectPractice ? safeQuestionLimit || 100 : safeQuestionLimit || maxQuestionLimit || 100,
 });
 
+export const createWrongPracticeCountParams = ({
+  chapterId,
+  practiceConfig,
+  subjectId,
+}) => ({
+  chapterId,
+  difficulty:
+    practiceConfig?.difficulty && practiceConfig.difficulty !== 'ALL'
+      ? practiceConfig.difficulty
+      : undefined,
+  subjectId,
+});
+
 export const loadMarkedSubjectQuestions = async ({
   commonParams,
   examApi,

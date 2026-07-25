@@ -2,6 +2,7 @@
 import { appMessage } from 'utils/appMessage';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { subjectApi } from 'api/services/subjectApi';
+import { examApi } from 'api/services/examApi';
 import { useLanguage } from 'context/language/LanguageProvider';
 import { getCurrentUserId } from 'utils/storage';
 import { typesetMath } from 'utils/typesetMath';
@@ -10,7 +11,11 @@ import {
   getNextQuestionIndex,
   getPreviousQuestionIndex,
 } from 'pages/Subject/utils/answerSelection';
-import { DEFAULT_PRACTICE_CONFIG } from '../constants/practiceOptions';
+import {
+  DEFAULT_PRACTICE_CONFIG,
+  SMART_WRONG_MODES,
+} from '../constants/practiceOptions';
+import { createWrongPracticeCountParams } from '../utils/practiceData';
 import { useMarkedQuestions } from './useMarkedQuestions';
 import { usePracticeDerivedState } from './usePracticeDerivedState';
 import { useStartPracticeSession } from './useStartPracticeSession';
@@ -24,6 +29,7 @@ export const useChapterPractice = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [hasRequested, setHasRequested] = useState(false);
+  const [wrongPracticeSummary, setWrongPracticeSummary] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,9 +65,13 @@ export const useChapterPractice = () => {
   } = useMarkedQuestions({ chapterId, userId });
   const { texts } = useLanguage();
   const maxQuestionLimit = isSubjectPractice ? 100 : chapterQuestionCount || 100;
+  const effectiveQuestionLimit =
+    SMART_WRONG_MODES[practiceConfig.mode] && wrongPracticeSummary !== null
+      ? wrongPracticeSummary.wrongTotal
+      : maxQuestionLimit;
   const safeQuestionLimit = Math.max(
     1,
-    Math.min(Number(practiceConfig.limit) || 1, maxQuestionLimit || 1)
+    Math.min(Number(practiceConfig.limit) || 1, effectiveQuestionLimit || 1)
   );
   const {
     answeredCount,
@@ -115,6 +125,46 @@ export const useChapterPractice = () => {
   useEffect(() => {
     typesetMath();
   }, [currentQuestionIndex, questions, selectedAnswers, confirmedAnswers]);
+
+  useEffect(() => {
+    if (!SMART_WRONG_MODES[practiceConfig.mode]) {
+      setWrongPracticeSummary(null);
+      return;
+    }
+
+    let mounted = true;
+
+    const loadWrongQuestionTotal = async () => {
+      try {
+        const data = await examApi.getSmartWrongPracticeQuestionCount(
+          createWrongPracticeCountParams({
+            chapterId,
+            practiceConfig,
+            subjectId,
+          })
+        );
+        if (!mounted) return;
+        const wrongTotal = Number(data?.wrongTotal ?? data?.total ?? 0);
+        const practiceTotal = Number(data?.practiceTotal || 0);
+        setWrongPracticeSummary({ wrongTotal, practiceTotal });
+        setPracticeConfig((prev) => ({
+          ...prev,
+          limit: Math.min(Math.max(Number(prev.limit) || 1, 1), Math.max(wrongTotal, 1)),
+        }));
+      } catch (error) {
+        console.error('Lỗi tải tổng số câu sai:', error);
+        if (mounted) {
+          setWrongPracticeSummary(null);
+        }
+      }
+    };
+
+    loadWrongQuestionTotal();
+
+    return () => {
+      mounted = false;
+    };
+  }, [chapterId, practiceConfig.difficulty, practiceConfig.mode, subjectId]);
 
   useEffect(() => {
     const hasSubjectName = Boolean(subjectName || location.state?.subjectName);
@@ -203,6 +253,7 @@ export const useChapterPractice = () => {
     isSubjectPractice,
     markedQuestions,
     maxQuestionLimit,
+    wrongPracticeSummary,
     navigate,
     panelTitle,
     practiceConfig,

@@ -2,6 +2,7 @@ import React from 'react';
 import { SessionHero } from 'pages/Subject/components/QuestionPanelShared/SessionHero';
 import {
   PRACTICE_DIFFICULTY_OPTIONS,
+  SMART_WRONG_MODES,
   SUBJECT_MODE_OPTIONS,
 } from '../constants/practiceOptions';
 
@@ -19,7 +20,17 @@ export const PracticeControls = ({
   progressPercent,
   questionCount,
   texts,
+  wrongPracticeSummary,
 }) => {
+  const isSmartWrongMode = Boolean(SMART_WRONG_MODES[practiceConfig.mode]);
+  const wrongTotal = Number(wrongPracticeSummary?.wrongTotal || 0);
+  const practiceTotal = Number(wrongPracticeSummary?.practiceTotal || 0);
+  const currentMaxQuestionLimit =
+    isSmartWrongMode && wrongPracticeSummary !== null
+      ? Math.max(wrongTotal, 1)
+      : maxQuestionLimit || 1;
+  const hasNoSmartWrongQuestions =
+    isSmartWrongMode && wrongPracticeSummary !== null && wrongTotal <= 0;
   const description = `${isSubjectPractice
     ? 'Chọn nhóm câu cần ôn, sau đó bắt đầu khi bạn sẵn sàng.'
     : 'Chọn số câu, độ khó rồi bắt đầu ôn tập theo chương.'} ${
@@ -29,10 +40,13 @@ export const PracticeControls = ({
         ? 'Câu hỏi chỉ được tải sau khi bạn bấm bắt đầu.'
         : 'Câu hỏi chỉ được tải sau khi bạn bấm bắt đầu.'
   }`;
-  const safeLimit = Math.min(
-    maxQuestionLimit || 1,
-    Math.max(1, Number(practiceConfig.limit) || 1)
-  );
+  const requestedLimit = Number(practiceConfig.limit);
+  const limitError =
+    Number.isNaN(requestedLimit) || requestedLimit < 1
+      ? 'Số câu phải lớn hơn hoặc bằng 1.'
+      : requestedLimit > currentMaxQuestionLimit
+        ? `Số câu không được vượt quá ${currentMaxQuestionLimit}.`
+        : '';
 
   const updateConfig = (patch) => {
     onPracticeConfigChange((prev) => ({
@@ -46,7 +60,12 @@ export const PracticeControls = ({
       action={
         <button
           onClick={onStartPractice}
-          disabled={isLoading || maxQuestionLimit <= 0}
+          disabled={
+            isLoading ||
+            maxQuestionLimit <= 0 ||
+            hasNoSmartWrongQuestions ||
+            Boolean(limitError)
+          }
           className="aura-button aura-button-primary w-full px-5 text-sm md:w-auto"
           type="button"
         >
@@ -102,23 +121,34 @@ export const PracticeControls = ({
           </div>
         )}
 
-        {!isSubjectPractice && (
+        {(isSmartWrongMode || !isSubjectPractice) && (
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
               <span className="aura-form-label">
-                Số câu
+                {isSmartWrongMode && wrongPracticeSummary !== null
+                  ? `Số câu trên ${wrongTotal} câu sai`
+                  : 'Số câu'}
               </span>
               <input
                 className="aura-input h-11 w-full px-3 text-sm"
                 disabled={isLoading}
-                max={maxQuestionLimit || 1}
+                max={currentMaxQuestionLimit}
                 min={1}
                 onChange={(event) =>
                   updateConfig({ limit: Number(event.target.value) || 1 })
                 }
                 type="number"
-                value={safeLimit}
+                value={practiceConfig.limit}
               />
+              {limitError ? (
+                <span className="mt-1 block text-xs font-semibold text-red-500">
+                  {limitError}
+                </span>
+              ) : hasNoSmartWrongQuestions ? (
+                <span className="mt-1 block text-xs font-semibold text-red-500">
+                  Không có câu sai nào theo bộ lọc hiện tại.
+                </span>
+              ) : null}
             </label>
 
             <label className="block">
@@ -140,6 +170,11 @@ export const PracticeControls = ({
                 ))}
               </select>
             </label>
+            {isSmartWrongMode && wrongPracticeSummary !== null ? (
+              <div className="sm:col-span-2 rounded-xl border border-gray-200 bg-white/70 px-4 py-3 text-sm font-semibold text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                Có {wrongTotal} câu sai trong {practiceTotal} câu có thể ôn theo bộ lọc hiện tại.
+              </div>
+            ) : null}
           </div>
         )}
       </div>

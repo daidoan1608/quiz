@@ -89,6 +89,55 @@ class QuestionPracticeServiceTest {
                 .containsExactly(1L, 2L);
     }
 
+    @Test
+    void countSmartWrongPracticeQuestionsCountsUniqueWrongQuestions() {
+        UUID userId = UUID.randomUUID();
+        Question first = question(1L, 10L, QuestionDifficulty.EASY, true, answer(101L, true));
+        Question second = question(2L, 10L, QuestionDifficulty.EASY, true, answer(201L, true));
+
+        when(userAnswerRepository.findSubmittedAnswersByUserForPractice(userId, null, null))
+                .thenReturn(List.of(
+                        userAnswer(1L, first, answer(102L, false), LocalDateTime.of(2026, 7, 20, 8, 0)),
+                        userAnswer(2L, first, answer(102L, false), LocalDateTime.of(2026, 7, 22, 8, 0)),
+                        userAnswer(3L, second, answer(202L, false), LocalDateTime.of(2026, 7, 23, 8, 0))
+                ));
+
+        long total = questionPracticeService.countSmartWrongPracticeQuestions(null, null, "ALL", userId);
+
+        assertThat(total).isEqualTo(2);
+    }
+
+    @Test
+    void smartWrongPracticeExcludesQuestionWhenLatestAttemptIsCorrect() {
+        UUID userId = UUID.randomUUID();
+        Question resolved = question(1L, 10L, QuestionDifficulty.EASY, true, answer(101L, true));
+        Question stillWrong = question(2L, 10L, QuestionDifficulty.EASY, true, answer(201L, true));
+        QuestionDto stillWrongDto = dto(2L);
+
+        when(userAnswerRepository.findSubmittedAnswersByUserForPractice(userId, null, null))
+                .thenReturn(List.of(
+                        userAnswer(1L, resolved, answer(102L, false), LocalDateTime.of(2026, 7, 20, 8, 0)),
+                        userAnswer(2L, resolved, answer(101L, true), LocalDateTime.of(2026, 7, 22, 8, 0)),
+                        userAnswer(3L, stillWrong, answer(202L, false), LocalDateTime.of(2026, 7, 23, 8, 0))
+                ));
+        when(questionMapper.toDto(stillWrong)).thenReturn(stillWrongDto);
+
+        List<QuestionDto> result = questionPracticeService.getSmartWrongPracticeQuestions(
+                null,
+                null,
+                10,
+                "ALL",
+                "recent",
+                userId
+        );
+        long total = questionPracticeService.countSmartWrongPracticeQuestions(null, null, "ALL", userId);
+
+        assertThat(result)
+                .extracting(QuestionDto::getQuestionId)
+                .containsExactly(2L);
+        assertThat(total).isEqualTo(1);
+    }
+
     private Question question(Long questionId, Long chapterId, QuestionDifficulty difficulty, boolean practiceEnabled, Answer... answers) {
         Chapter chapter = new Chapter();
         chapter.setChapterId(chapterId);

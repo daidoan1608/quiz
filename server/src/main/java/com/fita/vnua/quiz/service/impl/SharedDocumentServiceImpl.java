@@ -15,12 +15,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,11 +33,27 @@ public class SharedDocumentServiceImpl implements SharedDocumentService {
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
             "doc", "docx", "ppt", "pptx", "xls", "xlsx", "pdf", "txt", "csv", "zip", "rar"
     );
+    private static final Map<String, String> CONTENT_TYPES_BY_EXTENSION = Map.ofEntries(
+            Map.entry("doc", "application/msword"),
+            Map.entry("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+            Map.entry("ppt", "application/vnd.ms-powerpoint"),
+            Map.entry("pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+            Map.entry("xls", "application/vnd.ms-excel"),
+            Map.entry("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+            Map.entry("pdf", "application/pdf"),
+            Map.entry("txt", "text/plain"),
+            Map.entry("csv", "text/csv"),
+            Map.entry("zip", "application/zip"),
+            Map.entry("rar", "application/vnd.rar")
+    );
 
     private final SharedDocumentRepository repository;
 
     @Value("${document.upload-dir:uploads/documents}")
     private String documentUploadDir;
+
+    @Value("${document.max-file-size-bytes:26214400}")
+    private long documentMaxFileSizeBytes;
 
     @Override
     public List<SharedDocumentResponse> getPublicDocuments() {
@@ -59,11 +77,16 @@ public class SharedDocumentServiceImpl implements SharedDocumentService {
         if (file == null || file.isEmpty()) {
             throw new CustomApiException("Vui lòng chọn file tài liệu", HttpStatus.BAD_REQUEST);
         }
+        if (file.getSize() > documentMaxFileSizeBytes) {
+            throw new CustomApiException("File tài liệu vượt quá dung lượng cho phép", HttpStatus.BAD_REQUEST);
+        }
 
         String originalFilename = Paths.get(file.getOriginalFilename() == null ? "document" : file.getOriginalFilename())
                 .getFileName()
                 .toString();
         String extension = getSafeExtension(originalFilename);
+        validateFileSignature(extension, file);
+        String contentType = getContentTypeForExtension(extension);
         String storedFilename = UUID.randomUUID() + "." + extension;
 
         Path folder = uploadRoot();
@@ -79,7 +102,7 @@ public class SharedDocumentServiceImpl implements SharedDocumentService {
                 .description(StringUtils.hasText(description) ? description.trim() : null)
                 .originalFilename(originalFilename)
                 .storedFilename(storedFilename)
-                .contentType(file.getContentType())
+                .contentType(contentType)
                 .fileSize(file.getSize())
                 .active(active)
                 .build();
@@ -166,6 +189,43 @@ public class SharedDocumentServiceImpl implements SharedDocumentService {
             throw new CustomApiException("Định dạng tài liệu chưa được hỗ trợ", HttpStatus.BAD_REQUEST);
         }
         return extension;
+    }
+
+    private String getContentTypeForExtension(String extension) {
+        return CONTENT_TYPES_BY_EXTENSION.getOrDefault(extension, "application/octet-stream");
+    }
+
+    private void validateFileSignature(String extension, MultipartFile file) throws IOException {
+        byte[] header = new byte[8];
+        int length;
+        try (InputStream inputStream = file.getInputStream()) {
+            length = inputStream.read(header);
+        }
+
+        boolean valid = switch (extension) {
+            case "pdf" -> startsWith(header, length, new byte[]{0x25, 0x50, 0x44, 0x46});
+            case "zip", "docx", "pptx", "xlsx" -> startsWith(header, length, new byte[]{0x50, 0x4B});
+            case "rar" -> startsWith(header, length, new byte[]{0x52, 0x61, 0x72, 0x21, 0x1A, 0x07});
+            case "doc", "ppt", "xls" -> startsWith(header, length, new byte[]{(byte) 0xD0, (byte) 0xCF, 0x11, (byte) 0xE0});
+            case "txt", "csv" -> true;
+            default -> false;
+        };
+
+        if (!valid) {
+            throw new CustomApiException("Định dạng file tài liệu không hợp lệ", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private boolean startsWith(byte[] source, int sourceLength, byte[] prefix) {
+        if (sourceLength < prefix.length) {
+            return false;
+        }
+        for (int i = 0; i < prefix.length; i++) {
+            if (source[i] != prefix[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Path uploadRoot() {

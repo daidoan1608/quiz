@@ -894,114 +894,6 @@
     background: var(--aura-surface);
   }
 
-  .ant-message {
-    inset-inline-start: auto !important;
-    inset-inline-end: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    top: 20px !important;
-    width: 100% !important;
-    transform: none !important;
-    text-align: right;
-    z-index: 1200;
-  }
-
-  .ant-message .ant-message-notice-wrapper {
-    padding: 0;
-    text-align: right;
-  }
-
-  .ant-message .ant-message-move-up-appear,
-  .ant-message .ant-message-move-up-enter {
-    animation: aura-message-slide-in 220ms cubic-bezier(0.2, 0, 0, 1) !important;
-    animation-play-state: paused !important;
-  }
-
-  .ant-message .ant-message-move-up-appear.ant-message-move-up-appear-active,
-  .ant-message .ant-message-move-up-enter.ant-message-move-up-enter-active {
-    animation-play-state: running !important;
-  }
-
-  .ant-message .ant-message-move-up-leave {
-    animation: aura-message-slide-out 180ms ease-in forwards !important;
-    animation-play-state: paused !important;
-  }
-
-  .ant-message .ant-message-move-up-leave.ant-message-move-up-leave-active {
-    animation-play-state: running !important;
-  }
-
-  .ant-message .ant-message-notice {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-  }
-
-  .ant-message .ant-message-notice-content {
-    min-width: min(420px, calc(100vw - 32px));
-    max-width: min(520px, calc(100vw - 32px));
-    padding: 0;
-    border: 1px solid var(--aura-border);
-    border-radius: var(--aura-radius-lg);
-    background:
-      linear-gradient(135deg, rgba(var(--primary-color), 0.10), transparent 52%),
-      color-mix(in srgb, var(--aura-surface) 97%, transparent);
-    color: var(--aura-text);
-    box-shadow: var(--aura-shadow-lg);
-    backdrop-filter: blur(18px);
-    overflow: hidden;
-  }
-
-  .ant-message .ant-message-custom-content {
-    min-height: 58px;
-    display: grid;
-    grid-template-columns: 32px minmax(0, 1fr);
-    gap: 12px;
-    align-items: center;
-    padding: 14px 16px;
-    color: var(--aura-text);
-    text-align: left;
-    font-weight: 700;
-    line-height: 21px;
-  }
-
-  .ant-message .anticon {
-    width: 32px;
-    height: 32px;
-    display: inline-grid;
-    place-items: center;
-    margin: 0 !important;
-    border-radius: 10px;
-    font-size: 17px;
-    background: var(--aura-primary-soft);
-  }
-
-  .ant-message .ant-message-success .anticon {
-    color: var(--aura-success);
-    background: color-mix(in srgb, var(--aura-success) 13%, var(--aura-surface));
-  }
-
-  .ant-message .ant-message-error .anticon {
-    color: var(--aura-error);
-    background: color-mix(in srgb, var(--aura-error) 12%, var(--aura-surface));
-  }
-
-  .ant-message .ant-message-warning .anticon {
-    color: var(--aura-warning);
-    background: color-mix(in srgb, var(--aura-warning) 13%, var(--aura-surface));
-  }
-
-  .ant-message .ant-message-info .anticon,
-  .ant-message .ant-message-loading .anticon {
-    color: var(--aura-primary);
-    background: var(--aura-primary-soft);
-  }
-
-  .ant-message .ant-message-custom-content > span:last-child {
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-
   .aura-message-host {
     position: fixed;
     right: 20px;
@@ -1376,6 +1268,8 @@
 @media (prefers-reduced-motion: reduce) {
   .aura-tap-pop,
   .aura-loading-spinner,
+  .aura-message-toast,
+  .aura-message-toast--loading .aura-message-toast__icon,
   .aura-progress__bar,
   .aura-surface-panel-hover {
     animation: none;
@@ -1390,22 +1284,6 @@
 @media (max-width: 768px) {
   body { font-size: 15px; }
   .aura-container { width: min(100% - 24px, 1280px); }
-
-  .ant-message {
-    inset-inline-end: 0 !important;
-    right: 0 !important;
-    top: 12px !important;
-    width: 100% !important;
-  }
-
-  .ant-message .aura-app-message {
-    margin-inline-end: 12px !important;
-  }
-
-  .ant-message .ant-message-notice-content {
-    min-width: calc(100vw - 24px);
-    max-width: calc(100vw - 24px);
-  }
 
   .aura-message-host {
     right: 12px;

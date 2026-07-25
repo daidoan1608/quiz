@@ -28,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +61,8 @@ class UserExamServiceImplTest {
     private UserExamAttemptStatsService attemptStatsService;
     @Mock
     private StringRedisTemplate stringRedisTemplate;
+    @Mock
+    private ValueOperations<String, String> valueOperations;
     @Spy
     private UserExamMapper userExamMapper = new UserExamMapper(new ObjectMapper(), new QuestionMapper());
 
@@ -106,6 +109,9 @@ class UserExamServiceImplTest {
         when(userAnswerRepository.findUserAnswersByUserExamId(any())).thenReturn(List.of());
         when(userExamQuestionRepository.findWithQuestionDetailsByUserExamIds(any())).thenReturn(List.of());
         when(questionRepository.findQuestionsByExamId(examId)).thenReturn(List.of());
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.setIfAbsent(any(), any(), any())).thenReturn(true);
+        when(valueOperations.get(any())).thenReturn(null);
 
         userExamService.startOrResumeAttempt(request, authenticatedUserId);
 

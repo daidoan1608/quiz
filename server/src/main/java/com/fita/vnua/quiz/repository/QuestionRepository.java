@@ -92,6 +92,24 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             @Param("difficulty") String difficulty,
             @Param("number") int number);
 
+    @Query("""
+            SELECT COUNT(q)
+            FROM Question q
+            JOIN q.chapter c
+            JOIN c.subject s
+            WHERE q.deleted = false
+              AND c.deleted = false
+              AND s.deleted = false
+              AND q.practiceEnabled = true
+              AND (:subjectId IS NULL OR s.subjectId = :subjectId)
+              AND (:chapterId IS NULL OR c.chapterId = :chapterId)
+              AND (:difficulty IS NULL OR q.difficulty = :difficulty)
+            """)
+    long countPracticeQuestionsForScope(
+            @Param("subjectId") Long subjectId,
+            @Param("chapterId") Long chapterId,
+            @Param("difficulty") QuestionDifficulty difficulty);
+
     default List<Question> findQuestionsByChapter(Long chapterId, int number) {
         return findQuestionsByChapterAndDifficulty(chapterId, null, number);
     }

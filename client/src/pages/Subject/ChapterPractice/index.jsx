@@ -41,6 +41,7 @@ export default function ChapterPractice() {
       progressPercent={practice.progressPercent}
       questionCount={practice.questions.length}
       texts={practice.texts}
+      wrongPracticeSummary={practice.wrongPracticeSummary}
     />
   );
 

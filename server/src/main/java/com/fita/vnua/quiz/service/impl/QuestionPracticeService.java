@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +75,23 @@ public class QuestionPracticeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public long countSmartWrongPracticeQuestions(Long subjectId, Long chapterId, String difficulty, UUID userId) {
+        requireUser(userId);
+        QuestionDifficulty normalizedDifficulty = difficulty == null || difficulty.isBlank() || "ALL".equalsIgnoreCase(difficulty)
+                ? null
+                : questionMapper.parseDifficulty(difficulty);
+        return buildWrongQuestionStats(userId, subjectId, chapterId, normalizedDifficulty).size();
+    }
+
+    @Transactional(readOnly = true)
+    public long countPracticeQuestions(Long subjectId, Long chapterId, String difficulty) {
+        QuestionDifficulty normalizedDifficulty = difficulty == null || difficulty.isBlank() || "ALL".equalsIgnoreCase(difficulty)
+                ? null
+                : questionMapper.parseDifficulty(difficulty);
+        return questionRepository.countPracticeQuestionsForScope(subjectId, chapterId, normalizedDifficulty);
+    }
+
     private List<WrongQuestionStat> buildWrongQuestionStats(UUID userId, Long subjectId, Long chapterId, QuestionDifficulty difficulty) {
         Map<AttemptQuestionKey, List<UserAnswer>> answersByAttemptQuestion =
                 userAnswerRepository.findSubmittedAnswersByUserForPractice(userId, subjectId, chapterId).stream()
@@ -91,13 +107,14 @@ public class QuestionPracticeService {
                         ));
 
         Map<Long, WrongQuestionStat> statsByQuestion = new HashMap<>();
-        answersByAttemptQuestion.values().forEach(userAnswers -> recordWrongAttempt(statsByQuestion, userAnswers));
+        answersByAttemptQuestion.values().forEach(userAnswers -> recordAttempt(statsByQuestion, userAnswers));
         return statsByQuestion.values().stream()
                 .filter(stat -> stat.question() != null)
+                .filter(WrongQuestionStat::lastAttemptWrong)
                 .toList();
     }
 
-    private void recordWrongAttempt(Map<Long, WrongQuestionStat> statsByQuestion, List<UserAnswer> userAnswers) {
+    private void recordAttempt(Map<Long, WrongQuestionStat> statsByQuestion, List<UserAnswer> userAnswers) {
         if (userAnswers.isEmpty()) {
             return;
         }
@@ -109,37 +126,35 @@ public class QuestionPracticeService {
         Set<Long> chosenAnswerIds = userAnswers.stream()
                 .map(userAnswer -> userAnswer.getAnswer().getOptionId())
                 .collect(Collectors.toSet());
-        if (!correctAnswerIds.equals(chosenAnswerIds)) {
-            LocalDateTime submittedAt = Optional.ofNullable(userAnswers.get(0).getUserExam().getEndTime())
-                    .orElse(Optional.ofNullable(userAnswers.get(0).getUserExam().getUpdatedAt())
-                            .orElse(userAnswers.get(0).getUserExam().getStartTime()));
-            WrongQuestionStat currentStat = statsByQuestion.computeIfAbsent(
-                    question.getQuestionId(),
-                    id -> new WrongQuestionStat(question)
-            );
-            statsByQuestion.put(question.getQuestionId(), currentStat.recordWrong(submittedAt));
-        }
+        LocalDateTime submittedAt = Optional.ofNullable(userAnswers.get(0).getUserExam().getEndTime())
+                .orElse(Optional.ofNullable(userAnswers.get(0).getUserExam().getUpdatedAt())
+                        .orElse(userAnswers.get(0).getUserExam().getStartTime()));
+        boolean wrong = !correctAnswerIds.equals(chosenAnswerIds);
+        WrongQuestionStat currentStat = statsByQuestion.computeIfAbsent(
+                question.getQuestionId(),
+                id -> new WrongQuestionStat(question)
+        );
+        statsByQuestion.put(question.getQuestionId(), currentStat.recordAttempt(submittedAt, wrong));
     }
 
     private Set<Long> findWrongQuestionIds(UUID userId, Long chapterId) {
-        Map<Long, Set<Long>> chosenByQuestion = userAnswerRepository.findSubmittedAnswersByUserAndChapter(userId, chapterId).stream()
+        Map<AttemptQuestionKey, List<UserAnswer>> answersByAttemptQuestion = userAnswerRepository
+                .findSubmittedAnswersByUserAndChapter(userId, chapterId).stream()
                 .collect(Collectors.groupingBy(
-                        answer -> answer.getQuestion().getQuestionId(),
-                        Collectors.mapping(answer -> answer.getAnswer().getOptionId(), Collectors.toSet())
+                        answer -> new AttemptQuestionKey(
+                                answer.getUserExam().getUserExamId(),
+                                answer.getQuestion().getQuestionId()
+                        ),
+                        LinkedHashMap::new,
+                        Collectors.toList()
                 ));
 
-        Set<Long> wrongQuestionIds = new HashSet<>();
-        questionRepository.findPracticeByChapter(chapterId).forEach(question -> {
-            Set<Long> correctAnswerIds = question.getAnswers().stream()
-                    .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
-                    .map(answer -> answer.getOptionId())
-                    .collect(Collectors.toSet());
-            Set<Long> chosenAnswerIds = chosenByQuestion.get(question.getQuestionId());
-            if (chosenAnswerIds != null && !correctAnswerIds.equals(chosenAnswerIds)) {
-                wrongQuestionIds.add(question.getQuestionId());
-            }
-        });
-        return wrongQuestionIds;
+        Map<Long, WrongQuestionStat> statsByQuestion = new HashMap<>();
+        answersByAttemptQuestion.values().forEach(userAnswers -> recordAttempt(statsByQuestion, userAnswers));
+        return statsByQuestion.values().stream()
+                .filter(WrongQuestionStat::lastAttemptWrong)
+                .map(stat -> stat.question().getQuestionId())
+                .collect(Collectors.toSet());
     }
 
     private List<WrongQuestionStat> applyStrategyFilter(List<WrongQuestionStat> wrongStats, String strategy) {
@@ -185,13 +200,26 @@ public class QuestionPracticeService {
     private record AttemptQuestionKey(Long userExamId, Long questionId) {
     }
 
-    private record WrongQuestionStat(Question question, int wrongCount, LocalDateTime lastWrongAt) {
+    private record WrongQuestionStat(
+            Question question,
+            int wrongCount,
+            LocalDateTime lastWrongAt,
+            LocalDateTime lastAttemptAt,
+            boolean lastAttemptWrong) {
         private WrongQuestionStat(Question question) {
-            this(question, 0, LocalDateTime.MIN);
+            this(question, 0, LocalDateTime.MIN, LocalDateTime.MIN, false);
         }
 
-        private WrongQuestionStat recordWrong(LocalDateTime submittedAt) {
-            return new WrongQuestionStat(question, wrongCount + 1, submittedAt.isAfter(lastWrongAt) ? submittedAt : lastWrongAt);
+        private WrongQuestionStat recordAttempt(LocalDateTime submittedAt, boolean wrong) {
+            LocalDateTime nextLastWrongAt = wrong && submittedAt.isAfter(lastWrongAt) ? submittedAt : lastWrongAt;
+            boolean nextLastAttemptWrong = submittedAt.isBefore(lastAttemptAt) ? lastAttemptWrong : wrong;
+            LocalDateTime nextLastAttemptAt = submittedAt.isAfter(lastAttemptAt) ? submittedAt : lastAttemptAt;
+            return new WrongQuestionStat(
+                    question,
+                    wrong ? wrongCount + 1 : wrongCount,
+                    nextLastWrongAt,
+                    nextLastAttemptAt,
+                    nextLastAttemptWrong);
         }
     }
 }

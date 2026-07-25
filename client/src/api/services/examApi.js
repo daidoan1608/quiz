@@ -45,6 +45,14 @@ export const examApi = {
       .then((response) => getResponseData(response, []));
   },
 
+  getSmartWrongPracticeQuestionCount(params = {}) {
+    return authAxios
+      .get("/questions/practice/wrong/count", { params })
+      .then((response) =>
+        getResponseData(response, { total: 0, wrongTotal: 0, practiceTotal: 0 })
+      );
+  },
+
   getRankings(config) {
     return publicAxios.get("/public/rankings", config);
   },
