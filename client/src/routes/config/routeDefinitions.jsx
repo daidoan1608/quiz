@@ -1,21 +1,22 @@
-import React from 'react';
-import Account from 'pages/Account';
-import ExamAttemptDetail from 'pages/Account/ExamAttemptDetail';
-import ForgotPassword from 'pages/Auth/ForgotPassword';
-import Login from 'pages/Auth/Login';
-import RegisterForm from 'pages/Auth/Register';
-import VerifyEmail from 'pages/Auth/VerifyEmail';
-import Documents from 'pages/Documents';
-import Home from 'pages/Home';
-import Notifications from 'pages/Notifications';
-import Privacy from 'pages/Privacy';
-import Rank from 'pages/Rank';
-import Subject from 'pages/Subject';
-import ChapterPractice from 'pages/Subject/ChapterPractice';
-import SubjectDetail from 'pages/Subject/Detail';
-import Exam from 'pages/Subject/Exam';
-import Result from 'pages/Subject/Exam/Result';
-import Terms from 'pages/Terms';
+import React, { lazy } from 'react';
+
+const Account = lazy(() => import('pages/Account'));
+const ExamAttemptDetail = lazy(() => import('pages/Account/ExamAttemptDetail'));
+const ForgotPassword = lazy(() => import('pages/Auth/ForgotPassword'));
+const Login = lazy(() => import('pages/Auth/Login'));
+const RegisterForm = lazy(() => import('pages/Auth/Register'));
+const VerifyEmail = lazy(() => import('pages/Auth/VerifyEmail'));
+const Documents = lazy(() => import('pages/Documents'));
+const Home = lazy(() => import('pages/Home'));
+const Notifications = lazy(() => import('pages/Notifications'));
+const Privacy = lazy(() => import('pages/Privacy'));
+const Rank = lazy(() => import('pages/Rank'));
+const Subject = lazy(() => import('pages/Subject'));
+const ChapterPractice = lazy(() => import('pages/Subject/ChapterPractice'));
+const SubjectDetail = lazy(() => import('pages/Subject/Detail'));
+const Exam = lazy(() => import('pages/Subject/Exam'));
+const Result = lazy(() => import('pages/Subject/Exam/Result'));
+const Terms = lazy(() => import('pages/Terms'));
 
 export const standaloneRoutes = [
   { path: '/login', element: <Login />, guard: 'guest' },
