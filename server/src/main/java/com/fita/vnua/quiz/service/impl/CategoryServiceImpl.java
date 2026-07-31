@@ -81,8 +81,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public CategoryDto addCategory(CategoryDto categoryDto) {
+        validateUniqueCategoryName(categoryDto.getCategoryName(), null);
         Category category = new Category();
-        category.setCategoryName(categoryDto.getCategoryName());
+        category.setCategoryName(categoryDto.getCategoryName().trim());
         category.setCategoryDescription(categoryDto.getCategoryDescription());
         category.setDeleted(false);
         Category savedCategory = categoryRepository.save(category);
@@ -97,7 +98,8 @@ public class CategoryServiceImpl implements CategoryService {
         if (Boolean.TRUE.equals(category.getDeleted())) {
             throw new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND);
         }
-        category.setCategoryName((categoryDto.getCategoryName()));
+        validateUniqueCategoryName(categoryDto.getCategoryName(), id);
+        category.setCategoryName(categoryDto.getCategoryName().trim());
         category.setCategoryDescription(categoryDto.getCategoryDescription());
         Category savedCategory = categoryRepository.save(category);
         return categoryMapper.toDto(savedCategory);
@@ -137,5 +139,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     private CategorySummaryDto mapCategoryToSummaryDto(Category category, Map<Long, Long> subjectCounts) {
         return categoryMapper.toSummaryDto(category, subjectCounts.getOrDefault(category.getCategoryId(), 0L));
+    }
+
+    private void validateUniqueCategoryName(String categoryName, Long currentCategoryId) {
+        String normalizedName = categoryName == null ? "" : categoryName.trim();
+        boolean duplicated = currentCategoryId == null
+                ? categoryRepository.existsByCategoryNameIgnoreCaseAndDeletedFalse(normalizedName)
+                : categoryRepository.existsByCategoryNameIgnoreCaseAndDeletedFalseAndCategoryIdNot(normalizedName, currentCategoryId);
+        if (duplicated) {
+            throw new CustomApiException("Tên danh mục đã tồn tại", HttpStatus.CONFLICT);
+        }
     }
 }

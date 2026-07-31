@@ -109,7 +109,7 @@ public class UserController {
     @Operation(summary = "Cập nhật thông tin cá nhân", description = "Người dùng cập nhật họ tên, email, số điện thoại, địa chỉ")
     public ResponseEntity<ApiResponse<UserResponse>> updateProfile(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
-            @RequestBody UpdateProfileRequest request,
+            @Valid @RequestBody UpdateProfileRequest request,
             @AuthenticationPrincipal User currentUser
     ) {
         authorizationService.requireSelfOrAdminMod(userId, currentUser);
@@ -120,7 +120,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("admin/users")
     @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
-    public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody AdminUserCreateRequest request, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody AdminUserCreateRequest request, @AuthenticationPrincipal User currentUser) {
         UserCommand userCommand = userMapper.toUserCommand(request);
         UserCommand saveUser = userService.create(userCommand);
         auditLogService.record("CREATE", "USER", saveUser.getUserId(), currentUser, saveUser.getUsername());
@@ -132,7 +132,7 @@ public class UserController {
     @Operation(summary = "Cập nhập thông tin người dùng", description = "This API update info user")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
-            @RequestBody AdminUserUpdateRequest request,
+            @Valid @RequestBody AdminUserUpdateRequest request,
             @AuthenticationPrincipal User currentUser
     ) {
         UserCommand userCommand = userMapper.toUserCommand(request);

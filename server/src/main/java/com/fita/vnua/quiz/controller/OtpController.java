@@ -7,6 +7,7 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.service.OtpService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class OtpController {
 
     @PostMapping("/send")
     @Operation(summary = "Gửi mã OTP đến email")
-    public ResponseEntity<ApiResponse<Void>> sendOtp(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+    public ResponseEntity<ApiResponse<Void>> sendOtp(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         ApiResponse<Void> response = otpService.generateOtp(forgotPasswordRequest.getEmail());
         if ("success".equals(response.getStatus())) {
             return ResponseEntity.ok(response);
@@ -34,7 +35,7 @@ public class OtpController {
 
     @PostMapping("/verify")
     @Operation(summary = "Xác thực mã OTP")
-    public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest) {
+    public ResponseEntity<ApiResponse<String>> verifyOtp(@Valid @RequestBody VerifyOtpRequest verifyOtpRequest) {
         ApiResponse<String> response = otpService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
 
         if ("success".equals(response.getStatus())) {
@@ -48,7 +49,7 @@ public class OtpController {
     // Đặt lại mật khẩu
     @PostMapping("/reset")
     @Operation(summary = "Đặt lại mật khẩu")
-    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody TokenAndNewPasswordRequest tokenAndNewPasswordRequest) {
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody TokenAndNewPasswordRequest tokenAndNewPasswordRequest) {
         ApiResponse<Void> response = otpService.resetPassword(tokenAndNewPasswordRequest.getResetToken(), tokenAndNewPasswordRequest.getNewPassword());
 
         if ("success".equals(response.getStatus())) {

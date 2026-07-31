@@ -5,6 +5,8 @@ import com.fita.vnua.quiz.model.dto.AdminGroupPermissionDto;
 import com.fita.vnua.quiz.model.dto.request.AdminUserGroupAssignmentRequest;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.service.AdminGroupService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +29,7 @@ public class AdminGroupController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<ApiResponse<AdminGroupDto>> saveGroup(@RequestBody AdminGroupDto request) {
+    public ResponseEntity<ApiResponse<AdminGroupDto>> saveGroup(@Valid @RequestBody AdminGroupDto request) {
         return ResponseEntity.ok(ApiResponse.success("Lưu nhóm quyền thành công", adminGroupService.saveGroup(request)));
     }
 
@@ -48,7 +50,7 @@ public class AdminGroupController {
     @PutMapping("/{groupId}/permissions")
     public ResponseEntity<ApiResponse<List<AdminGroupPermissionDto>>> savePermissions(
             @PathVariable Long groupId,
-            @RequestBody List<AdminGroupPermissionDto> permissions
+            @RequestBody List<@NotNull(message = "Quyền không được để trống") @Valid AdminGroupPermissionDto> permissions
     ) {
         return ResponseEntity.ok(ApiResponse.success("Lưu quyền của nhóm thành công", adminGroupService.savePermissions(groupId, permissions)));
     }
@@ -63,7 +65,7 @@ public class AdminGroupController {
     @PutMapping("/users/{userId}")
     public ResponseEntity<ApiResponse<List<AdminGroupDto>>> assignUserGroups(
             @PathVariable UUID userId,
-            @RequestBody AdminUserGroupAssignmentRequest request
+            @Valid @RequestBody AdminUserGroupAssignmentRequest request
     ) {
         return ResponseEntity.ok(ApiResponse.success("Gán nhóm quyền thành công", adminGroupService.assignUserGroups(userId, request.getGroupIds())));
     }

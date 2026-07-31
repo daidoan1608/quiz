@@ -11,6 +11,7 @@ import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -230,7 +231,7 @@ public class QuestionController {
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#questionDto.chapterId, 'Chapter', 'CREATE')")
     @PostMapping("admin/questions")
     @Operation(summary = "Tạo câu hỏi mới")
-    public ResponseEntity<ApiResponse<QuestionDto>> createQuestion(@RequestBody QuestionDto questionDto, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse<QuestionDto>> createQuestion(@Valid @RequestBody QuestionDto questionDto, @AuthenticationPrincipal User currentUser) {
         QuestionDto createdQuestion = questionService.create(questionDto);
         auditLogService.record("CREATE", "QUESTION", createdQuestion.getQuestionId(), currentUser, createdQuestion.getContent());
         return ResponseEntity.ok(ApiResponse.success("Tạo câu hỏi thành công", createdQuestion));
@@ -241,7 +242,7 @@ public class QuestionController {
     @Operation(summary = "Cập nhật câu hỏi")
     public ResponseEntity<ApiResponse<QuestionDto>> updateQuestion(
             @PathVariable("questionId") Long questionId,
-            @RequestBody QuestionDto questionDto,
+            @Valid @RequestBody QuestionDto questionDto,
             @AuthenticationPrincipal User currentUser
     ) {
         QuestionDto updatedQuestion = questionService.update(questionId, questionDto);

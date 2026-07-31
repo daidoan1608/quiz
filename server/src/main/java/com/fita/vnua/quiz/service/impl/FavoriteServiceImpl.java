@@ -28,21 +28,24 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public FavoriteDto create(FavoriteDto favoriteDto, UUID currentUserId) {
-        // Lấy User hoặc ném ngoại lệ nếu không tìm thấy
+        if (favoriteDto == null || favoriteDto.getSubjectId() == null) {
+            throw new CustomApiException("Môn học yêu thích không được để trống", HttpStatus.BAD_REQUEST);
+        }
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(user.getDeleted())) {
             throw new CustomApiException("Không tìm thấy người dùng", HttpStatus.NOT_FOUND);
         }
 
-        // Lấy Subject hoặc ném ngoại lệ nếu không tìm thấy
         Subject subject = subjectRepository.findById(favoriteDto.getSubjectId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học"));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
         if (Boolean.TRUE.equals(subject.getDeleted()) || Boolean.TRUE.equals(subject.getCategory().getDeleted())) {
             throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
+        if (favoriteRepository.findByUserUserIdAndSubjectSubjectId(user.getUserId(), subject.getSubjectId()).isPresent()) {
+            throw new CustomApiException("Môn học đã có trong danh sách yêu thích", HttpStatus.CONFLICT);
+        }
 
-        // Tạo entity Favorite mới
         Favorite favorite = new Favorite();
         FavoriteId favoriteId = new FavoriteId();
         favoriteId.setUserId(user.getUserId());
@@ -52,10 +55,8 @@ public class FavoriteServiceImpl implements FavoriteService {
         favorite.setUser(user);
         favorite.setSubject(subject);
 
-        // Lưu favorite vào DB
         Favorite savedFavorite = favoriteRepository.save(favorite);
 
-        // Chuẩn bị FavoriteDto trả về
         FavoriteDto resultDto = new FavoriteDto();
         resultDto.setUserId(savedFavorite.getUser().getUserId());
         resultDto.setSubjectId(savedFavorite.getSubject().getSubjectId());
@@ -66,6 +67,9 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public FavoriteDto delete(FavoriteDto favoriteDto, UUID currentUserId) {
+        if (favoriteDto == null || favoriteDto.getSubjectId() == null) {
+            throw new CustomApiException("Môn học yêu thích không được để trống", HttpStatus.BAD_REQUEST);
+        }
         UUID userId = currentUserId;
         Long subjectId = favoriteDto.getSubjectId();
 
@@ -73,9 +77,8 @@ public class FavoriteServiceImpl implements FavoriteService {
         favoriteId.setUserId(userId);
         favoriteId.setSubjectId(subjectId);
 
-        // Tìm favorite theo composite key
         Favorite favorite = favoriteRepository.findById(favoriteId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học yêu thích"));
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học yêu thích", HttpStatus.NOT_FOUND));
 
         favoriteRepository.delete(favorite);
 

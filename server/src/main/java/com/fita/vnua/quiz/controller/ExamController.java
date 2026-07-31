@@ -10,6 +10,7 @@ import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.ExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class ExamController {
     @PostMapping("admin/exams")
     @Operation(summary = "Tạo bài thi")
     public ResponseEntity<ApiResponse<ExamDto>> createExam(
-            @RequestBody ExamRequest examRequest,
+            @Valid @RequestBody ExamRequest examRequest,
             @AuthenticationPrincipal User currentUser
     ) {
         ExamDto createdExam = examService.createExam(examRequest, currentUser.getUserId());
@@ -122,7 +123,7 @@ public class ExamController {
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'UPDATE')")
     @PutMapping("admin/exams/{examId}")
     @Operation(summary = "Cập nhật bài thi")
-    public ResponseEntity<ApiResponse<ExamDto>> updateExam(@PathVariable("examId") Long examId, @RequestBody ExamDto examDto, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse<ExamDto>> updateExam(@PathVariable("examId") Long examId, @Valid @RequestBody ExamDto examDto, @AuthenticationPrincipal User currentUser) {
         ExamDto updatedExam = examService.updateExam(examId, examDto);
         auditLogService.record("UPDATE", "EXAM", examId, currentUser, updatedExam.getTitle());
         return ResponseEntity.ok(ApiResponse.success("Cập nhật bài thi thành công", updatedExam));

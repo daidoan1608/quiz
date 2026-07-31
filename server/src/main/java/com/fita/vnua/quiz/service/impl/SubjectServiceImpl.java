@@ -113,8 +113,9 @@ public class SubjectServiceImpl implements SubjectService {
         if (Boolean.TRUE.equals(category.getDeleted())) {
             throw new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND);
         }
+        validateUniqueSubjectName(subjectDto.getName(), category.getCategoryId(), null);
         Subject subject = new Subject();
-        subject.setName(subjectDto.getName());
+        subject.setName(subjectDto.getName().trim());
         subject.setDescription(subjectDto.getDescription());
         subject.setCategory(category);
         subject.setDeleted(false);
@@ -131,8 +132,16 @@ public class SubjectServiceImpl implements SubjectService {
             throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
 
-        existingSubject.setName(subjectDto.getName());
+        Long categoryId = subjectDto.getCategoryId();
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
+        if (Boolean.TRUE.equals(category.getDeleted())) {
+            throw new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND);
+        }
+        validateUniqueSubjectName(subjectDto.getName(), categoryId, subjectId);
+        existingSubject.setName(subjectDto.getName().trim());
         existingSubject.setDescription(subjectDto.getDescription());
+        existingSubject.setCategory(category);
         return subjectMapper.toDto(subjectRepository.save(existingSubject));
     }
 
@@ -272,5 +281,15 @@ public class SubjectServiceImpl implements SubjectService {
                         row -> (Long) row[0],
                         row -> (Long) row[1]
                 ));
+    }
+
+    private void validateUniqueSubjectName(String subjectName, Long categoryId, Long currentSubjectId) {
+        String normalizedName = subjectName == null ? "" : subjectName.trim();
+        boolean duplicated = currentSubjectId == null
+                ? subjectRepository.existsByNameIgnoreCaseAndCategoryCategoryIdAndDeletedFalse(normalizedName, categoryId)
+                : subjectRepository.existsByNameIgnoreCaseAndCategoryCategoryIdAndDeletedFalseAndSubjectIdNot(normalizedName, categoryId, currentSubjectId);
+        if (duplicated) {
+            throw new CustomApiException("Tên môn học đã tồn tại trong danh mục", HttpStatus.CONFLICT);
+        }
     }
 }

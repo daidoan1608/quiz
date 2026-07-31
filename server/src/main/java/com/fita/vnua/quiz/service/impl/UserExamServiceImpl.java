@@ -446,9 +446,13 @@ public class UserExamServiceImpl implements UserExamService {
         }
 
         List<Long> answerIds = request.getAnswerIds() != null ? request.getAnswerIds() : new ArrayList<>();
+        if (request.getAnswerId() != null && !answerIds.isEmpty()) {
+            throw new CustomApiException("Chỉ gửi answerId hoặc answerIds, không gửi đồng thời cả hai", HttpStatus.BAD_REQUEST);
+        }
         if (answerIds.isEmpty() && request.getAnswerId() != null) {
             answerIds.add(request.getAnswerId());
         }
+        validateAnswerSelection(question, answerIds);
 
         userAnswerRepository.deleteByUserExamIdAndQuestionId(userExamId, request.getQuestionId());
         userAnswerRepository.flush();
@@ -461,6 +465,9 @@ public class UserExamServiceImpl implements UserExamService {
             Answer answer = answersById.get(answerId);
             if (answer == null) {
                 throw new EntityNotFoundException("Không tìm thấy đáp án với id: " + answerId);
+            }
+            if (answer.getQuestion() == null || !question.getQuestionId().equals(answer.getQuestion().getQuestionId())) {
+                throw new CustomApiException("Đáp án không thuộc câu hỏi đã chọn", HttpStatus.BAD_REQUEST);
             }
             UserAnswer userAnswer = new UserAnswer();
             userAnswer.setUserExam(userExam);
@@ -655,9 +662,38 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     private void updateAttemptProgressFields(UserExam userExam, Integer currentQuestionIndex, Integer remainingTime) {
-        if (currentQuestionIndex != null) userExam.setCurrentQuestionIndex(currentQuestionIndex);
-        if (remainingTime != null) userExam.setRemainingTime(Math.max(remainingTime, 0));
+        int questionCount = getAttemptQuestions(userExam).size();
+        if (currentQuestionIndex != null) {
+            if (questionCount > 0 && currentQuestionIndex >= questionCount) {
+                throw new CustomApiException("Vị trí câu hỏi hiện tại vượt quá số câu trong đề", HttpStatus.BAD_REQUEST);
+            }
+            userExam.setCurrentQuestionIndex(currentQuestionIndex);
+        }
+        if (remainingTime != null) {
+            Integer maxRemainingTime = userExam.getExam() == null || userExam.getExam().getDuration() == null
+                    ? null
+                    : userExam.getExam().getDuration() * 60;
+            if (maxRemainingTime != null && remainingTime > maxRemainingTime) {
+                throw new CustomApiException("Thời gian còn lại vượt quá thời lượng đề thi", HttpStatus.BAD_REQUEST);
+            }
+            userExam.setRemainingTime(Math.max(remainingTime, 0));
+        }
         userExam.setUpdatedAt(LocalDateTime.now());
+    }
+
+    private void validateAnswerSelection(Question question, List<Long> answerIds) {
+        if (answerIds == null || answerIds.isEmpty()) {
+            return;
+        }
+        QuestionType questionType = question.getQuestionType() == null
+                ? QuestionType.SINGLE_CHOICE
+                : question.getQuestionType();
+        if (questionType == QuestionType.SINGLE_CHOICE && new HashSet<>(answerIds).size() > 1) {
+            throw new CustomApiException("Câu hỏi chọn một chỉ được chọn 1 đáp án", HttpStatus.BAD_REQUEST);
+        }
+        if (questionType == QuestionType.FILL_IN_THE_BLANK) {
+            throw new CustomApiException("Loại câu hỏi điền khuyết chưa hỗ trợ lưu đáp án trắc nghiệm", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private ExamAttemptResponse buildAttemptResponse(UserExam userExam) {

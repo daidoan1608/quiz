@@ -44,7 +44,7 @@ public class AuthController {
 
     @PostMapping("login")
     @Operation(summary = "API đăng nhập (Trả về HttpOnly Cookie)")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             customUserDetailsService.ensurePasswordConfigured(loginRequest.getUsername());
             Authentication authentication = authenticationManager.authenticate(
@@ -104,7 +104,8 @@ public class AuthController {
             throw new CustomApiException("Phiên đăng nhập không hợp lệ hoặc đã hết hạn", HttpStatus.UNAUTHORIZED);
         }
 
-        String newAccessToken = authService.refreshAccessToken(UUID.fromString(refreshToken));
+        UUID refreshTokenId = parseRefreshToken(refreshToken);
+        String newAccessToken = authService.refreshAccessToken(refreshTokenId);
         ResponseCookie newAccessCookie = jwtTokenUtil.generateAccessJwtCookie(newAccessToken);
 
         return ResponseEntity.ok()
@@ -118,7 +119,7 @@ public class AuthController {
             @CookieValue(name = "refreshToken", defaultValue = "") String refreshToken
     ) {
         if (!refreshToken.isBlank()) {
-            authService.revokeRefreshToken(UUID.fromString(refreshToken));
+            authService.revokeRefreshToken(parseRefreshToken(refreshToken));
         }
 
         ResponseCookie cleanAccess = jwtTokenUtil.getCleanJwtCookie();
@@ -148,8 +149,20 @@ public class AuthController {
     @PostMapping("google")
     @Operation(summary = "API đăng nhập bằng Google (Nhận Google ID Token, Trả về HttpOnly Cookie)")
     public ResponseEntity<ApiResponse<AuthResponse>> loginWithGoogle(@RequestBody Map<String, String> body) throws Exception {
-        UserDetails userDetails = authService.authenticateGoogleToken(body.get("idToken"));
+        String idToken = body == null ? null : body.get("idToken");
+        if (idToken == null || idToken.isBlank()) {
+            throw new CustomApiException("Google ID token không được để trống", HttpStatus.BAD_REQUEST);
+        }
+        UserDetails userDetails = authService.authenticateGoogleToken(idToken);
         return buildAuthenticatedResponse("Đăng nhập bằng Google thành công", userDetails);
+    }
+
+    private UUID parseRefreshToken(String refreshToken) {
+        try {
+            return UUID.fromString(refreshToken);
+        } catch (IllegalArgumentException exception) {
+            throw new CustomApiException("Phiên đăng nhập không hợp lệ hoặc đã hết hạn", HttpStatus.UNAUTHORIZED);
+        }
     }
 
     private ResponseEntity<ApiResponse<AuthResponse>> buildAuthenticatedResponse(String message, UserDetails userDetails) {

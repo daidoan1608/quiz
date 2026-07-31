@@ -9,6 +9,7 @@ import com.fita.vnua.quiz.model.dto.response.CampaignResponse;
 import com.fita.vnua.quiz.model.dto.response.RecipientResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.NotificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,28 +40,28 @@ public class AdminNotificationController {
 
     @PostMapping("/global")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'NOTIFICATION', 'SEND', 'GLOBAL', null)")
-    public ResponseEntity<ApiResponse<Object>> createGlobal(@RequestBody GlobalNotificationRequest request) {
+    public ResponseEntity<ApiResponse<Object>> createGlobal(@Valid @RequestBody GlobalNotificationRequest request) {
         notificationService.sendGlobalNotification(request.getTitle(), request.getMessage());
         return ResponseEntity.ok(ApiResponse.success("Đã gửi thông báo toàn hệ thống", null));
     }
 
     @PostMapping("/personal")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'NOTIFICATION', 'SEND', 'GLOBAL', null) and @adminCapabilityService.hasPermission(principal, 'NOTIFICATION', 'VIEW_RECIPIENTS', 'GLOBAL', null)")
-    public ResponseEntity<ApiResponse<Object>> createPersonal(@RequestBody PersonalNotificationRequest request) {
+    public ResponseEntity<ApiResponse<Object>> createPersonal(@Valid @RequestBody PersonalNotificationRequest request) {
         notificationService.sendPersonalNotification(request.getUserId(), request.getTitle(), request.getMessage());
         return ResponseEntity.ok(ApiResponse.success("Đã gửi thông báo cá nhân", null));
     }
 
     @PostMapping("/subject")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'NOTIFICATION', 'SEND', 'SUBJECT', #request.subjectId)")
-    public ResponseEntity<ApiResponse<Object>> createSubjectManual(@RequestBody SubjectNotificationRequest request) {
+    public ResponseEntity<ApiResponse<Object>> createSubjectManual(@Valid @RequestBody SubjectNotificationRequest request) {
         notificationService.sendSubjectNotification(request.getSubjectId(), request.getSubjectName(), request.getExamId());
         return ResponseEntity.ok(ApiResponse.success("Đã gửi thông báo cho nhóm môn học", null));
     }
 
     @PostMapping("/batch")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'NOTIFICATION', 'SEND', 'GLOBAL', null) and @adminCapabilityService.hasPermission(principal, 'NOTIFICATION', 'VIEW_RECIPIENTS', 'GLOBAL', null)")
-    public ResponseEntity<ApiResponse<Object>> createBatch(@RequestBody BatchNotificationRequest request) {
+    public ResponseEntity<ApiResponse<Object>> createBatch(@Valid @RequestBody BatchNotificationRequest request) {
         notificationService.sendBatchNotification(request.getUserIds(), request.getTitle(), request.getMessage());
         return ResponseEntity.ok(ApiResponse.success("Đã gửi thông báo cho " + request.getUserIds().size() + " người dùng", null));
     }

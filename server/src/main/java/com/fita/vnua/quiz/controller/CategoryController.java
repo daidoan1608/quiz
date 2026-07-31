@@ -6,6 +6,7 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -76,7 +77,7 @@ public class CategoryController {
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'CATEGORY', 'CREATE', 'GLOBAL', null)")
     @PostMapping("admin/categories")
     @Operation(summary = "Thêm danh mục (admin)")
-    public ResponseEntity<ApiResponse<CategoryDto>> addCategory(@RequestBody CategoryDto categoryDto) {
+    public ResponseEntity<ApiResponse<CategoryDto>> addCategory(@Valid @RequestBody CategoryDto categoryDto) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Thêm danh mục thành công",
                 categoryService.addCategory(categoryDto)
@@ -88,7 +89,7 @@ public class CategoryController {
     @Operation(summary = "Cập nhật danh mục (admin)")
     public ResponseEntity<ApiResponse<CategoryDto>> updateCategory(
             @PathVariable("id") Long id,
-            @RequestBody CategoryDto categoryDto
+            @Valid @RequestBody CategoryDto categoryDto
     ) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Cập nhật danh mục thành công",

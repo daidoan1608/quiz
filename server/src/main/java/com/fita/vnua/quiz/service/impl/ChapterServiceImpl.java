@@ -100,8 +100,9 @@ public class ChapterServiceImpl implements ChapterService {
         if (Boolean.TRUE.equals(subject.getDeleted())) {
             throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
+        validateUniqueChapter(chapterDto.getName(), chapterDto.getChapterNumber(), subject.getSubjectId(), null);
         Chapter chapter = new Chapter();
-        chapter.setName(chapterDto.getName());
+        chapter.setName(chapterDto.getName().trim());
         chapter.setChapterNumber(chapterDto.getChapterNumber());
         chapter.setSubject(subject);
         chapter.setDeleted(false);
@@ -120,7 +121,8 @@ public class ChapterServiceImpl implements ChapterService {
             throw new CustomApiException("Không tìm thấy chương", HttpStatus.NOT_FOUND);
         }
 
-        existingChapter.setName(chapterDto.getName());
+        validateUniqueChapter(chapterDto.getName(), chapterDto.getChapterNumber(), existingChapter.getSubject().getSubjectId(), chapterId);
+        existingChapter.setName(chapterDto.getName().trim());
         existingChapter.setChapterNumber(chapterDto.getChapterNumber());
         chapterRepository.save(existingChapter);
         return chapterMapper.toDto(existingChapter);
@@ -164,5 +166,21 @@ public class ChapterServiceImpl implements ChapterService {
                         row -> (Long) row[0],
                         row -> (Long) row[1]
                 ));
+    }
+
+    private void validateUniqueChapter(String name, Integer chapterNumber, Long subjectId, Long currentChapterId) {
+        String normalizedName = name == null ? "" : name.trim();
+        boolean duplicatedName = currentChapterId == null
+                ? chapterRepository.existsByNameIgnoreCaseAndSubjectSubjectIdAndDeletedFalse(normalizedName, subjectId)
+                : chapterRepository.existsByNameIgnoreCaseAndSubjectSubjectIdAndDeletedFalseAndChapterIdNot(normalizedName, subjectId, currentChapterId);
+        if (duplicatedName) {
+            throw new CustomApiException("Tên chương đã tồn tại trong môn học", HttpStatus.CONFLICT);
+        }
+        boolean duplicatedNumber = currentChapterId == null
+                ? chapterRepository.existsByChapterNumberAndSubjectSubjectIdAndDeletedFalse(chapterNumber, subjectId)
+                : chapterRepository.existsByChapterNumberAndSubjectSubjectIdAndDeletedFalseAndChapterIdNot(chapterNumber, subjectId, currentChapterId);
+        if (duplicatedNumber) {
+            throw new CustomApiException("Số thứ tự chương đã tồn tại trong môn học", HttpStatus.CONFLICT);
+        }
     }
 }
