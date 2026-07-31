@@ -8,16 +8,19 @@ import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
+import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.AuthService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,13 +29,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/auth/")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Authentication API", description = "API thao tác liên quan bảo mật của người dùng (Cookie Based)")
 public class AuthController {
 
@@ -41,6 +44,7 @@ public class AuthController {
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService customUserDetailsService;
     private final com.fita.vnua.quiz.service.EmailVerificationService emailVerificationService;
+    private final AuditLogService auditLogService;
 
     @PostMapping("login")
     @Operation(summary = "API đăng nhập (Trả về HttpOnly Cookie)")
@@ -51,24 +55,42 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            auditLogService.record(
+                    "LOGIN_SUCCESS",
+                    "SECURITY",
+                    maskIdentifier(loginRequest.getUsername()),
+                    userDetails instanceof User user ? user : null,
+                    "Đăng nhập thành công"
+            );
             return buildAuthenticatedResponse("Đăng nhập thành công", userDetails);
         } catch (DisabledException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error(
-                            "FORBIDDEN",
-                            "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.",
-                            List.of("Tài khoản đã bị vô hiệu hóa")
-                    ));
+            log.warn("Login rejected for disabled account identifier={}", maskIdentifier(loginRequest.getUsername()));
+            auditLogService.recordSecurityEvent(
+                    "LOGIN_DISABLED",
+                    maskIdentifier(loginRequest.getUsername()),
+                    "Tài khoản bị vô hiệu hóa cố gắng đăng nhập"
+            );
+            throw new CustomApiException(
+                    "FORBIDDEN",
+                    "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.",
+                    HttpStatus.FORBIDDEN
+            );
         } catch (CustomApiException e) {
-            return ResponseEntity.status(e.getStatus())
-                    .body(ApiResponse.error(e.getCode(), e.getMessage(), List.of(e.getMessage())));
+            log.debug("Login rejected for identifier={}: {}", maskIdentifier(loginRequest.getUsername()), e.getCode());
+            auditLogService.recordSecurityEvent(
+                    "LOGIN_REJECTED",
+                    maskIdentifier(loginRequest.getUsername()),
+                    "Đăng nhập bị từ chối: " + e.getCode()
+            );
+            throw e;
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(
-                            "INVALID_CREDENTIALS",
-                            "Tên đăng nhập/email hoặc mật khẩu không đúng",
-                            List.of("Thông tin đăng nhập không hợp lệ")
-                    ));
+            log.warn("Login failed for identifier={}: invalid credentials", maskIdentifier(loginRequest.getUsername()));
+            auditLogService.recordSecurityEvent(
+                    "LOGIN_FAILED",
+                    maskIdentifier(loginRequest.getUsername()),
+                    "Thông tin đăng nhập không hợp lệ"
+            );
+            throw new BadCredentialsException("Tên đăng nhập/email hoặc mật khẩu không đúng", e);
         }
     }
 
@@ -154,6 +176,7 @@ public class AuthController {
             throw new CustomApiException("Google ID token không được để trống", HttpStatus.BAD_REQUEST);
         }
         UserDetails userDetails = authService.authenticateGoogleToken(idToken);
+        auditLogService.recordSecurityEvent("GOOGLE_LOGIN_SUCCESS", "google", "Đăng nhập bằng Google thành công");
         return buildAuthenticatedResponse("Đăng nhập bằng Google thành công", userDetails);
     }
 
@@ -176,5 +199,24 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(ApiResponse.success(message, authResponse));
+    }
+
+    private String maskIdentifier(String identifier) {
+        if (identifier == null || identifier.isBlank()) {
+            return "<blank>";
+        }
+        String trimmed = identifier.trim();
+        int atIndex = trimmed.indexOf('@');
+        if (atIndex > 0) {
+            return maskText(trimmed.substring(0, atIndex)) + trimmed.substring(atIndex);
+        }
+        return maskText(trimmed);
+    }
+
+    private String maskText(String value) {
+        if (value.length() <= 2) {
+            return "*".repeat(value.length());
+        }
+        return value.charAt(0) + "*".repeat(Math.min(value.length() - 2, 6)) + value.charAt(value.length() - 1);
     }
 }

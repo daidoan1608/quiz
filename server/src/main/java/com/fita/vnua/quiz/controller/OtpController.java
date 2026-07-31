@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/otp")
 @Tag(name="OTP API", description = "API cho các chức năng liên quan đến mã OTP")
@@ -24,25 +22,16 @@ public class OtpController {
     @PostMapping("/send")
     @Operation(summary = "Gửi mã OTP đến email")
     public ResponseEntity<ApiResponse<Void>> sendOtp(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
-        ApiResponse<Void> response = otpService.generateOtp(forgotPasswordRequest.getEmail());
-        if ("success".equals(response.getStatus())) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.badRequest().body(response);
-        }
+        otpService.generateOtp(forgotPasswordRequest.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("Mã OTP đã được gửi đến email.", null));
     }
 
 
     @PostMapping("/verify")
     @Operation(summary = "Xác thực mã OTP")
     public ResponseEntity<ApiResponse<String>> verifyOtp(@Valid @RequestBody VerifyOtpRequest verifyOtpRequest) {
-        ApiResponse<String> response = otpService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
-
-        if ("success".equals(response.getStatus())) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.badRequest().body(response);
-        }
+        String resetToken = otpService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
+        return ResponseEntity.ok(ApiResponse.success("Xác thực OTP thành công", resetToken));
     }
 
 
@@ -50,13 +39,8 @@ public class OtpController {
     @PostMapping("/reset")
     @Operation(summary = "Đặt lại mật khẩu")
     public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody TokenAndNewPasswordRequest tokenAndNewPasswordRequest) {
-        ApiResponse<Void> response = otpService.resetPassword(tokenAndNewPasswordRequest.getResetToken(), tokenAndNewPasswordRequest.getNewPassword());
-
-        if ("success".equals(response.getStatus())) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.badRequest().body(response);
-        }
+        otpService.resetPassword(tokenAndNewPasswordRequest.getResetToken(), tokenAndNewPasswordRequest.getNewPassword());
+        return ResponseEntity.ok(ApiResponse.success("Đặt lại mật khẩu thành công.", null));
     }
 
 }

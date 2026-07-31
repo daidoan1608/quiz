@@ -42,35 +42,4 @@ public class ApiResponse<T> {
         return success(message, emptyData);
     }
 
-    public static <T> ApiResponse<T> notFound(String message, String error) {
-        return error("NOT_FOUND", message, error);
-    }
-
-    public static <T> ApiResponse<T> error(String message, List<String> errors) {
-        return error("ERROR", message, errors, null);
-    }
-
-    public static <T> ApiResponse<T> error(String message, String error) {
-        return error("ERROR", message, List.of(error), null);
-    }
-
-    public static <T> ApiResponse<T> error(String code, String message, String error) {
-        return error(code, message, List.of(error), null);
-    }
-
-    public static <T> ApiResponse<T> error(String code, String message, List<String> errors) {
-        return error(code, message, errors, null);
-    }
-
-    public static <T> ApiResponse<T> error(String code, String message, List<String> errors, String path) {
-        return ApiResponse.<T>builder()
-                .status("error")
-                .code(code)
-                .message(message)
-                .data(null)
-                .errors(errors)
-                .path(path)
-                .timestamp(Instant.now())
-                .build();
-    }
 }

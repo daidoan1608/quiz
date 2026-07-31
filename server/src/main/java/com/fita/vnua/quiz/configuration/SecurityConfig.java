@@ -5,6 +5,8 @@ import com.fita.vnua.quiz.security.CustomPermissionEvaluator;
 import com.fita.vnua.quiz.security.JwtAccessDeniedHandler;
 import com.fita.vnua.quiz.security.JwtAuthenticationEntryPoint;
 import com.fita.vnua.quiz.security.JwtAuthenticationFilter;
+import com.fita.vnua.quiz.security.RateLimitFilter;
+import com.fita.vnua.quiz.security.TraceIdFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +55,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final TraceIdFilter traceIdFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final SecurityProperties securityProperties;
 
     // Inject danh sách domain từ application.properties
@@ -111,6 +115,8 @@ public class SecurityConfig {
                         .accessDeniedHandler(jwtAccessDeniedHandler)
                 )
                 .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
+                .addFilterBefore(traceIdFilter, CsrfFilter.class)
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

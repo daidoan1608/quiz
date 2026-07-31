@@ -1,14 +1,16 @@
 package com.fita.vnua.quiz.service.impl;
 
-import com.fita.vnua.quiz.model.dto.response.ApiResponse;
+import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.entity.OtpCode;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.OtpCodeRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.security.OtpGenerator;
+import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.OtpService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -29,13 +31,15 @@ public class OtpServiceImpl implements OtpService {
 
     private final PasswordEncoder passwordEncoder;
     private final OtpGenerator otpGenerator;
+    private final AuditLogService auditLogService;
 
     // Gửi OTP
     @Transactional
-    public ApiResponse<Void> generateOtp(String email) {
+    public void generateOtp(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
-            return ApiResponse.error("Gửi OTP thất bại", "Email không tồn tại.");
+            auditLogService.recordSecurityEvent("OTP_SEND_FAILED", maskEmail(email), "Email không tồn tại");
+            throw new CustomApiException("OTP_EMAIL_NOT_FOUND", "Email không tồn tại", HttpStatus.BAD_REQUEST);
         }
 
         UUID userId = user.get().getUserId();
@@ -56,40 +60,44 @@ public class OtpServiceImpl implements OtpService {
 
         // Gửi email
         emailService.sendOtpEmail(email, otp);
-
-        return ApiResponse.success("Mã OTP đã được gửi đến email.", null);
+        auditLogService.recordSecurityEvent("OTP_SENT", maskEmail(email), "Đã gửi OTP đặt lại mật khẩu");
     }
 
 
     // Xác minh OTP
     @Transactional
-    public ApiResponse<String> verifyOtp(String email, String otp) {
+    public String verifyOtp(String email, String otp) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
-            return ApiResponse.error("Xác thực OTP thất bại", "Email không tồn tại.");
+            auditLogService.recordSecurityEvent("OTP_VERIFY_FAILED", maskEmail(email), "Email không tồn tại");
+            throw new CustomApiException("OTP_EMAIL_NOT_FOUND", "Email không tồn tại", HttpStatus.BAD_REQUEST);
         }
 
         Optional<OtpCode> otpCodeOpt = otpCodeRepository.findByUser(user.get());
         if (otpCodeOpt.isEmpty()) {
-            return ApiResponse.error("Xác thực OTP thất bại", "Không tìm thấy mã OTP.");
+            auditLogService.recordSecurityEvent("OTP_VERIFY_FAILED", maskEmail(email), "Không tìm thấy mã OTP");
+            throw new CustomApiException("OTP_NOT_FOUND", "Không tìm thấy mã OTP", HttpStatus.BAD_REQUEST);
         }
 
         OtpCode otpCode = otpCodeOpt.get();
 
         if (otpCode.getOtpExpiry().isBefore(Instant.now())) {
             otpCodeRepository.deleteByUserId(user.get().getUserId());
-            return ApiResponse.error("Xác thực OTP thất bại", "Mã OTP đã hết hạn.");
+            auditLogService.recordSecurityEvent("OTP_EXPIRED", maskEmail(email), "OTP đã hết hạn");
+            throw new CustomApiException("OTP_EXPIRED", "Mã OTP đã hết hạn", HttpStatus.BAD_REQUEST);
         }
 
         if (otpCode.getFailedAttempts() >= MAX_FAILED_ATTEMPTS) {
             otpCodeRepository.deleteByUserId(user.get().getUserId());
-            return ApiResponse.error("Xác thực OTP thất bại", "Mã OTP đã bị khóa do nhập sai quá nhiều lần.");
+            auditLogService.recordSecurityEvent("OTP_LOCKED", maskEmail(email), "OTP bị khóa do nhập sai quá nhiều lần");
+            throw new CustomApiException("OTP_LOCKED", "Mã OTP đã bị khóa do nhập sai quá nhiều lần", HttpStatus.BAD_REQUEST);
         }
 
         if (!passwordEncoder.matches(otp, otpCode.getOtp())) {
             otpCode.setFailedAttempts(otpCode.getFailedAttempts() + 1);
             otpCodeRepository.save(otpCode);
-            return ApiResponse.error("Xác thực OTP thất bại", "Mã OTP không chính xác.");
+            auditLogService.recordSecurityEvent("OTP_VERIFY_FAILED", maskEmail(email), "OTP không chính xác");
+            throw new CustomApiException("INVALID_OTP", "Mã OTP không chính xác", HttpStatus.BAD_REQUEST);
         }
 
         String resetToken = UUID.randomUUID().toString();
@@ -97,22 +105,25 @@ public class OtpServiceImpl implements OtpService {
         otpCode.setFailedAttempts(0);
         otpCode.setResetTokenExpiry(Instant.now().plus(15, ChronoUnit.MINUTES));
         otpCodeRepository.save(otpCode);
+        auditLogService.recordSecurityEvent("OTP_VERIFIED", maskEmail(email), "Xác thực OTP thành công");
 
-        return ApiResponse.success("Xác thực OTP thành công", resetToken);
+        return resetToken;
     }
 
 
     @Transactional
-    public ApiResponse<Void> resetPassword(String resetToken, String newPassword) {
+    public void resetPassword(String resetToken, String newPassword) {
         if (!StringUtils.hasText(resetToken)) {
-            return ApiResponse.error("Đặt lại mật khẩu thất bại", "Token không hợp lệ.");
+            auditLogService.recordSecurityEvent("PASSWORD_RESET_FAILED", "reset-token", "Token không hợp lệ");
+            throw new CustomApiException("INVALID_RESET_TOKEN", "Token không hợp lệ", HttpStatus.BAD_REQUEST);
         }
 
         Optional<OtpCode> otpCodeOpt = otpCodeRepository.findActiveResetTokens(Instant.now()).stream()
                 .filter(code -> code.getResetToken() != null && passwordEncoder.matches(resetToken, code.getResetToken()))
                 .findFirst();
         if (otpCodeOpt.isEmpty()) {
-            return ApiResponse.error("Đặt lại mật khẩu thất bại", "Token không hợp lệ.");
+            auditLogService.recordSecurityEvent("PASSWORD_RESET_FAILED", "reset-token", "Token không hợp lệ");
+            throw new CustomApiException("INVALID_RESET_TOKEN", "Token không hợp lệ", HttpStatus.BAD_REQUEST);
         }
 
         OtpCode otpCode = otpCodeOpt.get();
@@ -120,7 +131,8 @@ public class OtpServiceImpl implements OtpService {
         if (otpCode.getResetTokenExpiry() == null ||
                 otpCode.getResetTokenExpiry().isBefore(Instant.now())) {
             otpCodeRepository.deleteByUserId(otpCode.getUser().getUserId());
-            return ApiResponse.error("Đặt lại mật khẩu thất bại", "Token đã hết hạn.");
+            auditLogService.recordSecurityEvent("PASSWORD_RESET_FAILED", maskEmail(otpCode.getUser().getEmail()), "Token đã hết hạn");
+            throw new CustomApiException("RESET_TOKEN_EXPIRED", "Token đã hết hạn", HttpStatus.BAD_REQUEST);
         }
 
         User user = otpCode.getUser();
@@ -129,8 +141,26 @@ public class OtpServiceImpl implements OtpService {
 
         // Xoá OTP + resetToken sau khi dùng
         otpCodeRepository.deleteByUserId(user.getUserId());
+        auditLogService.recordSecurityEvent("PASSWORD_RESET_SUCCESS", maskEmail(user.getEmail()), "Đặt lại mật khẩu thành công");
+    }
 
-        return ApiResponse.success("Đặt lại mật khẩu thành công.", null);
+    private String maskEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            return "<blank>";
+        }
+        String trimmed = email.trim();
+        int atIndex = trimmed.indexOf('@');
+        if (atIndex <= 0) {
+            return maskText(trimmed);
+        }
+        return maskText(trimmed.substring(0, atIndex)) + trimmed.substring(atIndex);
+    }
+
+    private String maskText(String value) {
+        if (value.length() <= 2) {
+            return "*".repeat(value.length());
+        }
+        return value.charAt(0) + "*".repeat(Math.min(value.length() - 2, 6)) + value.charAt(value.length() - 1);
     }
 
 }

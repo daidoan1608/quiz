@@ -6,13 +6,17 @@ import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.AuditLogRepository;
 import com.fita.vnua.quiz.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuditLogServiceImpl implements AuditLogService {
+    private static final int ENTITY_ID_MAX_LENGTH = 64;
+
     private final AuditLogRepository auditLogRepository;
 
     @Override
@@ -30,6 +34,20 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
+    public void recordSecurityEvent(String action, String entityId, String description) {
+        try {
+            AuditLog log = new AuditLog();
+            log.setAction(action);
+            log.setEntityType("SECURITY");
+            log.setEntityId(truncate(entityId, ENTITY_ID_MAX_LENGTH));
+            log.setDescription(description);
+            auditLogRepository.save(log);
+        } catch (RuntimeException ex) {
+            log.warn("Failed to record security audit event action={}", action, ex);
+        }
+    }
+
+    @Override
     public List<AuditLogResponse> latest() {
         return auditLogRepository.findTop200ByOrderByCreatedAtDesc().stream()
                 .map(log -> new AuditLogResponse(
@@ -42,5 +60,15 @@ public class AuditLogServiceImpl implements AuditLogService {
                         log.getDescription(),
                         log.getCreatedAt()))
                 .toList();
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null) {
+            return "unknown";
+        }
+        if (value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength);
     }
 }

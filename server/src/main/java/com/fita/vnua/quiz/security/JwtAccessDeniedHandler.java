@@ -2,6 +2,7 @@ package com.fita.vnua.quiz.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fita.vnua.quiz.exception.ProblemDetailsFactory;
+import com.fita.vnua.quiz.service.AuditLogService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ import java.util.List;
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
     private final ObjectMapper objectMapper;
     private final ProblemDetailsFactory problemDetailsFactory;
+    private final AuditLogService auditLogService;
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException)
@@ -28,10 +30,11 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
+        auditLogService.recordSecurityEvent("ACCESS_DENIED", request.getRequestURI(), "Request bị từ chối quyền truy cập");
         ProblemDetail body = problemDetailsFactory.create(
                 HttpStatus.FORBIDDEN,
                 "FORBIDDEN",
-                "Bạn không có quyền thực hiện thao tác này",
+                "Không có quyền truy cập",
                 "Bạn không có quyền thực hiện thao tác này",
                 List.of("Quyền truy cập bị từ chối"),
                 request

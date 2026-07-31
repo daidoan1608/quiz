@@ -2,7 +2,7 @@ package com.fita.vnua.quiz.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fita.vnua.quiz.exception.CustomApiException;
-import com.fita.vnua.quiz.model.dto.response.ApiResponse;
+import com.fita.vnua.quiz.exception.ProblemDetailsFactory;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService userDetailsService;
     private final ObjectMapper objectMapper;
+    private final ProblemDetailsFactory problemDetailsFactory;
 
     @Override
     protected void doFilterInternal(
@@ -62,20 +66,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (CustomApiException ex) {
-            log.debug("JWT authentication failed: {}", ex.getMessage());
+            log.debug("JWT authentication failed on {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getCode());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
+            response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
-            ApiResponse<Object> body = ApiResponse.error(
-                    "UNAUTHORIZED",
+            ProblemDetail body = problemDetailsFactory.create(
+                    HttpStatus.UNAUTHORIZED,
+                    ex.getCode() == null ? "UNAUTHORIZED" : ex.getCode(),
+                    "Phiên đăng nhập không hợp lệ",
                     "Phiên đăng nhập không hợp lệ hoặc đã hết hạn",
                     List.of("Vui lòng đăng nhập lại"),
-                    request.getRequestURI()
+                    request
             );
             response.getWriter().write(objectMapper.writeValueAsString(body));
             return;
         } catch (Exception e) {
-            log.warn("Cannot set user authentication", e);
+            log.warn("Cannot set user authentication on {} {}", request.getMethod(), request.getRequestURI(), e);
         }
 
         filterChain.doFilter(request, response);

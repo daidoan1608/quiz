@@ -1,5 +1,8 @@
 package com.fita.vnua.quiz.exception;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -10,16 +13,24 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -89,12 +100,19 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .toList();
+        Map<String, List<String>> fieldErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        org.springframework.validation.FieldError::getField,
+                        Collectors.mapping(error -> error.getDefaultMessage() == null ? "Không hợp lệ" : error.getDefaultMessage(), Collectors.toList())
+                ));
 
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 "VALIDATION_ERROR",
                 "Dữ liệu gửi lên không hợp lệ",
-                errors,
+                fieldErrors.isEmpty() ? errors : fieldErrors,
                 request
         );
     }
@@ -105,21 +123,121 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .toList();
+        Map<String, List<String>> fieldErrors = ex.getConstraintViolations()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        violation -> violation.getPropertyPath().toString(),
+                        Collectors.mapping(jakarta.validation.ConstraintViolation::getMessage, Collectors.toList())
+                ));
 
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 "VALIDATION_ERROR",
                 "Dữ liệu gửi lên không hợp lệ",
-                errors,
+                fieldErrors.isEmpty() ? errors : fieldErrors,
+                request
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "INVALID_REQUEST_PARAMETER",
+                "Tham số request không đúng định dạng",
+                Map.of(ex.getName(), List.of("phải là " + getExpectedTypeName(ex.getRequiredType()))),
+                request
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ProblemDetail> handleMissingServletRequestParameter(
+            MissingServletRequestParameterException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "MISSING_REQUEST_PARAMETER",
+                "Thiếu tham số bắt buộc",
+                Map.of(ex.getParameterName(), List.of("là bắt buộc")),
+                request
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ProblemDetail> handleMissingServletRequestPart(
+            MissingServletRequestPartException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "MISSING_REQUEST_PART",
+                "Thiếu dữ liệu multipart bắt buộc",
+                Map.of(ex.getRequestPartName(), List.of("là bắt buộc")),
+                request
+        );
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ProblemDetail> handleMaxUploadSizeExceeded(
+            MaxUploadSizeExceededException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "PAYLOAD_TOO_LARGE",
+                "File tải lên vượt quá dung lượng cho phép",
+                List.of("Vui lòng chọn file có dung lượng nhỏ hơn"),
+                request
+        );
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ProblemDetail> handleMediaTypeNotSupported(
+            HttpMediaTypeNotSupportedException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "UNSUPPORTED_MEDIA_TYPE",
+                "Content-Type của request không được hỗ trợ",
+                List.of("Content-Type không hợp lệ: " + ex.getContentType()),
                 request
         );
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ProblemDetail> handleMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        Throwable cause = ex.getMostSpecificCause();
+        if (cause instanceof InvalidFormatException invalidFormatException) {
+            return buildErrorResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "INVALID_REQUEST_BODY",
+                    "Dữ liệu gửi lên không đúng định dạng",
+                    formatInvalidValueError(invalidFormatException),
+                    request
+            );
+        }
+        if (cause instanceof MismatchedInputException mismatchedInputException) {
+            String fieldPath = getJsonFieldPath(mismatchedInputException);
+            String error = fieldPath.isBlank()
+                    ? "Body request không đúng cấu trúc dữ liệu yêu cầu"
+                    : fieldPath + " không đúng kiểu dữ liệu yêu cầu";
+            return buildErrorResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "INVALID_REQUEST_BODY",
+                    "Dữ liệu gửi lên không đúng định dạng",
+                    fieldPath.isBlank() ? List.of(error) : Map.of(fieldPath, List.of("không đúng kiểu dữ liệu yêu cầu")),
+                    request
+            );
+        }
+
         return buildErrorResponse(
                 HttpStatus.BAD_REQUEST,
-                "MALFORMED_REQUEST",
+                "INVALID_REQUEST_BODY",
                 "Dữ liệu gửi lên không đúng định dạng",
                 List.of("Vui lòng kiểm tra JSON/body của request"),
                 request
@@ -157,13 +275,17 @@ public class GlobalExceptionHandler {
             HttpStatusCode status,
             String code,
             String message,
-            List<String> errors,
+            Object errors,
             HttpServletRequest request
     ) {
         return ResponseEntity
                 .status(status)
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
-                .body(problemDetailsFactory.create(status, code, message, message, errors, request));
+                .body(problemDetailsFactory.create(status, code, resolveTitle(code, status), message, errors, request));
+    }
+
+    private String resolveTitle(String code, HttpStatusCode status) {
+        return ErrorCode.fromCode(code, status).title();
     }
 
     private String resolveCode(HttpStatusCode status) {
@@ -174,5 +296,42 @@ public class GlobalExceptionHandler {
             return "INTERNAL_SERVER_ERROR";
         }
         return "ERROR";
+    }
+
+    private Object formatInvalidValueError(InvalidFormatException ex) {
+        String fieldPath = getJsonFieldPath(ex);
+        String expectedType = getExpectedTypeName(ex.getTargetType());
+        if (fieldPath.isBlank()) {
+            return List.of("Giá trị không đúng kiểu dữ liệu yêu cầu");
+        }
+        return Map.of(fieldPath, List.of("phải là " + expectedType));
+    }
+
+    private String getJsonFieldPath(JsonMappingException ex) {
+        return ex.getPath()
+                .stream()
+                .map(JsonMappingException.Reference::getFieldName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("."));
+    }
+
+    private String getExpectedTypeName(Class<?> targetType) {
+        if (targetType == null) {
+            return "đúng kiểu dữ liệu";
+        }
+        if (Long.class.equals(targetType) || Long.TYPE.equals(targetType)
+                || Integer.class.equals(targetType) || Integer.TYPE.equals(targetType)
+                || Short.class.equals(targetType) || Short.TYPE.equals(targetType)
+                || Byte.class.equals(targetType) || Byte.TYPE.equals(targetType)) {
+            return "số nguyên";
+        }
+        if (Double.class.equals(targetType) || Double.TYPE.equals(targetType)
+                || Float.class.equals(targetType) || Float.TYPE.equals(targetType)) {
+            return "số";
+        }
+        if (Boolean.class.equals(targetType) || Boolean.TYPE.equals(targetType)) {
+            return "true/false";
+        }
+        return targetType.getSimpleName();
     }
 }

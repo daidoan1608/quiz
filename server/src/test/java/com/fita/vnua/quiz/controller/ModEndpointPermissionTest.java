@@ -3,6 +3,7 @@ package com.fita.vnua.quiz.controller;
 import com.fita.vnua.quiz.model.enums.UserRole;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.ExamDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
@@ -115,7 +116,7 @@ class ModEndpointPermissionTest {
                         .with(authentication(authenticationFor(mod)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new QuestionDto())))
+                        .content(objectMapper.writeValueAsString(validQuestionDto())))
                 .andExpect(status().isOk());
 
         verify(questionService).update(eq(QUESTION_ID), any(QuestionDto.class));
@@ -132,7 +133,7 @@ class ModEndpointPermissionTest {
                         .with(authentication(authenticationFor(mod)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new QuestionDto())))
+                        .content(objectMapper.writeValueAsString(validQuestionDto())))
                 .andExpect(status().isForbidden());
 
         verify(questionService, never()).update(any(), any());
@@ -154,7 +155,7 @@ class ModEndpointPermissionTest {
                         .with(authentication(authenticationFor(mod)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ExamDto())))
+                        .content(objectMapper.writeValueAsString(validExamDto())))
                 .andExpect(status().isOk());
 
         verify(examService).updateExam(eq(EXAM_ID), any(ExamDto.class));
@@ -171,7 +172,7 @@ class ModEndpointPermissionTest {
                         .with(authentication(authenticationFor(mod)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ExamDto())))
+                        .content(objectMapper.writeValueAsString(validExamDto())))
                 .andExpect(status().isForbidden());
 
         verify(examService, never()).updateExam(any(), any());
@@ -325,6 +326,32 @@ class ModEndpointPermissionTest {
         subject.setCategoryId(3L);
         subject.setName("Updated subject");
         return subject;
+    }
+
+    private QuestionDto validQuestionDto() {
+        AnswerDto firstAnswer = new AnswerDto();
+        firstAnswer.setContent("Answer A");
+        firstAnswer.setIsCorrect(true);
+
+        AnswerDto secondAnswer = new AnswerDto();
+        secondAnswer.setContent("Answer B");
+        secondAnswer.setIsCorrect(false);
+
+        QuestionDto question = new QuestionDto();
+        question.setContent("Updated question");
+        question.setDifficulty("EASY");
+        question.setChapterId(5L);
+        question.setQuestionType("SINGLE_CHOICE");
+        question.setAnswers(List.of(firstAnswer, secondAnswer));
+        return question;
+    }
+
+    private ExamDto validExamDto() {
+        ExamDto exam = new ExamDto();
+        exam.setSubjectId(SUBJECT_ID);
+        exam.setTitle("Updated exam");
+        exam.setDuration(30);
+        return exam;
     }
 
     private UsernamePasswordAuthenticationToken authenticationFor(User user) {
