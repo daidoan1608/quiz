@@ -17,6 +17,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.util.StringUtils;
 
 import java.security.Principal;
 import java.util.Map;
@@ -48,6 +49,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .addInterceptors(new CookieJwtHandshakeInterceptor(jwtTokenUtil, customUserDetailsService))
                 .setHandshakeHandler(new UserIdHandshakeHandler())
                 .withSockJS();
+
+        registry.addEndpoint("/ws-native")
+                .setAllowedOriginPatterns(allowedOrigins)
+                .addInterceptors(new CookieJwtHandshakeInterceptor(jwtTokenUtil, customUserDetailsService))
+                .setHandshakeHandler(new UserIdHandshakeHandler());
     }
 
     private static class CookieJwtHandshakeInterceptor implements HandshakeInterceptor {
@@ -67,7 +73,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 Map<String, Object> attributes
         ) {
             if (request instanceof ServletServerHttpRequest servletRequest) {
-                String token = jwtTokenUtil.getJwtFromCookies(servletRequest.getServletRequest());
+                String token = resolveToken(servletRequest);
                 if (token == null) {
                     return false;
                 }
@@ -84,6 +90,25 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 }
             }
             return false;
+        }
+
+        private String resolveToken(ServletServerHttpRequest request) {
+            String token = jwtTokenUtil.getJwtFromCookies(request.getServletRequest());
+            if (StringUtils.hasText(token)) {
+                return token;
+            }
+
+            String queryToken = request.getServletRequest().getParameter("accessToken");
+            if (StringUtils.hasText(queryToken)) {
+                return queryToken;
+            }
+
+            String authHeader = request.getServletRequest().getHeader("Authorization");
+            if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
+                return authHeader.substring(7);
+            }
+
+            return null;
         }
 
         @Override

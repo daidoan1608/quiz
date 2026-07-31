@@ -1,19 +1,23 @@
 import { authAxios, publicAxios } from "../axiosConfig";
-import { getResponseData } from './apiResponse';
+import { getResponseData, normalizeList } from './apiResponse';
 
 export const subjectApi = {
   getPublicSubjects() {
-    return publicAxios.get("/public/subjects").then((response) => getResponseData(response, []));
+    return publicAxios
+      .get("/public/subjects")
+      .then((response) => normalizeList(getResponseData(response, [])));
   },
 
   getRandomPublicSubjects(limit = 4) {
     return publicAxios
       .get("/public/subjects/random", { params: { limit } })
-      .then((response) => getResponseData(response, []));
+      .then((response) => normalizeList(getResponseData(response, [])));
   },
 
   getPublicCategories() {
-    return publicAxios.get("/public/categories").then((response) => getResponseData(response, []));
+    return publicAxios
+      .get("/public/categories")
+      .then((response) => normalizeList(getResponseData(response, [])));
   },
 
   getPublicSubject(subjectId) {
@@ -24,6 +28,6 @@ export const subjectApi = {
     if (!userId) return Promise.resolve([]);
     return authAxios
       .get(`users/${userId}/exam-attempts/in-progress`)
-      .then((response) => getResponseData(response, []));
+      .then((response) => normalizeList(getResponseData(response, [])));
   },
 };

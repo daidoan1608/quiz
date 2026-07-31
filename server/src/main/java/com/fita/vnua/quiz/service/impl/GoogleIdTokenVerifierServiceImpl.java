@@ -17,8 +17,8 @@ import java.util.Date;
 @Service
 public class GoogleIdTokenVerifierServiceImpl implements GoogleIdTokenVerifierService {
 
-    @Value("${google.client.id}")
-    private String clientId;
+    @Value("${google.client.ids:${google.client.id}}")
+    private String clientIds;
 
     @Value("${google.jwks-url}")
     private String googleJwksUrl;
@@ -41,8 +41,13 @@ public class GoogleIdTokenVerifierServiceImpl implements GoogleIdTokenVerifierSe
             JWSVerifier verifier = new RSASSAVerifier(publicKey);
             if (!signedJWT.verify(verifier)) return false;
 
-            // verify audience = client id
-            if (!signedJWT.getJWTClaimsSet().getAudience().contains(clientId)) return false;
+            // verify audience is one of configured Google OAuth client IDs
+            java.util.List<String> audiences = signedJWT.getJWTClaimsSet().getAudience();
+            boolean audienceAllowed = java.util.Arrays.stream(clientIds.split(","))
+                    .map(String::trim)
+                    .filter(id -> !id.isBlank())
+                    .anyMatch(audiences::contains);
+            if (!audienceAllowed) return false;
 
             // verify expiry
             if (signedJWT.getJWTClaimsSet().getExpirationTime().before(new Date())) return false;

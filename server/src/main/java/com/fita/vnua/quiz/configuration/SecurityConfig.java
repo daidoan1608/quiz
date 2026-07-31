@@ -74,6 +74,7 @@ public class SecurityConfig {
                     csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
                     csrf.csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler());
                     csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/ws/**"));
+                    csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/ws-native/**"));
                     securityProperties.getCsrfIgnoredAntMatchers()
                             .forEach(pattern -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher(pattern)));
                 })
@@ -91,6 +92,7 @@ public class SecurityConfig {
                                 "/api/v1/otp/**",
                                 "/api/v1/public/**",
                                 "/ws/**",
+                                "/ws-native/**",
                                 "/avatars/**", // Cho phép xem ảnh
                                 "/questions/**" // Cho phép xem ảnh câu hỏi
                         ).permitAll()
