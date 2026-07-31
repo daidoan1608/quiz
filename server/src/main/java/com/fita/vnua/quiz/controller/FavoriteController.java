@@ -7,6 +7,7 @@ import com.fita.vnua.quiz.service.AuthorizationService;
 import com.fita.vnua.quiz.service.FavoriteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +28,7 @@ public class FavoriteController {
     @PostMapping("/favorites")
     @Operation(summary = "Thêm môn học yêu thích")
     public ResponseEntity<ApiResponse<FavoriteDto>> createFavorite(
-            @RequestBody FavoriteDto favoriteDto,
+            @Valid @RequestBody FavoriteDto favoriteDto,
             @AuthenticationPrincipal User currentUser
     ) {
         User authenticatedUser = authorizationService.requireAuthenticated(currentUser);
@@ -38,7 +39,7 @@ public class FavoriteController {
     @DeleteMapping("/favorites")
     @Operation(summary = "Xóa môn học yêu thích")
     public ResponseEntity<ApiResponse<FavoriteDto>> deleteFavorite(
-            @RequestBody FavoriteDto favoriteDto,
+            @Valid @RequestBody FavoriteDto favoriteDto,
             @AuthenticationPrincipal User currentUser
     ) {
         User authenticatedUser = authorizationService.requireAuthenticated(currentUser);

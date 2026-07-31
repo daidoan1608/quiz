@@ -1,10 +1,16 @@
 const getServerMessage = (error) => {
   const responseData = error?.response?.data;
+  if (typeof responseData?.detail === "string" && responseData.detail.trim()) {
+    return responseData.detail;
+  }
   if (typeof responseData?.message === "string" && responseData.message.trim()) {
     return responseData.message;
   }
   if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
     return responseData.errors[0];
+  }
+  if (typeof responseData?.title === "string" && responseData.title.trim()) {
+    return responseData.title;
   }
   if (typeof responseData === "string" && responseData.trim()) {
     return responseData;
@@ -26,16 +32,16 @@ export const getApiErrorMessage = (
     return serverMessage || fallback;
   }
   if (status === 401) {
-    return "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!";
+    return serverMessage || "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!";
   }
   if (status === 403) {
-    return "Bạn không có quyền thực hiện thao tác này!";
+    return serverMessage || "Bạn không có quyền thực hiện thao tác này!";
   }
   if (status === 404) {
     return serverMessage || "Không tìm thấy dữ liệu.";
   }
   if (status === 405) {
-    return "Phương thức request không được hỗ trợ.";
+    return serverMessage || "Phương thức request không được hỗ trợ.";
   }
   if (status >= 500) {
     return "Hệ thống đang gặp sự cố, vui lòng thử lại sau!";

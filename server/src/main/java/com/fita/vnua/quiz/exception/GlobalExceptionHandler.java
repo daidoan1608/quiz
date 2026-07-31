@@ -1,15 +1,19 @@
 package com.fita.vnua.quiz.exception;
 
-import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,15 +23,18 @@ import java.util.List;
 
 @RestControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
+    private final ProblemDetailsFactory problemDetailsFactory;
+
     @ExceptionHandler(CustomApiException.class)
-    public ResponseEntity<ApiResponse<Object>> handleCustomApiException(CustomApiException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleCustomApiException(CustomApiException ex, HttpServletRequest request) {
         return buildErrorResponse(ex.getStatus(), ex.getCode(), ex.getMessage(), List.of(ex.getMessage()), request);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiResponse<Object>> handleEntityNotFoundException(EntityNotFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleEntityNotFoundException(EntityNotFoundException ex, HttpServletRequest request) {
         return buildErrorResponse(
                 HttpStatus.NOT_FOUND,
                 "NOT_FOUND",
@@ -38,23 +45,23 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Object>> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), List.of(ex.getMessage()), request);
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ApiResponse<Object>> handleIllegalStateException(IllegalStateException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleIllegalStateException(IllegalStateException ex, HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), List.of(ex.getMessage()), request);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiResponse<Object>> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
         String message = ex.getReason() != null ? ex.getReason() : ex.getMessage();
         return buildErrorResponse(ex.getStatusCode(), resolveCode(ex.getStatusCode()), message, List.of(message), request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<Object>> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
         return buildErrorResponse(
                 HttpStatus.FORBIDDEN,
                 "FORBIDDEN",
@@ -65,7 +72,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiResponse<Object>> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
         return buildErrorResponse(
                 HttpStatus.UNAUTHORIZED,
                 "INVALID_CREDENTIALS",
@@ -76,7 +83,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Object>> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -92,8 +99,35 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ProblemDetail> handleConstraintViolationException(ConstraintViolationException ex, HttpServletRequest request) {
+        List<String> errors = ex.getConstraintViolations()
+                .stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .toList();
+
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_ERROR",
+                "Dữ liệu gửi lên không hợp lệ",
+                errors,
+                request
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "MALFORMED_REQUEST",
+                "Dữ liệu gửi lên không đúng định dạng",
+                List.of("Vui lòng kiểm tra JSON/body của request"),
+                request
+        );
+    }
+
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiResponse<Object>> handleMethodNotSupported(
+    public ResponseEntity<ProblemDetail> handleMethodNotSupported(
             HttpRequestMethodNotSupportedException ex,
             HttpServletRequest request
     ) {
@@ -108,7 +142,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleGeneralException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled backend exception", ex);
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -119,7 +153,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    private ResponseEntity<ApiResponse<Object>> buildErrorResponse(
+    private ResponseEntity<ProblemDetail> buildErrorResponse(
             HttpStatusCode status,
             String code,
             String message,
@@ -128,7 +162,8 @@ public class GlobalExceptionHandler {
     ) {
         return ResponseEntity
                 .status(status)
-                .body(ApiResponse.error(code, message, errors, request.getRequestURI()));
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problemDetailsFactory.create(status, code, message, message, errors, request));
     }
 
     private String resolveCode(HttpStatusCode status) {

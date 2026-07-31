@@ -151,6 +151,9 @@ public class AdminGroupServiceImpl implements AdminGroupService {
         AdminGroupPermission permission = new AdminGroupPermission();
         permission.setGroup(group);
         permission.setScopeType(normalizeCode(dto.getScopeType()));
+        if (!permission.getScopeType().equals("GLOBAL") && dto.getScopeId() == null) {
+            throw new CustomApiException("Quyền theo phạm vi cụ thể cần có scopeId", HttpStatus.BAD_REQUEST);
+        }
         permission.setScopeId(permission.getScopeType().equals("GLOBAL") ? null : dto.getScopeId());
         permission.setResource(normalizeCode(dto.getResource()));
         permission.setAction(normalizeCode(dto.getAction()));

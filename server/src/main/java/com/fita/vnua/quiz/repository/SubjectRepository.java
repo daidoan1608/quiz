@@ -24,6 +24,10 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
     long countByDeletedFalse();
 
+    boolean existsByNameIgnoreCaseAndCategoryCategoryIdAndDeletedFalse(String name, Long categoryId);
+
+    boolean existsByNameIgnoreCaseAndCategoryCategoryIdAndDeletedFalseAndSubjectIdNot(String name, Long categoryId, Long subjectId);
+
     @Query("SELECT s FROM Subject s JOIN FETCH s.category WHERE s.category = :category AND s.deleted = false")
     List<Subject> findSubjectsByCategoryAndDeletedFalse(@Param("category") Category category);
 

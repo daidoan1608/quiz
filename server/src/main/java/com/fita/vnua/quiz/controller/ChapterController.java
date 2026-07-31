@@ -6,6 +6,7 @@ import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.service.ChapterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +78,7 @@ public class ChapterController {
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterDto.subjectId, 'Subject', 'CREATE')")
     @PostMapping("admin/chapters")
     @Operation(summary = "Tạo chương (admin)")
-    public ResponseEntity<ApiResponse<ChapterDto>> createChapter(@RequestBody ChapterDto chapterDto) {
+    public ResponseEntity<ApiResponse<ChapterDto>> createChapter(@Valid @RequestBody ChapterDto chapterDto) {
         ChapterDto createdChapter = chapterService.create(chapterDto);
         return ResponseEntity.ok(ApiResponse.success("Tạo chương thành công", createdChapter));
     }
@@ -87,7 +88,7 @@ public class ChapterController {
     @Operation(summary = "Cập nhật chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> updateChapter(
             @PathVariable("chapterId") Long chapterId,
-            @RequestBody ChapterDto chapterDto
+            @Valid @RequestBody ChapterDto chapterDto
     ) {
         ChapterDto updatedChapter = chapterService.update(chapterId, chapterDto);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật chương thành công", updatedChapter));

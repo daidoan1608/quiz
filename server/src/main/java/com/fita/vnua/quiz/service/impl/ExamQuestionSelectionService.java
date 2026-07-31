@@ -43,7 +43,7 @@ public class ExamQuestionSelectionService {
         Set<Long> seenQuestionIds = new LinkedHashSet<>();
         for (QuestionDto question : questions) {
             if (question.getQuestionId() == null || !seenQuestionIds.add(question.getQuestionId())) {
-                throw new CustomApiException("Danh sách câu hỏi không được trừng", HttpStatus.BAD_REQUEST);
+                throw new CustomApiException("Danh sách câu hỏi không được trùng", HttpStatus.BAD_REQUEST);
             }
         }
 
@@ -101,7 +101,7 @@ public class ExamQuestionSelectionService {
         }
         List<Long> uniqueIds = new ArrayList<>(new LinkedHashSet<>(questionIds));
         if (uniqueIds.size() != questionIds.size()) {
-            throw new CustomApiException("Danh sách câu hỏi không được trừng", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Danh sách câu hỏi không được trùng", HttpStatus.BAD_REQUEST);
         }
         List<Question> questions = questionDetailLoader.loadByIdsInSameOrder(uniqueIds);
         if (questions.size() != uniqueIds.size()) {
@@ -134,7 +134,9 @@ public class ExamQuestionSelectionService {
         }
         if (examRequest.getGenerationMode() != null && !examRequest.getGenerationMode().isBlank()) {
             try {
-                return ExamGenerationMode.valueOf(examRequest.getGenerationMode().trim().toUpperCase());
+                ExamGenerationMode mode = ExamGenerationMode.valueOf(examRequest.getGenerationMode().trim().toUpperCase());
+                validateExplicitModePayload(mode, examRequest, chapterCounts);
+                return mode;
             } catch (IllegalArgumentException exception) {
                 throw new CustomApiException("Phương thức tạo đề không hợp lệ", HttpStatus.BAD_REQUEST);
             }
@@ -152,6 +154,31 @@ public class ExamQuestionSelectionService {
             return ExamGenerationMode.CHAPTER;
         }
         throw new CustomApiException("Vui lòng chọn phương thức tạo đề", HttpStatus.BAD_REQUEST);
+    }
+
+    private void validateExplicitModePayload(ExamGenerationMode mode, ExamRequest examRequest, Map<Long, Integer> chapterCounts) {
+        switch (mode) {
+            case MANUAL -> {
+                if (examRequest.getQuestionIds() == null || examRequest.getQuestionIds().isEmpty()) {
+                    throw new CustomApiException("Vui lòng chọn câu hỏi cho đề thủ công", HttpStatus.BAD_REQUEST);
+                }
+            }
+            case TOTAL -> {
+                if (examRequest.getTotalQuestions() <= 0) {
+                    throw new CustomApiException("Tổng số câu hỏi phải lớn hơn 0", HttpStatus.BAD_REQUEST);
+                }
+            }
+            case DIFFICULTY -> {
+                if (examRequest.getEasyQuestions() <= 0 && examRequest.getMediumQuestions() <= 0 && examRequest.getHardQuestions() <= 0) {
+                    throw new CustomApiException("Vui lòng nhập số câu theo độ khó", HttpStatus.BAD_REQUEST);
+                }
+            }
+            case CHAPTER -> {
+                if (chapterCounts.values().stream().noneMatch(count -> count != null && count > 0)) {
+                    throw new CustomApiException("Vui lòng nhập số câu theo chương", HttpStatus.BAD_REQUEST);
+                }
+            }
+        }
     }
 
     private enum ExamGenerationMode {

@@ -14,6 +14,10 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     long countByDeletedFalse();
 
+    boolean existsByCategoryNameIgnoreCaseAndDeletedFalse(String categoryName);
+
+    boolean existsByCategoryNameIgnoreCaseAndDeletedFalseAndCategoryIdNot(String categoryName, Long categoryId);
+
     @Query("""
             SELECT c FROM Category c
             WHERE (:deleted IS NULL OR c.deleted = :deleted)

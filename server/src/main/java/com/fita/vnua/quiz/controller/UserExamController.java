@@ -17,6 +17,7 @@ import com.fita.vnua.quiz.service.UserExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -153,7 +154,7 @@ public class UserExamController {
             deprecated = true
     )
     public ResponseEntity<ApiResponse<UserExamDto>> createUserExam(
-            @RequestBody UserExamRequest userExamRequest,
+            @Valid @RequestBody UserExamRequest userExamRequest,
             @AuthenticationPrincipal User currentUser
     ) {
         authorizationService.requireAuthenticated(currentUser);
@@ -164,7 +165,7 @@ public class UserExamController {
     @PostMapping("exam-attempts/start")
     @Operation(summary = "Tạo mới hoặc resume bài thi đang thực hiện")
     public ResponseEntity<ApiResponse<ExamAttemptResponse>> startOrResumeAttempt(
-            @RequestBody StartExamAttemptRequest request,
+            @Valid @RequestBody StartExamAttemptRequest request,
             @AuthenticationPrincipal User currentUser) {
         authorizationService.requireAuthenticated(currentUser);
         ExamAttemptResponse attempt = userExamService.startOrResumeAttempt(request, currentUser.getUserId());
@@ -185,7 +186,7 @@ public class UserExamController {
     @Operation(summary = "Autosave đáp án của bài thi đang thực hiện")
     public ResponseEntity<ApiResponse<ExamAttemptResponse>> saveAttemptAnswer(
             @PathVariable("userExamId") Long userExamId,
-            @RequestBody SaveExamAttemptAnswerRequest request,
+            @Valid @RequestBody SaveExamAttemptAnswerRequest request,
             @AuthenticationPrincipal User currentUser) {
         authorizationService.requireAuthenticated(currentUser);
         ExamAttemptResponse attempt = userExamService.saveAttemptAnswer(userExamId, request, currentUser.getUserId());
@@ -196,7 +197,7 @@ public class UserExamController {
     @Operation(summary = "Cập nhật câu hiện tại/thời gian còn lại của bài thi đang thực hiện")
     public ResponseEntity<ApiResponse<ExamAttemptResponse>> updateAttemptProgress(
             @PathVariable("userExamId") Long userExamId,
-            @RequestBody UpdateExamAttemptProgressRequest request,
+            @Valid @RequestBody UpdateExamAttemptProgressRequest request,
             @AuthenticationPrincipal User currentUser) {
         authorizationService.requireAuthenticated(currentUser);
         ExamAttemptResponse attempt = userExamService.updateAttemptProgress(userExamId, request, currentUser.getUserId());

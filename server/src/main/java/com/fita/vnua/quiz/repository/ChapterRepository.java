@@ -18,6 +18,14 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
     long countByDeletedFalse();
 
+    boolean existsByNameIgnoreCaseAndSubjectSubjectIdAndDeletedFalse(String name, Long subjectId);
+
+    boolean existsByNameIgnoreCaseAndSubjectSubjectIdAndDeletedFalseAndChapterIdNot(String name, Long subjectId, Long chapterId);
+
+    boolean existsByChapterNumberAndSubjectSubjectIdAndDeletedFalse(Integer chapterNumber, Long subjectId);
+
+    boolean existsByChapterNumberAndSubjectSubjectIdAndDeletedFalseAndChapterIdNot(Integer chapterNumber, Long subjectId, Long chapterId);
+
     @Query("""
             SELECT c FROM Chapter c
             JOIN FETCH c.subject
