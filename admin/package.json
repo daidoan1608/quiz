@@ -41,6 +41,8 @@
     ]
   },
   "devDependencies": {
+    "@fontsource/inter": "^5.0.0",
+    "@fontsource/lexend": "^5.0.0",
     "@vitejs/plugin-react": "^5.0.0",
     "vite": "^7.0.0"
   }

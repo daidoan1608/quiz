@@ -60,8 +60,8 @@ body.dark {
   --admin-border: rgba(148, 163, 184, 0.24);
   --admin-border-strong: rgba(203, 213, 225, 0.30);
   --admin-text: #f8fafc;
-  --admin-muted: #cbd5e1;
-  --admin-subtle: #94a3b8;
+  --admin-muted: #d1d7e2;
+  --admin-subtle: #a8b4c5;
   --admin-primary: #60a5fa;
   --admin-primary-hover: #93c5fd;
   --admin-primary-soft: rgba(96, 165, 250, 0.14);
@@ -131,40 +131,24 @@ body[data-theme-color="slate"] {
 }
 
 body.dark[data-theme-color="emerald"] {
-  --admin-bg: #071612;
-  --admin-canvas: #0b1c17;
-  --admin-surface-solid: #10231d;
-  --admin-surface-muted: #17342b;
   --admin-primary: #34d399;
   --admin-primary-hover: #6ee7b7;
   --admin-primary-soft: rgba(52, 211, 153, 0.15);
 }
 
 body.dark[data-theme-color="cyberpunk"] {
-  --admin-bg: #170b1f;
-  --admin-canvas: #1d1028;
-  --admin-surface-solid: #24132f;
-  --admin-surface-muted: #331a43;
   --admin-primary: #f472b6;
   --admin-primary-hover: #f9a8d4;
   --admin-primary-soft: rgba(244, 114, 182, 0.15);
 }
 
 body.dark[data-theme-color="sunset"] {
-  --admin-bg: #1b1009;
-  --admin-canvas: #21150d;
-  --admin-surface-solid: #27180f;
-  --admin-surface-muted: #3b2315;
   --admin-primary: #fb923c;
   --admin-primary-hover: #fdba74;
   --admin-primary-soft: rgba(251, 146, 60, 0.15);
 }
 
 body.dark[data-theme-color="slate"] {
-  --admin-bg: #0f172a;
-  --admin-canvas: #111827;
-  --admin-surface-solid: #1e293b;
-  --admin-surface-muted: #273449;
   --admin-primary: #818cf8;
   --admin-primary-hover: #a5b4fc;
   --admin-primary-soft: rgba(129, 140, 248, 0.15);

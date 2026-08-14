@@ -20,8 +20,7 @@ export default function UserAvatarButton({
             alt={fullName || 'User Avatar'}
             className="h-full w-full object-cover"
             onError={(event) => {
-              event.currentTarget.src =
-                'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+              event.currentTarget.src = '/images/default_avatar.svg';
             }}
           />
         ) : (

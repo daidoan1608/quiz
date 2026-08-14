@@ -1,7 +1,6 @@
 import React from 'react';
 
-const DEFAULT_AVATAR =
-  'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+const DEFAULT_AVATAR = '/images/default_avatar.svg';
 
 const renderRankIcon = (rank) => {
   if (rank === 1)

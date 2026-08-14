@@ -1,5 +1,6 @@
 import React from 'react';
 import { MetricCard } from 'components/common/MetricCard';
+import { PageEmptyState } from 'components/common/PageState';
 
 export const StatsCard = ({ title, value }) => (
   <MetricCard
@@ -120,15 +121,9 @@ export const MiniInfo = ({ label, value }) => (
 );
 
 export const EmptyState = ({ text, compact = false, texts }) => (
-  <div
-    className={`aura-empty-state px-4 ${compact ? 'py-10' : 'py-14'}`}
-  >
-    <span className="material-symbols-outlined aura-empty-state__icon">
-      inbox
-    </span>
-    <h3 className="aura-empty-state__title text-lg">
-      {texts?.noContent || 'Chưa có nội dung'}
-    </h3>
-    <p className="aura-empty-state__description text-sm">{text}</p>
-  </div>
+  <PageEmptyState
+    className={compact ? '!py-10' : '!py-14'}
+    title={texts?.noContent || 'Chưa có nội dung'}
+    description={text}
+  />
 );

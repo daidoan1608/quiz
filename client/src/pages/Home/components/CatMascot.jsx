@@ -51,7 +51,7 @@ export default function CatMascot() {
         <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-orange-200 bg-orange-50 dark:border-orange-900/30 dark:bg-gray-700">
           {/* Bạn có thể thay link ảnh GIF khác nếu muốn */}
           <img
-            src="https://cdn.dribbble.com/userupload/23259628/file/original-609336522ed2395ba43595bf5103031c.gif"
+            src="/images/cat_mascot.gif"
             alt="Cat Mascot"
             className="h-14 w-14 object-cover mix-blend-multiply dark:mix-blend-normal"
             decoding="async"

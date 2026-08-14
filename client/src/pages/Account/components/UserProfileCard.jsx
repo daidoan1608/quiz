@@ -3,7 +3,7 @@ import { CLIENT_AVATAR_URL } from 'config/env';
 import { resolveMediaUrl } from 'utils/mediaUrl';
 import { getStoredAvatarUrl } from 'utils/storage';
 
-const DEFAULT_AVATAR = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+const DEFAULT_AVATAR = '/images/default_avatar.svg';
 
 export default function UserProfileCard({
   user,
