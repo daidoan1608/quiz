@@ -13,6 +13,7 @@ import { AdminExportButton } from "../../components/common/buttons/AdminButtons"
 import MainBackButton from "../../components/common/MainBackButton";
 import MarkdownLatex from "../../components/common/MarkdownLatex";
 import AdminLoadingState from "../../components/common/states/AdminLoadingState";
+import { resolveMediaUrl } from "../../utils/mediaUrl";
 import { appMessage as message } from "../../utils/ui/messageService";
 import { typesetMath } from "../../utils/typesetMath";
 
@@ -169,7 +170,11 @@ const ExamPrintPreviewPage = () => {
                   className="exam-print-question-content"
                 />
                 {question.imageUrl ? (
-                  <img className="exam-print-image" src={question.imageUrl} alt={`Câu ${questionIndex + 1}`} />
+                  <img
+                    className="exam-print-image"
+                    src={resolveMediaUrl(question.imageUrl)}
+                    alt={`Câu ${questionIndex + 1}`}
+                  />
                 ) : null}
                 <div>
                   {(question.answers || []).map((answer, answerIndex) => (

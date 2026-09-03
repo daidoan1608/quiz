@@ -191,6 +191,15 @@
   font-size: 15px;
 }
 
+.detail-question-image {
+  display: block;
+  max-width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  margin: 0 auto 16px;
+  border-radius: 8px;
+}
+
 .detail-answer-stack {
   display: flex;
   flex-direction: column;

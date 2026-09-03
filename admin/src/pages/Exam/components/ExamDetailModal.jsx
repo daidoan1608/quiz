@@ -17,6 +17,7 @@ import {
 import MarkdownLatex from "../../../components/common/MarkdownLatex";
 import AdminEmptyState from "../../../components/common/states/AdminEmptyState";
 import AdminLoadingState from "../../../components/common/states/AdminLoadingState";
+import { resolveMediaUrl } from "../../../utils/mediaUrl";
 import { useExamDetail } from "../hooks/useExamDetail";
 
 const { Title, Text } = Typography;
@@ -104,6 +105,13 @@ export const ExamDetailModal = ({ open, onCancel, examId }) => {
                   className="modern-card detail-question-card"
                 >
                   <MarkdownLatex className="detail-question-content" content={question.content} />
+                  {question.imageUrl ? (
+                    <img
+                      className="detail-question-image"
+                      src={resolveMediaUrl(question.imageUrl)}
+                      alt={`Câu ${index + 1}`}
+                    />
+                  ) : null}
 
                   <div className="detail-answer-stack">
                     {question.answers.map((answer) =>
