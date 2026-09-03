@@ -34,7 +34,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-white/60 bg-gradient-to-r from-white/92 via-blue-50/88 to-indigo-50/86 shadow-lg shadow-blue-900/5 backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:from-slate-950/92 dark:via-blue-950/70 dark:to-indigo-950/72 dark:shadow-black/30">
+      <header className="aura-header sticky top-0 z-50 w-full transition-all duration-300">
         <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
           <div className="grid h-20 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 md:h-24">
             <Logo onClick={() => navigate('/')} />

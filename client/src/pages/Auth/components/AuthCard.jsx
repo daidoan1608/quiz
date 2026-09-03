@@ -7,7 +7,7 @@ export const AuthCard = ({
   subtitle,
   title,
 }) => (
-  <div className="auth-page min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div className="auth-page aura-page-transition min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div className="auth-card w-full max-w-md space-y-8 p-10 rounded-2xl shadow-xl">
       <div className="text-center">
         <img

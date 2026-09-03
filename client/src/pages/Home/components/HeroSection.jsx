@@ -3,14 +3,13 @@ import CatMascot from './CatMascot';
 export default function HeroSection({ t, onStart }) {
   return (
     <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-br from-white via-primary/10 to-blue-100/80 px-6 py-12 shadow-2xl shadow-blue-900/10 ring-1 ring-primary/10 dark:border-white/10 dark:from-gray-900 dark:via-primary/10 dark:to-slate-900 dark:shadow-black/40 sm:px-12 flex flex-col lg:flex-row items-center gap-10">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/0 via-primary/70 to-primary/0 pointer-events-none" />
       <div className="absolute -top-24 left-1/4 h-80 w-80 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-28 right-1/4 h-80 w-80 rounded-full bg-blue-400/20 blur-3xl pointer-events-none dark:bg-indigo-500/20" />
       <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.55),transparent_42%,rgba(255,255,255,0.25))] pointer-events-none dark:bg-[linear-gradient(120deg,rgba(255,255,255,0.08),transparent_42%,rgba(255,255,255,0.03))]" />
 
       <div className="relative z-10 flex-1 flex flex-col gap-5 text-center lg:text-left">
         <span className="aura-kicker-pill mx-auto w-fit lg:mx-0">
-          <span className="material-symbols-outlined">auto_awesome</span>
+          <span className="material-symbols-outlined">school</span>
           {t('home.hero.badge')}
         </span>
         <h1 className="text-gray-900 dark:text-white text-4xl sm:text-5xl font-black leading-tight tracking-tight">

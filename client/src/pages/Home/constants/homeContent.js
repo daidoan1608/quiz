@@ -5,43 +5,37 @@ export const TEAM_MEMBERS = [
   {
     name: 'Đoàn Minh Đại',
     role: 'PM & Backend Developer',
-    avatar:
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    avatar: '/images/team/dai.jpg',
     quote: 'Dẫn dắt bằng chiến lược, xây dựng bằng công nghệ.',
   },
   {
     name: 'Lê Thị Hồng Ánh',
     role: 'Frontend Developer',
-    avatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+    avatar: '/images/team/anh.jpg',
     quote: 'Tối ưu hóa trải nghiệm người dùng.',
   },
   {
     name: 'Nguyễn Tuấn Anh',
     role: 'Frontend Developer',
-    avatar:
-      'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&q=80',
+    avatar: '/images/team/tuan_anh.jpg',
     quote: 'Mỗi dòng code là một trải nghiệm mới.',
   },
   {
     name: 'Nguyễn Thế Sơn',
     role: 'Frontend Developer',
-    avatar:
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80',
+    avatar: '/images/team/son.jpg',
     quote: 'Thiết kế giao diện – kiến tạo cảm hứng.',
   },
   {
     name: 'Đoàn Thanh Bình',
     role: 'UI/UX Designer',
-    avatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80',
+    avatar: '/images/team/binh.jpg',
     quote: 'Thiết kế vì người dùng, đẹp vì mục đích.',
   },
   {
     name: 'Chu Văn Tài',
     role: 'Business Analyst (BA)',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+    avatar: '/images/team/tai.jpg',
     quote: 'Hiểu đúng nhu cầu, xây đúng sản phẩm.',
   },
 ];

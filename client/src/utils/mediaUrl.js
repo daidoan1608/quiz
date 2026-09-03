@@ -1,7 +1,7 @@
 import { CLIENT_API_ROOT } from 'config/env';
 
 const DEFAULT_API_ROOT = "";
-const DEFAULT_AVATAR_URL = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+const DEFAULT_AVATAR_URL = "/images/default_avatar.svg";
 
 export const getApiRoot = () => CLIENT_API_ROOT || DEFAULT_API_ROOT;
 
