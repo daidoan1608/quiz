@@ -8,18 +8,21 @@ import com.fita.vnua.quiz.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class AuditLogServiceImpl implements AuditLogService {
     private static final int ENTITY_ID_MAX_LENGTH = 64;
 
     private final AuditLogRepository auditLogRepository;
 
     @Override
+    @Transactional
     public void record(String action, String entityType, Object entityId, User actor, String description) {
         AuditLog log = new AuditLog();
         log.setAction(action);
@@ -34,6 +37,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
+    @Transactional
     public void recordSecurityEvent(String action, String entityId, String description) {
         try {
             AuditLog log = new AuditLog();

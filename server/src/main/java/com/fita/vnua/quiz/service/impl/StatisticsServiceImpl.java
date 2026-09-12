@@ -11,6 +11,7 @@ import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class StatisticsServiceImpl implements StatisticsService {
     private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;

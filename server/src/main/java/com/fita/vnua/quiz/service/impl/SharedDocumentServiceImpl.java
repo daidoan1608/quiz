@@ -11,6 +11,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SharedDocumentServiceImpl implements SharedDocumentService {
 
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
@@ -70,6 +72,7 @@ public class SharedDocumentServiceImpl implements SharedDocumentService {
     }
 
     @Override
+    @Transactional
     public SharedDocumentResponse create(String title, String description, boolean active, MultipartFile file) throws IOException {
         if (!StringUtils.hasText(title)) {
             throw new CustomApiException("Tiêu đề tài liệu là bắt buộc", HttpStatus.BAD_REQUEST);
@@ -111,6 +114,7 @@ public class SharedDocumentServiceImpl implements SharedDocumentService {
     }
 
     @Override
+    @Transactional
     public SharedDocumentResponse update(Long id, String title, String description, Boolean active) {
         SharedDocument document = repository.findById(id)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy tài liệu", HttpStatus.NOT_FOUND));
@@ -127,6 +131,7 @@ public class SharedDocumentServiceImpl implements SharedDocumentService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) throws IOException {
         SharedDocument document = repository.findById(id)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy tài liệu", HttpStatus.NOT_FOUND));

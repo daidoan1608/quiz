@@ -162,6 +162,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CampaignResponse> getAllCampaigns(
             String keyword,
             String sendType,
@@ -241,6 +242,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "notificationUnreadCount", allEntries = true)
     public void deleteHistory(Long historyId) {
         if (!historyRepository.existsById(historyId)) {
             throw new CustomApiException("Chiến dịch không tồn tại", HttpStatus.NOT_FOUND);

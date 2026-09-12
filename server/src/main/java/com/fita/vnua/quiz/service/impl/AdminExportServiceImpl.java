@@ -10,6 +10,7 @@ import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.AdminExportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AdminExportServiceImpl implements AdminExportService {
 
     private final UserRepository userRepository;
