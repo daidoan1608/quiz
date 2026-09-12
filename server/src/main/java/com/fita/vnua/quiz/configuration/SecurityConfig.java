@@ -103,7 +103,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "MOD")
                         .requestMatchers("/api/v1/mod/**").hasAnyRole("ADMIN", "MOD")
-                        .requestMatchers("/api/v1/user/**").hasAnyRole("ADMIN", "MOD", "USER")
+                        .requestMatchers("/api/v1/user/**", "/api/v1/users/**").hasAnyRole("ADMIN", "MOD", "USER")
 
                         .anyRequest().authenticated()
                 )
