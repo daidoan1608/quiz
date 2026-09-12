@@ -81,14 +81,22 @@ public class AdminExportServiceImpl implements AdminExportService {
     }
 
     private String questionRow(Question question) {
-        String correctAnswers = question.getAnswers().stream()
-                .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
-                .map(answer -> answer.getContent())
-                .collect(Collectors.joining(" | "));
+        String correctAnswers = question.getAnswers() != null
+                ? question.getAnswers().stream()
+                        .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
+                        .map(Answer::getContent)
+                        .collect(Collectors.joining(" | "))
+                : "";
+        String subjectName = question.getChapter() != null && question.getChapter().getSubject() != null
+                ? question.getChapter().getSubject().getName()
+                : "";
+        String chapterName = question.getChapter() != null
+                ? question.getChapter().getName()
+                : "";
         return join(
                 question.getQuestionId(),
-                question.getChapter().getSubject().getName(),
-                question.getChapter().getName(),
+                subjectName,
+                chapterName,
                 question.getDifficulty(),
                 question.getQuestionType(),
                 question.getDeleted(),

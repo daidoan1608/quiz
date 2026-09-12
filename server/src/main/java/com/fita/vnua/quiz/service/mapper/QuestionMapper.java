@@ -78,9 +78,11 @@ public class QuestionMapper {
         dto.setDeletedCascadeId(question.getDeletedCascadeId());
         dto.setDeleteOriginType(question.getDeleteOriginType());
         dto.setDeleteOriginId(question.getDeleteOriginId());
-        dto.setAnswers(question.getAnswers().stream()
-                .map(this::toAnswerDto)
-                .collect(Collectors.toList()));
+        dto.setAnswers(question.getAnswers() != null
+                ? question.getAnswers().stream()
+                        .map(this::toAnswerDto)
+                        .collect(Collectors.toList())
+                : Collections.emptyList());
         return dto;
     }
 
@@ -107,6 +109,9 @@ public class QuestionMapper {
     private QuestionType resolveQuestionType(Question question) {
         if (question.getQuestionType() != null) {
             return question.getQuestionType();
+        }
+        if (question.getAnswers() == null) {
+            return QuestionType.SINGLE_CHOICE;
         }
         long correctCount = question.getAnswers().stream()
                 .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))

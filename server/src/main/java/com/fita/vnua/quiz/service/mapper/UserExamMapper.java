@@ -169,6 +169,9 @@ public class UserExamMapper {
     }
 
     private List<AnswerDto> toAnswerDtos(Question question) {
+        if (question == null || question.getAnswers() == null) {
+            return Collections.emptyList();
+        }
         return question.getAnswers().stream()
                 .map(answer -> toAnswerDto(question, answer))
                 .toList();

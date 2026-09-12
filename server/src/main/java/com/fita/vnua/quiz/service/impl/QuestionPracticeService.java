@@ -4,6 +4,7 @@ import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
+import com.fita.vnua.quiz.model.entity.Answer;
 import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.model.entity.UserAnswer;
 import com.fita.vnua.quiz.repository.QuestionRepository;
@@ -15,11 +16,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -119,12 +122,15 @@ public class QuestionPracticeService {
             return;
         }
         Question question = userAnswers.get(0).getQuestion();
-        Set<Long> correctAnswerIds = question.getAnswers().stream()
+        List<Answer> answers = question != null && question.getAnswers() != null ? question.getAnswers() : Collections.emptyList();
+        Set<Long> correctAnswerIds = answers.stream()
                 .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
-                .map(answer -> answer.getOptionId())
+                .map(Answer::getOptionId)
                 .collect(Collectors.toSet());
         Set<Long> chosenAnswerIds = userAnswers.stream()
-                .map(userAnswer -> userAnswer.getAnswer().getOptionId())
+                .map(UserAnswer::getAnswer)
+                .filter(Objects::nonNull)
+                .map(Answer::getOptionId)
                 .collect(Collectors.toSet());
         LocalDateTime submittedAt = Optional.ofNullable(userAnswers.get(0).getUserExam().getEndTime())
                 .orElse(Optional.ofNullable(userAnswers.get(0).getUserExam().getUpdatedAt())

@@ -71,6 +71,21 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getStatusCode(), resolveCode(ex.getStatusCode()), message, List.of(message), request);
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> handleDataIntegrityViolationException(
+            org.springframework.dao.DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Database constraint violation on {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildErrorResponse(
+                HttpStatus.CONFLICT,
+                "DATA_INTEGRITY_VIOLATION",
+                "Thao tác không thể hoàn tất do ràng buộc dữ liệu",
+                List.of("Dữ liệu đang được liên kết bởi các bản ghi khác hoặc vi phạm tính duy nhất."),
+                request
+        );
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ProblemDetail> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
         return buildErrorResponse(

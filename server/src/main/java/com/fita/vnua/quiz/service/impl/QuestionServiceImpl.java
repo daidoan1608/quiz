@@ -450,16 +450,17 @@ public class QuestionServiceImpl implements QuestionService {
         if (questionDto.getAnswers() == null) {
             return false;
         }
-        if (existingQuestion.getAnswers().size() != questionDto.getAnswers().size()) {
+        List<Answer> existingAnswers = existingQuestion.getAnswers() != null ? existingQuestion.getAnswers() : Collections.emptyList();
+        if (existingAnswers.size() != questionDto.getAnswers().size()) {
             return true;
         }
         Map<Long, AnswerDto> incomingAnswers = questionDto.getAnswers().stream()
                 .filter(answer -> answer.getOptionId() != null)
                 .collect(Collectors.toMap(AnswerDto::getOptionId, answer -> answer));
-        if (incomingAnswers.size() != existingQuestion.getAnswers().size()) {
+        if (incomingAnswers.size() != existingAnswers.size()) {
             return true;
         }
-        return existingQuestion.getAnswers().stream().anyMatch(answer -> {
+        return existingAnswers.stream().anyMatch(answer -> {
             AnswerDto incoming = incomingAnswers.get(answer.getOptionId());
             return incoming == null
                     || !Objects.equals(answer.getContent(), incoming.getContent())

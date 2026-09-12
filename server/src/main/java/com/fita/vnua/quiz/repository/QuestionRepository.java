@@ -35,6 +35,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Optional<Question> findByQuestionIdAndDeletedFalse(Long questionId);
 
     @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
+    @Query("SELECT q FROM Question q WHERE q.questionId = :questionId")
+    Optional<Question> findByIdWithDetails(@Param("questionId") Long questionId);
+
+    @EntityGraph(attributePaths = {"answers", "chapter", "chapter.subject"})
     List<Question> findByContentContainingIgnoreCaseAndDeletedFalse(String content);
 
     default List<Question> findByContentContainingIgnoreCase(String content) {

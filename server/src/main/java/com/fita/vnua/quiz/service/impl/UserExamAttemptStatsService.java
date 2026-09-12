@@ -102,7 +102,8 @@ public class UserExamAttemptStatsService {
     private boolean isQuestionCorrect(Question question, Set<Long> chosenAnswerIds) {
         if (chosenAnswerIds == null || chosenAnswerIds.isEmpty()) return false;
 
-        Set<Long> correctAnswerIds = question.getAnswers().stream()
+        List<Answer> answers = question.getAnswers() != null ? question.getAnswers() : Collections.emptyList();
+        Set<Long> correctAnswerIds = answers.stream()
                 .filter(answer -> Boolean.TRUE.equals(answer.getIsCorrect()))
                 .map(Answer::getOptionId)
                 .collect(Collectors.toSet());

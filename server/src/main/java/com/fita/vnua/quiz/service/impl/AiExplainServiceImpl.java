@@ -44,6 +44,7 @@ public class AiExplainServiceImpl implements AiExplainService {
     public ExplainQuestionResponse explainQuestion(ExplainQuestionRequest request, User currentUser) {
         // 1. Kiểm tra câu hỏi
         Question question = questionRepository.findByQuestionIdAndDeletedFalse(request.getQuestionId())
+                .or(() -> questionRepository.findByIdWithDetails(request.getQuestionId()))
                 .orElseThrow(() -> new CustomApiException("NOT_FOUND", "Không tìm thấy câu hỏi với ID: " + request.getQuestionId(), HttpStatus.NOT_FOUND));
 
         // 2. Rate limit kiểm soát tần suất gọi
