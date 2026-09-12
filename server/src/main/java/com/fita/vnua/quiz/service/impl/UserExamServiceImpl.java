@@ -18,6 +18,7 @@ import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;
+import com.fita.vnua.quiz.service.RankingService;
 import com.fita.vnua.quiz.service.UserExamService;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.service.mapper.UserExamMapper;
@@ -74,25 +75,19 @@ public class UserExamServiceImpl implements UserExamService {
     private final UserExamAttemptStatsService attemptStatsService;
     private final UserExamMapper userExamMapper;
     private final StringRedisTemplate stringRedisTemplate;
+    private final RankingService rankingService;
 
     @Override
     public List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate) {
-        List<UserExamRepository.UserExamSummaryProjection> projections = userExamRepository.getUserExamSummaries(fromDate, toDate);
-
-        return projections.stream().map(this::mapSummaryProjection).collect(Collectors.toList());
+        return rankingService.getUserExamSummaries(fromDate, toDate);
     }
 
     @Override
     public List<UserExamSummaryDto> getUserExamSummaries(String period) {
-        PeriodRange range = resolvePeriodRange(period);
-        return getUserExamSummaries(range.fromDate(), range.toDate());
+        return rankingService.getUserExamSummaries(period);
     }
 
     @Override
-    @Cacheable(
-            value = "ranking",
-            key = "'rankings:' + (#fromDate == null ? 'all' : #fromDate.toString()) + ':' + (#toDate == null ? 'all' : #toDate.toString()) + ':' + (#subjectName == null ? 'all' : #subjectName) + ':' + #criteria + ':' + #limit + ':' + (#currentUserId == null ? 'anonymous' : #currentUserId.toString())"
-    )
     public RankingResponse getRankings(
             LocalDateTime fromDate,
             LocalDateTime toDate,
@@ -101,55 +96,17 @@ public class UserExamServiceImpl implements UserExamService {
             int limit,
             UUID currentUserId
     ) {
-        String normalizedSubject = subjectName == null || subjectName.isBlank() ? null : subjectName.trim();
-        String normalizedCriteria = "avg".equalsIgnoreCase(criteria) ? "avg" : "total";
-        int normalizedLimit = Math.min(Math.max(limit, 1), 50);
-
-        List<UserExamSummaryDto> topUsers = userExamRepository
-                .getTopRankings(fromDate, toDate, normalizedSubject, normalizedCriteria, normalizedLimit)
-                .stream()
-                .map(this::mapSummaryProjection)
-                .toList();
-
-        UserExamSummaryDto currentUser = null;
-        if (currentUserId != null) {
-            currentUser = userExamRepository
-                    .getUserRanking(fromDate, toDate, normalizedSubject, normalizedCriteria, uuidToBytes(currentUserId))
-                    .map(this::mapSummaryProjection)
-                    .orElse(null);
-        }
-
-        return new RankingResponse(topUsers, currentUser);
+        return rankingService.getRankings(fromDate, toDate, subjectName, criteria, limit, currentUserId);
     }
 
     @Override
     public RankingResponse getRankings(String period, String subjectName, String criteria, int limit, UUID currentUserId) {
-        PeriodRange range = resolvePeriodRange(period);
-        return getRankings(range.fromDate(), range.toDate(), subjectName, criteria, limit, currentUserId);
+        return rankingService.getRankings(period, subjectName, criteria, limit, currentUserId);
     }
 
     @Override
     public PeriodRange resolvePeriodRange(String period) {
-        LocalDate today = LocalDate.now();
-        return switch (period == null ? "all" : period.toLowerCase()) {
-            case "week" -> new PeriodRange(today.with(DayOfWeek.MONDAY).atStartOfDay(), today.with(DayOfWeek.MONDAY).plusWeeks(1).atStartOfDay());
-            case "month" -> new PeriodRange(today.withDayOfMonth(1).atStartOfDay(), today.withDayOfMonth(1).plusMonths(1).atStartOfDay());
-            default -> new PeriodRange(null, null);
-        };
-    }
-
-    private UserExamSummaryDto mapSummaryProjection(UserExamRepository.UserExamSummaryProjection proj) {
-        UserExamSummaryDto dto = new UserExamSummaryDto();
-        dto.setUserId(bytesToUUID(proj.getUserId()));
-        dto.setUsername(proj.getUsername());
-        dto.setAvatarUrl(proj.getAvatarUrl());
-        dto.setAttemptCount(proj.getAttemptCount());
-        dto.setAvgScore(proj.getAvgScore());
-        dto.setTotalScore(proj.getTotalScore());
-        dto.setTotalDurationSeconds(proj.getTotalDurationSeconds());
-        dto.setSubjectName(proj.getSubjects());
-        dto.setRank(proj.getRankPosition());
-        return dto;
+        return rankingService.resolvePeriodRange(period);
     }
 
     protected UUID bytesToUUID(byte[] bytes) {

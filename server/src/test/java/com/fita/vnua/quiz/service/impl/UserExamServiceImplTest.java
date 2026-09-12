@@ -17,6 +17,7 @@ import com.fita.vnua.quiz.repository.UserAnswerRepository;
 import com.fita.vnua.quiz.repository.UserExamRepository;
 import com.fita.vnua.quiz.repository.UserExamQuestionRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
+import com.fita.vnua.quiz.service.RankingService;
 import com.fita.vnua.quiz.service.mapper.QuestionMapper;
 import com.fita.vnua.quiz.service.mapper.UserExamMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +64,8 @@ class UserExamServiceImplTest {
     private StringRedisTemplate stringRedisTemplate;
     @Mock
     private ValueOperations<String, String> valueOperations;
+    @Mock
+    private RankingService rankingService;
     @Spy
     private UserExamMapper userExamMapper = new UserExamMapper(new ObjectMapper(), new QuestionMapper());
 

@@ -12,6 +12,7 @@ import com.fita.vnua.quiz.model.dto.response.RankingResponse;
 import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.service.AuthorizationService;
+import com.fita.vnua.quiz.service.RankingService;
 import com.fita.vnua.quiz.service.UserExamAccessService;
 import com.fita.vnua.quiz.service.UserExamService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +42,7 @@ import java.util.UUID;
 @Tag(name = "User Exam API", description = "API cho các chức năng liên quan đến bài thi của người dùng")
 public class UserExamController {
     private final UserExamService userExamService;
+    private final RankingService rankingService;
     private final AuthorizationService authorizationService;
     private final UserExamAccessService userExamAccessService;
 
@@ -48,7 +50,7 @@ public class UserExamController {
     @Operation(summary = "Thống kê điểm thi của người dùng")
     public ResponseEntity<ApiResponse<List<UserExamSummaryDto>>> getUserExamSummaries(
             @RequestParam(defaultValue = "all") String period) {
-        List<UserExamSummaryDto> summaries = userExamService.getUserExamSummaries(period);
+        List<UserExamSummaryDto> summaries = rankingService.getUserExamSummaries(period);
         return ResponseEntity.ok(ApiResponse.success("Lấy thống kê điểm thi thành công", summaries));
     }
 
@@ -60,7 +62,7 @@ public class UserExamController {
             @RequestParam(defaultValue = "total") String criteria,
             @RequestParam(defaultValue = "10") int limit,
             @AuthenticationPrincipal User currentUser) {
-        RankingResponse rankings = userExamService.getRankings(
+        RankingResponse rankings = rankingService.getRankings(
                 period,
                 subjectName,
                 criteria,
