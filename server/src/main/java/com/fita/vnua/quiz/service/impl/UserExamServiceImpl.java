@@ -599,20 +599,6 @@ public class UserExamServiceImpl implements UserExamService {
         return userExam;
     }
 
-    private UserExam getInProgressUserExamForUpdate(Long userExamId, UUID currentUserId) {
-        if (currentUserId == null) {
-            throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.UNAUTHORIZED);
-        }
-        UserExam userExam = userExamRepository.findByIdAndUserIdForUpdate(userExamId, currentUserId)
-                .orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này",
-                        HttpStatus.FORBIDDEN));
-        if (!"IN_PROGRESS".equals(userExam.getStatus())) {
-            throw new CustomApiException("ATTEMPT_NOT_IN_PROGRESS", "Lượt làm bài không ở trạng thái đang thực hiện",
-                    HttpStatus.BAD_REQUEST);
-        }
-        return userExam;
-    }
-
     private UserExam getUserExamForCurrentUser(Long userExamId, UUID currentUserId) {
         if (currentUserId == null) {
             throw new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.UNAUTHORIZED);
