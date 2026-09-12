@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/users/me")
+@RequestMapping("/api/v1/users/me/avatar")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Avatar API", description = "API thao tác thêm sửa xoá avatar")
@@ -26,7 +26,7 @@ public class AvatarController {
     private final UserService userService;
 
     @Operation(summary = "API thay/thêm avatar")
-    @PutMapping("/avatar")
+    @PutMapping
     public ResponseEntity<ApiResponse<Map<String, String>>> uploadAvatar(
             @AuthenticationPrincipal User currentUser,
             @RequestParam("file") MultipartFile file) throws Exception {
@@ -46,7 +46,7 @@ public class AvatarController {
     }
 
     @Operation(summary = "API lấy link avatar")
-    @GetMapping("/avatar")
+    @GetMapping
     public ResponseEntity<ApiResponse<Map<String, String>>> getAvatar(@AuthenticationPrincipal User currentUser) {
         String url = userService.getUserResponseById(currentUser.getUserId()).getAvatarUrl();
         if (url == null || url.isBlank()) {

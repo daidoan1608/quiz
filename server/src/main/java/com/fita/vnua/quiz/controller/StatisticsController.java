@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,12 +17,13 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Tag(name = "Statistics API", description = "API cho các chức năng thống kê")
 public class StatisticsController {
     private final StatisticsService statisticsService;
 
-    @GetMapping("/api/v1/admin/statistics")
+    @GetMapping("/admin/statistics")
     @Operation(summary = "Lấy thống kê tổng quan")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'STATISTIC', 'VIEW', 'GLOBAL', null)")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getStatistics(

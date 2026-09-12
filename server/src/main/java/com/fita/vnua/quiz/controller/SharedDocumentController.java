@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class SharedDocumentController {
 
@@ -44,13 +46,13 @@ public class SharedDocumentController {
 
     private final SharedDocumentService documentService;
 
-    @GetMapping("/api/v1/public/documents")
+    @GetMapping("/public/documents")
     public ResponseEntity<ApiResponse<List<SharedDocumentResponse>>> getPublicDocuments() {
         return ResponseEntity
                 .ok(ApiResponse.success("Lấy danh sách tài liệu thành công", documentService.getPublicDocuments()));
     }
 
-    @GetMapping("/api/v1/public/documents/{id}/download")
+    @GetMapping("/public/documents/{id}/download")
     public ResponseEntity<Resource> downloadDocument(@PathVariable Long id) throws IOException {
         SharedDocument document = documentService.getDownloadableDocument(id);
         Resource resource = documentService.loadFile(document);
@@ -62,14 +64,14 @@ public class SharedDocumentController {
                 .body(resource);
     }
 
-    @GetMapping("/api/v1/admin/documents")
+    @GetMapping("/admin/documents")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'DOCUMENT', 'VIEW', 'GLOBAL', null)")
     public ResponseEntity<ApiResponse<List<SharedDocumentResponse>>> getAdminDocuments() {
         return ResponseEntity.ok(
                 ApiResponse.success("Lấy danh sách tài liệu quản trị thành công", documentService.getAdminDocuments()));
     }
 
-    @PostMapping(value = "/api/v1/admin/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/admin/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'DOCUMENT', 'CREATE', 'GLOBAL', null)")
     public ResponseEntity<ApiResponse<SharedDocumentResponse>> createDocument(
             @RequestParam("title") String title,
@@ -80,7 +82,7 @@ public class SharedDocumentController {
                 documentService.create(title, description, active, file)));
     }
 
-    @PatchMapping("/api/v1/admin/documents/{id}")
+    @PatchMapping("/admin/documents/{id}")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'DOCUMENT', 'UPDATE', 'GLOBAL', null)")
     public ResponseEntity<ApiResponse<SharedDocumentResponse>> updateDocument(
             @PathVariable Long id,
@@ -91,7 +93,7 @@ public class SharedDocumentController {
                 documentService.update(id, title, description, active)));
     }
 
-    @DeleteMapping("/api/v1/admin/documents/{id}")
+    @DeleteMapping("/admin/documents/{id}")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'DOCUMENT', 'DELETE', 'GLOBAL', null)")
     public ResponseEntity<ApiResponse<Object>> deleteDocument(@PathVariable Long id) throws IOException {
         documentService.delete(id);
