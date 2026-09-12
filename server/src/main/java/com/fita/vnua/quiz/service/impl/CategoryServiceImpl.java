@@ -17,6 +17,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final SubjectRepository subjectRepository;
@@ -79,6 +81,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public CategoryDto addCategory(CategoryDto categoryDto) {
         validateUniqueCategoryName(categoryDto.getCategoryName(), null);
@@ -91,6 +94,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
         Category category = categoryRepository.findById(id)
@@ -106,12 +110,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public void deleteCategory(Long id) {
         softDeleteService.deleteCategory(id, null);
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
     public CategoryDto restoreCategory(Long id) {
         softDeleteService.restoreCategory(id);

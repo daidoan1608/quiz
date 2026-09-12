@@ -51,10 +51,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import com.fita.vnua.quiz.utils.UuidUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserExamServiceImpl implements UserExamService {
     private static final Duration ATTEMPT_WRITE_LOCK_TTL = Duration.ofSeconds(5);
     private static final int ATTEMPT_WRITE_QUEUE_MAX_ATTEMPTS = 50;
@@ -150,17 +153,11 @@ public class UserExamServiceImpl implements UserExamService {
     }
 
     protected UUID bytesToUUID(byte[] bytes) {
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        long high = bb.getLong();
-        long low = bb.getLong();
-        return new UUID(high, low);
+        return UuidUtils.bytesToUUID(bytes);
     }
 
     protected byte[] uuidToBytes(UUID uuid) {
-        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
-        return bb.array();
+        return UuidUtils.uuidToBytes(uuid);
     }
 
     @Override

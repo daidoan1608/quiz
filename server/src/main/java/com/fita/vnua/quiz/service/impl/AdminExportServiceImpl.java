@@ -1,5 +1,6 @@
 package com.fita.vnua.quiz.service.impl;
 
+import com.fita.vnua.quiz.model.entity.Answer;
 import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.model.entity.UserExam;
