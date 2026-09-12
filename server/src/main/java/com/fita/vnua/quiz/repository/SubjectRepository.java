@@ -82,9 +82,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
             SELECT s FROM UserExam ue
             JOIN ue.exam e
             JOIN e.subject s
-            JOIN FETCH s.category
+            JOIN FETCH s.category c
             WHERE ue.user.userId = :userId
-            GROUP BY s
+            GROUP BY s, c
             ORDER BY MAX(ue.endTime) DESC
             """)
     List<Subject> findSubjectsWithUserExams(@Param("userId") UUID userId);

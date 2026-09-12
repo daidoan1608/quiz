@@ -15,7 +15,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +23,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ChapterServiceImpl implements ChapterService {
     private final ChapterRepository chapterRepository;
     private final QuestionRepository questionRepository;
@@ -93,6 +94,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public ChapterDto create(ChapterDto chapterDto) {
         var subject = subjectRepository.findById(chapterDto.getSubjectId())
@@ -113,6 +115,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public ChapterDto update(Long chapterId, ChapterDto chapterDto) {
         var existingChapter = chapterRepository.findById(chapterId)
@@ -129,6 +132,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public OperationResult delete(Long chapterId) {
         softDeleteService.deleteChapter(chapterId, null);
@@ -138,6 +142,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public ChapterDto restore(Long chapterId) {
         softDeleteService.restoreChapter(chapterId);

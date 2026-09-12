@@ -509,6 +509,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public OperationResult delete(Long questionId) {
         if (examQuestionRepository.existsByQuestionQuestionIdAndExamDeletedFalse(questionId)) {
@@ -523,6 +524,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail", "publicChaptersBySubject", "publicExamsBySubject", "publicExamDetail", "practiceQuestions"}, allEntries = true)
     public QuestionDto restore(Long questionId) {
         softDeleteService.restoreQuestion(questionId);
