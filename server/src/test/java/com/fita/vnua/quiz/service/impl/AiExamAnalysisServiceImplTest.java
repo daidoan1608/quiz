@@ -1,7 +1,6 @@
 package com.fita.vnua.quiz.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fita.vnua.quiz.configuration.properties.AiProperties;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.response.ExamAnalysisResponse;
 import com.fita.vnua.quiz.model.entity.*;
@@ -66,7 +65,6 @@ class AiExamAnalysisServiceImplTest {
     private AiClient aiClient;
 
     private ObjectMapper objectMapper;
-    private AiProperties aiProperties;
     private AiExamAnalysisServiceImpl aiExamAnalysisService;
     private User testUser;
     private UserExam testUserExam;
@@ -74,7 +72,6 @@ class AiExamAnalysisServiceImplTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        aiProperties = new AiProperties();
 
         aiExamAnalysisService = new AiExamAnalysisServiceImpl(
                 userExamRepository,
@@ -83,11 +80,9 @@ class AiExamAnalysisServiceImplTest {
                 userExamQuestionRepository,
                 authorizationService,
                 aiClientRouter,
-                aiProperties,
                 rateLimiter,
                 stringRedisTemplate,
-                objectMapper
-        );
+                objectMapper);
 
         testUser = new User();
         testUser.setUserId(UUID.randomUUID());

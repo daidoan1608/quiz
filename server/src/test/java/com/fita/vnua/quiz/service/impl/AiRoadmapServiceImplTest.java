@@ -1,7 +1,6 @@
 package com.fita.vnua.quiz.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fita.vnua.quiz.configuration.properties.AiProperties;
 import com.fita.vnua.quiz.model.dto.response.LearningRoadmapResponse;
 import com.fita.vnua.quiz.model.entity.Exam;
 import com.fita.vnua.quiz.model.entity.Subject;
@@ -51,19 +50,16 @@ class AiRoadmapServiceImplTest {
     private AiClient aiClient;
 
     private ObjectMapper objectMapper;
-    private AiProperties aiProperties;
     private AiRoadmapServiceImpl aiRoadmapService;
     private User testUser;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        aiProperties = new AiProperties();
 
         aiRoadmapService = new AiRoadmapServiceImpl(
                 userExamRepository,
                 aiClientRouter,
-                aiProperties,
                 rateLimiter,
                 stringRedisTemplate,
                 objectMapper
