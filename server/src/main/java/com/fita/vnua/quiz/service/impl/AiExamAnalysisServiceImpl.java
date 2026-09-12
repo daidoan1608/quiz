@@ -91,7 +91,7 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
         int maxDurationMinutes = exam != null && exam.getDuration() != null ? exam.getDuration() : 60;
 
         List<Question> questions = exam != null
-                ? questionRepository.findQuestionsByExamId(exam.getExamId())
+                ? questionRepository.findQuestionsByExamIdIncludingDeleted(exam.getExamId())
                 : Collections.emptyList();
 
         List<UserAnswer> userAnswers = userAnswerRepository.findUserAnswersByUserExamId(userExamId);
@@ -127,7 +127,8 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
             if (chosen == null || chosen.isEmpty()) {
                 skippedCount++;
             } else {
-                Set<Long> correctIds = q.getAnswers().stream()
+                List<Answer> answers = q.getAnswers() != null ? q.getAnswers() : Collections.emptyList();
+                Set<Long> correctIds = answers.stream()
                         .filter(a -> Boolean.TRUE.equals(a.getIsCorrect()))
                         .map(Answer::getOptionId)
                         .collect(Collectors.toSet());

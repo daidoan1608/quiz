@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { aiApi } from 'api/services/aiApi';
+import { useAuth } from 'context/auth/AuthProvider';
 
 export default function ExamAiAnalysisCard({ userExamId, className = '' }) {
+  const { isLoggedIn } = useAuth();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(true);
 
   const fetchAnalysis = useCallback(async () => {
-    if (!userExamId) return;
+    if (!userExamId || !isLoggedIn) return;
 
     setLoading(true);
     setError(null);
@@ -28,13 +30,25 @@ export default function ExamAiAnalysisCard({ userExamId, className = '' }) {
     } finally {
       setLoading(false);
     }
-  }, [userExamId]);
+  }, [userExamId, isLoggedIn]);
 
   useEffect(() => {
     fetchAnalysis();
   }, [fetchAnalysis]);
 
   if (!userExamId) return null;
+
+  if (!isLoggedIn) {
+    return (
+      <section className={`aura-surface-panel p-5 shadow-sm ${className}`}>
+        <div className="flex items-center gap-2.5 text-sm text-gray-600 dark:text-gray-300">
+          <span className="material-symbols-outlined text-purple-600 text-lg">psychology</span>
+          <span>Đăng nhập tài khoản để nhận đánh giá và phân tích chuyên sâu từ Trợ lý AI.</span>
+        </div>
+      </section>
+    );
+  }
+
 
   const getTierConfig = (tier) => {
     switch (tier?.toUpperCase()) {

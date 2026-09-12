@@ -169,7 +169,7 @@ class AiExamAnalysisServiceImplTest {
         a1.setIsCorrect(true);
         q1.setAnswers(List.of(a1));
 
-        when(questionRepository.findQuestionsByExamId(10L)).thenReturn(List.of(q1));
+        when(questionRepository.findQuestionsByExamIdIncludingDeleted(10L)).thenReturn(List.of(q1));
 
         UserAnswer ua1 = new UserAnswer();
         ua1.setQuestion(q1);

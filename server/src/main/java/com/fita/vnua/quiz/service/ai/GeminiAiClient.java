@@ -12,6 +12,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
 import java.util.ArrayList;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +32,16 @@ public class GeminiAiClient implements AiClient {
     public GeminiAiClient(AiProperties aiProperties, ObjectMapper objectMapper) {
         this.aiProperties = aiProperties;
         this.objectMapper = objectMapper;
-        this.restClient = RestClient.builder().build();
+
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(Duration.ofSeconds(10));
+        requestFactory.setReadTimeout(Duration.ofSeconds(60));
+
+        this.restClient = RestClient.builder()
+                .requestFactory(requestFactory)
+                .build();
     }
+
 
     @Override
     public String getProviderName() {
@@ -94,6 +107,12 @@ public class GeminiAiClient implements AiClient {
             throw new CustomApiException("AI_PARSE_ERROR", "Định dạng phản hồi AI không đúng kỳ vọng.", HttpStatus.BAD_GATEWAY);
         } catch (CustomApiException e) {
             throw e;
+        } catch (RestClientResponseException e) {
+            log.error("Gemini API returned error: HTTP {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode().value() == 429) {
+                throw new CustomApiException("AI_RATE_LIMIT", "Dịch vụ Google Gemini đang hết hạn mức hoặc quá tải. Vui lòng thử lại sau.", HttpStatus.TOO_MANY_REQUESTS);
+            }
+            throw new CustomApiException("AI_SERVICE_ERROR", "Google Gemini API phản hồi lỗi: " + e.getStatusCode(), HttpStatus.BAD_GATEWAY);
         } catch (Exception e) {
             log.error("Error calling Gemini API: {}", e.getMessage(), e);
             throw new CustomApiException("AI_SERVICE_ERROR", "Không thể kết nối đến AI service: " + e.getMessage(), HttpStatus.BAD_GATEWAY);

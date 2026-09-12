@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { aiApi } from 'api/services/aiApi';
 import { parseMarkdown } from 'utils/markdown/parseMarkdown';
+import { useAuth } from 'context/auth/AuthProvider';
 
 export default function AiExplanationBlock({
   questionId,
@@ -8,16 +9,24 @@ export default function AiExplanationBlock({
   className = '',
   buttonSize = 'default',
 }) {
+  const { isLoggedIn } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [explanationData, setExplanationData] = useState(null);
   const [error, setError] = useState(null);
 
   const fetchExplanation = async () => {
+    if (!isLoggedIn) {
+      setIsOpen(true);
+      setError('Vui lòng đăng nhập để sử dụng tính năng giải thích bằng AI.');
+      return;
+    }
+
     if (explanationData) {
       setIsOpen((prev) => !prev);
       return;
     }
+
 
     setIsOpen(true);
     setLoading(true);
