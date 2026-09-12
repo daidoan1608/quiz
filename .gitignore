@@ -86,3 +86,4 @@ server/uploads/**
 server/uploads/avatars/
 server/uploads/avatars/**
 !server/uploads/.gitkeep
+*.code-workspace

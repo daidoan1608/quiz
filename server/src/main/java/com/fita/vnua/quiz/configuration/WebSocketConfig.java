@@ -78,15 +78,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     return false;
                 }
 
-                String username = jwtTokenUtil.getUsernameFromToken(token);
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-                if (!jwtTokenUtil.validateToken(token, userDetails)) {
-                    return false;
-                }
+                try {
+                    String username = jwtTokenUtil.getUsernameFromToken(token);
+                    if (!StringUtils.hasText(username)) {
+                        return false;
+                    }
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                    if (!jwtTokenUtil.validateToken(token, userDetails)) {
+                        return false;
+                    }
 
-                if (userDetails instanceof User user) {
-                    attributes.put(WS_USER_ID, user.getUserId().toString());
-                    return true;
+                    if (userDetails instanceof User user) {
+                        attributes.put(WS_USER_ID, user.getUserId().toString());
+                        return true;
+                    }
+                } catch (Exception ignored) {
+                    return false;
                 }
             }
             return false;
