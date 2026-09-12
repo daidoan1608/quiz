@@ -113,7 +113,7 @@ public class RedisCacheConfig {
                 .build();
         objectMapper.activateDefaultTypingAsProperty(
                 typeValidator,
-                ObjectMapper.DefaultTyping.EVERYTHING,
+                ObjectMapper.DefaultTyping.NON_FINAL,
                 TYPE_HINT_PROPERTY
         );
         return new GenericJackson2JsonRedisSerializer(objectMapper);
