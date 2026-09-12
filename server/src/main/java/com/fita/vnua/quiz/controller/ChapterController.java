@@ -17,33 +17,33 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1")
 @Tag(name = "Chapter API", description = "API cho các chức năng liên quan đến chương")
 public class ChapterController {
     private final ChapterService chapterService;
 
-    @GetMapping("public/chapters/subject/{subjectId}")
+    @GetMapping("/public/chapters/subject/{subjectId}")
     @Operation(summary = "Lấy danh sách chương theo Id môn (public)")
     public ResponseEntity<ApiResponse<List<ChapterDto>>> getChapterBySubjectId(@PathVariable("subjectId") Long subjectId) {
         List<ChapterDto> chapters = chapterService.getChapterBySubject(subjectId);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách chương theo môn học thành công", chapters));
     }
 
-    @GetMapping("public/chapters")
+    @GetMapping("/public/chapters")
     @Operation(summary = "Lấy danh sách tất cả chương (public)")
     public ResponseEntity<ApiResponse<List<ChapterDto>>> getAllChapter() {
         List<ChapterDto> chapters = chapterService.getAllChapter();
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách chương thành công", chapters));
     }
 
-    @GetMapping("public/chapters/search")
+    @GetMapping("/public/chapters/search")
     @Operation(summary = "Tìm kiếm chương theo tên")
     public ResponseEntity<ApiResponse<List<ChapterDto>>> searchChapters(@RequestParam("q") String keyword) {
         List<ChapterDto> chapters = chapterService.searchChapters(keyword);
         return ResponseEntity.ok(ApiResponse.success("Tìm kiếm chương thành công", chapters));
     }
 
-    @GetMapping("public/chapters/{chapterId}")
+    @GetMapping("/public/chapters/{chapterId}")
     @Operation(summary = "Lấy chương theo Id (public)")
     public ResponseEntity<ApiResponse<ChapterDto>> getChapterById(@PathVariable("chapterId") Long chapterId) {
         ChapterDto chapter = chapterService.getChapterById(chapterId)
@@ -52,7 +52,7 @@ public class ChapterController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/chapters/filter")
+    @GetMapping("/admin/chapters/filter")
     @Operation(summary = "Lọc chương cho admin")
     public ResponseEntity<ApiResponse<List<ChapterDto>>> filterChapters(
             @RequestParam(required = false) String keyword,
@@ -69,14 +69,14 @@ public class ChapterController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/chapters/deleted")
+    @GetMapping("/admin/chapters/deleted")
     @Operation(summary = "Lấy danh sách chương đã xóa mềm")
     public ResponseEntity<ApiResponse<List<ChapterDto>>> getDeletedChapters() {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách chương đã xóa thành công", chapterService.getDeletedChapters()));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterDto.subjectId, 'Subject', 'CREATE')")
-    @PostMapping("admin/chapters")
+    @PostMapping("/admin/chapters")
     @Operation(summary = "Tạo chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> createChapter(@Valid @RequestBody ChapterDto chapterDto) {
         ChapterDto createdChapter = chapterService.create(chapterDto);
@@ -84,7 +84,7 @@ public class ChapterController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterId, 'Chapter', 'UPDATE')")
-    @PatchMapping("admin/chapters/{chapterId}")
+    @PatchMapping("/admin/chapters/{chapterId}")
     @Operation(summary = "Cập nhật chương (admin)")
     public ResponseEntity<ApiResponse<ChapterDto>> updateChapter(
             @PathVariable("chapterId") Long chapterId,
@@ -95,7 +95,7 @@ public class ChapterController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterId, 'Chapter', 'DELETE')")
-    @DeleteMapping("admin/chapters/{chapterId}")
+    @DeleteMapping("/admin/chapters/{chapterId}")
     @Operation(summary = "Xóa chương (admin)")
     public ResponseEntity<ApiResponse<Object>> deleteChapter(@PathVariable("chapterId") Long chapterId) {
         chapterService.delete(chapterId);
@@ -103,7 +103,7 @@ public class ChapterController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#chapterId, 'Chapter', 'UPDATE')")
-    @PatchMapping("admin/chapters/{chapterId}/restore")
+    @PatchMapping("/admin/chapters/{chapterId}/restore")
     @Operation(summary = "Khôi phục chương đã xóa mềm")
     public ResponseEntity<ApiResponse<ChapterDto>> restoreChapter(@PathVariable("chapterId") Long chapterId) {
         return ResponseEntity.ok(ApiResponse.success("Khôi phục chương thành công", chapterService.restore(chapterId)));

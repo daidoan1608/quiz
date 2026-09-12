@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/auth/")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Authentication API", description = "API thao tác liên quan bảo mật của người dùng (Cookie Based)")
@@ -46,7 +46,7 @@ public class AuthController {
     private final com.fita.vnua.quiz.service.EmailVerificationService emailVerificationService;
     private final AuditLogService auditLogService;
 
-    @PostMapping("login")
+    @PostMapping("/login")
     @Operation(summary = "API đăng nhập (Trả về HttpOnly Cookie)")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
@@ -94,7 +94,7 @@ public class AuthController {
         }
     }
 
-    @PatchMapping("password")
+    @PatchMapping("/password")
     @Operation(summary = "API thiết lập mật khẩu cho tài khoản đang đăng nhập")
     public ResponseEntity<ApiResponse<Object>> setPassword(
             @AuthenticationPrincipal User currentUser,
@@ -107,7 +107,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Đã thiết lập mật khẩu thành công. Bạn có thể đăng nhập bằng tài khoản + mật khẩu.", null));
     }
 
-    @GetMapping("me")
+    @GetMapping("/me")
     @Operation(summary = "API lấy thông tin người dùng đang đăng nhập")
     public ResponseEntity<ApiResponse<AuthResponse>> me(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
@@ -117,7 +117,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin người dùng thành công", authService.createAuthResponse(userDetails)));
     }
 
-    @PostMapping("refresh")
+    @PostMapping("/refresh")
     @Operation(summary = "API lấy lại access token (Dùng Cookie RefreshToken)")
     public ResponseEntity<ApiResponse<Object>> refreshAccessToken(
             @CookieValue(name = "refreshToken", required = false) String refreshToken
@@ -135,7 +135,7 @@ public class AuthController {
                 .body(ApiResponse.success("Làm mới phiên đăng nhập thành công", null));
     }
 
-    @PostMapping("logout")
+    @PostMapping("/logout")
     @Operation(summary = "API đăng xuất (Xóa Cookie)")
     public ResponseEntity<ApiResponse<Object>> logout(
             @CookieValue(name = "refreshToken", defaultValue = "") String refreshToken
@@ -153,7 +153,7 @@ public class AuthController {
                 .body(ApiResponse.success("Đăng xuất thành công", null));
     }
 
-    @PostMapping("register")
+    @PostMapping("/register")
     @Operation(summary = "API đăng ký tài khoản (Gửi email xác thực)")
     public ResponseEntity<ApiResponse<Object>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         AuthRegistrationResult result = authService.register(registerRequest);
@@ -161,14 +161,14 @@ public class AuthController {
                 .body(ApiResponse.success(result.message(), null));
     }
 
-    @GetMapping("verify-email")
+    @GetMapping("/verify-email")
     @Operation(summary = "API xác thực email tài khoản bằng token")
     public ResponseEntity<ApiResponse<Object>> verifyEmail(@RequestParam String token) {
         emailVerificationService.verifyEmail(token);
         return ResponseEntity.ok(ApiResponse.success("Xác thực email thành công", null));
     }
 
-    @PostMapping("google")
+    @PostMapping("/google")
     @Operation(summary = "API đăng nhập bằng Google (Nhận Google ID Token, Trả về HttpOnly Cookie)")
     public ResponseEntity<ApiResponse<AuthResponse>> loginWithGoogle(@RequestBody Map<String, String> body) throws Exception {
         String idToken = body == null ? null : body.get("idToken");

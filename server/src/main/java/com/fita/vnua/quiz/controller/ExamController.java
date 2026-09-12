@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1")
 @Tag(name = "Exam API", description = "API cho các chức năng liên quan đến bài thi")
 public class ExamController {
     private final ExamService examService;
@@ -30,7 +30,7 @@ public class ExamController {
     private final AuditLogService auditLogService;
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#examRequest.examDto.subjectId, 'Subject', 'CREATE')")
-    @PostMapping("admin/exams")
+    @PostMapping("/admin/exams")
     @Operation(summary = "Tạo bài thi")
     public ResponseEntity<ApiResponse<ExamDto>> createExam(
             @Valid @RequestBody ExamRequest examRequest,
@@ -42,7 +42,7 @@ public class ExamController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/exams/filter")
+    @GetMapping("/admin/exams/filter")
     @Operation(summary = "Lọc bài thi cho admin")
     public ResponseEntity<ApiResponse<List<ExamSummaryDto>>> filterExams(
             @RequestParam(required = false) String keyword,
@@ -60,7 +60,7 @@ public class ExamController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/exams/page")
+    @GetMapping("/admin/exams/page")
     @Operation(summary = "Lọc bài thi cho admin có phân trang")
     public ResponseEntity<ApiResponse<Page<ExamSummaryDto>>> filterExamsPage(
             @RequestParam(required = false) String keyword,
@@ -80,28 +80,28 @@ public class ExamController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/exams/deleted")
+    @GetMapping("/admin/exams/deleted")
     @Operation(summary = "Lấy danh sách bài thi đã xóa mềm")
     public ResponseEntity<ApiResponse<List<ExamSummaryDto>>> getDeletedExams() {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bài thi đã xóa thành công", examService.getDeletedExams()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/exams")
+    @GetMapping("/admin/exams")
     @Operation(summary = "Lấy danh sách bài thi")
     public ResponseEntity<ApiResponse<List<ExamSummaryDto>>> getAllExams() {
         List<ExamSummaryDto> exams = examService.getAllExams();
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bài thi thành công", exams));
     }
 
-    @GetMapping("public/exams/subject/{subjectId}")
+    @GetMapping("/public/exams/subject/{subjectId}")
     @Operation(summary = "Lấy danh sách bài thi theo Id môn (public)")
     public ResponseEntity<ApiResponse<List<ExamSummaryDto>>> getExamsBySubjectId(@PathVariable("subjectId") Long subjectId) {
         List<ExamSummaryDto> exams = examService.getExamsBySubjectId(subjectId);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bài thi theo môn học thành công", exams));
     }
 
-    @GetMapping("public/exams/{examId}")
+    @GetMapping("/public/exams/{examId}")
     @Operation(summary = "Lấy bài thi theo Id bài thi(public)")
     public ResponseEntity<ApiResponse<ExamDto>> getExamById(
             @PathVariable("examId") Long examId,
@@ -121,7 +121,7 @@ public class ExamController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'UPDATE')")
-    @PutMapping("admin/exams/{examId}")
+    @PutMapping("/admin/exams/{examId}")
     @Operation(summary = "Cập nhật bài thi")
     public ResponseEntity<ApiResponse<ExamDto>> updateExam(@PathVariable("examId") Long examId, @Valid @RequestBody ExamDto examDto, @AuthenticationPrincipal User currentUser) {
         ExamDto updatedExam = examService.updateExam(examId, examDto);
@@ -130,7 +130,7 @@ public class ExamController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'DELETE')")
-    @DeleteMapping("admin/exams/{examId}")
+    @DeleteMapping("/admin/exams/{examId}")
     @Operation(summary = "Xóa bài thi")
     public ResponseEntity<ApiResponse<Object>> deleteExam(@PathVariable("examId") Long examId, @AuthenticationPrincipal User currentUser) {
         examService.deleteExam(examId);
@@ -139,7 +139,7 @@ public class ExamController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasPermission(#examId, 'Exam', 'UPDATE')")
-    @PatchMapping("admin/exams/{examId}/restore")
+    @PatchMapping("/admin/exams/{examId}/restore")
     @Operation(summary = "Khôi phục bài thi đã xóa mềm")
     public ResponseEntity<ApiResponse<ExamDto>> restoreExam(@PathVariable("examId") Long examId) {
         return ResponseEntity.ok(ApiResponse.success("Khôi phục bài thi thành công", examService.restoreExam(examId)));

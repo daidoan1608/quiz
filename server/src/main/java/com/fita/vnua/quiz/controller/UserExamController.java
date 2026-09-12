@@ -38,7 +38,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1")
 @Tag(name = "User Exam API", description = "API cho các chức năng liên quan đến bài thi của người dùng")
 public class UserExamController {
     private final UserExamService userExamService;
@@ -46,7 +46,7 @@ public class UserExamController {
     private final AuthorizationService authorizationService;
     private final UserExamAccessService userExamAccessService;
 
-    @GetMapping("public/user-exam-summaries")
+    @GetMapping("/public/user-exam-summaries")
     @Operation(summary = "Thống kê điểm thi của người dùng")
     public ResponseEntity<ApiResponse<List<UserExamSummaryDto>>> getUserExamSummaries(
             @RequestParam(defaultValue = "all") String period) {
@@ -54,7 +54,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy thống kê điểm thi thành công", summaries));
     }
 
-    @GetMapping("public/rankings")
+    @GetMapping("/public/rankings")
     @Operation(summary = "Lấy bảng xếp hạng tối ưu")
     public ResponseEntity<ApiResponse<RankingResponse>> getRankings(
             @RequestParam(defaultValue = "all") String period,
@@ -72,7 +72,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy bảng xếp hạng thành công", rankings));
     }
 
-    @GetMapping("admin/user-exams")
+    @GetMapping("/admin/user-exams")
     @Operation(summary = "Lấy danh sách bài thi của tất cả người dùng")
     public ResponseEntity<Page<UserExamResponse>> getAllUserExams(
             @RequestParam(required = false) String keyword,
@@ -98,7 +98,7 @@ public class UserExamController {
         ));
     }
 
-    @GetMapping("user-exams")
+    @GetMapping("/user-exams")
     @Operation(summary = "Lấy bài thi của người dùng theo userId và subjectId")
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getUserExamByUserIdAndSubjectId(
             @Parameter(description = "User ID", required = true) @RequestParam("userId") UUID userId,
@@ -110,7 +110,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bài thi theo người dùng và môn học thành công", userExams));
     }
 
-    @GetMapping("users/{userId}/user-exams/recent")
+    @GetMapping("/users/{userId}/user-exams/recent")
     @Operation(summary = "Lấy 7 bài thi gần nhất của người dùng theo userId")
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getLast7UserExamsByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
@@ -121,7 +121,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bài thi gần nhất thành công", userExams));
     }
 
-    @GetMapping("user-exams/{userExamId}")
+    @GetMapping("/user-exams/{userExamId}")
     @Operation(summary = "Lấy bài thi của người dùng theo ID")
     public ResponseEntity<ApiResponse<UserExamResponse>> getUserExamById(
             @PathVariable("userExamId") Long userExamId,
@@ -137,7 +137,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin bài thi của người dùng thành công", userExam));
     }
 
-    @GetMapping("users/{userId}/user-exams/count")
+    @GetMapping("/users/{userId}/user-exams/count")
     @Operation(summary = "Lấy số lượng bài thi của người dùng theo userId")
     public ResponseEntity<ApiResponse<List<Map<Long, Object>>>> getExamAttemptsByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
@@ -148,7 +148,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy số lượt làm bài thành công", attempts));
     }
 
-    @PostMapping("user-exams")
+    @PostMapping("/user-exams")
     @Deprecated(since = "2026-07-23", forRemoval = false)
     @Operation(
             summary = "Tạo bài thi cho người dùng",
@@ -164,7 +164,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Tạo bài thi cho người dùng thành công", saveUserExam));
     }
 
-    @PostMapping("exam-attempts/start")
+    @PostMapping("/exam-attempts/start")
     @Operation(summary = "Tạo mới hoặc resume bài thi đang thực hiện")
     public ResponseEntity<ApiResponse<ExamAttemptResponse>> startOrResumeAttempt(
             @Valid @RequestBody StartExamAttemptRequest request,
@@ -174,7 +174,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Bắt đầu hoặc tiếp tục bài thi thành công", attempt));
     }
 
-    @GetMapping("users/{userId}/exam-attempts/in-progress")
+    @GetMapping("/users/{userId}/exam-attempts/in-progress")
     @Operation(summary = "Lấy danh sách bài thi đang thực hiện của người dùng")
     public ResponseEntity<ApiResponse<List<ExamAttemptResponse>>> getInProgressAttempts(
             @PathVariable("userId") UUID userId,
@@ -184,7 +184,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bài thi đang làm thành công", attempts));
     }
 
-    @PutMapping("exam-attempts/{userExamId}/answers")
+    @PutMapping("/exam-attempts/{userExamId}/answers")
     @Operation(summary = "Autosave đáp án của bài thi đang thực hiện")
     public ResponseEntity<ApiResponse<ExamAttemptResponse>> saveAttemptAnswer(
             @PathVariable("userExamId") Long userExamId,
@@ -195,7 +195,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Lưu đáp án thành công", attempt));
     }
 
-    @PatchMapping("exam-attempts/{userExamId}/progress")
+    @PatchMapping("/exam-attempts/{userExamId}/progress")
     @Operation(summary = "Cập nhật câu hiện tại/thời gian còn lại của bài thi đang thực hiện")
     public ResponseEntity<ApiResponse<ExamAttemptResponse>> updateAttemptProgress(
             @PathVariable("userExamId") Long userExamId,
@@ -206,7 +206,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật tiến độ làm bài thành công", attempt));
     }
 
-    @PostMapping("exam-attempts/{userExamId}/submit")
+    @PostMapping("/exam-attempts/{userExamId}/submit")
     @Operation(summary = "Nộp bài thi đang thực hiện")
     public ResponseEntity<ApiResponse<UserExamDto>> submitAttempt(
             @PathVariable("userExamId") Long userExamId,
@@ -216,7 +216,7 @@ public class UserExamController {
         return ResponseEntity.ok(ApiResponse.success("Nộp bài thi thành công", userExam));
     }
 
-    @GetMapping("users/{userId}/user-exams")
+    @GetMapping("/users/{userId}/user-exams")
     @Operation(summary = "Lấy bài thi của người dùng theo userId")
     public ResponseEntity<ApiResponse<List<UserExamResponse>>> getUserExamByUserId(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,

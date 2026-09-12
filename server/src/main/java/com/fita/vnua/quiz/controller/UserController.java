@@ -29,7 +29,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1")
 @Tag(name = "User API", description = "API thực hiện các thao tác với người dùng")
 public class UserController {
     private final UserService userService;
@@ -37,7 +37,7 @@ public class UserController {
     private final UserMapper userMapper;
     private final AuditLogService auditLogService;
 
-    @PatchMapping("users/{userId}/password")
+    @PatchMapping("/users/{userId}/password")
     @Operation(summary = "API đổi mật khẩu")
     public ResponseEntity<ApiResponse<Object>> changePassword(
             @PathVariable("userId") UUID userId,
@@ -50,7 +50,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/users/filter")
+    @GetMapping("/admin/users/filter")
     @Operation(summary = "Lọc danh sách người dùng cho admin")
     public ResponseEntity<ApiResponse<List<UserResponse>>> filterUsers(
             @RequestParam(required = false) String keyword,
@@ -68,7 +68,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/users/deleted")
+    @GetMapping("/admin/users/deleted")
     @Operation(summary = "Lấy danh sách người dùng đã vô hiệu hóa")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getDeletedUsers() {
         List<UserResponse> users = userService.getDeletedUserResponses();
@@ -76,7 +76,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/users")
+    @GetMapping("/admin/users")
     @Operation(summary = "Lấy danh sách tất cả người dùng", description = "This API fetches all users")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         List<UserResponse> users = userService.getAllUserResponses();
@@ -84,7 +84,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/users/search")
+    @GetMapping("/admin/users/search")
     @Operation(summary = "Lấy danh sách người dùng theo từ khóa tìm kiếm", description = "This API fetches users by search key")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getUserBySearchKey(
             @RequestParam("key") String keyword,
@@ -94,7 +94,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Tìm kiếm người dùng thành công", users));
     }
 
-    @GetMapping({"users/{userId}", "user/{userId}"})
+    @GetMapping({"/users/{userId}", "/user/{userId}"})
     @Operation(summary = "Lấy ra người dùng theo ID", description = "This API fetches a user by their ID")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
@@ -105,7 +105,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin người dùng thành công", user));
     }
 
-    @PatchMapping("users/{userId}")
+    @PatchMapping("/users/{userId}")
     @Operation(summary = "Cập nhật thông tin cá nhân", description = "Người dùng cập nhật họ tên, email, số điện thoại, địa chỉ")
     public ResponseEntity<ApiResponse<UserResponse>> updateProfile(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
@@ -118,7 +118,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("admin/users")
+    @PostMapping("/admin/users")
     @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody AdminUserCreateRequest request, @AuthenticationPrincipal User currentUser) {
         UserCommand userCommand = userMapper.toUserCommand(request);
@@ -128,7 +128,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("admin/users/{userId}")
+    @PatchMapping("/admin/users/{userId}")
     @Operation(summary = "Cập nhập thông tin người dùng", description = "This API update info user")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
@@ -142,7 +142,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("admin/users/{userId}")
+    @DeleteMapping("/admin/users/{userId}")
     @Operation(summary = "Xóa người dùng", description = "This API deletes a user")
     public ResponseEntity<ApiResponse<Object>> deleteUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
@@ -154,7 +154,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("admin/users/{userId}/restore")
+    @PatchMapping("/admin/users/{userId}/restore")
     @Operation(summary = "Khôi phục người dùng đã vô hiệu hóa")
     public ResponseEntity<ApiResponse<UserResponse>> restoreUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId

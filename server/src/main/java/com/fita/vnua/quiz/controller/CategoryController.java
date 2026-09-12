@@ -16,12 +16,12 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1")
 @Tag(name = "Category API", description = "API cho các chức năng liên quan đến danh mục")
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @GetMapping("public/categories")
+    @GetMapping("/public/categories")
     @Operation(summary = "Lấy danh sách danh mục (public)")
     public ResponseEntity<ApiResponse<List<CategorySummaryDto>>> getAllCategories() {
         return ResponseEntity.ok(ApiResponse.success(
@@ -30,7 +30,7 @@ public class CategoryController {
         ));
     }
 
-    @GetMapping("public/categories/search")
+    @GetMapping("/public/categories/search")
     @Operation(summary = "Tìm kiếm danh mục theo tên hoặc mô tả")
     public ResponseEntity<ApiResponse<List<CategorySummaryDto>>> searchCategories(@RequestParam("q") String keyword) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -40,7 +40,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'CATEGORY', 'VIEW', 'GLOBAL', null)")
-    @GetMapping("admin/categories/filter")
+    @GetMapping("/admin/categories/filter")
     @Operation(summary = "Lọc danh mục cho admin")
     public ResponseEntity<ApiResponse<List<CategorySummaryDto>>> filterCategories(
             @RequestParam(required = false) String keyword,
@@ -55,7 +55,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'CATEGORY', 'VIEW', 'GLOBAL', null)")
-    @GetMapping("admin/categories/deleted")
+    @GetMapping("/admin/categories/deleted")
     @Operation(summary = "Lấy danh sách danh mục đã xóa mềm")
     public ResponseEntity<ApiResponse<List<CategorySummaryDto>>> getDeletedCategories() {
         return ResponseEntity.ok(ApiResponse.success(
@@ -65,7 +65,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'CATEGORY', 'VIEW', 'GLOBAL', null)")
-    @GetMapping("admin/categories/{id}")
+    @GetMapping("/admin/categories/{id}")
     @Operation(summary = "Lấy danh mục theo Id (admin)")
     public ResponseEntity<ApiResponse<CategoryDto>> getCategoryById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -75,7 +75,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'CATEGORY', 'CREATE', 'GLOBAL', null)")
-    @PostMapping("admin/categories")
+    @PostMapping("/admin/categories")
     @Operation(summary = "Thêm danh mục (admin)")
     public ResponseEntity<ApiResponse<CategoryDto>> addCategory(@Valid @RequestBody CategoryDto categoryDto) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -85,7 +85,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'CATEGORY', 'UPDATE', 'GLOBAL', null)")
-    @PutMapping("admin/categories/{id}")
+    @PutMapping("/admin/categories/{id}")
     @Operation(summary = "Cập nhật danh mục (admin)")
     public ResponseEntity<ApiResponse<CategoryDto>> updateCategory(
             @PathVariable("id") Long id,
@@ -98,7 +98,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'CATEGORY', 'DELETE', 'GLOBAL', null)")
-    @DeleteMapping("admin/categories/{id}")
+    @DeleteMapping("/admin/categories/{id}")
     @Operation(summary = "Xóa danh mục (admin)")
     public ResponseEntity<ApiResponse<Object>> deleteCategory(@PathVariable("id") Long id) {
         categoryService.deleteCategory(id);
@@ -106,7 +106,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'CATEGORY', 'RESTORE', 'GLOBAL', null)")
-    @PatchMapping("admin/categories/{id}/restore")
+    @PatchMapping("/admin/categories/{id}/restore")
     @Operation(summary = "Khôi phục danh mục đã xóa mềm")
     public ResponseEntity<ApiResponse<CategoryDto>> restoreCategory(@PathVariable("id") Long id) {
         return ResponseEntity.ok(ApiResponse.success(
