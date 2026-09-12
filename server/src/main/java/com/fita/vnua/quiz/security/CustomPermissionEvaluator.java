@@ -1,13 +1,12 @@
-package com.fita.vnua.quiz.security;// package com.fita.vnua.quiz.security;
+package com.fita.vnua.quiz.security;
 
-import com.fita.vnua.quiz.model.entity.User; // Entity User của bạn
-import com.fita.vnua.quiz.repository.*; // Các Repository cần thiết
+import com.fita.vnua.quiz.model.entity.User;
+import com.fita.vnua.quiz.repository.*;
 import com.fita.vnua.quiz.service.AdminCapabilityService;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import java.io.Serializable;
-import java.util.UUID;
 
 @Component
 public class CustomPermissionEvaluator implements PermissionEvaluator {
@@ -20,10 +19,10 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
     private final AdminCapabilityService adminCapabilityService;
 
     public CustomPermissionEvaluator(ChapterRepository chapterRepository,
-                                     ExamRepository examRepository, QuestionRepository questionRepository,
-                                     AnswerRepository answerRepository,
-                                     SubjectRepository subjectRepository,
-                                     AdminCapabilityService adminCapabilityService) {
+            ExamRepository examRepository, QuestionRepository questionRepository,
+            AnswerRepository answerRepository,
+            SubjectRepository subjectRepository,
+            AdminCapabilityService adminCapabilityService) {
         this.chapterRepository = chapterRepository;
         this.examRepository = examRepository;
         this.questionRepository = questionRepository;
@@ -38,7 +37,8 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
     }
 
     @Override
-    public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
+    public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType,
+            Object permission) {
         if (authentication == null || targetId == null || targetType == null || permission == null) {
             return false;
         }

@@ -5,7 +5,6 @@ import com.fita.vnua.quiz.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +16,8 @@ public class AiClientRouter {
 
     public AiClient getActiveClient() {
         if (!aiProperties.isEnabled()) {
-            throw new CustomApiException("AI_DISABLED", "Tính năng AI hiện đang tạm thời tắt.", HttpStatus.SERVICE_UNAVAILABLE);
+            throw new CustomApiException("AI_DISABLED", "Tính năng AI hiện đang tạm thời tắt.",
+                    HttpStatus.SERVICE_UNAVAILABLE);
         }
 
         String preferred = aiProperties.getProvider();

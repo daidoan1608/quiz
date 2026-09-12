@@ -4,7 +4,6 @@ import com.fita.vnua.quiz.generator.FavoriteId;
 import com.fita.vnua.quiz.model.entity.Favorite;
 import com.fita.vnua.quiz.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
