@@ -3,6 +3,7 @@ import { PageContainer } from 'components/common/PageContainer';
 import { AnswerDistributionChart } from 'pages/Subject/components/AnswerDistributionChart';
 import { ExamAnswerSummaryStats } from 'pages/Subject/components/ExamAnswerSummaryStats';
 import QuestionReviewListBase from 'pages/Subject/components/QuestionReview/QuestionReviewListBase';
+import ExamAiAnalysisCard from 'components/Ai/ExamAiAnalysisCard';
 import { ResultActions } from './ResultActions';
 import { ResultHeader } from './ResultHeader';
 
@@ -31,6 +32,11 @@ export const ResultExamView = ({
             <AnswerDistributionChart {...summary} />
           </div>
         </section>
+        {userAnswers?.userExamDto?.userExamId && (
+          <ExamAiAnalysisCard
+            userExamId={userAnswers.userExamDto.userExamId}
+          />
+        )}
         <ResultActions
           examData={examData}
           examId={examId}
@@ -42,3 +48,4 @@ export const ResultExamView = ({
     </PageContainer>
   </div>
 );
+

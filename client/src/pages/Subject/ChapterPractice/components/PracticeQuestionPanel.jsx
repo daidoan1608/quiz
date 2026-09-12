@@ -83,7 +83,18 @@ export const PracticeQuestionPanel = ({
         <ConfirmMultipleAnswerButton onClick={onConfirmMultipleAnswer} />
       )}
 
-      {hasAnswered && <PracticeAnswerExplanation />}
+      {hasAnswered && (
+        <PracticeAnswerExplanation
+          questionId={currentQuestion?.questionId}
+          selectedAnswerIds={
+            Array.isArray(selectedValue)
+              ? selectedValue
+              : selectedValue !== undefined && selectedValue !== null
+              ? [selectedValue]
+              : []
+          }
+        />
+      )}
     </QuestionPanelShell>
   );
 };

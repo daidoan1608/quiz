@@ -4,6 +4,7 @@ import { AnswerDistributionChart } from 'pages/Subject/components/AnswerDistribu
 import { ExamAnswerSummaryStats } from 'pages/Subject/components/ExamAnswerSummaryStats';
 import { AttemptDetailHeader } from './AttemptDetailHeader';
 import { AttemptQuestionReviewList } from './AttemptQuestionReviewList';
+import ExamAiAnalysisCard from 'components/Ai/ExamAiAnalysisCard';
 
 export const AttemptDetailView = ({ examData, navigate, summary, userAnswers }) => (
   <div className="relative flex min-h-screen w-full flex-col bg-background-light font-display text-[#111418] dark:bg-background-dark dark:text-gray-200">
@@ -31,8 +32,14 @@ export const AttemptDetailView = ({ examData, navigate, summary, userAnswers }) 
             <AnswerDistributionChart {...summary} showPercentage={false} />
           </div>
         </section>
+        {userAnswers?.userExamDto?.userExamId && (
+          <ExamAiAnalysisCard
+            userExamId={userAnswers.userExamDto.userExamId}
+          />
+        )}
         <AttemptQuestionReviewList questionResults={summary.questionResults} />
       </div>
     </PageContainer>
   </div>
 );
+

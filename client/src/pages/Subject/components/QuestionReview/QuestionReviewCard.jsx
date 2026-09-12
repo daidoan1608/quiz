@@ -4,6 +4,7 @@ import { resolveMediaUrl } from 'utils/mediaUrl';
 import { getAnswerId } from 'pages/Subject/utils/examResultSummary';
 import ReviewAnswerOption from './ReviewAnswerOption';
 import ReviewStatusBadge from './ReviewStatusBadge';
+import AiExplanationBlock from 'components/Ai/AiExplanationBlock';
 
 export default function QuestionReviewCard({
   answerBorderStyleClass,
@@ -64,6 +65,11 @@ export default function QuestionReviewCard({
             );
           })}
         </div>
+
+        <AiExplanationBlock
+          questionId={question.questionId}
+          selectedAnswerIds={selectedIds}
+        />
       </div>
     </div>
   );
