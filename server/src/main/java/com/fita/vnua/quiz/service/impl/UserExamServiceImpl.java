@@ -19,6 +19,7 @@ import com.fita.vnua.quiz.model.dto.response.UserExamResponse;
 import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.repository.*;
 import com.fita.vnua.quiz.service.RankingService;
+import com.fita.vnua.quiz.service.UserExamAdminService;
 import com.fita.vnua.quiz.service.UserExamService;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.service.mapper.UserExamMapper;
@@ -76,6 +77,7 @@ public class UserExamServiceImpl implements UserExamService {
     private final UserExamMapper userExamMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final RankingService rankingService;
+    private final UserExamAdminService userExamAdminService;
 
     @Override
     public List<UserExamSummaryDto> getUserExamSummaries(LocalDateTime fromDate, LocalDateTime toDate) {
@@ -125,9 +127,7 @@ public class UserExamServiceImpl implements UserExamService {
 
     @Override
     public UserExamResponse getUserExamByIdForAdmin(Long id) {
-        UserExam userExam = userExamRepository.findByIdWithExamSubjectAndUser(id)
-                .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi của người dùng", HttpStatus.NOT_FOUND));
-        return buildUserExamResponse(userExam);
+        return userExamAdminService.getUserExamByIdForAdmin(id);
     }
 
     private UserExamResponse buildUserExamResponse(UserExam userExam) {
@@ -257,16 +257,7 @@ public class UserExamServiceImpl implements UserExamService {
             LocalDateTime startedTo,
             Pageable pageable
     ) {
-        String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
-        return userExamRepository.filterForAdmin(
-                        normalizedKeyword,
-                        categoryId,
-                        subjectId,
-                        startedFrom,
-                        startedTo,
-                        pageable
-                )
-                .map(userExamMapper::toAdminListResponse);
+        return userExamAdminService.getAllUserExamsForAdmin(keyword, categoryId, subjectId, startedFrom, startedTo, pageable);
     }
 
     @Override
