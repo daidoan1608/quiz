@@ -4,6 +4,7 @@ import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.request.*;
 import com.fita.vnua.quiz.model.dto.response.ApiResponse;
 import com.fita.vnua.quiz.model.dto.result.AuthRegistrationResult;
+import com.fita.vnua.quiz.model.dto.result.RefreshTokenResult;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.security.CustomUserDetailsService;
@@ -127,11 +128,15 @@ public class AuthController {
         }
 
         UUID refreshTokenId = parseRefreshToken(refreshToken);
-        String newAccessToken = authService.refreshAccessToken(refreshTokenId);
-        ResponseCookie newAccessCookie = jwtTokenUtil.generateAccessJwtCookie(newAccessToken);
+        RefreshTokenResult tokenResult = authService.refreshTokens(refreshTokenId);
+        ResponseCookie newAccessCookie = jwtTokenUtil.generateAccessJwtCookie(tokenResult.accessToken());
+        ResponseCookie newRefreshCookie = jwtTokenUtil.generateRefreshJwtCookie(tokenResult.refreshToken());
+        ResponseCookie legacyCleanRefreshCookie = jwtTokenUtil.getCleanLegacyRefreshJwtCookie();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, legacyCleanRefreshCookie.toString())
                 .body(ApiResponse.success("Làm mới phiên đăng nhập thành công", null));
     }
 
@@ -146,10 +151,12 @@ public class AuthController {
 
         ResponseCookie cleanAccess = jwtTokenUtil.getCleanJwtCookie();
         ResponseCookie cleanRefresh = jwtTokenUtil.getCleanRefreshJwtCookie();
+        ResponseCookie legacyCleanRefresh = jwtTokenUtil.getCleanLegacyRefreshJwtCookie();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cleanAccess.toString())
                 .header(HttpHeaders.SET_COOKIE, cleanRefresh.toString())
+                .header(HttpHeaders.SET_COOKIE, legacyCleanRefresh.toString())
                 .body(ApiResponse.success("Đăng xuất thành công", null));
     }
 
@@ -193,11 +200,13 @@ public class AuthController {
         String refreshTokenUUID = authService.generateRefreshToken(userDetails);
         ResponseCookie accessCookie = jwtTokenUtil.generateAccessJwtCookie(accessToken);
         ResponseCookie refreshCookie = jwtTokenUtil.generateRefreshJwtCookie(refreshTokenUUID);
+        ResponseCookie legacyCleanRefreshCookie = jwtTokenUtil.getCleanLegacyRefreshJwtCookie();
         AuthResponse authResponse = authService.createAuthResponse(userDetails);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, legacyCleanRefreshCookie.toString())
                 .body(ApiResponse.success(message, authResponse));
     }
 

@@ -2,6 +2,7 @@ package com.fita.vnua.quiz.service;
 
 import com.fita.vnua.quiz.model.dto.request.RegisterRequest;
 import com.fita.vnua.quiz.model.dto.result.AuthRegistrationResult;
+import com.fita.vnua.quiz.model.dto.result.RefreshTokenResult;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,8 @@ public interface AuthService {
     String generateAccessToken(UserDetails userDetails);
 
     String generateRefreshToken(UserDetails userDetails);
+
+    RefreshTokenResult refreshTokens(UUID refreshTokenId);
 
     String refreshAccessToken(UUID refreshTokenId);
 

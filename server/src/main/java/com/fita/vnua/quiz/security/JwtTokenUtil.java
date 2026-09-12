@@ -39,6 +39,9 @@ public class JwtTokenUtil {
     @Value("${app.cookie.same-site}")
     private String cookieSameSite;
 
+    @Value("${app.cookie.refresh-path:/api/v1/auth}")
+    private String refreshCookiePath;
+
     private final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
     private final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 
@@ -148,11 +151,11 @@ public class JwtTokenUtil {
      */
     public ResponseCookie generateRefreshJwtCookie(String refreshToken) {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
-                .path("/")
+                .path(getEffectiveRefreshCookiePath())
                 .maxAge(refreshTokenExpiration / 1000)
                 .httpOnly(true)
-                .secure(cookieSecure)       // <--- SỬA
-                .sameSite(cookieSameSite);  // <--- SỬA
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite);
 
         if (cookieDomain != null && !cookieDomain.isEmpty()) {
             builder.domain(cookieDomain);
@@ -201,6 +204,21 @@ public class JwtTokenUtil {
 
     public ResponseCookie getCleanRefreshJwtCookie() {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                .path(getEffectiveRefreshCookiePath())
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite);
+
+        if (cookieDomain != null && !cookieDomain.isEmpty()) {
+            builder.domain(cookieDomain);
+        }
+
+        return builder.build();
+    }
+
+    public ResponseCookie getCleanLegacyRefreshJwtCookie() {
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
                 .path("/")
                 .maxAge(0)
                 .httpOnly(true)
@@ -212,5 +230,9 @@ public class JwtTokenUtil {
         }
 
         return builder.build();
+    }
+
+    private String getEffectiveRefreshCookiePath() {
+        return (refreshCookiePath != null && !refreshCookiePath.isBlank()) ? refreshCookiePath : "/api/v1/auth";
     }
 }

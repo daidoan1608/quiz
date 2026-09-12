@@ -9,6 +9,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
+    @Query("""
+            SELECT rt FROM RefreshToken rt
+            JOIN FETCH rt.user
+            WHERE rt.token = :token
+            """)
     Optional<RefreshToken> findByToken(UUID token);
 
     @Query("""
@@ -21,7 +26,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
 
     void deleteByToken(UUID token);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE RefreshToken rt SET rt.revoked = true WHERE rt.user.userId = :userId AND rt.revoked = false")
     void revokeAllByUserId(UUID userId);
 }

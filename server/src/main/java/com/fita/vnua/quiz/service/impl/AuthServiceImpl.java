@@ -8,6 +8,7 @@ import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.command.UserCommand;
 import com.fita.vnua.quiz.model.dto.request.RegisterRequest;
 import com.fita.vnua.quiz.model.dto.result.AuthRegistrationResult;
+import com.fita.vnua.quiz.model.dto.result.RefreshTokenResult;
 import com.fita.vnua.quiz.model.dto.response.AuthResponse;
 import com.fita.vnua.quiz.model.entity.RefreshToken;
 import com.fita.vnua.quiz.model.entity.User;
@@ -16,6 +17,7 @@ import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import com.fita.vnua.quiz.security.JwtTokenUtil;
 import com.fita.vnua.quiz.service.AdminCapabilityService;
+import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.AuthService;
 import com.fita.vnua.quiz.service.EmailVerificationService;
 import com.fita.vnua.quiz.service.GoogleIdTokenVerifierService;
@@ -52,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
     private final CustomUserDetailsService customUserDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final CacheManager cacheManager;
+    private final AuditLogService auditLogService;
 
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
@@ -86,25 +89,66 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String refreshAccessToken(UUID refreshTokenId) {
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenAndRevoked(refreshTokenId, false)
+    @Transactional
+    public RefreshTokenResult refreshTokens(UUID refreshTokenId) {
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenId)
                 .orElseThrow(() -> new CustomApiException("Phiên đăng nhập không tồn tại hoặc đã bị thu hồi", HttpStatus.UNAUTHORIZED));
 
+        User user = refreshToken.getUser();
+
+        // 1. Kiểm tra nếu Refresh Token đã bị thu hồi trước đó (Token Reuse Detection - RFC 6819)
+        if (refreshToken.isRevoked()) {
+            auditLogService.recordSecurityEvent(
+                    "REFRESH_TOKEN_REUSE_DETECTED",
+                    user != null ? user.getUsername() : refreshTokenId.toString(),
+                    "Phát hiện tái sử dụng refresh token đã bị thu hồi. Thu hồi toàn bộ phiên đăng nhập của người dùng."
+            );
+            if (user != null) {
+                refreshTokenRepository.revokeAllByUserId(user.getUserId());
+                evictUserDetailsCache(user);
+            }
+            throw new CustomApiException("Phiên đăng nhập không hợp lệ hoặc đã bị thu hồi do phát hiện hành vi bất thường", HttpStatus.UNAUTHORIZED);
+        }
+
+        // 2. Kiểm tra hạn sử dụng
         if (refreshToken.getExpiryDate().before(new Date())) {
             refreshTokenRepository.delete(refreshToken);
             throw new CustomApiException("Phiên đăng nhập đã hết hạn", HttpStatus.UNAUTHORIZED);
         }
 
-        User user = refreshToken.getUser();
-        if (Boolean.TRUE.equals(user.getDeleted())) {
+        // 3. Kiểm tra trạng thái tài khoản
+        if (user == null || Boolean.TRUE.equals(user.getDeleted())) {
             refreshToken.setRevoked(true);
             refreshTokenRepository.save(refreshToken);
             throw new CustomApiException("Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.", HttpStatus.FORBIDDEN);
         }
-        return generateAccessTokenForUser(user);
+
+        // 4. Refresh Token Rotation (RTR): Thu hồi token hiện tại
+        refreshToken.setRevoked(true);
+        refreshTokenRepository.save(refreshToken);
+
+        // Phát hành Refresh Token mới
+        RefreshToken newRefreshToken = RefreshToken.builder()
+                .token(UUID.randomUUID())
+                .user(user)
+                .expiryDate(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .revoked(false)
+                .build();
+        refreshTokenRepository.save(newRefreshToken);
+
+        // Tạo Access Token mới
+        String newAccessToken = generateAccessTokenForUser(user);
+
+        return new RefreshTokenResult(newAccessToken, newRefreshToken.getToken().toString());
     }
 
     @Override
+    public String refreshAccessToken(UUID refreshTokenId) {
+        return refreshTokens(refreshTokenId).accessToken();
+    }
+
+    @Override
+    @Transactional
     public void revokeRefreshToken(UUID tokenId) {
         refreshTokenRepository.findByTokenAndRevoked(tokenId, false)
                 .ifPresent(refreshToken -> {

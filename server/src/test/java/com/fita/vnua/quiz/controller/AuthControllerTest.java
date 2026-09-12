@@ -79,4 +79,60 @@ class AuthControllerTest {
                 .isInstanceOf(CustomApiException.class)
                 .hasMessage("Vui lòng đăng nhập để tiếp tục");
     }
+
+    @Test
+    void refreshAccessTokenSuccessReturnsRotatedCookies() {
+        UUID oldTokenId = UUID.randomUUID();
+        UUID newTokenId = UUID.randomUUID();
+        com.fita.vnua.quiz.model.dto.result.RefreshTokenResult refreshResult =
+                new com.fita.vnua.quiz.model.dto.result.RefreshTokenResult("new-access-token", newTokenId.toString());
+
+        when(authService.refreshTokens(oldTokenId)).thenReturn(refreshResult);
+        when(jwtTokenUtil.generateAccessJwtCookie("new-access-token"))
+                .thenReturn(org.springframework.http.ResponseCookie.from("accessToken", "new-access-token").path("/").build());
+        when(jwtTokenUtil.generateRefreshJwtCookie(newTokenId.toString()))
+                .thenReturn(org.springframework.http.ResponseCookie.from("refreshToken", newTokenId.toString()).path("/api/v1/auth").build());
+        when(jwtTokenUtil.getCleanLegacyRefreshJwtCookie())
+                .thenReturn(org.springframework.http.ResponseCookie.from("refreshToken", "").path("/").maxAge(0).build());
+
+        ResponseEntity<ApiResponse<Object>> response = authController.refreshAccessToken(oldTokenId.toString());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().get(org.springframework.http.HttpHeaders.SET_COOKIE)).hasSize(3);
+    }
+
+    @Test
+    void refreshAccessTokenRejectsMissingOrBlankCookie() {
+        assertThatThrownBy(() -> authController.refreshAccessToken(null))
+                .isInstanceOf(CustomApiException.class)
+                .hasMessage("Phiên đăng nhập không hợp lệ hoặc đã hết hạn");
+
+        assertThatThrownBy(() -> authController.refreshAccessToken("   "))
+                .isInstanceOf(CustomApiException.class)
+                .hasMessage("Phiên đăng nhập không hợp lệ hoặc đã hết hạn");
+    }
+
+    @Test
+    void refreshAccessTokenRejectsMalformedToken() {
+        assertThatThrownBy(() -> authController.refreshAccessToken("invalid-uuid-string"))
+                .isInstanceOf(CustomApiException.class)
+                .hasMessage("Phiên đăng nhập không hợp lệ hoặc đã hết hạn");
+    }
+
+    @Test
+    void logoutRevokesTokenAndCleansCookies() {
+        UUID tokenId = UUID.randomUUID();
+        when(jwtTokenUtil.getCleanJwtCookie())
+                .thenReturn(org.springframework.http.ResponseCookie.from("accessToken", "").path("/").maxAge(0).build());
+        when(jwtTokenUtil.getCleanRefreshJwtCookie())
+                .thenReturn(org.springframework.http.ResponseCookie.from("refreshToken", "").path("/api/v1/auth").maxAge(0).build());
+        when(jwtTokenUtil.getCleanLegacyRefreshJwtCookie())
+                .thenReturn(org.springframework.http.ResponseCookie.from("refreshToken", "").path("/").maxAge(0).build());
+
+        ResponseEntity<ApiResponse<Object>> response = authController.logout(tokenId.toString());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        org.mockito.Mockito.verify(authService).revokeRefreshToken(tokenId);
+        assertThat(response.getHeaders().get(org.springframework.http.HttpHeaders.SET_COOKIE)).hasSize(3);
+    }
 }
