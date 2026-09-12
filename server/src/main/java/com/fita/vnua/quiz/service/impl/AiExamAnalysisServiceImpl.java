@@ -9,6 +9,7 @@ import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.UserAnswerRepository;
+import com.fita.vnua.quiz.repository.UserExamQuestionRepository;
 import com.fita.vnua.quiz.repository.UserExamRepository;
 import com.fita.vnua.quiz.security.InMemoryRateLimiter;
 import com.fita.vnua.quiz.service.AiExamAnalysisService;
@@ -35,6 +36,7 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
     private final UserExamRepository userExamRepository;
     private final UserAnswerRepository userAnswerRepository;
     private final QuestionRepository questionRepository;
+    private final UserExamQuestionRepository userExamQuestionRepository;
     private final AuthorizationService authorizationService;
     private final AiClientRouter aiClientRouter;
     private final AiProperties aiProperties;
@@ -90,9 +92,7 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
         }
         int maxDurationMinutes = exam != null && exam.getDuration() != null ? exam.getDuration() : 60;
 
-        List<Question> questions = exam != null
-                ? questionRepository.findQuestionsByExamIdIncludingDeleted(exam.getExamId())
-                : Collections.emptyList();
+        List<Question> questions = getAttemptQuestions(userExam);
 
         List<UserAnswer> userAnswers = userAnswerRepository.findUserAnswersByUserExamId(userExamId);
 
@@ -281,5 +281,22 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
             }
         }
         return list.isEmpty() ? List.of("Đang cập nhật đánh giá chi tiết.") : list;
+    }
+
+    private List<Question> getAttemptQuestions(UserExam userExam) {
+        if (userExamQuestionRepository != null) {
+            List<UserExamQuestion> snapshots = userExamQuestionRepository.findWithQuestionDetailsByUserExamIds(List.of(userExam.getUserExamId()));
+            if (snapshots != null && !snapshots.isEmpty()) {
+                return snapshots.stream()
+                        .map(UserExamQuestion::getQuestion)
+                        .filter(Objects::nonNull)
+                        .toList();
+            }
+        }
+        Exam exam = userExam.getExam();
+        if (exam != null && exam.getExamId() != null) {
+            return questionRepository.findQuestionsByExamIdIncludingDeleted(exam.getExamId());
+        }
+        return Collections.emptyList();
     }
 }

@@ -8,6 +8,7 @@ import com.fita.vnua.quiz.model.entity.*;
 import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.UserAnswerRepository;
+import com.fita.vnua.quiz.repository.UserExamQuestionRepository;
 import com.fita.vnua.quiz.repository.UserExamRepository;
 import com.fita.vnua.quiz.security.InMemoryRateLimiter;
 import com.fita.vnua.quiz.service.AuthorizationService;
@@ -44,6 +45,9 @@ class AiExamAnalysisServiceImplTest {
     private QuestionRepository questionRepository;
 
     @Mock
+    private UserExamQuestionRepository userExamQuestionRepository;
+
+    @Mock
     private AuthorizationService authorizationService;
 
     @Mock
@@ -76,6 +80,7 @@ class AiExamAnalysisServiceImplTest {
                 userExamRepository,
                 userAnswerRepository,
                 questionRepository,
+                userExamQuestionRepository,
                 authorizationService,
                 aiClientRouter,
                 aiProperties,
@@ -201,5 +206,59 @@ class AiExamAnalysisServiceImplTest {
         assertThat(response.isCached()).isFalse();
 
         verify(valueOperations).set(eq("ai:exam-analysis:ue:100"), anyString(), any(Duration.class));
+    }
+
+    @Test
+    void analyzeExamResult_WhenSnapshotExists_UsesSnapshotQuestions() {
+        when(userExamRepository.findById(100L)).thenReturn(Optional.of(testUserExam));
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("ai:exam-analysis:ue:100")).thenReturn(null);
+        when(rateLimiter.allow(anyString(), anyInt(), any(Duration.class))).thenReturn(true);
+
+        Chapter chapter = new Chapter();
+        chapter.setName("Chương Snapshot");
+
+        Question snapshotQuestion = new Question();
+        snapshotQuestion.setQuestionId(50L);
+        snapshotQuestion.setContent("Câu hỏi snapshot");
+        snapshotQuestion.setDifficulty(QuestionDifficulty.HARD);
+        snapshotQuestion.setChapter(chapter);
+
+        Answer correctAns = new Answer();
+        correctAns.setOptionId(501L);
+        correctAns.setIsCorrect(true);
+        snapshotQuestion.setAnswers(List.of(correctAns));
+
+        UserExamQuestion ueq = new UserExamQuestion();
+        ueq.setUserExam(testUserExam);
+        ueq.setQuestion(snapshotQuestion);
+        ueq.setPosition(0);
+
+        when(userExamQuestionRepository.findWithQuestionDetailsByUserExamIds(List.of(100L)))
+                .thenReturn(List.of(ueq));
+
+        UserAnswer ua = new UserAnswer();
+        ua.setQuestion(snapshotQuestion);
+        ua.setAnswer(correctAns);
+        when(userAnswerRepository.findUserAnswersByUserExamId(100L)).thenReturn(List.of(ua));
+
+        when(aiClientRouter.getActiveClient()).thenReturn(aiClient);
+        when(aiClient.getProviderName()).thenReturn("gemini");
+        when(aiClient.generateExplanation(anyString(), anyString())).thenReturn("""
+                {
+                  "performanceTier": "XUẤT SẮC",
+                  "summary": "Phân tích từ snapshot chuẩn xác.",
+                  "strengths": ["Nắm chắc kiến thức nâng cao"],
+                  "weaknesses": [],
+                  "recommendations": []
+                }
+                """);
+
+        ExamAnalysisResponse response = aiExamAnalysisService.analyzeExamResult(100L, testUser);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getPerformanceTier()).isEqualTo("XUẤT SẮC");
+        // Verify questionRepository was NOT called because snapshots were used
+        verify(questionRepository, never()).findQuestionsByExamIdIncludingDeleted(anyLong());
     }
 }

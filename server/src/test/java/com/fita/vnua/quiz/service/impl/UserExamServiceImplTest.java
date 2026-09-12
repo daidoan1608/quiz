@@ -36,9 +36,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,6 +83,22 @@ class UserExamServiceImplTest {
         assertThatThrownBy(() -> userExamService.getUserExamByIdForUser(10L, currentUserId))
                 .isInstanceOf(CustomApiException.class)
                 .hasMessage("Bạn không có quyền thực hiện thao tác này");
+    }
+
+    @Test
+    void submitAttemptRejectsAlreadySubmittedAttemptWithProperErrorCode() {
+        UUID currentUserId = UUID.randomUUID();
+        UserExam submittedAttempt = buildAttempt(10L, 99L, 0);
+        submittedAttempt.setStatus("SUBMITTED");
+
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
+        when(userExamRepository.findByIdAndUserId(10L, currentUserId)).thenReturn(Optional.of(submittedAttempt));
+
+        assertThatThrownBy(() -> userExamService.submitAttempt(10L, currentUserId))
+                .isInstanceOf(CustomApiException.class)
+                .hasMessage("Lượt làm bài không ở trạng thái đang thực hiện")
+                .hasFieldOrPropertyWithValue("code", "ATTEMPT_NOT_IN_PROGRESS");
     }
 
     @Test

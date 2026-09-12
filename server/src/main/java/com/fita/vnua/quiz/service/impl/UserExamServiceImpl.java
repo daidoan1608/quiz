@@ -54,7 +54,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import com.fita.vnua.quiz.utils.UuidUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -582,7 +581,7 @@ public class UserExamServiceImpl implements UserExamService {
     private UserExam getInProgressUserExam(Long userExamId, UUID currentUserId) {
         UserExam userExam = getUserExamForCurrentUser(userExamId, currentUserId);
         if (!"IN_PROGRESS".equals(userExam.getStatus())) {
-            throw new IllegalStateException("Lượt làm bài không ở trạng thái đang thực hiện");
+            throw new CustomApiException("ATTEMPT_NOT_IN_PROGRESS", "Lượt làm bài không ở trạng thái đang thực hiện", HttpStatus.BAD_REQUEST);
         }
         return userExam;
     }
@@ -594,7 +593,7 @@ public class UserExamServiceImpl implements UserExamService {
         UserExam userExam = userExamRepository.findByIdAndUserIdForUpdate(userExamId, currentUserId)
                 .orElseThrow(() -> new CustomApiException("Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN));
         if (!"IN_PROGRESS".equals(userExam.getStatus())) {
-            throw new IllegalStateException("Lượt làm bài không ở trạng thái đang thực hiện");
+            throw new CustomApiException("ATTEMPT_NOT_IN_PROGRESS", "Lượt làm bài không ở trạng thái đang thực hiện", HttpStatus.BAD_REQUEST);
         }
         return userExam;
     }
