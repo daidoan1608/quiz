@@ -5,14 +5,15 @@ import com.fita.vnua.quiz.model.entity.OtpCode;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.OtpCodeRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
+import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import com.fita.vnua.quiz.security.OtpGenerator;
 import com.fita.vnua.quiz.service.AuditLogService;
 import com.fita.vnua.quiz.service.OtpService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
@@ -32,6 +33,7 @@ public class OtpServiceImpl implements OtpService {
     private final PasswordEncoder passwordEncoder;
     private final OtpGenerator otpGenerator;
     private final AuditLogService auditLogService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     // Gửi OTP
     @Transactional
@@ -138,6 +140,7 @@ public class OtpServiceImpl implements OtpService {
         User user = otpCode.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+        customUserDetailsService.evictUser(user.getUsername(), user.getEmail());
 
         // Xoá OTP + resetToken sau khi dùng
         otpCodeRepository.deleteByUserId(user.getUserId());

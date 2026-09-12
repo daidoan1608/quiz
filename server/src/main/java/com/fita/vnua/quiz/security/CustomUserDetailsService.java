@@ -4,6 +4,8 @@ import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.DisabledException;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final CacheManager cacheManager;
 
     @Override
     @Cacheable(value = "userDetails", key = "#usernameOrEmail")
@@ -39,6 +42,21 @@ public class CustomUserDetailsService implements UserDetailsService {
                     "Tài khoản này đang đăng nhập bằng Google. Vui lòng thiết lập mật khẩu trước.",
                     HttpStatus.BAD_REQUEST
             );
+        }
+    }
+
+    public void evictUser(String username, String email) {
+        if (cacheManager == null) {
+            return;
+        }
+        Cache cache = cacheManager.getCache("userDetails");
+        if (cache != null) {
+            if (username != null && !username.isBlank()) {
+                cache.evictIfPresent(username);
+            }
+            if (email != null && !email.isBlank()) {
+                cache.evictIfPresent(email);
+            }
         }
     }
 }

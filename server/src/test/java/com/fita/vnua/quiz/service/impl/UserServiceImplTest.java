@@ -7,6 +7,7 @@ import com.fita.vnua.quiz.model.dto.response.UserResponse;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.UserRepository;
 import com.fita.vnua.quiz.service.mapper.UserMapper;
+import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,6 +32,9 @@ class UserServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private CustomUserDetailsService customUserDetailsService;
 
     @Spy
     private UserMapper userMapper = new UserMapper();

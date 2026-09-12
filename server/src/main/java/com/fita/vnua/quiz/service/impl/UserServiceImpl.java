@@ -13,6 +13,7 @@ import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.repository.RefreshTokenRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
+import com.fita.vnua.quiz.security.CustomUserDetailsService;
 import com.fita.vnua.quiz.service.UserService;
 import com.fita.vnua.quiz.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     public List<UserResponse> getAllUserResponses() {
@@ -160,6 +162,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setPassword(passwordEncoder.encode(command.getPassword()));
         }
         var updatedUser = userRepository.save(existingUser);
+        customUserDetailsService.evictUser(existingUser.getUsername(), existingUser.getEmail());
         return userMapper.toUserCommand(updatedUser);
     }
 
@@ -183,7 +186,9 @@ public class UserServiceImpl implements UserService {
         if (request.getAddress() != null) {
             existingUser.setAddress(request.getAddress());
         }
-        return userMapper.toUserResponse(userRepository.save(existingUser));
+        var savedUser = userRepository.save(existingUser);
+        customUserDetailsService.evictUser(savedUser.getUsername(), savedUser.getEmail());
+        return userMapper.toUserResponse(savedUser);
     }
 
     @Override
@@ -200,6 +205,7 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+        customUserDetailsService.evictUser(user.getUsername(), user.getEmail());
     }
 
     @Override
@@ -216,6 +222,7 @@ public class UserServiceImpl implements UserService {
             user.setDeleteOriginType("USER");
             user.setDeleteOriginId(null);
             userRepository.save(user);
+            customUserDetailsService.evictUser(user.getUsername(), user.getEmail());
         }
         refreshTokenRepository.revokeAllByUserId(userId);
         return OperationResult.builder()
@@ -234,7 +241,9 @@ public class UserServiceImpl implements UserService {
         user.setDeletedCascadeId(null);
         user.setDeleteOriginType(null);
         user.setDeleteOriginId(null);
-        return userMapper.toUserResponse(userRepository.save(user));
+        var restoredUser = userRepository.save(user);
+        customUserDetailsService.evictUser(restoredUser.getUsername(), restoredUser.getEmail());
+        return userMapper.toUserResponse(restoredUser);
     }
 
     @Override

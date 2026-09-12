@@ -46,8 +46,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (!"POST".equalsIgnoreCase(request.getMethod())) {
             return null;
         }
-        return switch (request.getRequestURI()) {
+        String path = request.getServletPath();
+        if (path == null || path.isBlank()) {
+            path = request.getRequestURI();
+        }
+        if (path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return switch (path) {
             case "/api/v1/auth/login" -> new RateLimitPolicy("auth-login", 5, Duration.ofMinutes(1));
+            case "/api/v1/auth/register" -> new RateLimitPolicy("auth-register", 5, Duration.ofMinutes(10));
             case "/api/v1/otp/send" -> new RateLimitPolicy("otp-send", 3, Duration.ofMinutes(10));
             case "/api/v1/otp/verify" -> new RateLimitPolicy("otp-verify", 5, Duration.ofMinutes(5));
             case "/api/v1/otp/reset" -> new RateLimitPolicy("otp-reset", 5, Duration.ofMinutes(5));
