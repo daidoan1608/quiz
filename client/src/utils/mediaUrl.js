@@ -5,7 +5,7 @@ const DEFAULT_AVATAR_URL = "/images/default_avatar.svg";
 
 export const getApiRoot = () => CLIENT_API_ROOT || DEFAULT_API_ROOT;
 
-export const isAbsoluteUrl = (url) => /^https?:\/\//i.test(url || "");
+export const isAbsoluteUrl = (url) => /^(?:https?:\/\/|data:|blob:)/i.test(url || "");
 
 export const resolveMediaUrl = (url, baseUrl = getApiRoot()) => {
   if (!url) return "";
