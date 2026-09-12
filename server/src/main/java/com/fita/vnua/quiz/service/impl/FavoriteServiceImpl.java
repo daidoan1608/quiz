@@ -6,7 +6,6 @@ import com.fita.vnua.quiz.model.dto.FavoriteDto;
 import com.fita.vnua.quiz.model.entity.Favorite;
 import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.model.entity.User;
-import com.fita.vnua.quiz.repository.CategoryRepository;
 import com.fita.vnua.quiz.repository.FavoriteRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.repository.UserRepository;
@@ -24,7 +23,6 @@ public class FavoriteServiceImpl implements FavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
-    private final CategoryRepository categoryRepository;
 
     @Override
     public FavoriteDto create(FavoriteDto favoriteDto, UUID currentUserId) {
@@ -42,7 +40,8 @@ public class FavoriteServiceImpl implements FavoriteService {
         if (Boolean.TRUE.equals(subject.getDeleted()) || Boolean.TRUE.equals(subject.getCategory().getDeleted())) {
             throw new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND);
         }
-        if (favoriteRepository.findByUserUserIdAndSubjectSubjectId(user.getUserId(), subject.getSubjectId()).isPresent()) {
+        if (favoriteRepository.findByUserUserIdAndSubjectSubjectId(user.getUserId(), subject.getSubjectId())
+                .isPresent()) {
             throw new CustomApiException("Môn học đã có trong danh sách yêu thích", HttpStatus.CONFLICT);
         }
 
@@ -97,14 +96,13 @@ public class FavoriteServiceImpl implements FavoriteService {
                 .filter(fav -> !Boolean.TRUE.equals(fav.getSubject().getDeleted()))
                 .filter(fav -> !Boolean.TRUE.equals(fav.getSubject().getCategory().getDeleted()))
                 .map(fav -> {
-            FavoriteDto dto = new FavoriteDto();
-            dto.setUserId(fav.getUser().getUserId());
-            dto.setSubjectId(fav.getSubject().getSubjectId());
-            dto.setSubjectName(fav.getSubject().getName());
-            dto.setCategoryId(fav.getSubject().getCategory().getCategoryId());
-            return dto;
-        }).toList();
+                    FavoriteDto dto = new FavoriteDto();
+                    dto.setUserId(fav.getUser().getUserId());
+                    dto.setSubjectId(fav.getSubject().getSubjectId());
+                    dto.setSubjectName(fav.getSubject().getName());
+                    dto.setCategoryId(fav.getSubject().getCategory().getCategoryId());
+                    return dto;
+                }).toList();
     }
-
 
 }

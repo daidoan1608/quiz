@@ -1,7 +1,5 @@
 package com.fita.vnua.quiz.utils;
 
-import com.fita.vnua.quiz.model.enums.QuestionType;
-
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
@@ -28,7 +26,7 @@ import java.util.stream.Collectors;
 public class ExcelHelper {
     private static final int MIN_ANSWERS = 2;
     private static final int MAX_ANSWERS = 8;
-    private static final String[] OPTIONS = {"A", "B", "C", "D", "E", "F", "G", "H"};
+    private static final String[] OPTIONS = { "A", "B", "C", "D", "E", "F", "G", "H" };
 
     public static List<QuestionDto> excelToQuestions(InputStream is) {
         return spreadsheetToQuestions(is);
@@ -78,7 +76,8 @@ public class ExcelHelper {
         validateDifficulty(difficulty);
         questionDto.setDifficulty(difficulty);
 
-        Set<String> correctOptions = parseCorrectOptions(getCellValue(currentRow, formatter, columns.correctOptionsColumn()).trim().toUpperCase());
+        Set<String> correctOptions = parseCorrectOptions(
+                getCellValue(currentRow, formatter, columns.correctOptionsColumn()).trim().toUpperCase());
         boolean hasBlankAnswerBeforeFilledAnswer = false;
         boolean seenBlankAnswer = false;
 
@@ -98,7 +97,8 @@ public class ExcelHelper {
             answers.add(answerDto);
         }
         if (hasBlankAnswerBeforeFilledAnswer) {
-            throw new CustomApiException("Các đáp án phải nhập liền từ A, không được bỏ trống đáp án ở giữa.", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Các đáp án phải nhập liền từ A, không được bỏ trống đáp án ở giữa.",
+                    HttpStatus.BAD_REQUEST);
         }
         validateCorrectOptionsWithinAnswerRange(correctOptions, answers.size());
 
@@ -158,7 +158,8 @@ public class ExcelHelper {
         String difficulty = getCsvValue(row, 1).trim();
         validateDifficulty(difficulty);
 
-        Set<String> correctOptions = parseCorrectOptions(getCsvValue(row, columns.correctOptionsColumn()).trim().toUpperCase());
+        Set<String> correctOptions = parseCorrectOptions(
+                getCsvValue(row, columns.correctOptionsColumn()).trim().toUpperCase());
         boolean hasBlankAnswerBeforeFilledAnswer = false;
         boolean seenBlankAnswer = false;
 
@@ -181,7 +182,8 @@ public class ExcelHelper {
             answers.add(answerDto);
         }
         if (hasBlankAnswerBeforeFilledAnswer) {
-            throw new CustomApiException("Các đáp án phải nhập liền từ A, không được bỏ trống đáp án ở giữa.", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Các đáp án phải nhập liền từ A, không được bỏ trống đáp án ở giữa.",
+                    HttpStatus.BAD_REQUEST);
         }
         validateCorrectOptionsWithinAnswerRange(correctOptions, answers.size());
 
@@ -264,7 +266,8 @@ public class ExcelHelper {
         for (String option : correctOptions) {
             int optionIndex = option.charAt(0) - 'A';
             if (optionIndex >= answerCount) {
-                throw new CustomApiException("Đáp án đúng " + option + " không có nội dung đáp án tương ứng.", HttpStatus.BAD_REQUEST);
+                throw new CustomApiException("Đáp án đúng " + option + " không có nội dung đáp án tương ứng.",
+                        HttpStatus.BAD_REQUEST);
             }
         }
     }
@@ -298,7 +301,8 @@ public class ExcelHelper {
         throw new CustomApiException("Giá trị bật/tắt không hợp lệ: " + value, HttpStatus.BAD_REQUEST);
     }
 
-    private record ImportColumns(int correctOptionsColumn, int imageUrlColumn, int questionTypeColumn, int examEnabledColumn, int practiceEnabledColumn) {
+    private record ImportColumns(int correctOptionsColumn, int imageUrlColumn, int questionTypeColumn,
+            int examEnabledColumn, int practiceEnabledColumn) {
         static ImportColumns current() {
             return new ImportColumns(10, 11, 12, 13, 14);
         }
@@ -329,7 +333,8 @@ public class ExcelHelper {
             if (correctColumn <= legacy().correctOptionsColumn()) {
                 return legacy();
             }
-            return new ImportColumns(correctColumn, correctColumn + 1, correctColumn + 2, correctColumn + 3, correctColumn + 4);
+            return new ImportColumns(correctColumn, correctColumn + 1, correctColumn + 2, correctColumn + 3,
+                    correctColumn + 4);
         }
 
         int answerLimit() {

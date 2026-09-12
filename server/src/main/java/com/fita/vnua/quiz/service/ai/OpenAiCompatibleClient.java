@@ -13,7 +13,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.time.Duration;
@@ -43,7 +42,6 @@ public class OpenAiCompatibleClient implements AiClient {
                 .build();
     }
 
-
     @Override
     public String getProviderName() {
         return "openai";
@@ -58,11 +56,15 @@ public class OpenAiCompatibleClient implements AiClient {
     public String generateExplanation(String systemPrompt, String userPrompt) {
         String apiKey = aiProperties.getOpenai().getApiKey();
         if (!StringUtils.hasText(apiKey)) {
-            throw new CustomApiException("AI_NOT_CONFIGURED", "Chưa cấu hình API Key cho OpenAI/DeepSeek.", HttpStatus.SERVICE_UNAVAILABLE);
+            throw new CustomApiException("AI_NOT_CONFIGURED", "Chưa cấu hình API Key cho OpenAI/DeepSeek.",
+                    HttpStatus.SERVICE_UNAVAILABLE);
         }
 
-        String model = StringUtils.hasText(aiProperties.getOpenai().getModel()) ? aiProperties.getOpenai().getModel() : "gpt-4o-mini";
-        String baseUrl = StringUtils.hasText(aiProperties.getOpenai().getBaseUrl()) ? aiProperties.getOpenai().getBaseUrl() : "https://api.openai.com/v1";
+        String model = StringUtils.hasText(aiProperties.getOpenai().getModel()) ? aiProperties.getOpenai().getModel()
+                : "gpt-4o-mini";
+        String baseUrl = StringUtils.hasText(aiProperties.getOpenai().getBaseUrl())
+                ? aiProperties.getOpenai().getBaseUrl()
+                : "https://api.openai.com/v1";
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
@@ -90,7 +92,8 @@ public class OpenAiCompatibleClient implements AiClient {
                     .body(String.class);
 
             if (!StringUtils.hasText(rawResponse)) {
-                throw new CustomApiException("AI_EMPTY_RESPONSE", "Không nhận được phản hồi từ AI service.", HttpStatus.BAD_GATEWAY);
+                throw new CustomApiException("AI_EMPTY_RESPONSE", "Không nhận được phản hồi từ AI service.",
+                        HttpStatus.BAD_GATEWAY);
             }
 
             JsonNode root = objectMapper.readTree(rawResponse);
@@ -104,18 +107,23 @@ public class OpenAiCompatibleClient implements AiClient {
             }
 
             log.warn("OpenAI unexpected response structure: {}", rawResponse);
-            throw new CustomApiException("AI_PARSE_ERROR", "Định dạng phản hồi AI không đúng kỳ vọng.", HttpStatus.BAD_GATEWAY);
+            throw new CustomApiException("AI_PARSE_ERROR", "Định dạng phản hồi AI không đúng kỳ vọng.",
+                    HttpStatus.BAD_GATEWAY);
         } catch (CustomApiException e) {
             throw e;
         } catch (RestClientResponseException e) {
             log.error("OpenAI API returned error: HTTP {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
             if (e.getStatusCode().value() == 429) {
-                throw new CustomApiException("AI_RATE_LIMIT", "Dịch vụ OpenAI/DeepSeek đang quá tải hoặc hết hạn mức. Vui lòng thử lại sau.", HttpStatus.TOO_MANY_REQUESTS);
+                throw new CustomApiException("AI_RATE_LIMIT",
+                        "Dịch vụ OpenAI/DeepSeek đang quá tải hoặc hết hạn mức. Vui lòng thử lại sau.",
+                        HttpStatus.TOO_MANY_REQUESTS);
             }
-            throw new CustomApiException("AI_SERVICE_ERROR", "OpenAI compatible API phản hồi lỗi: " + e.getStatusCode(), HttpStatus.BAD_GATEWAY);
+            throw new CustomApiException("AI_SERVICE_ERROR", "OpenAI compatible API phản hồi lỗi: " + e.getStatusCode(),
+                    HttpStatus.BAD_GATEWAY);
         } catch (Exception e) {
             log.error("Error calling OpenAI compatible API: {}", e.getMessage(), e);
-            throw new CustomApiException("AI_SERVICE_ERROR", "Không thể kết nối đến AI service: " + e.getMessage(), HttpStatus.BAD_GATEWAY);
+            throw new CustomApiException("AI_SERVICE_ERROR", "Không thể kết nối đến AI service: " + e.getMessage(),
+                    HttpStatus.BAD_GATEWAY);
         }
     }
 }

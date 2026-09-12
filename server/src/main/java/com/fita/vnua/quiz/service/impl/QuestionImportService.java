@@ -1,7 +1,5 @@
 package com.fita.vnua.quiz.service.impl;
 
-import com.fita.vnua.quiz.model.enums.QuestionType;
-
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.AnswerDto;
 import com.fita.vnua.quiz.model.dto.QuestionDto;
@@ -55,7 +53,8 @@ public class QuestionImportService {
         ImportedQuestionFile importedFile = readImportFile(file);
         ImportPreviewResponse preview = buildPreview(importedFile);
         if (preview.getInvalidRows() > 0) {
-            throw new CustomApiException("File import còn lỗi: " + String.join("; ", preview.getErrors()), HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("File import còn lỗi: " + String.join("; ", preview.getErrors()),
+                    HttpStatus.BAD_REQUEST);
         }
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new CustomApiException("Chương không tồn tại", HttpStatus.NOT_FOUND));
@@ -109,8 +108,7 @@ public class QuestionImportService {
         if (!isZip) {
             return new ImportedQuestionFile(
                     ExcelHelper.importToQuestions(file.getInputStream(), originalFilename),
-                    Map.of()
-            );
+                    Map.of());
         }
 
         return readZipImportFile(file);
@@ -140,7 +138,8 @@ public class QuestionImportService {
                     excelBytes = readEntryBytes(zipInputStream, MAX_SPREADSHEET_BYTES);
                     totalUnzippedBytes += excelBytes.length;
                     if (totalUnzippedBytes > MAX_UNZIPPED_BYTES) {
-                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.", HttpStatus.BAD_REQUEST);
+                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.",
+                                HttpStatus.BAD_REQUEST);
                     }
                     excelFilename = simpleName;
                 } else if (isImageFile(simpleName)) {
@@ -151,7 +150,8 @@ public class QuestionImportService {
                     byte[] imageBytes = readEntryBytes(zipInputStream, MAX_IMAGE_BYTES);
                     totalUnzippedBytes += imageBytes.length;
                     if (totalUnzippedBytes > MAX_UNZIPPED_BYTES) {
-                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.", HttpStatus.BAD_REQUEST);
+                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.",
+                                HttpStatus.BAD_REQUEST);
                     }
                     images.put(entry.getName().toLowerCase(), imageBytes);
                     images.put(simpleName.toLowerCase(), imageBytes);
@@ -159,7 +159,8 @@ public class QuestionImportService {
                     byte[] ignoredBytes = readEntryBytes(zipInputStream, MAX_IMAGE_BYTES);
                     totalUnzippedBytes += ignoredBytes.length;
                     if (totalUnzippedBytes > MAX_UNZIPPED_BYTES) {
-                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.", HttpStatus.BAD_REQUEST);
+                        throw new CustomApiException("Tổng dung lượng giải nén vượt quá giới hạn.",
+                                HttpStatus.BAD_REQUEST);
                     }
                 }
             }
@@ -246,8 +247,7 @@ public class QuestionImportService {
             int rowNumber,
             Map<String, byte[]> images,
             List<String> errors,
-            Set<Integer> invalidRows
-    ) {
+            Set<Integer> invalidRows) {
         if (question.getContent() == null || question.getContent().trim().isEmpty()) {
             addRowError(errors, invalidRows, rowNumber, "nội dung câu hỏi đang trống.");
         }

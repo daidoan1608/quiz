@@ -1,7 +1,5 @@
 package com.fita.vnua.quiz.service;
 
-import com.fita.vnua.quiz.model.enums.AuthProvider;
-
 import com.fita.vnua.quiz.model.dto.command.UserCommand;
 import com.fita.vnua.quiz.model.dto.request.ChangePasswordRequest;
 import com.fita.vnua.quiz.model.dto.response.UserResponse;
@@ -27,7 +25,8 @@ public interface UserService {
 
     List<UserResponse> searchNotificationRecipients(String keyword, int limit);
 
-    List<UserResponse> filterUsers(String keyword, String role, String authProvider, Boolean emailVerified, Boolean deleted, String sortBy, String sortDir);
+    List<UserResponse> filterUsers(String keyword, String role, String authProvider, Boolean emailVerified,
+            Boolean deleted, String sortBy, String sortDir);
 
     UserCommand create(UserCommand command);
 

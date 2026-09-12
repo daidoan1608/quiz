@@ -2,7 +2,6 @@ package com.fita.vnua.quiz.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Getter
 public class CustomApiException extends RuntimeException {
@@ -11,7 +10,7 @@ public class CustomApiException extends RuntimeException {
 
     public CustomApiException(String message) {
         super(message);
-        this.status = HttpStatus.BAD_REQUEST;  // Mặc định là Bad Request
+        this.status = HttpStatus.BAD_REQUEST; // Mặc định là Bad Request
         this.code = "BAD_REQUEST";
     }
 

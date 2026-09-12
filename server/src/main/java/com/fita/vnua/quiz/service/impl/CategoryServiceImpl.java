@@ -5,7 +5,6 @@ import com.fita.vnua.quiz.model.dto.CategoryDto;
 import com.fita.vnua.quiz.model.dto.CategorySummaryDto;
 import com.fita.vnua.quiz.model.dto.SubjectDto;
 import com.fita.vnua.quiz.model.entity.Category;
-import com.fita.vnua.quiz.model.entity.Subject;
 import com.fita.vnua.quiz.repository.CategoryRepository;
 import com.fita.vnua.quiz.repository.SubjectRepository;
 import com.fita.vnua.quiz.service.CategoryService;
@@ -56,15 +55,13 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategorySummaryDto> filterCategories(String keyword, Boolean deleted, String sortBy, String sortDir) {
         String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
         List<CategorySummaryDto> categories = mapCategoriesToSummaryDtos(
-                categoryRepository.filterCategories(normalizedKeyword, deleted)
-        );
+                categoryRepository.filterCategories(normalizedKeyword, deleted));
         return AdminSortHelper.sort(categories, sortBy, sortDir, Map.of(
                 "categoryId", CategorySummaryDto::getCategoryId,
                 "categoryName", CategorySummaryDto::getCategoryName,
                 "categoryDescription", CategorySummaryDto::getCategoryDescription,
                 "totalSubjects", CategorySummaryDto::getTotalSubjects,
-                "deletedAt", CategorySummaryDto::getDeletedAt
-        ));
+                "deletedAt", CategorySummaryDto::getDeletedAt));
     }
 
     @Override
@@ -82,7 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
+    @CacheEvict(value = { "publicCategories", "publicSubjectsByCategory", "publicSubjectDetail" }, allEntries = true)
     public CategoryDto addCategory(CategoryDto categoryDto) {
         validateUniqueCategoryName(categoryDto.getCategoryName(), null);
         Category category = new Category();
@@ -95,7 +92,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
+    @CacheEvict(value = { "publicCategories", "publicSubjectsByCategory", "publicSubjectDetail" }, allEntries = true)
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy danh mục", HttpStatus.NOT_FOUND));
@@ -111,14 +108,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
+    @CacheEvict(value = { "publicCategories", "publicSubjectsByCategory", "publicSubjectDetail" }, allEntries = true)
     public void deleteCategory(Long id) {
         softDeleteService.deleteCategory(id, null);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = {"publicCategories", "publicSubjectsByCategory", "publicSubjectDetail"}, allEntries = true)
+    @CacheEvict(value = { "publicCategories", "publicSubjectsByCategory", "publicSubjectDetail" }, allEntries = true)
     public CategoryDto restoreCategory(Long id) {
         softDeleteService.restoreCategory(id);
         Category category = categoryRepository.findById(id)
@@ -136,8 +133,7 @@ public class CategoryServiceImpl implements CategoryService {
         Map<Long, Long> subjectCounts = categoryRepository.countActiveSubjectsByCategoryIds(categoryIds).stream()
                 .collect(Collectors.toMap(
                         row -> (Long) row[0],
-                        row -> (Long) row[1]
-                ));
+                        row -> (Long) row[1]));
         return categories.stream()
                 .map(category -> mapCategoryToSummaryDto(category, subjectCounts))
                 .toList();
@@ -151,7 +147,8 @@ public class CategoryServiceImpl implements CategoryService {
         String normalizedName = categoryName == null ? "" : categoryName.trim();
         boolean duplicated = currentCategoryId == null
                 ? categoryRepository.existsByCategoryNameIgnoreCaseAndDeletedFalse(normalizedName)
-                : categoryRepository.existsByCategoryNameIgnoreCaseAndDeletedFalseAndCategoryIdNot(normalizedName, currentCategoryId);
+                : categoryRepository.existsByCategoryNameIgnoreCaseAndDeletedFalseAndCategoryIdNot(normalizedName,
+                        currentCategoryId);
         if (duplicated) {
             throw new CustomApiException("Tên danh mục đã tồn tại", HttpStatus.CONFLICT);
         }

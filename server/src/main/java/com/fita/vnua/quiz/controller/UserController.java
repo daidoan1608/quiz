@@ -1,7 +1,5 @@
 package com.fita.vnua.quiz.controller;
 
-import com.fita.vnua.quiz.model.enums.AuthProvider;
-
 import com.fita.vnua.quiz.model.dto.command.UserCommand;
 import com.fita.vnua.quiz.model.dto.request.AdminUserCreateRequest;
 import com.fita.vnua.quiz.model.dto.request.AdminUserUpdateRequest;
@@ -42,8 +40,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<Object>> changePassword(
             @PathVariable("userId") UUID userId,
             @Valid @RequestBody ChangePasswordRequest request,
-        @AuthenticationPrincipal User currentUser
-    ) {
+            @AuthenticationPrincipal User currentUser) {
         authorizationService.requireSelf(userId, currentUser);
         userService.changePassword(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công", null));
@@ -59,12 +56,10 @@ public class UserController {
             @RequestParam(required = false) Boolean emailVerified,
             @RequestParam(required = false) Boolean deleted,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortDir
-    ) {
+            @RequestParam(required = false) String sortDir) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Lọc người dùng thành công",
-                userService.filterUsers(keyword, role, authProvider, emailVerified, deleted, sortBy, sortDir)
-        ));
+                userService.filterUsers(keyword, role, authProvider, emailVerified, deleted, sortBy, sortDir)));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -88,18 +83,16 @@ public class UserController {
     @Operation(summary = "Lấy danh sách người dùng theo từ khóa tìm kiếm", description = "This API fetches users by search key")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getUserBySearchKey(
             @RequestParam("key") String keyword,
-            @RequestParam(defaultValue = "20") int limit
-    ) {
+            @RequestParam(defaultValue = "20") int limit) {
         List<UserResponse> users = userService.searchNotificationRecipients(keyword, limit);
         return ResponseEntity.ok(ApiResponse.success("Tìm kiếm người dùng thành công", users));
     }
 
-    @GetMapping({"/users/{userId}", "/user/{userId}"})
+    @GetMapping({ "/users/{userId}", "/user/{userId}" })
     @Operation(summary = "Lấy ra người dùng theo ID", description = "This API fetches a user by their ID")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
-            @AuthenticationPrincipal User currentUser
-    ) {
+            @AuthenticationPrincipal User currentUser) {
         authorizationService.requireSelfOrAdminMod(userId, currentUser);
         UserResponse user = userService.getUserResponseById(userId);
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin người dùng thành công", user));
@@ -110,8 +103,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> updateProfile(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
             @Valid @RequestBody UpdateProfileRequest request,
-            @AuthenticationPrincipal User currentUser
-    ) {
+            @AuthenticationPrincipal User currentUser) {
         authorizationService.requireSelfOrAdminMod(userId, currentUser);
         UserResponse updatedUser = userService.updateProfileResponse(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật hồ sơ thành công", updatedUser));
@@ -120,11 +112,13 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/users")
     @Operation(summary = "Tạo người dùng mới", description = "This API creates a new user")
-    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody AdminUserCreateRequest request, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody AdminUserCreateRequest request,
+            @AuthenticationPrincipal User currentUser) {
         UserCommand userCommand = userMapper.toUserCommand(request);
         UserCommand saveUser = userService.create(userCommand);
         auditLogService.record("CREATE", "USER", saveUser.getUserId(), currentUser, saveUser.getUsername());
-        return ResponseEntity.ok(ApiResponse.success("Tạo người dùng thành công", userService.getUserResponseById(saveUser.getUserId())));
+        return ResponseEntity.ok(ApiResponse.success("Tạo người dùng thành công",
+                userService.getUserResponseById(saveUser.getUserId())));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -133,12 +127,12 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
             @Valid @RequestBody AdminUserUpdateRequest request,
-            @AuthenticationPrincipal User currentUser
-    ) {
+            @AuthenticationPrincipal User currentUser) {
         UserCommand userCommand = userMapper.toUserCommand(request);
         UserCommand updatedUser = userService.update(userId, userCommand);
         auditLogService.record("UPDATE", "USER", userId, currentUser, updatedUser.getUsername());
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật người dùng thành công", userService.getUserResponseById(updatedUser.getUserId())));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật người dùng thành công",
+                userService.getUserResponseById(updatedUser.getUserId())));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -146,8 +140,7 @@ public class UserController {
     @Operation(summary = "Xóa người dùng", description = "This API deletes a user")
     public ResponseEntity<ApiResponse<Object>> deleteUser(
             @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId,
-            @AuthenticationPrincipal User currentUser
-    ) {
+            @AuthenticationPrincipal User currentUser) {
         userService.delete(userId);
         auditLogService.record("DELETE", "USER", userId, currentUser, "Disable user");
         return ResponseEntity.ok(ApiResponse.success("Vô hiệu hóa người dùng thành công", null));
@@ -157,8 +150,7 @@ public class UserController {
     @PatchMapping("/admin/users/{userId}/restore")
     @Operation(summary = "Khôi phục người dùng đã vô hiệu hóa")
     public ResponseEntity<ApiResponse<UserResponse>> restoreUser(
-            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId
-    ) {
+            @Parameter(description = "User ID", required = true) @PathVariable("userId") UUID userId) {
         return ResponseEntity.ok(ApiResponse.success("Khôi phục người dùng thành công", userService.restore(userId)));
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,14 +40,14 @@ public class SharedDocumentController {
             Map.entry("txt", "text/plain"),
             Map.entry("csv", "text/csv"),
             Map.entry("zip", "application/zip"),
-            Map.entry("rar", "application/vnd.rar")
-    );
+            Map.entry("rar", "application/vnd.rar"));
 
     private final SharedDocumentService documentService;
 
     @GetMapping("/api/v1/public/documents")
     public ResponseEntity<ApiResponse<List<SharedDocumentResponse>>> getPublicDocuments() {
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách tài liệu thành công", documentService.getPublicDocuments()));
+        return ResponseEntity
+                .ok(ApiResponse.success("Lấy danh sách tài liệu thành công", documentService.getPublicDocuments()));
     }
 
     @GetMapping("/api/v1/public/documents/{id}/download")
@@ -66,7 +65,8 @@ public class SharedDocumentController {
     @GetMapping("/api/v1/admin/documents")
     @PreAuthorize("@adminCapabilityService.hasPermission(principal, 'DOCUMENT', 'VIEW', 'GLOBAL', null)")
     public ResponseEntity<ApiResponse<List<SharedDocumentResponse>>> getAdminDocuments() {
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách tài liệu quản trị thành công", documentService.getAdminDocuments()));
+        return ResponseEntity.ok(
+                ApiResponse.success("Lấy danh sách tài liệu quản trị thành công", documentService.getAdminDocuments()));
     }
 
     @PostMapping(value = "/api/v1/admin/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -75,9 +75,9 @@ public class SharedDocumentController {
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "active", defaultValue = "true") boolean active,
-            @RequestParam("file") MultipartFile file
-    ) throws IOException {
-        return ResponseEntity.ok(ApiResponse.success("Tải tài liệu lên thành công", documentService.create(title, description, active, file)));
+            @RequestParam("file") MultipartFile file) throws IOException {
+        return ResponseEntity.ok(ApiResponse.success("Tải tài liệu lên thành công",
+                documentService.create(title, description, active, file)));
     }
 
     @PatchMapping("/api/v1/admin/documents/{id}")
@@ -86,9 +86,9 @@ public class SharedDocumentController {
             @PathVariable Long id,
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "active", required = false) Boolean active
-    ) {
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật tài liệu thành công", documentService.update(id, title, description, active)));
+            @RequestParam(value = "active", required = false) Boolean active) {
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật tài liệu thành công",
+                documentService.update(id, title, description, active)));
     }
 
     @DeleteMapping("/api/v1/admin/documents/{id}")

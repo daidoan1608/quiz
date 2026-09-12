@@ -2,7 +2,6 @@ package com.fita.vnua.quiz.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fita.vnua.quiz.configuration.properties.AiProperties;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.ai.RoadmapStepDto;
 import com.fita.vnua.quiz.model.dto.response.LearningRoadmapResponse;
@@ -33,7 +32,6 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
 
     private final UserExamRepository userExamRepository;
     private final AiClientRouter aiClientRouter;
-    private final AiProperties aiProperties;
     private final InMemoryRateLimiter rateLimiter;
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
@@ -44,7 +42,8 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
     @Transactional(readOnly = true)
     public LearningRoadmapResponse getPersonalizedRoadmap(User currentUser, boolean forceRefresh) {
         if (currentUser == null || currentUser.getUserId() == null) {
-            throw new CustomApiException("UNAUTHORIZED", "Vui lòng đăng nhập để xem lộ trình học tập", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("UNAUTHORIZED", "Vui lòng đăng nhập để xem lộ trình học tập",
+                    HttpStatus.UNAUTHORIZED);
         }
 
         // 1. Lấy danh sách các bài thi đã nộp của sinh viên
@@ -102,12 +101,16 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
         for (Map.Entry<String, List<UserExam>> entry : bySubject.entrySet()) {
             String subjectName = entry.getKey();
             List<UserExam> subjectExams = entry.getValue();
-            double avgScore = subjectExams.stream().mapToDouble(e -> e.getScore() != null ? e.getScore() : 0).average().orElse(0);
-            double maxScore = subjectExams.stream().mapToDouble(e -> e.getScore() != null ? e.getScore() : 0).max().orElse(0);
-            double minScore = subjectExams.stream().mapToDouble(e -> e.getScore() != null ? e.getScore() : 0).min().orElse(0);
+            double avgScore = subjectExams.stream().mapToDouble(e -> e.getScore() != null ? e.getScore() : 0).average()
+                    .orElse(0);
+            double maxScore = subjectExams.stream().mapToDouble(e -> e.getScore() != null ? e.getScore() : 0).max()
+                    .orElse(0);
+            double minScore = subjectExams.stream().mapToDouble(e -> e.getScore() != null ? e.getScore() : 0).min()
+                    .orElse(0);
 
-            statsSummary.append(String.format("- Môn '%s': %d bài thi, Điểm TB: %.1f/100, Cao nhất: %.1f, Thấp nhất: %.1f\n",
-                    subjectName, subjectExams.size(), avgScore, maxScore, minScore));
+            statsSummary.append(
+                    String.format("- Môn '%s': %d bài thi, Điểm TB: %.1f/100, Cao nhất: %.1f, Thấp nhất: %.1f\n",
+                            subjectName, subjectExams.size(), avgScore, maxScore, minScore));
 
             totalScoreSum += subjectExams.stream().mapToDouble(e -> e.getScore() != null ? e.getScore() : 0).sum();
             totalValidExams += subjectExams.size();
@@ -122,27 +125,29 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
                 BẮT BUỘC chỉ trả về kết quả dưới dạng chuỗi JSON thuần túy (không bọc trong markdown code fence, không kèm lời chào hỏi đầu hay cuối).
                 """;
 
-        String userPrompt = String.format("""
-                Dữ liệu học tập của sinh viên:
-                - Tổng số bài thi đã hoàn thành: %d
-                - Điểm trung bình tổng quan: %.1f/100
-                - Thống kê chi tiết theo môn:
-                %s
-                
-                Hãy phân tích và trả về JSON theo đúng định dạng sau:
-                {
-                  "summary": "Nhận xét tổng quan về phong độ và xu hướng học tập hiện tại (2-3 câu)",
-                  "steps": [
-                    {
-                      "step": 1,
-                      "title": "Tên bước hành động (ngắn gọn, trực quan, ví dụ: 'Cấp bách: Cải thiện điểm môn Tin học đại cương')",
-                      "action": "Hướng dẫn cụ thể sinh viên nên ôn chương nào, làm dạng bài gì",
-                      "priority": "HIGH", // HIGH (ưu tiên cao nếu điểm < 70), MEDIUM (duy trì điểm khá 70-84), LOW (bứt phá/mở rộng nếu >= 85)
-                      "subjectName": "Tên môn học liên quan nếu có"
-                    }
-                  ]
-                }
-                """, totalValidExams, overallAverage, statsSummary.toString());
+        String userPrompt = String.format(
+                """
+                        Dữ liệu học tập của sinh viên:
+                        - Tổng số bài thi đã hoàn thành: %d
+                        - Điểm trung bình tổng quan: %.1f/100
+                        - Thống kê chi tiết theo môn:
+                        %s
+
+                        Hãy phân tích và trả về JSON theo đúng định dạng sau:
+                        {
+                          "summary": "Nhận xét tổng quan về phong độ và xu hướng học tập hiện tại (2-3 câu)",
+                          "steps": [
+                            {
+                              "step": 1,
+                              "title": "Tên bước hành động (ngắn gọn, trực quan, ví dụ: 'Cấp bách: Cải thiện điểm môn Tin học đại cương')",
+                              "action": "Hướng dẫn cụ thể sinh viên nên ôn chương nào, làm dạng bài gì",
+                              "priority": "HIGH", // HIGH (ưu tiên cao nếu điểm < 70), MEDIUM (duy trì điểm khá 70-84), LOW (bứt phá/mở rộng nếu >= 85)
+                              "subjectName": "Tên môn học liên quan nếu có"
+                            }
+                          ]
+                        }
+                        """,
+                totalValidExams, overallAverage, statsSummary.toString());
 
         // 7. Gọi AI
         AiClient client = aiClientRouter.getActiveClient();
@@ -175,7 +180,8 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
 
         try {
             JsonNode root = objectMapper.readTree(cleanJson);
-            String summary = root.path("summary").asText("Lộ trình học tập được cá nhân hóa theo phong độ thi gần đây của bạn.");
+            String summary = root.path("summary")
+                    .asText("Lộ trình học tập được cá nhân hóa theo phong độ thi gần đây của bạn.");
             List<RoadmapStepDto> steps = new ArrayList<>();
 
             JsonNode stepsNode = root.path("steps");
@@ -224,8 +230,7 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
                                     .title("Duy trì nhịp làm bài thi thử")
                                     .action("Dành 15-20 phút mỗi ngày làm đề tổng hợp để tăng phản xạ.")
                                     .priority("MEDIUM")
-                                    .build()
-                    ))
+                                    .build()))
                     .cached(false)
                     .provider(provider)
                     .build();
@@ -234,7 +239,8 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
 
     private LearningRoadmapResponse buildOnboardingRoadmap() {
         return LearningRoadmapResponse.builder()
-                .summary("Chào mừng bạn đến với hệ thống ôn thi Quiz VNUA! Hãy bắt đầu hành trình bằng một bài thi thử để trợ lý AI có dữ liệu đánh giá năng lực ban đầu nhé.")
+                .summary(
+                        "Chào mừng bạn đến với hệ thống ôn thi Quiz VNUA! Hãy bắt đầu hành trình bằng một bài thi thử để trợ lý AI có dữ liệu đánh giá năng lực ban đầu nhé.")
                 .steps(List.of(
                         RoadmapStepDto.builder()
                                 .step(1)
@@ -259,8 +265,7 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
                                 .title("Duy trì chuỗi ngày ôn tập")
                                 .action("Luyện tập đều đặn hàng ngày để sẵn sàng cho kỳ thi kết thúc học phần đạt điểm cao.")
                                 .priority("LOW")
-                                .build()
-                ))
+                                .build()))
                 .cached(true)
                 .provider("system")
                 .build();

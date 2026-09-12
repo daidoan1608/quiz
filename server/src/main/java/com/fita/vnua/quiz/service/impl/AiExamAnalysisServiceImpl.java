@@ -2,11 +2,9 @@ package com.fita.vnua.quiz.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fita.vnua.quiz.configuration.properties.AiProperties;
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.response.ExamAnalysisResponse;
 import com.fita.vnua.quiz.model.entity.*;
-import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
 import com.fita.vnua.quiz.repository.QuestionRepository;
 import com.fita.vnua.quiz.repository.UserAnswerRepository;
 import com.fita.vnua.quiz.repository.UserExamQuestionRepository;
@@ -39,7 +37,6 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
     private final UserExamQuestionRepository userExamQuestionRepository;
     private final AuthorizationService authorizationService;
     private final AiClientRouter aiClientRouter;
-    private final AiProperties aiProperties;
     private final InMemoryRateLimiter rateLimiter;
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
@@ -50,16 +47,19 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
     @Transactional(readOnly = true)
     public ExamAnalysisResponse analyzeExamResult(Long userExamId, User currentUser) {
         if (currentUser == null || currentUser.getUserId() == null) {
-            throw new CustomApiException("UNAUTHORIZED", "Vui lòng đăng nhập để phân tích kết quả bài thi", HttpStatus.UNAUTHORIZED);
+            throw new CustomApiException("UNAUTHORIZED", "Vui lòng đăng nhập để phân tích kết quả bài thi",
+                    HttpStatus.UNAUTHORIZED);
         }
 
         // 1. Kiểm tra bài thi tồn tại và quyền truy cập
         UserExam userExam = userExamRepository.findById(userExamId)
-                .orElseThrow(() -> new CustomApiException("NOT_FOUND", "Không tìm thấy kết quả bài thi với ID: " + userExamId, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomApiException("NOT_FOUND",
+                        "Không tìm thấy kết quả bài thi với ID: " + userExamId, HttpStatus.NOT_FOUND));
 
         authorizationService.requireSelfOrAdminMod(userExam.getUser().getUserId(), currentUser);
 
-        // 2. Kiểm tra Redis cache (kết quả bài thi đã nộp là bất biến nên cache dùng lại vĩnh viễn/30 ngày)
+        // 2. Kiểm tra Redis cache (kết quả bài thi đã nộp là bất biến nên cache dùng
+        // lại vĩnh viễn/30 ngày)
         String cacheKey = "ai:exam-analysis:ue:" + userExamId;
         try {
             String cachedJson = stringRedisTemplate.opsForValue().get(cacheKey);
@@ -101,8 +101,7 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
                 .filter(ua -> ua.getQuestion() != null && ua.getAnswer() != null)
                 .collect(Collectors.groupingBy(
                         ua -> ua.getQuestion().getQuestionId(),
-                        Collectors.mapping(ua -> ua.getAnswer().getOptionId(), Collectors.toSet())
-                ));
+                        Collectors.mapping(ua -> ua.getAnswer().getOptionId(), Collectors.toSet())));
 
         // Phân tích theo Chương (Chapter)
         Map<String, int[]> chapterStats = new LinkedHashMap<>(); // chapterName -> [correct, total]
@@ -172,13 +171,13 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
                 - Điểm số: %.1f / 100
                 - Thời gian làm bài: %d phút / %d phút quy định
                 - Tổng số câu hỏi: %d (Đúng: %d, Sai: %d, Bỏ qua: %d)
-                
+
                 Kết quả theo từng Chương:
                 %s
-                
+
                 Kết quả theo Độ khó:
                 %s
-                
+
                 Hãy phân tích và trả về JSON theo đúng định dạng sau:
                 {
                   "performanceTier": "XUẤT SẮC" | "GIỎI" | "KHÁ" | "TRUNG BÌNH" | "CẦN CỐ GẮNG",
@@ -205,7 +204,8 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
         String rawResponse = client.generateExplanation(systemPrompt, userPrompt);
 
         // 7. Parse kết quả và lưu Cache
-        ExamAnalysisResponse result = parseExamAnalysisResponse(userExamId, rawResponse, client.getProviderName(), score);
+        ExamAnalysisResponse result = parseExamAnalysisResponse(userExamId, rawResponse, client.getProviderName(),
+                score);
 
         try {
             String jsonToCache = objectMapper.writeValueAsString(result);
@@ -217,7 +217,8 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
         return result;
     }
 
-    private ExamAnalysisResponse parseExamAnalysisResponse(Long userExamId, String rawResponse, String provider, float score) {
+    private ExamAnalysisResponse parseExamAnalysisResponse(Long userExamId, String rawResponse, String provider,
+            float score) {
         String cleanJson = rawResponse.trim();
         if (cleanJson.startsWith("```json")) {
             cleanJson = cleanJson.substring(7);
@@ -264,10 +265,14 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
     }
 
     private String resolveDefaultTier(float score) {
-        if (score >= 90) return "XUẤT SẮC";
-        if (score >= 80) return "GIỎI";
-        if (score >= 65) return "KHÁ";
-        if (score >= 50) return "TRUNG BÌNH";
+        if (score >= 90)
+            return "XUẤT SẮC";
+        if (score >= 80)
+            return "GIỎI";
+        if (score >= 65)
+            return "KHÁ";
+        if (score >= 50)
+            return "TRUNG BÌNH";
         return "CẦN CỐ GẮNG";
     }
 
@@ -285,7 +290,8 @@ public class AiExamAnalysisServiceImpl implements AiExamAnalysisService {
 
     private List<Question> getAttemptQuestions(UserExam userExam) {
         if (userExamQuestionRepository != null) {
-            List<UserExamQuestion> snapshots = userExamQuestionRepository.findWithQuestionDetailsByUserExamIds(List.of(userExam.getUserExamId()));
+            List<UserExamQuestion> snapshots = userExamQuestionRepository
+                    .findWithQuestionDetailsByUserExamIds(List.of(userExam.getUserExamId()));
             if (snapshots != null && !snapshots.isEmpty()) {
                 return snapshots.stream()
                         .map(UserExamQuestion::getQuestion)

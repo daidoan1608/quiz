@@ -48,7 +48,6 @@ public class ExamServiceImpl implements ExamService {
     private final ExamQuestionRepository examQuestionRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-    private final UserAnswerRepository userAnswerRepository;
     private final UserExamRepository userExamRepository;
     private final SoftDeleteService softDeleteService;
     private final UserExamService userExamService;
@@ -77,8 +76,7 @@ public class ExamServiceImpl implements ExamService {
         return examRepository.countQuestionsByExamIds(examIds).stream()
                 .collect(Collectors.toMap(
                         row -> (Long) row[0],
-                        row -> (Long) row[1]
-                ));
+                        row -> (Long) row[1]));
     }
 
     @Override
@@ -100,11 +98,11 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public List<ExamSummaryDto> filterExams(String keyword, Long categoryId, Long subjectId, UUID createdBy, Boolean deleted, String sortBy, String sortDir) {
+    public List<ExamSummaryDto> filterExams(String keyword, Long categoryId, Long subjectId, UUID createdBy,
+            Boolean deleted, String sortBy, String sortDir) {
         String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
         List<ExamSummaryDto> exams = mapExamsToSummaryDtos(
-                examRepository.filterExams(normalizedKeyword, categoryId, subjectId, createdBy, deleted)
-        );
+                examRepository.filterExams(normalizedKeyword, categoryId, subjectId, createdBy, deleted));
         return AdminSortHelper.sort(exams, sortBy, sortDir, Map.of(
                 "examId", ExamSummaryDto::getExamId,
                 "examCode", ExamSummaryDto::getExamCode,
@@ -115,25 +113,26 @@ public class ExamServiceImpl implements ExamService {
                 "duration", ExamSummaryDto::getDuration,
                 "createdDate", ExamSummaryDto::getCreatedDate,
                 "questionCount", ExamSummaryDto::getQuestionCount,
-                "deletedAt", ExamSummaryDto::getDeletedAt
-        ));
+                "deletedAt", ExamSummaryDto::getDeletedAt));
     }
 
     @Override
-    public Page<ExamSummaryDto> filterExamsPage(String keyword, Long categoryId, Long subjectId, UUID createdBy, Boolean deleted, Pageable pageable) {
+    public Page<ExamSummaryDto> filterExamsPage(String keyword, Long categoryId, Long subjectId, UUID createdBy,
+            Boolean deleted, Pageable pageable) {
         String normalizedKeyword = keyword == null || keyword.trim().isEmpty() ? null : keyword.trim();
-        Page<Exam> page = examRepository.filterExamsPage(normalizedKeyword, categoryId, subjectId, createdBy, deleted, pageable);
+        Page<Exam> page = examRepository.filterExamsPage(normalizedKeyword, categoryId, subjectId, createdBy, deleted,
+                pageable);
         Map<Long, Long> questionCounts = countQuestionsByExam(page.getContent());
         return page.map(exam -> mapExamToSummaryDto(exam, questionCounts));
     }
 
     @Override
-    public Page<ExamSummaryDto> filterExamsPage(String keyword, Long categoryId, Long subjectId, UUID createdBy, Boolean deleted, int page, int size, String sortBy, String sortDir) {
+    public Page<ExamSummaryDto> filterExamsPage(String keyword, Long categoryId, Long subjectId, UUID createdBy,
+            Boolean deleted, int page, int size, String sortBy, String sortDir) {
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 Math.min(Math.max(size, 1), 100),
-                resolveExamSort(sortBy, sortDir)
-        );
+                resolveExamSort(sortBy, sortDir));
         return filterExamsPage(keyword, categoryId, subjectId, createdBy, deleted, pageable);
     }
 
@@ -147,7 +146,8 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional(readOnly = true)
-    public ExamDto getPublicExamById(Long examId, boolean includeCorrectAnswers, Long userExamId, UUID currentUserId, boolean currentUserAdminOrMod) {
+    public ExamDto getPublicExamById(Long examId, boolean includeCorrectAnswers, Long userExamId, UUID currentUserId,
+            boolean currentUserAdminOrMod) {
         ExamDto exam;
         if (includeCorrectAnswers) {
             requireCorrectAnswerAccess(examId, userExamId, currentUserId, currentUserAdminOrMod);
@@ -163,7 +163,8 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional // Đảm bảo tính toàn vẹn dữ liệu
-    @CacheEvict(value = {"publicSubjectDetail", "publicExamsBySubject", "publicExamDetail", "ranking"}, allEntries = true)
+    @CacheEvict(value = { "publicSubjectDetail", "publicExamsBySubject", "publicExamDetail",
+            "ranking" }, allEntries = true)
     public ExamDto createExam(ExamRequest examRequest, UUID currentUserId) {
         // 1. Tạo Exam mới & Lưu thông tin cơ bản
         ExamDto examDto = examRequest.getExamDto();
@@ -193,7 +194,8 @@ public class ExamServiceImpl implements ExamService {
         examDto.setCreatedBy(exam.getCreatedBy().getUserId());
         examDto.setCreatedDate(String.valueOf(exam.getCreatedTime()));
 
-        List<QuestionDto> selectedQuestions = examQuestionSelectionService.resolveExamQuestions(examRequest, examDto.getSubjectId());
+        List<QuestionDto> selectedQuestions = examQuestionSelectionService.resolveExamQuestions(examRequest,
+                examDto.getSubjectId());
         saveQuestionsToExam(exam, selectedQuestions);
         examDto.setQuestions(selectedQuestions);
 
@@ -201,9 +203,9 @@ public class ExamServiceImpl implements ExamService {
         // Đặt ở cuối cùng để chắc chắn đề thi đã tạo thành công
         try {
             notificationService.sendSubjectNotification(
-                    subject.getSubjectId(),    // ID môn học
-                    subject.getName(),  // Tên môn học (Check lại getter trong Entity Subject của bạn)
-                    exam.getExamId()           // ID đề thi để user click vào
+                    subject.getSubjectId(), // ID môn học
+                    subject.getName(), // Tên môn học (Check lại getter trong Entity Subject của bạn)
+                    exam.getExamId() // ID đề thi để user click vào
             );
         } catch (Exception e) {
             // Log lỗi nhưng KHÔNG throw exception.
@@ -214,7 +216,8 @@ public class ExamServiceImpl implements ExamService {
         return examDto;
     }
 
-    // Hàm phụ mình tách ra để code đỡ bị lặp lại (Optional - bạn dùng hay không tùy ý)
+    // Hàm phụ mình tách ra để code đỡ bị lặp lại (Optional - bạn dùng hay không tùy
+    // ý)
     private void saveQuestionsToExam(Exam exam, List<QuestionDto> questionDtos) {
         Set<Long> questionIds = questionDtos.stream()
                 .map(QuestionDto::getQuestionId)
@@ -243,7 +246,8 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"publicSubjectDetail", "publicExamsBySubject", "publicExamDetail", "ranking"}, allEntries = true)
+    @CacheEvict(value = { "publicSubjectDetail", "publicExamsBySubject", "publicExamDetail",
+            "ranking" }, allEntries = true)
     public ExamDto updateExam(Long id, ExamDto examDto) {
         Exam exam = examRepository.findByExamIdAndDeletedFalse(id)
                 .orElseThrow(() -> new CustomApiException("Không tìm thấy bài thi", HttpStatus.NOT_FOUND));
@@ -253,7 +257,8 @@ public class ExamServiceImpl implements ExamService {
         exam.setDuration(examDto.getDuration());
         if (examDto.getSubjectId() != null) {
             if (!examDto.getSubjectId().equals(exam.getSubject().getSubjectId()) && examDto.getQuestions() == null) {
-                throw new CustomApiException("Doi mon hoc cua de thi can gui lai danh sach cau hoi moi.", HttpStatus.BAD_REQUEST);
+                throw new CustomApiException("Doi mon hoc cua de thi can gui lai danh sach cau hoi moi.",
+                        HttpStatus.BAD_REQUEST);
             }
             Subject subject = subjectRepository.findById(examDto.getSubjectId())
                     .orElseThrow(() -> new CustomApiException("Không tìm thấy môn học", HttpStatus.NOT_FOUND));
@@ -265,7 +270,8 @@ public class ExamServiceImpl implements ExamService {
         Exam updatedExam = examRepository.save(exam);
 
         if (examDto.getQuestions() != null) {
-            examQuestionSelectionService.validateSelectedQuestions(examDto.getQuestions(), updatedExam.getSubject().getSubjectId());
+            examQuestionSelectionService.validateSelectedQuestions(examDto.getQuestions(),
+                    updatedExam.getSubject().getSubjectId());
             examQuestionRepository.deleteByExamId(updatedExam.getExamId());
             saveQuestionsToExam(updatedExam, examDto.getQuestions());
         }
@@ -275,19 +281,23 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"publicSubjectDetail", "publicExamsBySubject", "publicExamDetail", "ranking"}, allEntries = true)
+    @CacheEvict(value = { "publicSubjectDetail", "publicExamsBySubject", "publicExamDetail",
+            "ranking" }, allEntries = true)
     public void deleteExam(Long id) {
         softDeleteService.deleteExam(id, null);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = {"publicSubjectDetail", "publicExamsBySubject", "publicExamDetail", "ranking"}, allEntries = true)
+    @CacheEvict(value = { "publicSubjectDetail", "publicExamsBySubject", "publicExamDetail",
+            "ranking" }, allEntries = true)
     public ExamDto restoreExam(Long id) {
         softDeleteService.restoreExam(id);
         if (examQuestionRepository.countValidQuestionsForExam(id) == 0) {
             softDeleteService.deleteExam(id, null);
-            throw new CustomApiException("De thi khong con cau hoi hop le. Vui long cap nhat cau hoi truoc khi khoi phuc.", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException(
+                    "De thi khong con cau hoi hop le. Vui long cap nhat cau hoi truoc khi khoi phuc.",
+                    HttpStatus.BAD_REQUEST);
         }
         return getExamById(id);
     }
@@ -295,19 +305,24 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public ExamDto getExamByIdForSubmittedAttempt(Long examId, Long userExamId, UUID currentUserId) {
         User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN));
+                .orElseThrow(
+                        () -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN));
         UserExam userExam = (currentUser.getRole() == UserRole.ADMIN || currentUser.getRole() == UserRole.MOD)
-                ? userExamRepository.findByIdWithExamSubjectAndUser(userExamId).orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN))
+                ? userExamRepository.findByIdWithExamSubjectAndUser(userExamId).orElseThrow(
+                        () -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN))
                 : userExamRepository.findByIdAndUserId(userExamId, currentUserId)
-                        .orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN));
+                        .orElseThrow(() -> new CustomApiException("Bạn không có quyền truy cập bài thi này",
+                                HttpStatus.FORBIDDEN));
         if (!examId.equals(userExam.getExam().getExamId()) || !"SUBMITTED".equals(userExam.getStatus())) {
             throw new CustomApiException("Bạn không có quyền truy cập bài thi này", HttpStatus.FORBIDDEN);
         }
-        List<QuestionDto> questions = userExamService.getAttemptQuestionDtosForSubmittedAttempt(userExamId, currentUserId);
+        List<QuestionDto> questions = userExamService.getAttemptQuestionDtosForSubmittedAttempt(userExamId,
+                currentUserId);
         return examMapper.toDto(userExam.getExam(), questions);
     }
 
-    private void requireCorrectAnswerAccess(Long examId, Long userExamId, UUID currentUserId, boolean currentUserAdminOrMod) {
+    private void requireCorrectAnswerAccess(Long examId, Long userExamId, UUID currentUserId,
+            boolean currentUserAdminOrMod) {
         if (currentUserId == null) {
             throw new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN);
         }
@@ -318,7 +333,8 @@ public class ExamServiceImpl implements ExamService {
             throw new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN);
         }
         UserExam userExam = userExamRepository.findByIdAndUserId(userExamId, currentUserId)
-                .orElseThrow(() -> new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN));
+                .orElseThrow(() -> new CustomApiException("Bạn không có quyền xem đáp án bài thi này",
+                        HttpStatus.FORBIDDEN));
         if (!examId.equals(userExam.getExam().getExamId()) || !"SUBMITTED".equals(userExam.getStatus())) {
             throw new CustomApiException("Bạn không có quyền xem đáp án bài thi này", HttpStatus.FORBIDDEN);
         }
@@ -377,7 +393,8 @@ public class ExamServiceImpl implements ExamService {
             throw new CustomApiException("Ma de khong duoc vuot qua 64 ky tu", HttpStatus.BAD_REQUEST);
         }
         if (!examCode.matches("[A-Z0-9._-]+")) {
-            throw new CustomApiException("Ma de chi duoc chua chu cai, so, dau cham, gach ngang hoac gach duoi", HttpStatus.BAD_REQUEST);
+            throw new CustomApiException("Ma de chi duoc chua chu cai, so, dau cham, gach ngang hoac gach duoi",
+                    HttpStatus.BAD_REQUEST);
         }
         return examCode;
     }
