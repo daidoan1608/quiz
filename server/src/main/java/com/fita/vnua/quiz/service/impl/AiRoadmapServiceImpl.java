@@ -120,8 +120,8 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
 
         // 6. Xây dựng Prompt cho AI
         String systemPrompt = """
-                Bạn là một cố vấn học tập đại học (Academic Advisor) tận tâm, am hiểu và giàu kinh nghiệm của trường Học viện Nông nghiệp Việt Nam (VNUA).
-                Nhiệm vụ của bạn là đọc dữ liệu thống kê điểm thi trắc nghiệm của sinh viên và đề xuất một Lộ trình học tập (Actionable Roadmap) gồm 3 đến 4 bước hành động cụ thể, thực tế và tạo động lực.
+                Bạn là một cố vấn học tập đại học (Academic Advisor) tận tâm và giàu kinh nghiệm của Học viện Nông nghiệp Việt Nam (VNUA).
+                Nhiệm vụ của bạn là đọc dữ liệu thống kê điểm thi trắc nghiệm của sinh viên và đề xuất một Lộ trình học tập gồm đúng 2 đến 3 bước hành động cô đọng, súc tích, ngắn gọn, phù hợp hiển thị trực tiếp trên Dashboard trang chủ.
                 BẮT BUỘC chỉ trả về kết quả dưới dạng chuỗi JSON thuần túy (không bọc trong markdown code fence, không kèm lời chào hỏi đầu hay cuối).
                 """;
 
@@ -133,19 +133,20 @@ public class AiRoadmapServiceImpl implements AiRoadmapService {
                         - Thống kê chi tiết theo môn:
                         %s
 
-                        Hãy phân tích và trả về JSON theo đúng định dạng sau:
+                        Hãy phân tích và trả về JSON theo đúng định dạng sau (đặc biệt lưu ý giữ nội dung thật ngắn gọn, súc tích):
                         {
-                          "summary": "Nhận xét tổng quan về phong độ và xu hướng học tập hiện tại (2-3 câu)",
+                          "summary": "Nhận xét ngắn gọn trong đúng 1 đến 2 câu ngắn (tối đa 35 từ), tập trung vào phong độ chính",
                           "steps": [
                             {
                               "step": 1,
-                              "title": "Tên bước hành động (ngắn gọn, trực quan, ví dụ: 'Cấp bách: Cải thiện điểm môn Tin học đại cương')",
-                              "action": "Hướng dẫn cụ thể sinh viên nên ôn chương nào, làm dạng bài gì",
-                              "priority": "HIGH", // HIGH (ưu tiên cao nếu điểm < 70), MEDIUM (duy trì điểm khá 70-84), LOW (bứt phá/mở rộng nếu >= 85)
+                              "title": "Tiêu đề hành động rất ngắn gọn (tối đa 7 từ, ví dụ: 'Ôn tập môn Tin học')",
+                              "action": "Hành động cụ thể, súc tích trong đúng 1 câu ngắn (tối đa 20 từ)",
+                              "priority": "HIGH", // HIGH (điểm < 70), MEDIUM (70-84), LOW (>= 85)
                               "subjectName": "Tên môn học liên quan nếu có"
                             }
                           ]
                         }
+                        Chỉ đề xuất tối đa 2 đến 3 bước quan trọng nhất.
                         """,
                 totalValidExams, overallAverage, statsSummary.toString());
 
