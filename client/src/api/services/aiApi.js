@@ -2,11 +2,12 @@ import { authAxios } from '../axiosConfig';
 import { getResponseData } from './apiResponse';
 
 export const aiApi = {
-  explainQuestion(questionId, selectedAnswerIds = []) {
+  explainQuestion(questionId, selectedAnswerIds = [], refresh = false) {
     return authAxios
       .post('ai/explain-question', {
         questionId,
         selectedAnswerIds,
+        refresh: refresh === true,
       })
       .then((response) => getResponseData(response, null));
   },

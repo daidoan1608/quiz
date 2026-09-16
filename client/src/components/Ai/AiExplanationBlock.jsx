@@ -15,25 +15,25 @@ export default function AiExplanationBlock({
   const [explanationData, setExplanationData] = useState(null);
   const [error, setError] = useState(null);
 
-  const fetchExplanation = async () => {
+  const fetchExplanation = async (force = false) => {
+    const isRefresh = force === true;
     if (!isLoggedIn) {
       setIsOpen(true);
       setError('Vui lòng đăng nhập để sử dụng tính năng giải thích bằng AI.');
       return;
     }
 
-    if (explanationData) {
+    if (explanationData && !isRefresh) {
       setIsOpen((prev) => !prev);
       return;
     }
-
 
     setIsOpen(true);
     setLoading(true);
     setError(null);
 
     try {
-      const data = await aiApi.explainQuestion(questionId, selectedAnswerIds);
+      const data = await aiApi.explainQuestion(questionId, selectedAnswerIds, isRefresh);
       setExplanationData(data);
     } catch (err) {
       const message =
@@ -50,25 +50,32 @@ export default function AiExplanationBlock({
   const renderFormattedExplanation = (rawText) => {
     if (!rawText) return null;
 
-    // Enhance standard headers and bullet points for clean UI display
-    const enhancedText = rawText
+    // 1. Chạy parseMarkdown để xử lý KaTeX, escape an toàn và inline markdown (bold/italic/code)
+    const parsedHtml = parseMarkdown(rawText);
+
+    // 2. Chuyển đổi tiêu đề ###, ##, gạch ngang --- và bullet points sau khi parse an toàn
+    const formattedHtml = parsedHtml
       .replace(
-        /^###\s+(.+)$/gm,
-        '<h4 class="ai-explain-title text-base font-bold text-indigo-700 dark:text-indigo-400 mt-3.5 mb-1.5 flex items-center gap-1.5">$1</h4>'
+        /(?:^|<br\s*\/?>)\s*###\s+([^<]+)/g,
+        '<h4 class="ai-explain-title text-base font-bold text-indigo-700 dark:text-indigo-400 mt-3.5 mb-1 flex items-center gap-1.5">$1</h4>'
       )
       .replace(
-        /^##\s+(.+)$/gm,
-        '<h3 class="ai-explain-main-title text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2">$1</h3>'
+        /(?:^|<br\s*\/?>)\s*##\s+([^<]+)/g,
+        '<h3 class="ai-explain-main-title text-lg font-bold text-gray-900 dark:text-white mt-4 mb-1.5">$1</h3>'
       )
       .replace(
-        /^-\s+(.+)$/gm,
-        '<li class="ai-explain-item ml-4 list-disc text-sm text-gray-700 dark:text-gray-300 leading-relaxed">$1</li>'
+        /(?:^|<br\s*\/?>)\s*---\s*(?:<br\s*\/?>|$)/g,
+        '<hr class="my-2.5 border-gray-200 dark:border-gray-700" />'
+      )
+      .replace(
+        /(?:^|<br\s*\/?>)\s*[-*]\s+([^<]+)/g,
+        '<div class="flex items-start gap-2 ml-1 text-gray-700 dark:text-gray-300"><span class="text-indigo-500 font-bold">•</span><span class="flex-1">$1</span></div>'
       );
 
     return (
       <div
-        className="ai-explanation-content space-y-2 text-sm leading-relaxed text-gray-800 dark:text-gray-200"
-        dangerouslySetInnerHTML={{ __html: parseMarkdown(enhancedText) }}
+        className="ai-explanation-content space-y-1.5 text-sm leading-relaxed text-gray-800 dark:text-gray-200"
+        dangerouslySetInnerHTML={{ __html: formattedHtml }}
       />
     );
   };
@@ -80,7 +87,7 @@ export default function AiExplanationBlock({
       {/* Trigger Button */}
       <button
         type="button"
-        onClick={fetchExplanation}
+        onClick={() => fetchExplanation(false)}
         disabled={loading}
         className={`inline-flex items-center gap-1.5 rounded-lg border font-medium transition-all duration-200 shadow-2xs ${
           isSmall
@@ -122,14 +129,29 @@ export default function AiExplanationBlock({
                 </span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors"
-              title="Đóng"
-            >
-              <span className="material-symbols-outlined text-base">close</span>
-            </button>
+            <div className="flex items-center gap-1">
+              {explanationData && (
+                <button
+                  type="button"
+                  onClick={() => fetchExplanation(true)}
+                  disabled={loading}
+                  className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-800 dark:hover:text-purple-300 transition-colors"
+                  title="Tạo lại giải thích mới với AI"
+                >
+                  <span className={`material-symbols-outlined text-base ${loading ? 'animate-spin' : ''}`}>
+                    refresh
+                  </span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors"
+                title="Đóng"
+              >
+                <span className="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
           </div>
 
           {/* Body */}
@@ -154,7 +176,7 @@ export default function AiExplanationBlock({
                     <p className="text-xs opacity-90">{error}</p>
                     <button
                       type="button"
-                      onClick={fetchExplanation}
+                      onClick={() => fetchExplanation(false)}
                       className="mt-2 text-xs font-semibold text-red-700 dark:text-red-300 underline hover:no-underline"
                     >
                       Thử lại

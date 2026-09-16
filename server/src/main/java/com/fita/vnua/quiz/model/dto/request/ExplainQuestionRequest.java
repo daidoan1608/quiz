@@ -15,4 +15,11 @@ public class ExplainQuestionRequest {
     private Long questionId;
 
     private List<Long> selectedAnswerIds;
+    private Boolean refresh;
+
+    public ExplainQuestionRequest(Long questionId, List<Long> selectedAnswerIds) {
+        this.questionId = questionId;
+        this.selectedAnswerIds = selectedAnswerIds;
+        this.refresh = false;
+    }
 }

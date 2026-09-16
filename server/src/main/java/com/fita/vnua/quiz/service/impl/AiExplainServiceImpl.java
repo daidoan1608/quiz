@@ -34,9 +34,13 @@ public class AiExplainServiceImpl implements AiExplainService {
     private final StringRedisTemplate stringRedisTemplate;
 
     private static final String SYSTEM_PROMPT = """
-            Bạn là một trợ giảng đại học xuất sắc, tận tâm và giàu kinh nghiệm của trường Học viện Nông nghiệp Việt Nam (VNUA).
-            Nhiệm vụ của bạn là giải thích cặn kẽ câu hỏi trắc nghiệm sau đây cho sinh viên.
-            Phong cách trình bày: Sư phạm, rõ ràng, dễ hiểu, súc tích, định dạng bằng Markdown chuẩn đẹp (dùng tiêu đề ###, danh sách gạch đầu dòng, công thức toán/lý/hóa bằng LaTeX nếu có).
+            Bạn là trợ giảng đại học của Học viện Nông nghiệp Việt Nam (VNUA).
+            Nhiệm vụ của bạn là giải thích câu hỏi trắc nghiệm một cách ngắn gọn, súc tích và đi thẳng vào trọng tâm.
+            QUY TẮC BẮT BUỘC:
+            1. TUYỆT ĐỐI KHÔNG chào hỏi xã giao ở đầu bài (không viết 'Chào các em...', 'Thầy/cô rất vui...').
+            2. TUYỆT ĐỐI KHÔNG chúc thi tốt hay chào tạm biệt ở cuối bài.
+            3. Đi thẳng trực tiếp vào nội dung phân tích theo đúng cấu trúc yêu cầu, không lan man.
+            4. Định dạng Markdown chuẩn: dùng tiêu đề ###, gạch đầu dòng -, in đậm từ khóa quan trọng, công thức LaTeX nếu có.
             """;
 
     @Override
@@ -68,19 +72,22 @@ public class AiExplainServiceImpl implements AiExplainService {
                 : selectedIds.stream().map(String::valueOf).collect(Collectors.joining("-"));
         String cacheKey = String.format("ai:explain:q:%d:sel:%s", question.getQuestionId(), selectedKeySuffix);
 
-        try {
-            String cachedExplanation = stringRedisTemplate.opsForValue().get(cacheKey);
-            if (cachedExplanation != null && !cachedExplanation.isBlank()) {
-                log.info("Returning cached AI explanation for questionId={}", question.getQuestionId());
-                return ExplainQuestionResponse.builder()
-                        .questionId(question.getQuestionId())
-                        .explanation(cachedExplanation)
-                        .cached(true)
-                        .provider("cache")
-                        .build();
+        boolean isRefresh = Boolean.TRUE.equals(request.getRefresh());
+        if (!isRefresh) {
+            try {
+                String cachedExplanation = stringRedisTemplate.opsForValue().get(cacheKey);
+                if (cachedExplanation != null && !cachedExplanation.isBlank()) {
+                    log.info("Returning cached AI explanation for questionId={}", question.getQuestionId());
+                    return ExplainQuestionResponse.builder()
+                            .questionId(question.getQuestionId())
+                            .explanation(cachedExplanation)
+                            .cached(true)
+                            .provider("cache")
+                            .build();
+                }
+            } catch (Exception e) {
+                log.warn("Redis get cache error: {}", e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("Redis get cache error: {}", e.getMessage());
         }
 
         // 4. Lấy AI Client đang hoạt động
@@ -143,22 +150,22 @@ public class AiExplainServiceImpl implements AiExplainService {
         }
 
         sb.append("""
-                Hãy phân tích và giải thích cho sinh viên theo cấu trúc Markdown sau:
-                ### 1. Phân tích đáp án đúng
-                - Giải thích chi tiết tại sao đáp án đúng là chính xác (dẫn giải lý thuyết, công thức hoặc định lý liên quan).
-                
-                ### 2. Phân tích các phương án còn lại
-                - Chỉ ra điểm sai, lỗ hổng hoặc bẫy tư duy của các phương án sai.
+                Hãy giải thích thật ngắn gọn, đi thẳng vào trọng tâm bản chất theo cấu trúc Markdown sau:
+                ### 1. Đáp án đúng
+                - Khẳng định đáp án đúng và giải thích lý do cốt lõi trong đúng 1-2 câu ngắn (tối đa 40 từ).
+
+                ### 2. Vì sao các phương án khác sai
+                - Mỗi phương án sai chỉ giải thích bằng đúng 1 dòng ngắn gọn (chỉ ra từ khóa sai hoặc lý do loại trừ).
                 """);
 
         if (!studentChosenOptions.isEmpty()) {
-            sb.append("- Nhận xét cụ thể về phương án mà sinh viên đã chọn (nếu sinh viên chọn sai, giải thích vì sao dễ nhầm lẫn sang phương án này).\n");
+            sb.append("- Nhận xét ngắn về phương án sinh viên đã chọn (nếu chọn sai, chỉ ra bẫy nhầm lẫn trong đúng 1 câu ngắn).\n");
         }
 
         sb.append("""
-                
-                ### 3. Mẹo ghi nhớ & Điểm mấu chốt
-                - Đúc kết 1-2 ý ngắn gọn để sinh viên ghi nhớ nhanh và phản xạ tốt khi gặp dạng bài này lần sau.
+
+                ### 3. Từ khóa cốt lõi
+                - Đúng 1 câu ngắn chứa từ khóa/mẹo mấu chốt để nhận diện đáp án khi gặp lại câu hỏi này.
                 """);
 
         return sb.toString();
