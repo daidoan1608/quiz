@@ -23,9 +23,11 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CachingConfigurer;
+
 @Configuration
 @Slf4j
-public class RedisCacheConfig {
+public class RedisCacheConfig implements CachingConfigurer {
     private static final String TYPE_HINT_PROPERTY = "@type";
 
     @Bean
@@ -58,15 +60,17 @@ public class RedisCacheConfig {
                 .withCacheConfiguration("notificationUnreadCount", cacheWithTtl(Duration.ofSeconds(60), keyPrefix));
     }
 
+    @Override
     @Bean("cacheKeyGenerator")
-    public KeyGenerator cacheKeyGenerator() {
+    public KeyGenerator keyGenerator() {
         return (Object target, Method method, Object... params) -> Arrays.stream(params)
                 .map(param -> param == null ? "null" : param.toString())
                 .collect(Collectors.joining(":"));
     }
 
+    @Override
     @Bean
-    public CacheErrorHandler cacheErrorHandler() {
+    public CacheErrorHandler errorHandler() {
         return new CacheErrorHandler() {
             @Override
             public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
@@ -113,7 +117,7 @@ public class RedisCacheConfig {
                 .build();
         objectMapper.activateDefaultTypingAsProperty(
                 typeValidator,
-                ObjectMapper.DefaultTyping.NON_FINAL,
+                ObjectMapper.DefaultTyping.EVERYTHING,
                 TYPE_HINT_PROPERTY
         );
         return new GenericJackson2JsonRedisSerializer(objectMapper);
