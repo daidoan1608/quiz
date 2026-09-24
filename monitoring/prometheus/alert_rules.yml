@@ -45,3 +45,22 @@ groups:
         annotations:
           summary: "HikariCP Connection Pool Depleted"
           description: "Đang có hơn 5 request chờ kết nối database trống trong connection pool."
+
+      - alert: RedisDown
+        expr: redis_up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis Server is DOWN"
+          description: "Dịch vụ Redis không phản hồi trong hơn 1 phút."
+
+      - alert: RedisHighMemoryUsage
+        expr: (redis_memory_used_bytes{job="redis"} / redis_memory_max_bytes{job="redis"}) * 100 > 90
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis Memory Usage > 90%"
+          description: "Redis đang sử dụng hơn 90% dung lượng bộ nhớ tối đa."
+

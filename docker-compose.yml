@@ -88,8 +88,8 @@ services:
     profiles: ["monitoring"]
     image: prom/prometheus:v2.54.1
     restart: unless-stopped
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -98,16 +98,13 @@ services:
       - --storage.tsdb.path=/prometheus
       - --web.console.libraries=/usr/share/prometheus/console_libraries
       - --web.console.templates=/usr/share/prometheus/consoles
-    depends_on:
-      backend:
-        condition: service_started
 
   grafana:
     profiles: ["monitoring"]
     image: grafana/grafana:11.2.0
     restart: unless-stopped
-    ports:
-      - "3002:3000"
+    expose:
+      - "3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -123,8 +120,8 @@ services:
     profiles: ["monitoring"]
     image: prom/alertmanager:v0.27.0
     restart: unless-stopped
-    ports:
-      - "9093:9093"
+    expose:
+      - "9093"
     volumes:
       - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data:/alertmanager
@@ -136,8 +133,8 @@ services:
     profiles: ["monitoring"]
     image: grafana/loki:3.1.0
     restart: unless-stopped
-    ports:
-      - "3100:3100"
+    expose:
+      - "3100"
     volumes:
       - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki-data:/loki
@@ -155,6 +152,17 @@ services:
     depends_on:
       loki:
         condition: service_started
+
+  redis-exporter:
+    profiles: ["monitoring"]
+    image: oliver006/redis_exporter:v1.67.0-alpine
+    restart: unless-stopped
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    expose:
+      - "9121"
+    depends_on:
+      - redis
 
 volumes:
   db-data:
