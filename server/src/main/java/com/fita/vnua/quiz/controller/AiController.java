@@ -10,14 +10,19 @@ import com.fita.vnua.quiz.service.AiRoadmapService;
 import com.fita.vnua.quiz.model.dto.request.AnalyzeExamResultRequest;
 import com.fita.vnua.quiz.model.dto.response.ExamAnalysisResponse;
 import com.fita.vnua.quiz.service.AiExamAnalysisService;
+import com.fita.vnua.quiz.model.dto.ai.GenerateQuestionsResponse;
+import com.fita.vnua.quiz.model.enums.QuestionDifficulty;
+import com.fita.vnua.quiz.service.AiQuestionGeneratorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,6 +33,23 @@ public class AiController {
     private final AiExplainService aiExplainService;
     private final AiRoadmapService aiRoadmapService;
     private final AiExamAnalysisService aiExamAnalysisService;
+    private final AiQuestionGeneratorService aiQuestionGeneratorService;
+
+    @PostMapping(value = "/generate-questions-from-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
+    @Operation(summary = "Tự động sinh câu hỏi trắc nghiệm từ tài liệu (PDF, DOCX, TXT) bằng AI")
+    public ResponseEntity<ApiResponse<GenerateQuestionsResponse>> generateQuestionsFromFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "chapterId", required = false) Long chapterId,
+            @RequestParam(value = "numberOfQuestions", required = false, defaultValue = "5") Integer numberOfQuestions,
+            @RequestParam(value = "difficulty", required = false) QuestionDifficulty difficulty,
+            @RequestParam(value = "saveToDatabase", required = false, defaultValue = "false") Boolean saveToDatabase,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        GenerateQuestionsResponse response = aiQuestionGeneratorService.generateQuestionsFromFile(
+                file, chapterId, numberOfQuestions, difficulty, saveToDatabase, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Sinh câu hỏi từ tài liệu thành công", response));
+    }
 
     @PostMapping("/explain-question")
     @PreAuthorize("isAuthenticated()")

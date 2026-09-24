@@ -461,6 +461,7 @@ Nhóm API chính:
 | Admin import/export | `/admin/questions/import`, `/admin/questions/upload-image`, các endpoint export | Import Excel, upload ảnh, tải dữ liệu |
 | Admin notification | `/admin/notifications/global`, `/admin/notifications/personal`, `/admin/notifications/subject`, `/admin/notifications/batch`, `/admin/notifications/campaigns` | Gửi và quản lý campaign thông báo |
 | Admin groups/audit | `/admin/groups`, `/api/v1/admin/audit-logs` | Nhóm quyền admin và audit log |
+| AI Assistant | `/api/v1/ai/explain-question`, `/api/v1/ai/roadmap`, `/api/v1/ai/analyze-exam-result`, `/api/v1/ai/generate-questions-from-file` | Giải thích câu hỏi, gợi ý lộ trình, phân tích bài thi, sinh câu hỏi từ file PDF/DOCX/TXT |
 
 Postman collection:
 
@@ -514,19 +515,28 @@ Các entity đáng chú ý:
 - Swagger UI khi backend đang chạy: `http://localhost:8080/swagger-ui`.
 - OpenAPI JSON khi backend đang chạy: `http://localhost:8080/v3/api-docs`.
 
-## Giám Sát Hệ Thống (Prometheus & Grafana)
+## Giám Sát Hệ Thống & Cảnh Báo (Prometheus, Alertmanager, Loki, Grafana)
 
-Dự án đã tích hợp sẵn hệ thống giám sát metrics:
+Dự án đã tích hợp trọn bộ giải pháp giám sát toàn diện (Observability Stack):
 
-- **Spring Boot Actuator & Micrometer:** Expose metrics tại endpoint `/actuator/prometheus` (CPU, Memory, Threads, HTTP latency/throughput, HikariCP DB pool).
+- **Spring Boot Actuator & Micrometer:** Expose metrics tại `/actuator/prometheus` (CPU, Memory Heap, Threads, HTTP latency/throughput, HikariCP DB pool).
 - **Prometheus (`http://localhost:9090`):** Tự động cào (scrape) metrics từ backend mỗi 10 giây.
+- **Alertmanager (`http://localhost:9093`):** Quản lý và bắn cảnh báo khi có sự cố:
+  - `BackendDown`: Backend ngừng hoạt động > 1 phút.
+  - `HighCpuUsage`: CPU quá tải > 85% trong 2 phút.
+  - `HighJvmHeapUsage`: Bộ nhớ JVM Heap > 90%.
+  - `HighHttp5xxRate`: Xuất hiện lỗi 500 liên tục.
+  - `DatabaseConnectionPoolDepleted`: Hết kết nối database trong pool.
+- **Loki & Promtail (`http://localhost:3100`):** Thu thập và quản lý log tập trung. Xem log Exception trực tiếp trên Grafana mà không cần SSH/xem console.
 - **Grafana (`http://localhost:3002`):**
   - Tài khoản mặc định: `admin` / `admin`
-  - Đã tự động cấu hình (provisioned) Prometheus datasource (`http://prometheus:9090`).
-  - Đã nạp sẵn dashboard **Spring Boot 3 - Application Observability** theo dõi Uptime, Process/System CPU, Heap Memory, Request Rate, Latency, và Connection Pool.
+  - Đã nạp sẵn Datasource: **Prometheus** và **Loki**.
+  - Đã nạp sẵn dashboard **Spring Boot 3 - Application Observability**.
 
 Thư mục cấu hình:
-- `monitoring/prometheus/prometheus.yml`: Cấu hình scrape targets.
-- `monitoring/grafana/provisioning/datasources/`: Cấu hình datasource tự động.
-- `monitoring/grafana/provisioning/dashboards/`: Cấu hình nạp dashboard tự động từ file JSON.
+- `monitoring/prometheus/`: File `prometheus.yml` và quy tắc cảnh báo `alert_rules.yml`.
+- `monitoring/alertmanager/`: Cấu hình nhận cảnh báo `alertmanager.yml` (Telegram, Discord, Webhook).
+- `monitoring/loki/`: Cấu hình lưu trữ log `loki-config.yml`.
+- `monitoring/promtail/`: Cấu hình shipper log `promtail-config.yml`.
+- `monitoring/grafana/provisioning/`: Cấu hình tự động nạp datasources và dashboard.
 

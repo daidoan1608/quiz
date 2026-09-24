@@ -1,0 +1,47 @@
+groups:
+  - name: QuizBackendAlerts
+    rules:
+      - alert: BackendDown
+        expr: up{job="spring-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Quiz Backend is DOWN!"
+          description: "Backend service không phản hồi trong hơn 1 phút tại instance {{ $labels.instance }}."
+
+      - alert: HighCpuUsage
+        expr: process_cpu_usage{job="spring-backend"} * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backend CPU Usage > 85%"
+          description: "Process CPU đang ở mức {{ $value | printf \"%.1f\" }}% liên tục trong 2 phút."
+
+      - alert: HighJvmHeapUsage
+        expr: (sum(jvm_memory_used_bytes{area="heap"}) / sum(jvm_memory_max_bytes{area="heap"})) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "JVM Heap Memory > 90%"
+          description: "Bộ nhớ JVM Heap đã vượt quá 90% (hiện tại: {{ $value | printf \"%.1f\" }}%), nguy cơ gặp OutOfMemoryError."
+
+      - alert: HighHttp5xxRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[1m])) > 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx Server Error Rate"
+          description: "Hệ thống đang phát sinh nhiều lỗi 5xx (> 1 req/s) trong 1 phút qua."
+
+      - alert: DatabaseConnectionPoolDepleted
+        expr: hikaricp_connections_pending > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HikariCP Connection Pool Depleted"
+          description: "Đang có hơn 5 request chờ kết nối database trống trong connection pool."

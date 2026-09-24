@@ -1,0 +1,24 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'job', 'severity']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 1h
+  receiver: 'telegram-receiver'
+
+receivers:
+  - name: 'telegram-receiver'
+    telegram_configs:
+      - bot_token: 'YOUR_TELEGRAM_BOT_TOKEN' # Điền bot token từ @BotFather
+        chat_id: 0                         # Điền Chat ID số từ @userinfobot (hoặc ID group -xxxxxxxxx)
+        send_resolved: true                # Tự động gửi tin nhắn báo khi sự cố đã được giải quyết
+        parse_mode: 'HTML'
+        message: |
+          {{ if eq .Status "firing" }}🔥 <b>[CẢNH BÁO SỰ CỐ]</b>{{ else }}✅ <b>[ĐÃ KHẮC PHỤC]</b>{{ end }}
+          <b>Tên cảnh báo:</b> {{ .CommonLabels.alertname }}
+          <b>Mức độ:</b> {{ .CommonLabels.severity }}
+          <b>Tóm tắt:</b> {{ .CommonAnnotations.summary }}
+          <b>Chi tiết:</b> {{ .CommonAnnotations.description }}
+          <b>Thời gian:</b> {{ .StartsAt.Format "15:04:05 02/01/2006" }}
