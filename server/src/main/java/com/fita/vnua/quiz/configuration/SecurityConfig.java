@@ -99,7 +99,8 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/ws-native/**",
                                 "/avatars/**", // Cho phép xem ảnh
-                                "/questions/**" // Cho phép xem ảnh câu hỏi
+                                "/questions/**", // Cho phép xem ảnh câu hỏi
+                                "/actuator/**" // Endpoint metrics và health check cho Prometheus
                         ).permitAll()
 
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "MOD")

@@ -1,0 +1,338 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "Application Overview",
+      "type": "row"
+    },
+    {
+      "id": 1,
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "process_uptime_seconds{application=~\"$application\"}",
+          "legendFormat": "Uptime",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" },
+          "mappings": []
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Process CPU Usage",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "process_cpu_usage{application=~\"$application\"} * 100",
+          "legendFormat": "CPU",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 70 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "System CPU Usage",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "system_cpu_usage{application=~\"$application\"} * 100",
+          "legendFormat": "System CPU",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 75 },
+              { "color": "red", "value": 90 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Heap Usage %",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "(sum(jvm_memory_used_bytes{application=~\"$application\", area=\"heap\"}) / sum(jvm_memory_max_bytes{application=~\"$application\", area=\"heap\"})) * 100",
+          "legendFormat": "Heap %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 75 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Live Threads",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads{application=~\"$application\"}",
+          "legendFormat": "Threads",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Active DB Connections",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "hikaricp_connections_active{application=~\"$application\"}",
+          "legendFormat": "Active Connections",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 101,
+      "title": "HTTP Traffic & Latency",
+      "type": "row"
+    },
+    {
+      "id": 7,
+      "title": "HTTP Request Rate (req/sec)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{application=~\"$application\"}[1m])) by (status)",
+          "legendFormat": "Status: {{status}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth"
+          }
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Average Response Time (seconds)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_sum{application=~\"$application\"}[1m])) / sum(rate(http_server_requests_seconds_count{application=~\"$application\"}[1m]))",
+          "legendFormat": "Avg Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "max(http_server_requests_seconds_max{application=~\"$application\"})",
+          "legendFormat": "Max Latency",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth"
+          }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "id": 102,
+      "title": "JVM Memory & Garbage Collection",
+      "type": "row"
+    },
+    {
+      "id": 9,
+      "title": "JVM Heap Memory",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{application=~\"$application\", area=\"heap\"}",
+          "legendFormat": "Used: {{id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "jvm_memory_max_bytes{application=~\"$application\", area=\"heap\"}",
+          "legendFormat": "Max",
+          "refId": "B"
+        },
+        {
+          "expr": "jvm_memory_committed_bytes{application=~\"$application\", area=\"heap\"}",
+          "legendFormat": "Committed",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line"
+          }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Hikari Connection Pool",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "hikaricp_connections_active{application=~\"$application\"}",
+          "legendFormat": "Active",
+          "refId": "A"
+        },
+        {
+          "expr": "hikaricp_connections_idle{application=~\"$application\"}",
+          "legendFormat": "Idle",
+          "refId": "B"
+        },
+        {
+          "expr": "hikaricp_connections_pending{application=~\"$application\"}",
+          "legendFormat": "Pending",
+          "refId": "C"
+        },
+        {
+          "expr": "hikaricp_connections_max{application=~\"$application\"}",
+          "legendFormat": "Max",
+          "refId": "D"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line"
+          }
+        }
+      }
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["spring-boot", "micrometer", "jvm"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "quiz",
+          "value": "quiz"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Application",
+        "multi": false,
+        "name": "application",
+        "options": [],
+        "query": "label_values(jvm_memory_used_bytes, application)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
+  },
+  "timezone": "browser",
+  "title": "Spring Boot 3 - Application Observability",
+  "uid": "spring-boot-quiz",
+  "version": 1
+}

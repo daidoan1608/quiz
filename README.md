@@ -348,6 +348,8 @@ http://api.localhost    -> server API qua Nginx
 http://localhost:8080   -> server API direct
 http://localhost:3000   -> client direct
 http://localhost:3001   -> admin direct
+http://localhost:9090   -> Prometheus UI
+http://localhost:3002   -> Grafana Dashboard (admin/admin)
 ```
 
 Các lệnh hỗ trợ:
@@ -377,6 +379,8 @@ Các service Docker:
 | `db` | MySQL 8, database mặc định `quiz` |
 | `redis` | Redis 7 Alpine, dùng cho cache |
 | `nginx` | Reverse proxy cho client/admin/API |
+| `prometheus` | Thu thập metrics từ Spring Boot Actuator, port `9090` |
+| `grafana` | Trực quan hóa metrics, dashboard Spring Boot tự động nạp, port `3002` |
 
 Chạy Docker thủ công:
 
@@ -509,4 +513,20 @@ Các entity đáng chú ý:
 - `docs/postman/Quiz.postman_collection.json`: Postman collection cho API.
 - Swagger UI khi backend đang chạy: `http://localhost:8080/swagger-ui`.
 - OpenAPI JSON khi backend đang chạy: `http://localhost:8080/v3/api-docs`.
+
+## Giám Sát Hệ Thống (Prometheus & Grafana)
+
+Dự án đã tích hợp sẵn hệ thống giám sát metrics:
+
+- **Spring Boot Actuator & Micrometer:** Expose metrics tại endpoint `/actuator/prometheus` (CPU, Memory, Threads, HTTP latency/throughput, HikariCP DB pool).
+- **Prometheus (`http://localhost:9090`):** Tự động cào (scrape) metrics từ backend mỗi 10 giây.
+- **Grafana (`http://localhost:3002`):**
+  - Tài khoản mặc định: `admin` / `admin`
+  - Đã tự động cấu hình (provisioned) Prometheus datasource (`http://prometheus:9090`).
+  - Đã nạp sẵn dashboard **Spring Boot 3 - Application Observability** theo dõi Uptime, Process/System CPU, Heap Memory, Request Rate, Latency, và Connection Pool.
+
+Thư mục cấu hình:
+- `monitoring/prometheus/prometheus.yml`: Cấu hình scrape targets.
+- `monitoring/grafana/provisioning/datasources/`: Cấu hình datasource tự động.
+- `monitoring/grafana/provisioning/dashboards/`: Cấu hình nạp dashboard tự động từ file JSON.
 
