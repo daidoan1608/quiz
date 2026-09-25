@@ -27,6 +27,8 @@ services:
         VITE_AVATAR_URL: ""
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-995894234177-1b4ri2jqtthfkpilgchdrv39c50mpn5o.apps.googleusercontent.com}
     restart: unless-stopped
+    env_file:
+      - ./server/.env.local
     expose:
       - "3000"
 
@@ -37,6 +39,8 @@ services:
         VITE_API_URL: /api/v1/
         VITE_ADMIN_BASENAME: /
     restart: unless-stopped
+    env_file:
+      - ./server/.env.local
     expose:
       - "3001"
 
@@ -108,6 +112,8 @@ services:
     restart: unless-stopped
     expose:
       - "3000"
+    ports:
+      - "3002:3000"
     env_file:
       - ./server/.env.local
     environment:
