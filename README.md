@@ -1,6 +1,6 @@
 # Quiz VNUA
 
-Nền tảng ôn tập và thi trắc nghiệm trực tuyến.  
+Nền tảng ôn tập và thi trắc nghiệm trực tuyến.
 Kiến trúc: **Spring Boot 3.4.0** + **React 18 (Vite)** + **MySQL 8** + **Redis** + **RabbitMQ** + **Nginx** + **Prometheus/Grafana**.
 
 ---
@@ -23,7 +23,7 @@ run.cmd
 Script sẽ hiển thị bảng điều khiển menu:
 ```text
 ==============================================
-         QUIZ SYSTEM CONTROLLER              
+         QUIZ SYSTEM CONTROLLER
 ==============================================
 1. Chay App co ban (BE, FE, DB, Redis, RabbitMQ, Nginx)
 2. Chay Full App + Monitoring (Prometheus & Grafana)
@@ -101,6 +101,7 @@ npm run dev
 Tài liệu chi tiết về kiến trúc, database, nghiệp vụ, API và hạ tầng giám sát được lưu trữ trong thư mục **[`docs/`](docs/README.md)**:
 
 - **[docs/architecture.md](docs/architecture.md)**: Sơ đồ kiến trúc tổng quan, hạ tầng Nginx và cơ chế hàng đợi RabbitMQ.
+- **[docs/workflows.md](docs/workflows.md)**: Sơ đồ tuần tự các luồng chính: Xác thực/Refresh Token, Làm bài thi/Nộp bài tải cao, AI sinh câu hỏi, Giám sát cảnh báo.
 - **[docs/backend.md](docs/backend.md)**: Chi tiết Spring Boot 3.4.0, bảo mật JWT Cookie, xử lý tải cao, AI sinh câu hỏi từ tài liệu.
 - **[docs/frontend.md](docs/frontend.md)**: Chi tiết 2 ứng dụng React Client & Admin, Ant Design, các màn hình chức năng.
 - **[docs/monitoring.md](docs/monitoring.md)**: Trọn bộ Observability (Prometheus, Grafana, Loki, Alertmanager gửi cảnh báo Telegram).

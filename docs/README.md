@@ -9,6 +9,7 @@ Thư mục này chứa toàn bộ tài liệu đặc tả kiến trúc, công ng
 | Tài liệu | Mô tả chi tiết |
 | :--- | :--- |
 | **[Kiến Trúc Hệ Thống (Architecture)](./architecture.md)** | Sơ đồ luồng dữ liệu, Reverse Proxy Nginx, hệ thống Domain và cơ chế xử lý tải cao bất đồng bộ qua RabbitMQ. |
+| **[Sơ Đồ Luồng Hoạt Động (Workflows)](./workflows.md)** | Sơ đồ tuần tự (Sequence Diagram) cho Xác thực/Refresh Token, Làm bài thi/Nộp bài tải cao, AI sinh câu hỏi, và Giám sát cảnh báo. |
 | **[Backend API & Nghiệp Vụ (Backend)](./backend.md)** | Hướng dẫn phát triển Spring Boot 3.4.0, xác thực JWT Cookie, phân quyền, cấu hình RabbitMQ, AI Assistant và danh mục REST API. |
 | **[Giao Diện Frontend (Frontend)](./frontend.md)** | Cấu trúc 2 ứng dụng React 18 / Vite 7 (`client` cho người dùng & `admin` cho quản trị viên), thư viện Ant Design và các tính năng. |
 | **[Hệ Thống Giám Sát (Monitoring)](./monitoring.md)** | Bộ giải pháp Observability: Prometheus thu thập metrics, Grafana dashboard, Loki gom log tập trung và Alertmanager cảnh báo Telegram. |

@@ -7,13 +7,13 @@ services:
       - ./server/.env.production
     environment:
       DB_HOST: db
-      DB_PORT: 3306
+      DB_PORT: ${DB_PORT:-3306}
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:${DB_PORT:-3306}/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
     expose:
-      - "8080"
+      - "${SERVER_PORT:-8080}"
     depends_on:
       db:
         condition: service_healthy
@@ -33,7 +33,7 @@ services:
     env_file:
       - ./server/.env.production
     expose:
-      - "3000"
+      - "${CLIENT_PORT:-3000}"
 
   admin:
     build:
@@ -45,7 +45,7 @@ services:
     env_file:
       - ./server/.env.production
     expose:
-      - "3001"
+      - "${ADMIN_PORT:-3001}"
 
   db:
     image: mysql:8.0
@@ -58,6 +58,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-me}
       MYSQL_DATABASE: ${DB_NAME:-quiz}
+    expose:
+      - "${DB_PORT:-3306}"
     volumes:
       - ./mysql.init:/docker-entrypoint-initdb.d:ro
       - db-data:/var/lib/mysql
@@ -72,6 +74,8 @@ services:
     image: redis:7-alpine
     restart: always
     command: redis-server --appendonly yes
+    expose:
+      - "${REDIS_PORT:-6379}"
     volumes:
       - redis-data:/data
 
@@ -79,8 +83,8 @@ services:
     image: rabbitmq:3.13-management-alpine
     restart: unless-stopped
     expose:
-      - "5672"
-      - "15672"
+      - "${RABBITMQ_PORT:-5672}"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}"
     env_file:
       - ./server/.env.production
     environment:
@@ -88,6 +92,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+      - ./monitoring/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -99,8 +104,8 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
@@ -117,7 +122,7 @@ services:
     image: prom/prometheus:v2.54.1
     restart: unless-stopped
     expose:
-      - "9090"
+      - "${PROMETHEUS_PORT:-9090}"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -131,6 +136,8 @@ services:
     profiles: ["monitoring"]
     image: grafana/grafana:11.2.0
     restart: unless-stopped
+    ports:
+      - "${GRAFANA_PORT:-3002}:3000"
     expose:
       - "3000"
     env_file:
@@ -139,6 +146,11 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_USERS_AUTO_ASSIGN_ORG=true
+      - GF_USERS_AUTO_ASSIGN_ORG_NAME=${GRAFANA_ORG_NAME:-Quiz VNUA}
+      - GF_BRANDING_APP_TITLE=${GRAFANA_APP_TITLE:-Quiz VNUA - Giám Sát Hệ Thống}
+      - GF_BRANDING_APP_SUB_TITLE=${GRAFANA_APP_SUB_TITLE:-Hệ thống giám sát và cảnh báo sự cố Quiz VNUA}
+      - GF_SERVER_INSTANCE_NAME=${GRAFANA_INSTANCE_NAME:-Quiz VNUA Monitor}
     volumes:
       - grafana-data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -151,7 +163,7 @@ services:
     image: prom/alertmanager:v0.27.0
     restart: unless-stopped
     expose:
-      - "9093"
+      - "${ALERTMANAGER_PORT:-9093}"
     volumes:
       - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data:/alertmanager
@@ -164,7 +176,7 @@ services:
     image: grafana/loki:3.1.0
     restart: unless-stopped
     expose:
-      - "3100"
+      - "${LOKI_PORT:-3100}"
     volumes:
       - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki-data:/loki
@@ -188,9 +200,9 @@ services:
     image: oliver006/redis_exporter:v1.67.0-alpine
     restart: unless-stopped
     environment:
-      - REDIS_ADDR=redis://redis:6379
+      - REDIS_ADDR=redis://redis:${REDIS_PORT:-6379}
     expose:
-      - "9121"
+      - "${REDIS_EXPORTER_PORT:-9121}"
     depends_on:
       - redis
 

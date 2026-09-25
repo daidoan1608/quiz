@@ -74,11 +74,18 @@ flowchart LR
 - **Loki:** Lưu trữ và lập chỉ mục log.
 - **Lợi ích:** Quản trị viên và Lập trình viên có thể tìm kiếm lỗi, xem Stacktrace Exception của Backend ngay trên giao diện Grafana mà không cần phải SSH vào server hay gõ `docker logs`.
 
-### 5. Grafana Dashboard
+### 5. Grafana Dashboard (Tùy Chỉnh Tiêu Đề)
 - Địa chỉ truy cập: **`http://monitor.localhost`** *(Tài khoản mặc định: `admin` / `admin`)*.
+- Tiêu đề giao diện (Branding): **Quiz VNUA - Giám Sát Hệ Thống** (Tổ chức: `Quiz VNUA`).
 - Tự động nạp sẵn (Provisioning):
   - **Datasource:** Prometheus và Loki.
   - **Dashboard:** `Spring Boot 3 - Application Observability` (giám sát chi tiết JVM, DB, Requests) và `Redis Dashboard`.
+
+### 6. RabbitMQ Management Dashboard (Tùy Chỉnh Tiêu Đề)
+- Địa chỉ truy cập: **`http://rabbitmq.localhost`** *(Tài khoản mặc định: `guest` / `guest`)*.
+- Tiêu đề thanh tiêu đề (Header): **Quiz VNUA - He Thong Hang Doi**.
+- Tên Cluster định danh: **Quiz VNUA Message Broker**.
+- Cấu hình tại: `monitoring/rabbitmq/rabbitmq.conf`.
 
 ---
 
