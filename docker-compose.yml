@@ -109,8 +109,6 @@ services:
     restart: unless-stopped
     expose:
       - "3000"
-    ports:
-      - "3002:3000"
     env_file:
       - ./server/.env.production
     environment:
