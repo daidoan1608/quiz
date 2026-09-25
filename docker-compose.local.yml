@@ -11,6 +11,8 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-admin}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-Q123456@}
       JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--Xms256m -Xmx768m -XX:+UseG1GC}
       SPRING_FLYWAY_ENABLED: "false"
       SPRING_DATASOURCE_URL: jdbc:mysql://db:${DB_PORT:-3306}/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh

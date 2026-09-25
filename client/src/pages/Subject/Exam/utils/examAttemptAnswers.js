@@ -3,21 +3,22 @@ import { isMultipleChoice, normalizeSelectedIndexes } from 'pages/Subject/utils/
 export const mapAttemptAnswersToSelection = (questions = [], userAnswerDtos = []) =>
   userAnswerDtos.reduce((answerIndexByQuestion, userAnswer) => {
     const questionIndex = questions.findIndex(
-      (question) => question.questionId === userAnswer.questionId
+      (question) => String(question.questionId) === String(userAnswer.questionId)
     );
     if (questionIndex < 0) return answerIndexByQuestion;
 
     const question = questions[questionIndex];
     const answerIndex = (question?.answers || []).findIndex(
-      (answer) => (answer.answerId || answer.optionId) === userAnswer.answerId
+      (answer) =>
+        String(answer.answerId ?? answer.optionId) === String(userAnswer.answerId)
     );
     if (answerIndex < 0) return answerIndexByQuestion;
 
     if (isMultipleChoice(question)) {
-      answerIndexByQuestion[questionIndex] = [
-        ...(answerIndexByQuestion[questionIndex] || []),
-        answerIndex,
-      ];
+      const currentList = answerIndexByQuestion[questionIndex] || [];
+      if (!currentList.includes(answerIndex)) {
+        answerIndexByQuestion[questionIndex] = [...currentList, answerIndex];
+      }
     } else {
       answerIndexByQuestion[questionIndex] = answerIndex;
     }
@@ -36,9 +37,12 @@ export const buildSaveAnswerPayload = ({
     .filter(Boolean)
     .map((answer) => answer.answerId || answer.optionId);
 
+  const isMulti = isMultipleChoice(question);
+
   return {
-    answerId: answerIds[0],
-    answerIds,
+    ...(isMulti
+      ? { answerIds }
+      : { answerId: answerIds.length > 0 ? answerIds[0] : null }),
     currentQuestionIndex: questionIndex,
     questionId: question.questionId,
     remainingTime,

@@ -195,6 +195,7 @@
   "accountLoadError": "Unable to load account information.",
   "changePasswordSuccess": "Password changed successfully.",
   "changePasswordError": "Unable to change password.",
+  "uploadAvatarSuccess": "Avatar updated successfully!",
   "uploadAvatarError": "Unable to upload avatar.",
   "updateProfileSuccess": "Personal information updated successfully!",
   "updateProfileError": "Unable to update personal information.",

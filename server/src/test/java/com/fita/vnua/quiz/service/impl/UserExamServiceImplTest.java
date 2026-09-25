@@ -2,11 +2,14 @@ package com.fita.vnua.quiz.service.impl;
 
 import com.fita.vnua.quiz.exception.CustomApiException;
 import com.fita.vnua.quiz.model.dto.UserExamDto;
+import com.fita.vnua.quiz.model.dto.request.SaveExamAttemptAnswerRequest;
 import com.fita.vnua.quiz.model.dto.request.StartExamAttemptRequest;
 import com.fita.vnua.quiz.model.dto.request.UserExamRequest;
+import com.fita.vnua.quiz.model.entity.Answer;
 import com.fita.vnua.quiz.model.entity.Exam;
 import com.fita.vnua.quiz.model.entity.Question;
 import com.fita.vnua.quiz.model.entity.Subject;
+import com.fita.vnua.quiz.model.enums.QuestionType;
 import com.fita.vnua.quiz.model.entity.User;
 import com.fita.vnua.quiz.model.entity.UserAnswer;
 import com.fita.vnua.quiz.model.entity.UserExam;
@@ -197,6 +200,45 @@ class UserExamServiceImplTest {
         assertThat(movedWithoutAnswerAttempt.getStatus()).isEqualTo("CANCELLED");
         verify(userExamRepository).save(emptyAttempt);
         verify(userExamRepository).save(movedWithoutAnswerAttempt);
+    }
+
+    @Test
+    void saveAttemptAnswerAcceptsBothAnswerIdAndAnswerIdsGracefully() {
+        UUID currentUserId = UUID.randomUUID();
+        Long userExamId = 10L;
+        Long examId = 99L;
+        Long questionId = 1L;
+        Long answerId = 5L;
+
+        UserExam attempt = buildAttempt(userExamId, examId, 0);
+
+        Question question = new Question();
+        question.setQuestionId(questionId);
+        question.setQuestionType(QuestionType.SINGLE_CHOICE);
+
+        Answer answer = new Answer();
+        answer.setOptionId(answerId);
+        answer.setQuestion(question);
+
+        SaveExamAttemptAnswerRequest request = new SaveExamAttemptAnswerRequest();
+        request.setQuestionId(questionId);
+        request.setAnswerId(answerId);
+        request.setAnswerIds(List.of(answerId));
+        request.setCurrentQuestionIndex(0);
+        request.setRemainingTime(1800);
+
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
+        when(userExamRepository.findByIdAndUserId(userExamId, currentUserId)).thenReturn(Optional.of(attempt));
+        when(questionRepository.findById(questionId)).thenReturn(Optional.of(question));
+        when(questionRepository.findQuestionsByExamId(examId)).thenReturn(List.of(question));
+        when(answerRepository.findAllById(any())).thenReturn(List.of(answer));
+        when(userExamRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = userExamService.saveAttemptAnswer(userExamId, request, currentUserId);
+
+        assertThat(response).isNotNull();
+        verify(userAnswerRepository).save(any(UserAnswer.class));
     }
 
     private UserExam buildAttempt(Long userExamId, Long examId, Integer currentQuestionIndex) {

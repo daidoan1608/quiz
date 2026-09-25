@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { appMessage } from 'utils/appMessage';
 import { accountApi } from 'api/services/accountApi';
@@ -26,6 +26,7 @@ export const useAccountPage = () => {
   const [activeSection, setActiveSection] = useState(ACCOUNT_SECTIONS.PERSONAL);
   const [inProgressAttempts, setInProgressAttempts] = useState([]);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const { updateAvatar, avatarUrl, authProvider, hasPassword } = useAuth();
   const navigate = useNavigate();
@@ -108,8 +109,20 @@ export const useAccountPage = () => {
   };
 
   const handleUploadAvatar = async (fileInput) => {
+    if (!fileInput) return;
+
+    if (!fileInput.type.startsWith('image/')) {
+      appMessage.warning('Vui lòng chọn file hình ảnh hợp lệ (JPG, PNG, WEBP...).');
+      return;
+    }
+
+    if (fileInput.size > 5 * 1024 * 1024) {
+      appMessage.warning('Kích thước ảnh không được vượt quá 5MB.');
+      return;
+    }
+
     try {
-      setLoading(true);
+      setUploadingAvatar(true);
       const newAvatarUrl = await accountApi.uploadAvatar(
         buildAvatarFormData(fileInput)
       );
@@ -123,13 +136,13 @@ export const useAccountPage = () => {
         updateAvatar(newAvatarUrl);
       }
       appMessage.success(
-        texts.uploadAvatarSuccess || 'Tải lên avatar thành công!'
+        texts.uploadAvatarSuccess || 'Cập nhật ảnh đại diện thành công!'
       );
     } catch (error) {
       console.error(error);
-      appMessage.error('Lỗi tải ảnh lên.');
+      appMessage.error(texts.uploadAvatarError || 'Lỗi tải ảnh lên.');
     } finally {
-      setLoading(false);
+      setUploadingAvatar(false);
     }
   };
 
@@ -179,6 +192,7 @@ export const useAccountPage = () => {
     setShowChangePassword,
     showChangePassword,
     texts,
+    uploadingAvatar,
     user,
   };
 };

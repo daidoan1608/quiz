@@ -390,12 +390,10 @@ public class UserExamServiceImpl implements UserExamService {
             throw new CustomApiException("Câu hỏi không thuộc lượt làm bài này", HttpStatus.BAD_REQUEST);
         }
 
-        List<Long> answerIds = request.getAnswerIds() != null ? request.getAnswerIds() : new ArrayList<>();
-        if (request.getAnswerId() != null && !answerIds.isEmpty()) {
-            throw new CustomApiException("Chỉ gửi answerId hoặc answerIds, không gửi đồng thời cả hai",
-                    HttpStatus.BAD_REQUEST);
-        }
-        if (answerIds.isEmpty() && request.getAnswerId() != null) {
+        List<Long> answerIds = request.getAnswerIds() != null
+                ? new ArrayList<>(request.getAnswerIds())
+                : new ArrayList<>();
+        if (request.getAnswerId() != null && !answerIds.contains(request.getAnswerId())) {
             answerIds.add(request.getAnswerId());
         }
         validateAnswerSelection(question, answerIds);

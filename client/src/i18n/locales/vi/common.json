@@ -195,6 +195,7 @@
   "accountLoadError": "Không thể tải thông tin tài khoản.",
   "changePasswordSuccess": "Đổi mật khẩu thành công.",
   "changePasswordError": "Lỗi đổi mật khẩu.",
+  "uploadAvatarSuccess": "Cập nhật ảnh đại diện thành công!",
   "uploadAvatarError": "Lỗi tải ảnh lên.",
   "updateProfileSuccess": "Cập nhật thông tin cá nhân thành công!",
   "updateProfileError": "Không thể cập nhật thông tin cá nhân.",

@@ -23,6 +23,7 @@ export const AccountView = ({
   setShowChangePassword,
   showChangePassword,
   texts,
+  uploadingAvatar,
   user,
 }) => (
   <div className="flex flex-1 bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-gray-200">
@@ -41,6 +42,7 @@ export const AccountView = ({
         <UserProfileCard
           user={user}
           avatarUrl={avatarUrl}
+          uploadingAvatar={uploadingAvatar}
           onUploadAvatar={handleUploadAvatar}
           onPersonalInfoClick={() => setActiveSection(ACCOUNT_SECTIONS.PERSONAL)}
           onRoadmapClick={() => setActiveSection(ACCOUNT_SECTIONS.ROADMAP)}
