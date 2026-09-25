@@ -1,0 +1,120 @@
+name: Quiz CI Pipeline
+
+on:
+  push:
+    branches: [ production ]
+  pull_request:
+    branches: [ production ]
+  workflow_dispatch:
+
+jobs:
+  # ====================================================================
+  # 1. Backend CI: Compile, Test & Build Spring Boot Application
+  # ====================================================================
+  backend-ci:
+    name: Backend (Spring Boot 3.4.0)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x server/mvnw
+
+      - name: Run Unit & Integration Tests
+        run: |
+          cd server
+          ./mvnw test
+
+      - name: Build Application JAR
+        run: |
+          cd server
+          ./mvnw package -DskipTests
+
+  # ====================================================================
+  # 2. Client Web CI: Install & Build React User Client
+  # ====================================================================
+  frontend-client-ci:
+    name: Frontend Client (React + Vite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install Client Dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: Build Client Project
+        run: |
+          cd client
+          npm run build
+
+  # ====================================================================
+  # 3. Admin Web CI: Install & Build React Admin Client
+  # ====================================================================
+  frontend-admin-ci:
+    name: Frontend Admin (React + Vite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: admin/package-lock.json
+
+      - name: Install Admin Dependencies
+        run: |
+          cd admin
+          npm ci
+
+      - name: Build Admin Project
+        run: |
+          cd admin
+          npm run build
+
+  # ====================================================================
+  # 4. Docker Validation: Check Syntax & Configurations
+  # ====================================================================
+  docker-validation:
+    name: Docker Compose Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Prepare Mock Env Files for Validation
+        run: |
+          cp server/.env.example server/.env.local
+          cp server/.env.example server/.env.production
+
+      - name: Validate docker-compose.local.yml
+        run: |
+          docker compose --env-file server/.env.local -f docker-compose.local.yml config --quiet
+
+      - name: Validate docker-compose.yml
+        run: |
+          docker compose --env-file server/.env.production -f docker-compose.yml config --quiet
