@@ -142,8 +142,6 @@ services:
     profiles: ["monitoring"]
     image: grafana/grafana:11.2.0
     restart: unless-stopped
-    ports:
-      - "${GRAFANA_PORT:-3002}:3000"
     expose:
       - "3000"
     env_file:
