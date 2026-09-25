@@ -9,6 +9,8 @@ services:
       DB_HOST: db
       DB_PORT: 3306
       REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
       SPRING_FLYWAY_ENABLED: "false"
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
     expose:
@@ -18,6 +20,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   user:
     build:
@@ -75,6 +79,26 @@ services:
       - "6379"
     volumes:
       - redis-data-local:/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    expose:
+      - "5672"
+      - "15672"
+    env_file:
+      - ./server/.env.local
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq-data-local:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
   nginx:
     image: nginx:alpine
@@ -181,3 +205,4 @@ volumes:
   grafana-data-local:
   alertmanager-data-local:
   loki-data-local:
+  rabbitmq-data-local:

@@ -59,14 +59,37 @@ public class AiQuestionGeneratorServiceImpl implements AiQuestionGeneratorServic
             Boolean saveToDatabase,
             User currentUser
     ) {
-        if (currentUser == null || currentUser.getUserId() == null) {
-            throw new CustomApiException("UNAUTHORIZED", "Vui lòng đăng nhập để sử dụng tính năng này.",
-                    HttpStatus.UNAUTHORIZED);
-        }
-
         if (file == null || file.isEmpty()) {
             throw new CustomApiException("BAD_REQUEST", "Vui lòng tải lên file tài liệu hợp lệ (PDF, DOCX hoặc TXT).",
                     HttpStatus.BAD_REQUEST);
+        }
+
+        String documentText = extractTextFromFile(file);
+        return generateQuestionsFromText(
+                documentText,
+                file.getOriginalFilename(),
+                chapterId,
+                numberOfQuestions,
+                difficulty,
+                saveToDatabase,
+                currentUser
+        );
+    }
+
+    @Override
+    @Transactional
+    public GenerateQuestionsResponse generateQuestionsFromText(
+            String documentText,
+            String sourceName,
+            Long chapterId,
+            Integer numberOfQuestions,
+            QuestionDifficulty difficulty,
+            Boolean saveToDatabase,
+            User currentUser
+    ) {
+        if (currentUser == null || currentUser.getUserId() == null) {
+            throw new CustomApiException("UNAUTHORIZED", "Vui lòng đăng nhập để sử dụng tính năng này.",
+                    HttpStatus.UNAUTHORIZED);
         }
 
         int count = (numberOfQuestions == null || numberOfQuestions <= 0) ? DEFAULT_QUESTIONS_COUNT : numberOfQuestions;
@@ -86,8 +109,6 @@ public class AiQuestionGeneratorServiceImpl implements AiQuestionGeneratorServic
                             HttpStatus.NOT_FOUND));
         }
 
-        // 1. Trích xuất text từ tài liệu
-        String documentText = extractTextFromFile(file);
         if (!StringUtils.hasText(documentText) || documentText.trim().length() < 30) {
             throw new CustomApiException("BAD_REQUEST", "Không thể trích xuất nội dung văn bản từ file hoặc tài liệu quá ngắn.",
                     HttpStatus.BAD_REQUEST);
@@ -150,7 +171,7 @@ public class AiQuestionGeneratorServiceImpl implements AiQuestionGeneratorServic
                 .totalGenerated(parsedQuestions.size())
                 .totalSaved(savedCount)
                 .chapterId(chapterId)
-                .fileName(file.getOriginalFilename())
+                .fileName(sourceName)
                 .provider(client.getProviderName())
                 .questions(parsedQuestions)
                 .build();

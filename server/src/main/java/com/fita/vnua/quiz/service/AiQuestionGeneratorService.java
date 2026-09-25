@@ -14,4 +14,14 @@ public interface AiQuestionGeneratorService {
             Boolean saveToDatabase,
             User currentUser
     );
+
+    GenerateQuestionsResponse generateQuestionsFromText(
+            String documentText,
+            String sourceName,
+            Long chapterId,
+            Integer numberOfQuestions,
+            QuestionDifficulty difficulty,
+            Boolean saveToDatabase,
+            User currentUser
+    );
 }
