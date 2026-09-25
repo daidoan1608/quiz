@@ -1,0 +1,100 @@
+name: Quiz CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Quiz CI Pipeline"]
+    branches: [ production ]
+    types: [ completed ]
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Moi truong trien khai (Deployment target)'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+
+jobs:
+  deploy-to-vps:
+    name: Deploy to Production VPS
+    runs-on: ubuntu-latest
+    # Chi trien khai khi CI Pipeline truoc do da chay thanh cong hoac khi nguoi dung kich hoat thu cong
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success') }}
+
+    steps:
+      - name: Validate GitHub Secrets Configuration
+        run: |
+          echo "Kiem tra cac GitHub Secrets can thiet..."
+          if [ -z "${{ secrets.SSH_HOST }}" ]; then
+            echo "[ERROR] Thieu secret SSH_HOST tren GitHub Repo."
+            exit 1
+          fi
+          if [ -z "${{ secrets.SSH_USER }}" ]; then
+            echo "[ERROR] Thieu secret SSH_USER tren GitHub Repo."
+            exit 1
+          fi
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "[ERROR] Thieu secret SSH_PRIVATE_KEY tren GitHub Repo."
+            exit 1
+          fi
+          if [ -z "${{ secrets.PROD_ENV_FILE }}" ]; then
+            echo "[ERROR] Thieu secret PROD_ENV_FILE (chua noi dung .env.production)."
+            exit 1
+          fi
+          echo "[OK] Tat ca secrets bat buoc da san sang."
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          PROD_ENV_FILE: ${{ secrets.PROD_ENV_FILE }}
+          TARGET_DIR: ${{ secrets.TARGET_DIR || '/opt/quiz' }}
+          GHCR_ACTOR: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          envs: PROD_ENV_FILE,TARGET_DIR,GHCR_ACTOR,GHCR_TOKEN
+          script_stop: true
+          script: |
+            echo "=== BAT DAU TRIEN KHAI QUIZ PRODUCTION TREN VPS ==="
+            
+            # 1. Kiem tra thu muc du an tren VPS
+            if [ ! -d "$TARGET_DIR" ]; then
+              echo "[ERROR] Thu muc $TARGET_DIR chua ton tai tren VPS."
+              echo "Vui long clone repository vao thu muc $TARGET_DIR truoc khi chay CD."
+              exit 1
+            fi
+            
+            cd "$TARGET_DIR"
+            echo "[INFO] Dang tai ban cap nhat ma nguon tu nhanh production..."
+            git fetch origin production
+            git reset --hard origin/production
+            
+            # 2. Inject toan bo bien moi truong tu GitHub Secret vao file tren VPS
+            echo "[INFO] Dang inject bien moi truong vao server/.env.production..."
+            printf "%s\n" "$PROD_ENV_FILE" > server/.env.production
+            cp server/.env.production .env
+            
+            # 3. Kiem tra volume MySQL external
+            docker volume inspect quiz-mysql-data >/dev/null 2>&1 || {
+              echo "[INFO] Dang tao volume 'quiz-mysql-data'..."
+              docker volume create quiz-mysql-data
+            }
+            
+            # 4. Dang nhap GHCR va keo image da duoc GitHub Actions build san
+            echo "[INFO] Dang nhap GitHub Container Registry va tai images moi nhat..."
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
+            docker compose --env-file server/.env.production -f docker-compose.yml pull
+            
+            # 5. Khoi dong lai he thong container (Zero-build tren VPS)
+            echo "[INFO] Khoi dong lai he thong container..."
+            docker compose --env-file server/.env.production -f docker-compose.yml up -d --remove-orphans
+            
+            # 6. Don dep image cu khong su dung
+            echo "[INFO] Dang don dep Docker images cu..."
+            docker image prune -f
+            
+            echo "=== TRIEN KHAI ZERO-BUILD HOAN TAT THANH CONG! ==="

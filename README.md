@@ -105,4 +105,5 @@ Tài liệu chi tiết về kiến trúc, database, nghiệp vụ, API và hạ 
 - **[docs/backend.md](docs/backend.md)**: Chi tiết Spring Boot 3.4.0, bảo mật JWT Cookie, xử lý tải cao, AI sinh câu hỏi từ tài liệu.
 - **[docs/frontend.md](docs/frontend.md)**: Chi tiết 2 ứng dụng React Client & Admin, Ant Design, các màn hình chức năng.
 - **[docs/monitoring.md](docs/monitoring.md)**: Trọn bộ Observability (Prometheus, Grafana, Loki, Alertmanager gửi cảnh báo Telegram).
+- **[docs/ci-cd.md](docs/ci-cd.md)**: Quy trình CI/CD tự động, kiểm thử chất lượng, cơ chế nạp Secret qua GitHub Actions và hướng dẫn deploy VPS.
 - **[docs/postman/](docs/postman/Quiz.postman_collection.json)**: Bộ sưu tập Postman Collection đầy đủ của các API.
