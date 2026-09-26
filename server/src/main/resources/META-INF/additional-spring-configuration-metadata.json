@@ -1,0 +1,209 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Khoá bí mật (Secret key) ký và giải mã JWT token."
+    },
+    {
+      "name": "jwt.access-token-expiration",
+      "type": "java.lang.Long",
+      "description": "Thời gian hết hạn của Access Token (mili giây)."
+    },
+    {
+      "name": "jwt.refresh-token-expiration",
+      "type": "java.lang.Long",
+      "description": "Thời gian hết hạn của Refresh Token (mili giây)."
+    },
+    {
+      "name": "app.cache.redis.key-prefix",
+      "type": "java.lang.String",
+      "description": "Tiền tố key Redis lưu cache hệ thống."
+    },
+    {
+      "name": "avatar.upload-dir",
+      "type": "java.lang.String",
+      "description": "Đường dẫn thư mục lưu trữ ảnh đại diện người dùng."
+    },
+    {
+      "name": "avatar.default-url",
+      "type": "java.lang.String",
+      "description": "URL đường dẫn ảnh đại diện mặc định."
+    },
+    {
+      "name": "question.upload-dir",
+      "type": "java.lang.String",
+      "description": "Đường dẫn thư mục lưu trữ ảnh/tệp đính kèm câu hỏi."
+    },
+    {
+      "name": "document.upload-dir",
+      "type": "java.lang.String",
+      "description": "Đường dẫn thư mục lưu trữ tài liệu tham khảo bài thi."
+    },
+    {
+      "name": "cloudinary.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Bật/tắt lưu trữ hình ảnh trên Cloudinary."
+    },
+    {
+      "name": "cloudinary.cloud-name",
+      "type": "java.lang.String",
+      "description": "Cloud Name của tài khoản Cloudinary."
+    },
+    {
+      "name": "cloudinary.api-key",
+      "type": "java.lang.String",
+      "description": "API Key của Cloudinary."
+    },
+    {
+      "name": "cloudinary.api-secret",
+      "type": "java.lang.String",
+      "description": "API Secret của Cloudinary."
+    },
+    {
+      "name": "cloudinary.folder",
+      "type": "java.lang.String",
+      "description": "Thư mục lưu trữ hình ảnh trên Cloudinary."
+    },
+    {
+      "name": "imgbb.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Bật/tắt lưu trữ ảnh trên ImgBB."
+    },
+    {
+      "name": "imgbb.api-key",
+      "type": "java.lang.String",
+      "description": "API Key tài khoản ImgBB."
+    },
+    {
+      "name": "image.storage.primary",
+      "type": "java.lang.String",
+      "description": "Nhà cung cấp lưu trữ ảnh chính (cloudinary / imgbb / local)."
+    },
+    {
+      "name": "app.frontend.base-url",
+      "type": "java.lang.String",
+      "description": "Địa chỉ cơ sở của giao diện web Frontend."
+    },
+    {
+      "name": "app.cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "Danh sách các domain được phép truy cập CORS."
+    },
+    {
+      "name": "app.cookie.domain",
+      "type": "java.lang.String",
+      "description": "Tên miền gắn cho cookie xác thực."
+    },
+    {
+      "name": "app.cookie.secure",
+      "type": "java.lang.Boolean",
+      "description": "Cờ Secure chỉ gửi cookie qua HTTPS."
+    },
+    {
+      "name": "app.cookie.same-site",
+      "type": "java.lang.String",
+      "description": "Chính sách SameSite cho cookie (Strict / Lax / None)."
+    },
+    {
+      "name": "app.cookie.max-age",
+      "type": "java.lang.Integer",
+      "description": "Thời gian sống tối đa của cookie (giây)."
+    },
+    {
+      "name": "app.cookie.refresh-path",
+      "type": "java.lang.String",
+      "description": "Đường dẫn endpoint hợp lệ của Refresh Token cookie."
+    },
+    {
+      "name": "app.email-verification.expiration-minutes",
+      "type": "java.lang.Integer",
+      "description": "Thời hạn hiệu lực của mã/liên kết xác thực email (phút)."
+    },
+    {
+      "name": "google.client.id",
+      "type": "java.lang.String",
+      "description": "Google OAuth2 Client ID chính thức."
+    },
+    {
+      "name": "google.client.ids",
+      "type": "java.lang.String",
+      "description": "Danh sách các Google OAuth2 Client ID được chấp nhận."
+    },
+    {
+      "name": "google.jwks-url",
+      "type": "java.lang.String",
+      "description": "Đường dẫn JWKS URL của Google để xác thực id_token."
+    },
+    {
+      "name": "app.admin.initializer-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Tự động khởi tạo tài khoản Admin mặc định khi start app."
+    },
+    {
+      "name": "app.admin.username",
+      "type": "java.lang.String",
+      "description": "Tên đăng nhập tài khoản Admin mặc định."
+    },
+    {
+      "name": "app.admin.password",
+      "type": "java.lang.String",
+      "description": "Mật khẩu tài khoản Admin mặc định."
+    },
+    {
+      "name": "app.admin.email",
+      "type": "java.lang.String",
+      "description": "Email tài khoản Admin mặc định."
+    },
+    {
+      "name": "app.admin.full-name",
+      "type": "java.lang.String",
+      "description": "Họ và tên tài khoản Admin mặc định."
+    },
+    {
+      "name": "app.security.csrf-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Bật/tắt bảo vệ CSRF trong Spring Security."
+    },
+    {
+      "name": "app.ai.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Bật/tắt tính năng trợ lý học tập AI."
+    },
+    {
+      "name": "app.ai.provider",
+      "type": "java.lang.String",
+      "description": "Nhà cung cấp AI mô hình ngôn ngữ (gemini / openai)."
+    },
+    {
+      "name": "app.ai.gemini.api-key",
+      "type": "java.lang.String",
+      "description": "API Key của Google Gemini."
+    },
+    {
+      "name": "app.ai.gemini.model",
+      "type": "java.lang.String",
+      "description": "Tên mô hình Gemini (ví dụ: gemini-2.0-flash)."
+    },
+    {
+      "name": "app.ai.gemini.base-url",
+      "type": "java.lang.String",
+      "description": "Base URL của Google Generative Language API."
+    },
+    {
+      "name": "app.ai.openai.api-key",
+      "type": "java.lang.String",
+      "description": "API Key của OpenAI."
+    },
+    {
+      "name": "app.ai.openai.model",
+      "type": "java.lang.String",
+      "description": "Tên mô hình OpenAI (ví dụ: gpt-4o-mini)."
+    },
+    {
+      "name": "app.ai.openai.base-url",
+      "type": "java.lang.String",
+      "description": "Base URL của OpenAI API."
+    }
+  ]
+}

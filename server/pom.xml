@@ -126,6 +126,13 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Spring Boot Configuration Processor for generating IDE configuration metadata -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Testing dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

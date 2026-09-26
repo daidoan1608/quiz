@@ -1,23 +1,13 @@
 services:
   backend:
-    image: ${BACKEND_IMAGE:-ghcr.io/daidoan1608/quiz-backend:production}
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required in .env}
     build:
       context: ./server
     restart: unless-stopped
     env_file:
-      - ./server/.env.production
-    environment:
-      DB_HOST: db
-      DB_PORT: ${DB_PORT:-3306}
-      REDIS_HOST: redis
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
-      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-admin}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-Q123456@}
-      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--Xms256m -Xmx768m -XX:+UseG1GC}
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:${DB_PORT:-3306}/${DB_NAME:-quiz}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Ho_Chi_Minh
+      - .env
     expose:
-      - "${SERVER_PORT:-8080}"
+      - "${SERVER_PORT:?SERVER_PORT is required in .env}"
     depends_on:
       db:
         condition: service_healthy
@@ -27,31 +17,31 @@ services:
         condition: service_healthy
 
   user:
-    image: ${CLIENT_IMAGE:-ghcr.io/daidoan1608/quiz-client:production}
+    image: ${CLIENT_IMAGE:?CLIENT_IMAGE is required in .env}
     build:
       context: ./client
       args:
-        VITE_API_URL: ${CLIENT_API_URL:-https://api.quizvnua.com/api/v1/}
-        VITE_AVATAR_URL: ${CLIENT_AVATAR_URL:-https://api.quizvnua.com}
-        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-995894234177-1b4ri2jqtthfkpilgchdrv39c50mpn5o.apps.googleusercontent.com}
+        VITE_API_URL: ${CLIENT_API_URL:?CLIENT_API_URL is required in .env}
+        VITE_AVATAR_URL: ${CLIENT_AVATAR_URL}
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required in .env}
     restart: unless-stopped
     env_file:
-      - ./server/.env.production
+      - .env
     expose:
-      - "${CLIENT_PORT:-3000}"
+      - "${CLIENT_PORT:?CLIENT_PORT is required in .env}"
 
   admin:
-    image: ${ADMIN_IMAGE:-ghcr.io/daidoan1608/quiz-admin:production}
+    image: ${ADMIN_IMAGE:?ADMIN_IMAGE is required in .env}
     build:
       context: ./admin
       args:
-        VITE_API_URL: ${ADMIN_API_URL:-https://api.quizvnua.com/api/v1/}
-        VITE_ADMIN_BASENAME: ${ADMIN_BASENAME:-/}
+        VITE_API_URL: ${ADMIN_API_URL:?ADMIN_API_URL is required in .env}
+        VITE_ADMIN_BASENAME: ${ADMIN_BASENAME:?ADMIN_BASENAME is required in .env}
     restart: unless-stopped
     env_file:
-      - ./server/.env.production
+      - .env
     expose:
-      - "${ADMIN_PORT:-3001}"
+      - "${ADMIN_PORT:?ADMIN_PORT is required in .env}"
 
   db:
     image: mysql:8.0
@@ -59,15 +49,12 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-      - --innodb-buffer-pool-size=256M
-      - --max-connections=100
+      - --innodb-buffer-pool-size=${MYSQL_INNODB_BUFFER_POOL_SIZE:?MYSQL_INNODB_BUFFER_POOL_SIZE is required in .env}
+      - --max-connections=${MYSQL_MAX_CONNECTIONS:?MYSQL_MAX_CONNECTIONS is required in .env}
     env_file:
-      - ./server/.env.production
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-me}
-      MYSQL_DATABASE: ${DB_NAME:-quiz}
+      - .env
     expose:
-      - "${DB_PORT:-3306}"
+      - "${DB_PORT:?DB_PORT is required in .env}"
     volumes:
       - ./mysql.init:/docker-entrypoint-initdb.d:ro
       - db-data:/var/lib/mysql
@@ -82,8 +69,10 @@ services:
     image: redis:7-alpine
     restart: always
     command: redis-server --appendonly yes
+    env_file:
+      - .env
     expose:
-      - "${REDIS_PORT:-6379}"
+      - "${REDIS_PORT:?REDIS_PORT is required in .env}"
     volumes:
       - redis-data:/data
 
@@ -91,13 +80,10 @@ services:
     image: rabbitmq:3.13-management-alpine
     restart: unless-stopped
     expose:
-      - "${RABBITMQ_PORT:-5672}"
-      - "${RABBITMQ_MANAGEMENT_PORT:-15672}"
+      - "${RABBITMQ_PORT:?RABBITMQ_PORT is required in .env}"
+      - "${RABBITMQ_MANAGEMENT_PORT:?RABBITMQ_MANAGEMENT_PORT is required in .env}"
     env_file:
-      - ./server/.env.production
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      - .env
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
       - ./monitoring/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
@@ -111,9 +97,11 @@ services:
   nginx:
     image: nginx:alpine
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
-      - "${NGINX_PORT:-80}:80"
-      - "${NGINX_HTTPS_PORT:-443}:443"
+      - "${NGINX_PORT:?NGINX_PORT is required in .env}:80"
+      - "${NGINX_HTTPS_PORT:?NGINX_HTTPS_PORT is required in .env}:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
@@ -129,8 +117,10 @@ services:
     profiles: ["monitoring"]
     image: prom/prometheus:v2.54.1
     restart: unless-stopped
+    env_file:
+      - .env
     expose:
-      - "${PROMETHEUS_PORT:-9090}"
+      - "${PROMETHEUS_PORT:?PROMETHEUS_PORT is required in .env}"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -145,18 +135,9 @@ services:
     image: grafana/grafana:11.2.0
     restart: unless-stopped
     expose:
-      - "3000"
+      - "${GRAFANA_PORT:?GRAFANA_PORT is required in .env}"
     env_file:
-      - ./server/.env.production
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_USERS_AUTO_ASSIGN_ORG=true
-      - GF_USERS_AUTO_ASSIGN_ORG_NAME=${GRAFANA_ORG_NAME:-Quiz VNUA}
-      - GF_BRANDING_APP_TITLE=${GRAFANA_APP_TITLE:-Quiz VNUA - Giám Sát Hệ Thống}
-      - GF_BRANDING_APP_SUB_TITLE=${GRAFANA_APP_SUB_TITLE:-Hệ thống giám sát và cảnh báo sự cố Quiz VNUA}
-      - GF_SERVER_INSTANCE_NAME=${GRAFANA_INSTANCE_NAME:-Quiz VNUA Monitor}
+      - .env
     volumes:
       - grafana-data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -168,8 +149,10 @@ services:
     profiles: ["monitoring"]
     image: prom/alertmanager:v0.27.0
     restart: unless-stopped
+    env_file:
+      - .env
     expose:
-      - "${ALERTMANAGER_PORT:-9093}"
+      - "${ALERTMANAGER_PORT:?ALERTMANAGER_PORT is required in .env}"
     volumes:
       - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data:/alertmanager
@@ -181,8 +164,10 @@ services:
     profiles: ["monitoring"]
     image: grafana/loki:3.1.0
     restart: unless-stopped
+    env_file:
+      - .env
     expose:
-      - "${LOKI_PORT:-3100}"
+      - "${LOKI_PORT:?LOKI_PORT is required in .env}"
     volumes:
       - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki-data:/loki
@@ -192,6 +177,8 @@ services:
     profiles: ["monitoring"]
     image: grafana/promtail:3.1.0
     restart: unless-stopped
+    env_file:
+      - .env
     volumes:
       - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -205,10 +192,10 @@ services:
     profiles: ["monitoring"]
     image: oliver006/redis_exporter:v1.67.0-alpine
     restart: unless-stopped
-    environment:
-      - REDIS_ADDR=redis://redis:${REDIS_PORT:-6379}
+    env_file:
+      - .env
     expose:
-      - "${REDIS_EXPORTER_PORT:-9121}"
+      - "${REDIS_EXPORTER_PORT:?REDIS_EXPORTER_PORT is required in .env}"
     depends_on:
       - redis
 
