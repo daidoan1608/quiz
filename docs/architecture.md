@@ -111,3 +111,86 @@ Hệ thống sử dụng Topic Exchange `quiz.exchange` kết hợp Dead Letter 
 
 3. **Gửi email thông báo (`notification.email.queue`):**
    - Tách biệt hoàn toàn việc gửi mail SMTP ra khỏi luồng chính, tránh làm chậm các request của người dùng.
+
+---
+
+## 4. Sơ Đồ Triển Khai Hệ Thống (UML Deployment Diagram)
+
+Mô tả cấu trúc vật lý, môi trường Container hóa Docker Compose và liên kết mạng giữa các thành phần trên máy chủ VPS theo chuẩn UML Deployment:
+
+```mermaid
+flowchart TB
+    %% Client Device Node
+    subgraph ClientNode["«device»\nThiết Bị Người Dùng (Client Machine / Browser)"]
+        Browser["Trình duyệt Web (Chrome / Edge / Safari / Mobile)\n- Single Page Application (SPA)\n- WebSocket STOMP Client (SockJS)"]
+    end
+
+    %% External Cloud Services
+    subgraph CloudServices["«cloud»\nDịch Vụ Ngoài (External Cloud Services)"]
+        GoogleOAuth["Google Cloud Identity\n(OAuth 2.0 / OpenID Connect)"]
+        GeminiAPI["Google AI Studio\n(Gemini 2.0 Flash LLM API)"]
+        SMTPRelay["Email Server\n(SMTP Relay Port 587)"]
+        TelegramCloud["Telegram Bot API\n(Alertmanager Push Notifications)"]
+    end
+
+    %% VPS Node
+    subgraph VPSHost["«device» «server»\nMáy Chủ Sản Xuất VPS (Linux Ubuntu 22.04 LTS)"]
+        
+        %% Reverse Proxy
+        subgraph GatewayNode["Cổng Truy Cập (Reverse Proxy)"]
+            Nginx["Nginx Reverse Proxy Container\n- Ports: 80 (HTTP) & 443 (HTTPS SSL)\n- SSL Let's Encrypt Certbot\n- Domain Virtual Hosts Routing"]
+        end
+
+        %% Internal Docker Network
+        subgraph DockerBridge["«execution environment»\nMạng Nội Bộ Container (Docker Bridge: quiz-network)"]
+            
+            subgraph FE_Containers["Tầng Frontend"]
+                ClientFE["«artifact» quiz-client:latest\n(React 18 + Vite / Nginx Alpine)\nInternal Port: 3000"]
+                AdminFE["«artifact» quiz-admin:latest\n(React 18 + Vite / Nginx Alpine)\nInternal Port: 3001"]
+            end
+
+            subgraph BE_Container["Tầng Backend"]
+                BackendApp["«artifact» quiz-backend:latest\n(Spring Boot 3.4.0 / Eclipse Temurin JDK 17)\nInternal Port: 8080\n- REST Controller & WebSocket STOMP\n- Spring Security & JWT Filter\n- RabbitMQ Producers & Listeners"]
+            end
+
+            subgraph DB_Containers["Tầng Lưu Trữ & Hàng Đợi"]
+                MySQLDb[("«artifact» quiz-mysql:8.0\n(MySQL Enterprise)\nInternal Port: 3306\nVolume: mysql_data")]
+                RedisDb[("«artifact» quiz-redis:7-alpine\n(Redis Cache & Session)\nInternal Port: 6379\nVolume: redis_data")]
+                RabbitMQBroker["«artifact» quiz-rabbitmq:3.13-management\n(RabbitMQ Message Broker)\nInternal Ports: 5672 (AMQP), 15672 (UI)\nVolume: rabbitmq_data"]
+            end
+
+            subgraph Observability_Containers["Tầng Giám Sát (Observability Stack)"]
+                Prometheus["«artifact» Prometheus:v2.54\nInternal Port: 9090"]
+                Loki["«artifact» Grafana Loki:v3.1\nInternal Port: 3100"]
+                Alertmanager["«artifact» Alertmanager:v0.27\nInternal Port: 9093"]
+                Grafana["«artifact» Grafana:11.2\nInternal Port: 3000"]
+            end
+        end
+    end
+
+    %% Network Connections
+    Browser ===|HTTPS :443 / WSS| Nginx
+
+    Nginx -->|Proxy Pass :3000| ClientFE
+    Nginx -->|Proxy Pass :3001| AdminFE
+    Nginx -->|Proxy Pass :8080| BackendApp
+    Nginx -->|Proxy Pass :3000| Grafana
+    Nginx -->|Proxy Pass :15672| RabbitMQBroker
+
+    BackendApp ===|JDBC / HikariCP| MySQLDb
+    BackendApp ===|Jedis / Lettuce| RedisDb
+    BackendApp ===|AMQP Protocol| RabbitMQBroker
+
+    BackendApp -.->|HTTP Scrape /metrics| Prometheus
+    Prometheus -->|Webhook Alert| Alertmanager
+    Alertmanager -->|Push Alert| TelegramCloud
+    Prometheus -.-> Grafana
+    Loki -.-> Grafana
+
+    %% Outbound Cloud Connections
+    Browser -.->|Authenticate Token| GoogleOAuth
+    BackendApp -.->|Verify ID Token| GoogleOAuth
+    BackendApp -.->|REST API JSON Schema| GeminiAPI
+    RabbitMQBroker -.->|Worker Async Dispatch| SMTPRelay
+```
+

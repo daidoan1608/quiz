@@ -79,3 +79,92 @@ Base URL: `http://api.localhost/api/v1` (Local) hoặc `https://api.quizvnua.com
 - **Postman Collection:** File nằm tại `docs/postman/Quiz.postman_collection.json`
 - **Actuator Health:** `http://api.localhost/actuator/health`
 - **Prometheus Metrics:** `http://api.localhost/actuator/prometheus`
+
+---
+
+## 6. Sơ Đồ Phân Tầng Kiến Trúc Backend (Layered Architecture Diagram)
+
+Kiến trúc backend được tổ chức theo mô hình phân tầng chặt chẽ (Clean / Layered Architecture) đảm bảo tính mở rộng và dễ bảo trì:
+
+```mermaid
+flowchart TD
+    subgraph ClientRequests["Yêu cầu từ Client & Web"]
+        HTTPReq["HTTP / REST API Request"]
+        WSReq["WebSocket STOMP Connection"]
+    end
+
+    subgraph SecurityLayer["Tầng Bảo Mật & Lọc Yêu Cầu (Security & Filter)"]
+        CorsFilter["CorsFilter & RateLimiter"]
+        JwtFilter["JwtAuthenticationFilter\n(Đọc Token từ HttpOnly Cookie)"]
+        SecCtx["SecurityContextHolder\n(Thiết lập UserPrincipal & Roles)"]
+        CorsFilter --> JwtFilter --> SecCtx
+    end
+
+    HTTPReq --> CorsFilter
+    WSReq --> SecurityLayer
+
+    subgraph PresentationLayer["Tầng Trình Diễn (Presentation Layer)"]
+        AuthController["AuthController\nOtpController"]
+        ExamController["ExamAttemptController\nExamController"]
+        AIController["AiAssistantController"]
+        AdminController["AdminUserController\nAdminQuestionController\nAdminGroupController"]
+        NotifyController["NotificationController\nWebSocketChannel"]
+        GlobalException["GlobalExceptionHandler\n(@ControllerAdvice)"]
+    end
+
+    SecCtx --> AuthController
+    SecCtx --> ExamController
+    SecCtx --> AIController
+    SecCtx --> AdminController
+    SecCtx --> NotifyController
+
+    subgraph ServiceLayer["Tầng Xử Lý Nghiệp Vụ (Service Layer)"]
+        AuthSvc["AuthService\nOtpService\nUserService"]
+        ExamSvc["ExamAttemptService\nExamGradingService"]
+        AISvc["AiService\nGeminiClientService"]
+        DocSvc["QuestionImportService\nExcelParserService\nPdfExportService"]
+        NotifySvc["NotificationService\nEmailService"]
+        CacheSvc["RedisCacheService\nLeaderboardService"]
+    end
+
+    AuthController --> AuthSvc
+    ExamController --> ExamSvc
+    AIController --> AISvc
+    AdminController --> DocSvc
+    AdminController --> AuthSvc
+    NotifyController --> NotifySvc
+
+    subgraph AsyncBroker["Tầng Hàng Đợi Bất Đồng Bộ (RabbitMQ Broker)"]
+        Producer["RabbitTemplate (Publisher)"]
+        ExamConsumer["ExamSubmissionConsumer"]
+        AIConsumer["AiGenerationConsumer"]
+        MailConsumer["EmailNotificationConsumer"]
+        DLQConsumer["DeadLetterQueueConsumer"]
+
+        Producer -->|exam.submission| ExamConsumer
+        Producer -->|ai.generation| AIConsumer
+        Producer -->|notification.email| MailConsumer
+    end
+
+    ExamSvc -->|Nộp bài số lượng lớn| Producer
+    AISvc -->|Tác vụ sinh câu hỏi ngầm| Producer
+    NotifySvc -->|Gửi mail bất đồng bộ| Producer
+
+    subgraph DataLayer["Tầng Dữ Liệu & Bộ Đệm (Persistence & Storage Layer)"]
+        JpaRepo["Spring Data JPA Repositories\n(Hibernate ORM)"]
+        RedisRepo["RedisTemplate\n(Session autosave, OTP, Caching)"]
+        MySQL[("MySQL 8.0 Database\n(ACID Transactional)")]
+        Redis[( "Redis 7 In-Memory\nKey-Value Store" )]
+
+        JpaRepo --> MySQL
+        RedisRepo --> Redis
+    end
+
+    AuthSvc --> JpaRepo
+    AuthSvc --> RedisRepo
+    ExamSvc --> JpaRepo
+    ExamSvc --> RedisRepo
+    ExamConsumer --> JpaRepo
+    CacheSvc --> RedisRepo
+```
+

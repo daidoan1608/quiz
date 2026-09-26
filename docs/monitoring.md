@@ -93,7 +93,7 @@ flowchart LR
 
 Để nhận tin nhắn sự cố vào nhóm Telegram của bạn:
 
-1. Mở file [monitoring/alertmanager/alertmanager.yml](file:///D:/Workspace/Dmd/quiz/monitoring/alertmanager/alertmanager.yml).
+1. Mở file [monitoring/alertmanager/alertmanager.yml](../monitoring/alertmanager/alertmanager.yml).
 2. Điền thông tin Bot và Chat ID:
    ```yaml
    receivers:
