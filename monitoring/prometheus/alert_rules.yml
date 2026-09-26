@@ -7,7 +7,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Quiz Backend is DOWN!"
+          summary: "Backend Down (Dịch vụ Backend không phản hồi)"
           description: "Backend service không phản hồi trong hơn 1 phút tại instance {{ $labels.instance }}."
 
       - alert: HighCpuUsage
@@ -16,7 +16,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Backend CPU Usage > 85%"
+          summary: "High CPU Usage (CPU Backend > 85%)"
           description: "Process CPU đang ở mức {{ $value | printf \"%.1f\" }}% liên tục trong 2 phút."
 
       - alert: HighJvmHeapUsage
@@ -25,7 +25,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "JVM Heap Memory > 90%"
+          summary: "High JVM Heap Usage (Bộ nhớ Heap > 90%)"
           description: "Bộ nhớ JVM Heap đã vượt quá 90% (hiện tại: {{ $value | printf \"%.1f\" }}%), nguy cơ gặp OutOfMemoryError."
 
       - alert: HighHttp5xxRate
@@ -34,7 +34,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "High HTTP 5xx Server Error Rate"
+          summary: "High HTTP 5xx Rate (Tỷ lệ lỗi 5xx tăng cao)"
           description: "Hệ thống đang phát sinh nhiều lỗi 5xx (> 1 req/s) trong 1 phút qua."
 
       - alert: DatabaseConnectionPoolDepleted
@@ -43,7 +43,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "HikariCP Connection Pool Depleted"
+          summary: "Database Connection Pool Depleted (Hết kết nối DB)"
           description: "Đang có hơn 5 request chờ kết nối database trống trong connection pool."
 
       - alert: RedisDown
@@ -52,7 +52,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Redis Server is DOWN"
+          summary: "Redis Down (Dịch vụ Redis không phản hồi)"
           description: "Dịch vụ Redis không phản hồi trong hơn 1 phút."
 
       - alert: RedisHighMemoryUsage
@@ -61,7 +61,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Redis Memory Usage > 90%"
+          summary: "Redis High Memory Usage (Bộ nhớ Redis > 90%)"
           description: "Redis đang sử dụng hơn 90% dung lượng bộ nhớ tối đa."
 
       - alert: RabbitMQDown
@@ -70,7 +70,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "RabbitMQ Server is DOWN"
+          summary: "RabbitMQ Down (Dịch vụ RabbitMQ không phản hồi)"
           description: "Dịch vụ hàng đợi tin nhắn RabbitMQ không phản hồi trong hơn 1 phút."
 
 

@@ -13,15 +13,36 @@ receivers:
   - name: 'slack-notifications'
     slack_configs:
       - channel: '#quiz-alerts'
-        username: 'Quiz Monitoring'
+        username: 'Quiz SRE Alert'
+        icon_emoji: '{{ if eq .Status "firing" }}:rotating_light:{{ else }}:white_check_mark:{{ end }}'
         send_resolved: true
-        title: '{{ if eq .Status "firing" }}🔥 [CẢNH BÁO SỰ CỐ - {{ .CommonLabels.severity | toUpper }}]{{ else }}✅ [ĐÃ KHẮC PHỤC]{{ end }} {{ .CommonLabels.alertname }}'
         color: '{{ if eq .Status "firing" }}{{ if eq .CommonLabels.severity "critical" }}danger{{ else }}warning{{ end }}{{ else }}good{{ end }}'
+        title: '{{ if eq .Status "firing" }}🚨 [SỰ CỐ - {{ .CommonLabels.severity | toUpper }}]{{ else }}✅ [ĐÃ KHẮC PHỤC]{{ end }} {{ if .CommonAnnotations.summary }}{{ .CommonAnnotations.summary }}{{ else }}{{ .CommonLabels.alertname }}{{ end }}'
+        title_link: 'http://localhost:9090/alerts'
         text: >-
           {{ range .Alerts }}
-            *Tên cảnh báo:* {{ .Labels.alertname }}
-            *Mức độ:* `{{ .Labels.severity }}`
-            *Tóm tắt:* {{ .Annotations.summary }}
-            *Chi tiết:* {{ .Annotations.description }}
-            *Thời gian:* {{ .StartsAt.Format "15:04:05 02/01/2006" }}
+          *Mô tả chi tiết:* {{ .Annotations.description }}
           {{ end }}
+        fields:
+          - title: 'Dịch vụ ảnh hưởng'
+            value: '`{{ .CommonLabels.job }}`'
+            short: true
+          - title: 'Mức độ cảnh báo'
+            value: '{{ if eq .CommonLabels.severity "critical" }}🔴 CRITICAL{{ else }}🟡 WARNING{{ end }}'
+            short: true
+          - title: 'Trạng thái sự cố'
+            value: '{{ if eq .Status "firing" }}🔥 Đang diễn ra (Firing){{ else }}✅ Đã khắc phục (Resolved){{ end }}'
+            short: true
+          - title: 'Thời điểm kích hoạt'
+            value: '{{ range .Alerts }}{{ .StartsAt.Format "15:04:05 02/01/2006" }}{{ end }}'
+            short: true
+        actions:
+          - type: button
+            text: '📊 Mở Grafana'
+            url: 'http://localhost:3000'
+            style: primary
+          - type: button
+            text: '🚨 Xem Prometheus Alerts'
+            url: 'http://localhost:9090/alerts'
+            style: danger
+        footer: 'Quiz SRE Observability • Prometheus & Alertmanager'
