@@ -122,6 +122,7 @@ services:
       - "${PROMETHEUS_PORT:?PROMETHEUS_PORT is required in .env}"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
       - prometheus-data-local:/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
@@ -155,9 +156,12 @@ services:
     volumes:
       - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data-local:/alertmanager
-    command:
-      - --config.file=/etc/alertmanager/alertmanager.yml
-      - --storage.path=/alertmanager
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo -n "$$SLACK_WEBHOOK_URL" > /tmp/slack_webhook_url
+        exec /bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml --storage.path=/alertmanager
 
   loki:
     profiles: ["monitoring"]
@@ -197,6 +201,18 @@ services:
       - "${REDIS_EXPORTER_PORT:?REDIS_EXPORTER_PORT is required in .env}"
     depends_on:
       - redis
+
+  chatops:
+    profiles: ["monitoring"]
+    build:
+      context: ./monitoring/chatops
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - prometheus
 
 volumes:
   quiz-mysql-data:

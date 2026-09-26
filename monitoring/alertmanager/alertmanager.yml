@@ -1,25 +1,27 @@
 global:
   resolve_timeout: 5m
+  slack_api_url_file: '/tmp/slack_webhook_url'
 
 route:
   group_by: ['alertname', 'job', 'severity']
   group_wait: 10s
   group_interval: 1m
   repeat_interval: 1h
-  receiver: 'default-receiver'
+  receiver: 'slack-notifications'
 
 receivers:
-  - name: 'default-receiver'
-    # Bật và điền thông tin bên dưới khi muốn nhận cảnh báo qua Telegram:
-    # telegram_configs:
-    #   - bot_token: 'YOUR_TELEGRAM_BOT_TOKEN' # Điền bot token từ @BotFather
-    #     chat_id: 123456789                  # Điền Chat ID số từ @userinfobot (hoặc ID group -xxxxxxxxx)
-    #     send_resolved: true                 # Tự động gửi tin nhắn báo khi sự cố đã được giải quyết
-    #     parse_mode: 'HTML'
-    #     message: |
-    #       {{ if eq .Status "firing" }}🔥 <b>[CẢNH BÁO SỰ CỐ]</b>{{ else }}✅ <b>[ĐÃ KHẮC PHỤC]</b>{{ end }}
-    #       <b>Tên cảnh báo:</b> {{ .CommonLabels.alertname }}
-    #       <b>Mức độ:</b> {{ .CommonLabels.severity }}
-    #       <b>Tóm tắt:</b> {{ .CommonAnnotations.summary }}
-    #       <b>Chi tiết:</b> {{ .CommonAnnotations.description }}
-    #       <b>Thời gian:</b> {{ .StartsAt.Format "15:04:05 02/01/2006" }}
+  - name: 'slack-notifications'
+    slack_configs:
+      - channel: '#quiz-alerts'
+        username: 'Quiz Monitoring'
+        send_resolved: true
+        title: '{{ if eq .Status "firing" }}🔥 [CẢNH BÁO SỰ CỐ - {{ .CommonLabels.severity | toUpper }}]{{ else }}✅ [ĐÃ KHẮC PHỤC]{{ end }} {{ .CommonLabels.alertname }}'
+        color: '{{ if eq .Status "firing" }}{{ if eq .CommonLabels.severity "critical" }}danger{{ else }}warning{{ end }}{{ else }}good{{ end }}'
+        text: >-
+          {{ range .Alerts }}
+            *Tên cảnh báo:* {{ .Labels.alertname }}
+            *Mức độ:* `{{ .Labels.severity }}`
+            *Tóm tắt:* {{ .Annotations.summary }}
+            *Chi tiết:* {{ .Annotations.description }}
+            *Thời gian:* {{ .StartsAt.Format "15:04:05 02/01/2006" }}
+          {{ end }}

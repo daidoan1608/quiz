@@ -24,7 +24,7 @@ flowchart LR
 
     subgraph Notification["Thông Báo"]
         AM["Alertmanager\n(:9093)"]
-        Tele["Telegram Channel / Bot"]
+        Slack["Slack Channel\n(#quiz-webapp)"]
     end
 
     subgraph Visualization["Trực Quan Hóa"]
@@ -36,7 +36,7 @@ flowchart LR
     Logs --> PT --> Loki
 
     Prom -->|Gửi cảnh báo vi phạm| AM
-    AM -->|Bắn tin nhắn sự cố| Tele
+    AM -->|Bắn webhook sự cố| Slack
 
     Prom --> Graf
     Loki --> Graf
@@ -89,19 +89,31 @@ flowchart LR
 
 ---
 
-## 3. Hướng Dẫn Cấu Hình Bắn Cảnh Báo Về Telegram
+## 3. Hướng Dẫn Cấu Hình Bắn Cảnh Báo Về Slack Webhook
 
-Để nhận tin nhắn sự cố vào nhóm Telegram của bạn:
+Alertmanager đã được cấu hình tích hợp sẵn sàng với kênh Slack:
 
 1. Mở file [monitoring/alertmanager/alertmanager.yml](../monitoring/alertmanager/alertmanager.yml).
-2. Điền thông tin Bot và Chat ID:
+2. Đường link Webhook URL được thiết lập trong `slack_api_url` và kênh `#quiz-webapp`:
    ```yaml
+   global:
+     resolve_timeout: 5m
+     slack_api_url: 'YOUR_SLACK_WEBHOOK_URL'
+
+   route:
+     group_by: ['alertname', 'job', 'severity']
+     group_wait: 10s
+     group_interval: 1m
+     repeat_interval: 1h
+     receiver: 'slack-notifications'
+
    receivers:
-     - name: 'telegram-channel'
-       telegram_configs:
-         - bot_token: 'YOUR_TELEGRAM_BOT_TOKEN'
-           chat_id: YOUR_CHAT_ID
-           parse_mode: 'HTML'
+     - name: 'slack-notifications'
+       slack_configs:
+         - channel: '#quiz-webapp'
            send_resolved: true
+           icon_emoji: ':bell:'
+           title: '{{ if eq .Status "firing" }}🔥 [CẢNH BÁO SỰ CỐ - {{ .CommonLabels.severity | toUpper }}]{{ else }}✅ [ĐÃ KHẮC PHỤC]{{ end }} {{ .CommonLabels.alertname }}'
+           color: '{{ if eq .Status "firing" }}{{ if eq .CommonLabels.severity "critical" }}danger{{ else }}warning{{ end }}{{ else }}good{{ end }}'
    ```
-3. Khởi động lại hệ thống bằng lệnh `.\run.cmd monitor`. Khi có sự cố hoặc khi sự cố được khắc phục, Alertmanager sẽ tự động gửi tin nhắn kèm nhãn cảnh báo tức thời.
+3. Khởi động lại hệ thống bằng lệnh `.\run.cmd monitor`. Khi có sự cố (Backend sập, Redis sập, RabbitMQ sập, CPU quá tải) hoặc khi sự cố được khắc phục xong (`[RESOLVED]`), Alertmanager sẽ tự động gửi tin nhắn kèm thanh màu trực quan (Đỏ / Vàng / Xanh lá) về kênh Slack của bạn.
