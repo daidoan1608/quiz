@@ -1,6 +1,6 @@
 {
   "short_name": "Quiz VNUA",
-  "name": "Ôn thi trắc nghiệm VNUA",
+  "name": "Quiz VNUA - Ôn thi trắc nghiệm Học viện Nông nghiệp",
   "icons": [
     {
       "src": "logoschool.png",
@@ -18,8 +18,8 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#1890ff",
   "background_color": "#ffffff"
 }

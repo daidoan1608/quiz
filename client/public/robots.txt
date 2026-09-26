@@ -1,3 +1,13 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /subjects
+Disallow: /attempt/
+Disallow: /exam/
+Disallow: /profile/
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://quizvnua.com/sitemap.xml
