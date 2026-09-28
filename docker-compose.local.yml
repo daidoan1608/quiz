@@ -148,9 +148,12 @@ services:
   alertmanager:
     profiles: ["monitoring"]
     image: prom/alertmanager:v0.27.0
+    user: root
     restart: unless-stopped
     env_file:
       - .env
+      - path: ./monitoring/chatops/.env
+        required: false
     expose:
       - "${ALERTMANAGER_PORT:?ALERTMANAGER_PORT is required in .env}"
     volumes:
@@ -160,8 +163,14 @@ services:
       - /bin/sh
       - -c
       - |
+        cp /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime
         echo -n "$$SLACK_WEBHOOK_URL" > /tmp/slack_webhook_url
-        exec /bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml --storage.path=/alertmanager
+        GRAFANA_URL="$${GRAFANA_PUBLIC_URL:-http://localhost:3002}"
+        PROMETHEUS_URL="$${PROMETHEUS_PUBLIC_URL:-http://localhost:9090}"
+        sed -e "s|__GRAFANA_PUBLIC_URL__|$$GRAFANA_URL|g" \
+            -e "s|__PROMETHEUS_PUBLIC_URL__|$$PROMETHEUS_URL|g" \
+            /etc/alertmanager/alertmanager.yml > /tmp/alertmanager.yml
+        exec /bin/alertmanager --config.file=/tmp/alertmanager.yml --storage.path=/alertmanager
 
   loki:
     profiles: ["monitoring"]
@@ -209,6 +218,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+      - path: ./monitoring/chatops/.env
+        required: false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:

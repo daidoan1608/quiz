@@ -65,7 +65,7 @@ groups:
           description: "Redis đang sử dụng hơn 90% dung lượng bộ nhớ tối đa."
 
       - alert: RabbitMQDown
-        expr: rabbitmq_up == 0
+        expr: up{job="rabbitmq"} == 0
         for: 1m
         labels:
           severity: critical

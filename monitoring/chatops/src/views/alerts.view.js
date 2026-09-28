@@ -1,10 +1,11 @@
 import { GRAFANA_PUBLIC_URL, PROMETHEUS_PUBLIC_URL } from '../config.js';
+import { formatDateTime, formatTime } from '../utils/date.util.js';
 
 /**
  * Hiển thị cảnh báo sự cố từ Prometheus định dạng Block Kit gọn gàng
  */
 export function formatAlertsBlockKit(alerts) {
-  const nowStr = `${new Date().toLocaleTimeString('vi-VN')} ${new Date().toLocaleDateString('vi-VN')}`;
+  const nowStr = formatDateTime();
 
   if (!alerts || alerts.length === 0) {
     return {
@@ -80,7 +81,7 @@ export function formatAlertsBlockKit(alerts) {
     const summary = a.annotations?.summary || a.labels?.alertname || 'Sự cố không xác định';
     const desc = a.annotations?.description || 'Không có mô tả chi tiết.';
     const job = a.labels?.job || a.labels?.instance || 'N/A';
-    const activeSince = a.activeAt ? new Date(a.activeAt).toLocaleTimeString('vi-VN') : 'Mới ghi nhận';
+    const activeSince = a.activeAt ? formatTime(a.activeAt) : 'Mới ghi nhận';
 
     blocks.push({
       type: 'section',

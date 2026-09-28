@@ -73,6 +73,9 @@ export const DOCKER_SOCKET_PATH =
 // --- 5. TIỀN TỐ DỰ ÁN (CONTAINER PREFIX) ---
 export const CONTAINER_PREFIX = process.env.CONTAINER_PREFIX || 'quiz';
 
+// --- 6. TIMEZONE (Múi giờ hệ thống, mặc định: Asia/Ho_Chi_Minh - UTC+7) ---
+export const TIMEZONE = process.env.TZ || process.env.TIMEZONE || 'Asia/Ho_Chi_Minh';
+
 /**
  * Kiểm tra các biến bắt buộc trước khi khởi động
  */

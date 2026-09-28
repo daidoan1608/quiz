@@ -1,5 +1,6 @@
 import { getContainers, categorizeContainer } from '../services/docker.service.js';
 import { CONTAINER_PREFIX } from '../config.js';
+import { formatDateTime } from '../utils/date.util.js';
 
 /**
  * Dashboard trạng thái hệ thống định dạng Block Kit (gọn gàng, ít icon)
@@ -49,7 +50,7 @@ export async function getStatusBlockKit() {
       grouped[groupKey].push(c);
     }
 
-    const nowStr = `${new Date().toLocaleTimeString('vi-VN')} ${new Date().toLocaleDateString('vi-VN')}`;
+    const nowStr = formatDateTime();
     const healthBadge = stoppedCount === 0 ? '🟢 Ổn định' : `🔴 ${stoppedCount} đã dừng`;
 
     const blocks = [

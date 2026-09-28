@@ -1,4 +1,5 @@
 import { findQuizContainer, getContainerRawLogs, cleanDockerLogs } from '../services/docker.service.js';
+import { formatTime } from '../utils/date.util.js';
 
 /**
  * Hiển thị nhật ký hoạt động (Logs) định dạng Block Kit gọn gàng
@@ -29,7 +30,7 @@ export async function getLogsBlockKit(target, lines = 30) {
     const { buffer } = await getContainerRawLogs(container.Id, lines);
     const cleanLog = cleanDockerLogs(buffer);
     const trimmed = cleanLog.length > 2800 ? cleanLog.slice(-2800) : cleanLog;
-    const nowTime = new Date().toLocaleTimeString('vi-VN');
+    const nowTime = formatTime();
 
     return {
       text: `Nhật ký ${containerName} (${lines} dòng)`,
