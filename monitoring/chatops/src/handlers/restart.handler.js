@@ -1,24 +1,24 @@
 import { findQuizContainer, restartDockerContainer } from '../services/docker.service.js';
 
 /**
- * Xử lý khởi động lại container kèm phản hồi Block Kit
+ * Xử lý khởi động lại container với phản hồi gọn gàng, ít icon
  */
 export async function handleRestartContainer(target, user, respond) {
   const container = await findQuizContainer(target);
   if (!container) {
     await respond({
       response_type: 'ephemeral',
-      text: `❌ Không tìm thấy container nào khớp với từ khóa: \`${target}\`.`,
+      text: `Không tìm thấy container nào khớp với từ khóa: \`${target}\`.`,
       blocks: [
         {
           type: 'header',
-          text: { type: 'plain_text', text: '❌ Không tìm thấy Container', emoji: true },
+          text: { type: 'plain_text', text: 'Không tìm thấy Container' },
         },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `Không tìm thấy container nào khớp với từ khóa: \`${target}\`.\nVui lòng gõ \`/quiz status\` để kiểm tra danh sách container.`,
+            text: `Không tìm thấy container: \`${target}\`.\nDùng lệnh \`/quiz status\` để kiểm tra danh sách container hiện có.`,
           },
         },
       ],
@@ -31,13 +31,13 @@ export async function handleRestartContainer(target, user, respond) {
 
   await respond({
     response_type: 'in_channel',
-    text: `⏳ Đang khởi động lại container \`${containerName}\` theo yêu cầu của ${userMention}...`,
+    text: `Đang khởi động lại container \`${containerName}\` theo yêu cầu của ${userMention}...`,
     blocks: [
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `⏳ *Đang tiến hành khởi động lại container:* \`${containerName}\`\n👤 *Yêu cầu bởi:* *${userMention}*\n⏱️ *Đang gửi tín hiệu SIGTERM (grace period 10s)... Vui lòng chờ.*`,
+          text: `Đang gửi tín hiệu khởi động lại \`${containerName}\` (Yêu cầu bởi: ${userMention}, grace period 10s)...`,
         },
       },
     ],
@@ -51,14 +51,13 @@ export async function handleRestartContainer(target, user, respond) {
     if (res.status === 204) {
       await respond({
         response_type: 'in_channel',
-        text: `✅ Container \`${containerName}\` đã được khởi động lại thành công!`,
+        text: `Container \`${containerName}\` đã được khởi động lại thành công!`,
         blocks: [
           {
             type: 'header',
             text: {
               type: 'plain_text',
-              text: '✅ Khởi động lại Container thành công!',
-              emoji: true,
+              text: 'Khởi động lại thành công',
             },
           },
           {
@@ -66,8 +65,8 @@ export async function handleRestartContainer(target, user, respond) {
             fields: [
               { type: 'mrkdwn', text: `*Container:* \`${containerName}\`` },
               { type: 'mrkdwn', text: `*Trạng thái:* 🟢 \`Running\`` },
-              { type: 'mrkdwn', text: `*Thời gian xử lý:* \`${duration} giây\`` },
-              { type: 'mrkdwn', text: `*Người kích hoạt:* *${userMention}*` },
+              { type: 'mrkdwn', text: `*Thời gian xử lý:* \`${duration}s\`` },
+              { type: 'mrkdwn', text: `*Người thực hiện:* ${userMention}` },
             ],
           },
           {
@@ -75,13 +74,13 @@ export async function handleRestartContainer(target, user, respond) {
             elements: [
               {
                 type: 'button',
-                text: { type: 'plain_text', text: `📋 Xem Logs (${containerName})`, emoji: true },
+                text: { type: 'plain_text', text: `Logs (${containerName})` },
                 value: containerName,
                 action_id: `action_logs_${containerName}`,
               },
               {
                 type: 'button',
-                text: { type: 'plain_text', text: '📊 Xem trạng thái toàn hệ thống', emoji: true },
+                text: { type: 'plain_text', text: 'Trạng thái hệ thống' },
                 action_id: 'action_refresh_status',
               },
             ],
@@ -91,17 +90,17 @@ export async function handleRestartContainer(target, user, respond) {
     } else {
       await respond({
         response_type: 'in_channel',
-        text: `⚠️ Khởi động lại container \`${containerName}\` trả về mã: ${res.status}.`,
+        text: `Phản hồi bất thường khi khởi động lại \`${containerName}\` (Mã HTTP: ${res.status}).`,
         blocks: [
           {
             type: 'header',
-            text: { type: 'plain_text', text: '⚠️ Phản hồi bất thường khi Restart', emoji: true },
+            text: { type: 'plain_text', text: 'Phản hồi bất thường khi Restart' },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `Container \`${containerName}\` phản hồi mã HTTP \`${res.status}\`.\nVui lòng kiểm tra logs hoặc trạng thái container.`,
+              text: `Container \`${containerName}\` phản hồi mã HTTP \`${res.status}\`. Vui lòng kiểm tra lại trạng thái.`,
             },
           },
         ],
@@ -110,11 +109,11 @@ export async function handleRestartContainer(target, user, respond) {
   } catch (err) {
     await respond({
       response_type: 'in_channel',
-      text: `❌ Lỗi khi khởi động lại: ${err.message}`,
+      text: `Lỗi khi khởi động lại \`${containerName}\`: ${err.message}`,
       blocks: [
         {
           type: 'header',
-          text: { type: 'plain_text', text: '❌ Lỗi khi khởi động lại Container', emoji: true },
+          text: { type: 'plain_text', text: 'Lỗi khi khởi động lại' },
         },
         {
           type: 'section',

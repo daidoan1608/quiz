@@ -1,23 +1,22 @@
 /**
- * Menu trợ giúp Block Kit
+ * Menu trợ giúp lệnh ChatOps gọn gàng, ít icon
  */
 export function getHelpBlockKit() {
   return {
-    text: '🤖 QUIZ CHATOPS - HƯỚNG DẪN VẬN HÀNH',
+    text: 'Quiz ChatOps - Hướng dẫn sử dụng',
     blocks: [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: '🤖 QUIZ CHATOPS - HƯỚNG DẪN VẬN HÀNH',
-          emoji: true,
+          text: 'Quiz ChatOps - Hướng dẫn lệnh',
         },
       },
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: 'Trợ lý điều khiển và giám sát hạ tầng Quiz Webapp trực tiếp qua Slack Socket Mode bảo mật.',
+          text: 'Giám sát và điều khiển hạ tầng qua Slack Socket Mode:',
         },
       },
       { type: 'divider' },
@@ -25,7 +24,7 @@ export function getHelpBlockKit() {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '• `/quiz status`\n  *Xem bảng điều khiển hạ tầng và trạng thái các container Docker*\n\n• `/quiz restart <tên_service>`\n  *Khởi động lại dịch vụ an toàn (vd: `/quiz restart backend`, `/quiz restart redis`)*\n\n• `/quiz logs <tên_service> [số_dòng]`\n  *Đọc nhật ký hoạt động (vd: `/quiz logs backend 50`)*\n\n• `/quiz alerts`\n  *Kiểm tra danh sách cảnh báo sự cố đang kích hoạt trên Prometheus*',
+          text: '• `/quiz status` - Xem trạng thái các container đang chạy\n• `/quiz restart <service>` - Khởi động lại container (vd: `/quiz restart backend`)\n• `/quiz logs <service> [lines]` - Xem nhật ký log (vd: `/quiz logs backend 50`)\n• `/quiz alerts` - Kiểm tra các cảnh báo sự cố từ Prometheus',
         },
       },
       { type: 'divider' },
@@ -34,18 +33,18 @@ export function getHelpBlockKit() {
         elements: [
           {
             type: 'button',
-            text: { type: 'plain_text', text: '📊 Xem trạng thái hạ tầng', emoji: true },
+            text: { type: 'plain_text', text: 'Xem trạng thái' },
             style: 'primary',
             action_id: 'action_refresh_status',
           },
           {
             type: 'button',
-            text: { type: 'plain_text', text: '🚨 Kiểm tra Cảnh báo', emoji: true },
+            text: { type: 'plain_text', text: 'Kiểm tra cảnh báo' },
             action_id: 'action_quick_alerts',
           },
           {
             type: 'button',
-            text: { type: 'plain_text', text: '📋 Xem Logs Backend', emoji: true },
+            text: { type: 'plain_text', text: 'Logs Backend' },
             value: 'backend',
             action_id: 'action_logs_backend',
           },

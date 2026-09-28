@@ -33,7 +33,7 @@ export function registerCommandHandlers(app) {
       if (!target) {
         await respond({
           response_type: 'ephemeral',
-          text: '⚠️ Vui lòng chỉ định service cần khởi động lại. Ví dụ: `/quiz restart redis` hoặc `/quiz restart backend`.',
+          text: 'Vui lòng chỉ định service cần khởi động lại. Ví dụ: `/quiz restart backend` hoặc `/quiz restart redis`.',
         });
         return;
       }
@@ -49,7 +49,7 @@ export function registerCommandHandlers(app) {
       if (!target) {
         await respond({
           response_type: 'ephemeral',
-          text: '⚠️ Vui lòng chỉ định service cần xem log. Ví dụ: `/quiz logs backend 30` hoặc `/quiz logs redis`.',
+          text: 'Vui lòng chỉ định service cần xem log. Ví dụ: `/quiz logs backend 30` hoặc `/quiz logs redis`.',
         });
         return;
       }
@@ -74,7 +74,7 @@ export function registerCommandHandlers(app) {
       } catch (err) {
         await respond({
           response_type: 'in_channel',
-          text: `❌ Lỗi khi truy vấn Prometheus alerts: ${err.message}`,
+          text: `Lỗi truy vấn Prometheus alerts: ${err.message}`,
         });
       }
       return;

@@ -1,5 +1,5 @@
 import http from 'http';
-import { DOCKER_SOCKET_PATH } from '../config.js';
+import { DOCKER_SOCKET_PATH, CONTAINER_PREFIX } from '../config.js';
 
 /**
  * Gọi Docker Engine API qua UNIX Socket
@@ -89,13 +89,14 @@ export async function findQuizContainer(shortName) {
   if (!Array.isArray(containers)) return null;
 
   const cleanQuery = shortName.toLowerCase().trim();
+  const prefix = CONTAINER_PREFIX.toLowerCase();
   return containers.find((c) => {
     const names = c.Names || [];
     return names.some((n) => {
       const lower = n.toLowerCase();
       return (
         lower === `/${cleanQuery}` ||
-        lower === `/quiz-${cleanQuery}-1` ||
+        lower === `/${prefix}-${cleanQuery}-1` ||
         lower.includes(cleanQuery)
       );
     });

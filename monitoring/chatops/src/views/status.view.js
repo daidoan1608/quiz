@@ -1,33 +1,34 @@
 import { getContainers, categorizeContainer } from '../services/docker.service.js';
+import { CONTAINER_PREFIX } from '../config.js';
 
 /**
- * Tạo Dashboard trạng thái hệ thống với Slack Block Kit
+ * Dashboard trạng thái hệ thống định dạng Block Kit (gọn gàng, ít icon)
  */
 export async function getStatusBlockKit() {
   try {
     const { data: containers } = await getContainers(true);
     if (!Array.isArray(containers)) {
       return {
-        text: '❌ Không thể kết nối tới Docker Engine socket!',
+        text: 'Lỗi: Không thể kết nối tới Docker Engine socket.',
         blocks: [
           {
             type: 'header',
-            text: { type: 'plain_text', text: '❌ Lỗi kết nối Docker Engine', emoji: true },
+            text: { type: 'plain_text', text: 'Lỗi kết nối Docker Engine' },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: 'Không thể đọc danh sách container từ `/var/run/docker.sock`. Vui lòng kiểm tra Docker daemon.',
+              text: 'Không thể đọc danh sách container từ Docker socket. Vui lòng kiểm tra Docker daemon.',
             },
           },
         ],
       };
     }
 
-    // Lọc các container thuộc project quiz
+    const prefix = CONTAINER_PREFIX.toLowerCase();
     const quizContainers = containers
-      .filter((c) => (c.Names || []).some((n) => n.includes('quiz')))
+      .filter((c) => (c.Names || []).some((n) => n.toLowerCase().includes(prefix)))
       .sort((a, b) => (a.Names[0] || '').localeCompare(b.Names[0] || ''));
 
     let runningCount = 0;
@@ -48,35 +49,34 @@ export async function getStatusBlockKit() {
       grouped[groupKey].push(c);
     }
 
-    const nowStr = `${new Date().toLocaleTimeString('vi-VN')} - ${new Date().toLocaleDateString('vi-VN')}`;
-    const healthBadge = stoppedCount === 0 ? '🟢 *Hoạt động ổn định*' : `🔴 *${stoppedCount} container gặp sự cố*`;
+    const nowStr = `${new Date().toLocaleTimeString('vi-VN')} ${new Date().toLocaleDateString('vi-VN')}`;
+    const healthBadge = stoppedCount === 0 ? '🟢 Ổn định' : `🔴 ${stoppedCount} đã dừng`;
 
     const blocks = [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: '📊 BẢNG ĐIỀU KHIỂN HẠ TẦNG QUIZ SYSTEM',
-          emoji: true,
+          text: 'Trạng thái hệ thống (Quiz)',
         },
       },
       {
         type: 'section',
         fields: [
-          { type: 'mrkdwn', text: `*🟢 Đang chạy:* \`${runningCount} / ${quizContainers.length} containers\`` },
-          { type: 'mrkdwn', text: `*🔴 Đã dừng:* \`${stoppedCount}\`` },
-          { type: 'mrkdwn', text: `*⚡ Trạng thái hạ tầng:* ${healthBadge}` },
-          { type: 'mrkdwn', text: `*⏱️ Cập nhật lúc:* \`${nowStr}\`` },
+          { type: 'mrkdwn', text: `*Đang chạy:* \`${runningCount}/${quizContainers.length}\`` },
+          { type: 'mrkdwn', text: `*Đã dừng:* \`${stoppedCount}\`` },
+          { type: 'mrkdwn', text: `*Tình trạng:* ${healthBadge}` },
+          { type: 'mrkdwn', text: `*Cập nhật:* \`${nowStr}\`` },
         ],
       },
       { type: 'divider' },
     ];
 
     const groupMeta = [
-      { key: 'apps', title: '🚀 Ứng dụng & Cổng vào (Apps & Gateway)' },
-      { key: 'data', title: '💾 Cơ sở dữ liệu & Message Queue' },
-      { key: 'observability', title: '🔭 Hạ tầng Giám sát & Logs (Observability)' },
-      { key: 'other', title: '📦 Dịch vụ khác' },
+      { key: 'apps', title: 'Ứng dụng & Gateway' },
+      { key: 'data', title: 'Cơ sở dữ liệu & Message Queue' },
+      { key: 'observability', title: 'Giám sát & Logs' },
+      { key: 'other', title: 'Dịch vụ khác' },
     ];
 
     for (const g of groupMeta) {
@@ -87,8 +87,8 @@ export async function getStatusBlockKit() {
       for (const c of items) {
         const name = (c.Names[0] || '').replace('/', '');
         const isUp = c.State === 'running';
-        const emoji = isUp ? '🟢' : '🔴';
-        groupText += `${emoji} *${name}* • \`${c.Status}\`\n`;
+        const statusDot = isUp ? '🟢' : '🔴';
+        groupText += `${statusDot} \`${name}\` - ${c.Status}\n`;
       }
 
       blocks.push({
@@ -102,29 +102,29 @@ export async function getStatusBlockKit() {
 
     blocks.push({ type: 'divider' });
 
-    // Quick Action Bar
+    // Action buttons gọn gàng
     blocks.push({
       type: 'actions',
       elements: [
         {
           type: 'button',
-          text: { type: 'plain_text', text: '🔄 Làm mới', emoji: true },
+          text: { type: 'plain_text', text: 'Làm mới' },
           action_id: 'action_refresh_status',
         },
         {
           type: 'button',
-          text: { type: 'plain_text', text: '🚨 Kiểm tra Cảnh báo', emoji: true },
+          text: { type: 'plain_text', text: 'Kiểm tra cảnh báo' },
           action_id: 'action_quick_alerts',
         },
         {
           type: 'button',
-          text: { type: 'plain_text', text: '📋 Logs Backend', emoji: true },
+          text: { type: 'plain_text', text: 'Logs Backend' },
           value: 'backend',
           action_id: 'action_logs_backend',
         },
         {
           type: 'button',
-          text: { type: 'plain_text', text: '🔄 Restart Backend', emoji: true },
+          text: { type: 'plain_text', text: 'Restart Backend' },
           value: 'backend',
           style: 'danger',
           action_id: 'action_restart_backend',
@@ -137,26 +137,26 @@ export async function getStatusBlockKit() {
       elements: [
         {
           type: 'mrkdwn',
-          text: '💡 Gõ `/quiz restart <service>` để khởi động lại dịch vụ bất kỳ • Gõ `/quiz help` để xem trợ giúp.',
+          text: 'Gõ `/quiz restart <service>` để khởi động lại • `/quiz help` để xem trợ giúp.',
         },
       ],
     });
 
     return {
-      text: `*Trạng thái Quiz System:* 🟢 ${runningCount} Running | 🔴 ${stoppedCount} Stopped`,
+      text: `Trạng thái Quiz: ${runningCount} đang chạy, ${stoppedCount} đã dừng`,
       blocks,
     };
   } catch (err) {
     return {
-      text: `❌ Lỗi khi đọc trạng thái Docker: ${err.message}`,
+      text: `Lỗi đọc trạng thái Docker: ${err.message}`,
       blocks: [
         {
           type: 'header',
-          text: { type: 'plain_text', text: '❌ Lỗi hệ thống', emoji: true },
+          text: { type: 'plain_text', text: 'Lỗi hệ thống' },
         },
         {
           type: 'section',
-          text: { type: 'mrkdwn', text: `Lỗi khi đọc trạng thái Docker Engine: \`${err.message}\`` },
+          text: { type: 'mrkdwn', text: `Không thể đọc trạng thái Docker Engine: \`${err.message}\`` },
         },
       ],
     };

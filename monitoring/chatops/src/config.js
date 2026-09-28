@@ -46,11 +46,36 @@ function loadLocalEnv() {
 // Nạp env file trước khi khởi tạo các hằng số config
 loadLocalEnv();
 
+// --- 1. SLACK TOKENS (BẮT BUỘC) ---
 export const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 export const SLACK_APP_TOKEN = process.env.SLACK_APP_TOKEN;
-export const PROMETHEUS_URL = process.env.PROMETHEUS_URL || 'http://prometheus:9090';
-export const DOCKER_SOCKET_PATH = process.env.DOCKER_SOCKET_PATH || '/var/run/docker.sock';
 
+// --- 2. PROMETHEUS INTERNAL ENDPOINT (ChatOps gọi nội bộ) ---
+// Trong Docker network: http://prometheus:9090, ngoài máy host: http://localhost:9090
+export const PROMETHEUS_URL = process.env.PROMETHEUS_URL || 'http://prometheus:9090';
+
+// --- 3. PUBLIC URLS (Dành cho button click trên Slack mở browser người dùng) ---
+// Tự động nhận diện port cấu hình từ root .env hoặc dùng URL domain tùy chỉnh
+export const GRAFANA_PUBLIC_URL =
+  process.env.GRAFANA_PUBLIC_URL ||
+  (process.env.GRAFANA_PORT ? `http://localhost:${process.env.GRAFANA_PORT}` : 'http://localhost:3002');
+
+export const PROMETHEUS_PUBLIC_URL =
+  process.env.PROMETHEUS_PUBLIC_URL ||
+  (process.env.PROMETHEUS_PORT ? `http://localhost:${process.env.PROMETHEUS_PORT}` : 'http://localhost:9090');
+
+// --- 4. DOCKER ENGINE SOCKET ---
+// Linux/Docker: /var/run/docker.sock, Windows: //./pipe/docker_engine
+export const DOCKER_SOCKET_PATH =
+  process.env.DOCKER_SOCKET_PATH ||
+  (process.platform === 'win32' ? '//./pipe/docker_engine' : '/var/run/docker.sock');
+
+// --- 5. TIỀN TỐ DỰ ÁN (CONTAINER PREFIX) ---
+export const CONTAINER_PREFIX = process.env.CONTAINER_PREFIX || 'quiz';
+
+/**
+ * Kiểm tra các biến bắt buộc trước khi khởi động
+ */
 export function validateConfig() {
   if (!SLACK_BOT_TOKEN || !SLACK_APP_TOKEN) {
     console.error('FATAL: SLACK_BOT_TOKEN hoặc SLACK_APP_TOKEN bị thiếu trong biến môi trường!');

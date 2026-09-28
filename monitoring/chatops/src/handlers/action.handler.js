@@ -32,7 +32,7 @@ export function registerActionHandlers(app) {
     } catch (err) {
       await respond({
         response_type: 'in_channel',
-        text: `❌ Lỗi khi kiểm tra cảnh báo: ${err.message}`,
+        text: `Lỗi khi kiểm tra cảnh báo: ${err.message}`,
       });
     }
   });
