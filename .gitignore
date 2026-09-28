@@ -37,6 +37,7 @@ admin/.env.production
 client/.env
 client/.env.production
 server/.env
+monitoring/chatops/.env
 server/src/main/resources/keys/*.json
 
 # Database
